@@ -83,7 +83,8 @@ export default function Login() {
       <div className='login-panel'>
         <div className='login-main  integration'>
           <div className='login-title'>
-            <img src={'/image/logo-dark.svg'} style={{ width: '120px' }} />
+            {/* <img src={'/image/logo-dark.svg'} style={{ width: '120px' }} /> */}
+            <h4>{t('欢迎使用一体化监控平台')}</h4>
           </div>
           <Form form={form} layout='vertical' requiredMark={true}>
             <Form.Item

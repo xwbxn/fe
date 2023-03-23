@@ -60,6 +60,7 @@ import Permissions from '@/pages/permissions';
 import SSOConfigs from '@/pages/help/SSOConfigs';
 import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
+import Grafana from '@/pages/grafana'
 import { dynamicPackages, Entry } from '@/utils';
 
 const Packages = dynamicPackages();
@@ -162,6 +163,8 @@ export default function Content() {
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
 
         <Route exact path='/permissions' component={Permissions} />
+
+        <Route exact path='/dashboard-grafana' component={Grafana} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

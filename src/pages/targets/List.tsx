@@ -33,6 +33,7 @@ interface ITargetProps {
   note: string;
   tags: string[];
   update_at: number;
+  ip_address: string;
 }
 
 interface IProps {
@@ -325,6 +326,16 @@ export default function List(props: IProps) {
               {note}
             </Tooltip>
           );
+        },
+      });
+    }
+    if (item.name === 'ip_address') {
+      columns.push({
+        title: t('ip_address'),
+        dataIndex: 'ip_address',
+        render: (val, reocrd) => {
+          if (reocrd.ip_address === "") return 'unknown';
+          return val;
         },
       });
     }

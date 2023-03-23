@@ -52,15 +52,15 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api/n9e/proxy': {
-        target: 'http://10.206.0.7:17000/',
+        target: 'http://127.0.0.1:17000/',
         changeOrigin: true,
       },
       '/api/n9e/datasource': {
-        target: 'http://10.206.0.7:17000/',
+        target: 'http://127.0.0.1:17000/',
         changeOrigin: true,
       },
       '/api/n9e': {
-        target: 'http://10.206.0.7:17000/',
+        target: 'http://127.0.0.1:17000/',
         changeOrigin: true,
       },
       '/api/fc-brain': {
@@ -91,7 +91,7 @@ export default defineConfig({
         additionalData: `@import "/src/global.variable.less";`,
         javascriptEnabled: true,
         modifyVars: {
-          'primary-color': '#6C53B1',
+          'primary-color': '#0A4B9D',
           'primary-background': '#F0ECF9',
           'disabled-color': 'rgba(0, 0, 0, 0.5)',
           'tabs-ink-bar-color': 'linear-gradient(to right, #9F4CFC, #0019F4 )',

@@ -17,6 +17,7 @@ const zh_CN = {
   os: '操作系统',
   arch: 'CPU架构',
   note: '备注',
+  ip_address: 'IP地址',
   organize_columns: {
     title: '显示列',
   },

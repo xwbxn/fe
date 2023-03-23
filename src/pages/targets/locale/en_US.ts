@@ -17,6 +17,7 @@ const en_US = {
   os: 'OS',
   arch: 'CPU Arch',
   note: 'Note',
+  ip_address: 'Ip Address',
   organize_columns: {
     title: 'Organize Columns',
   },

@@ -66,8 +66,9 @@ export interface ICommonState {
   busiGroups: {
     name: string;
     id: number;
+    label_value?: string
   }[];
-  setBusiGroups: (groups: { name: string; id: number }[]) => void;
+  setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
   setCurBusiId: (id: number) => void;
   profile: IProfile;

@@ -45,6 +45,10 @@ const getMenuList = (t) => {
           key: '/dashboards-built-in',
           label: t('内置大盘'),
         },
+        {
+          key: '/dashboard-grafana',
+          label: t('grafana'),
+        },
       ],
     },
     {
@@ -318,7 +322,7 @@ const SideMenu: FC = () => {
         'menu-container-en': i18n.language === 'en_US' && collapsed === '0',
       })}
     >
-      {collapsed !== '2' && (
+      {/* {collapsed !== '2' && (
         <div
           className={classNames({
             home: true,
@@ -329,7 +333,7 @@ const SideMenu: FC = () => {
             <img src={collapsed === '1' ? '/image/logo.svg' : '/image/logo-l.svg'} alt='' className='logo' />
           </div>
         </div>
-      )}
+      )} */}
       <FloatFcMenu
         fullModeWidth={i18n.language === 'en_US' ? 180 : undefined}
         items={menus}
