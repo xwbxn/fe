@@ -319,6 +319,7 @@ export default function Index(props: IProps) {
                       min={0}
                       style={{ width: '100%' }}
                       value={search.num_traces}
+                      // @ts-ignore
                       onChange={(num_traces) => setSearch({ ...search, num_traces })}
                       onPressEnter={() => handleSearch(false)}
                     />

@@ -81,6 +81,7 @@ function renderOperationParamEditor(
           size='small'
           value={value as number}
           onChange={(val) => {
+            // @ts-ignore
             onChange(val);
           }}
         />
