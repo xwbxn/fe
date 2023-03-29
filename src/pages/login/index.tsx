@@ -75,17 +75,8 @@ export default function Login() {
 
   return (
     <div className='login-warp'>
-      <img src={'/image/login-left-top-corner.png'} className='left-top-bg'></img>
-      <img src={'/image/login-right-bottom-corner.png'} className='right-bottom-bg'></img>
-      <div className='banner integration'>
-        <img src={'/image/login-dashboard.svg'} style={{ margin: '0 60px', zIndex: 5, width: 632 }}></img>
-      </div>
       <div className='login-panel'>
         <div className='login-main  integration'>
-          <div className='login-title'>
-            {/* <img src={'/image/logo-dark.svg'} style={{ width: '120px' }} /> */}
-            <h4>{t('欢迎使用一体化监控平台')}</h4>
-          </div>
           <Form form={form} layout='vertical' requiredMark={true}>
             <Form.Item
               label='账户'
