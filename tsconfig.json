@@ -26,7 +26,7 @@
     "checkJs": false,
     "sourceMap": true,
     "strictFunctionTypes": false,
-    "strictNullChecks": false
+    "strictNullChecks": true
   },
   "include": ["./src"],
   "exclude": ["./src/store/miniDva/*", "./src/Packages/", "src/components/Dantd/**/*", "./node_modules/**/*"]
