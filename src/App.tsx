@@ -90,7 +90,14 @@ function App() {
     groupedDatasourceList: {},
     datasourceList: [],
     setDatasourceList: (datasourceList) => {
-      setCommonState((state) => ({ ...state, datasourceList, groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type') }));
+      setCommonState((state) => ({
+        ...state, datasourceList, groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type') as {
+          [index: string]: {
+            name: string;
+            id: number;
+          }[];
+        }
+      }));
     },
     busiGroups: [],
     setBusiGroups: (busiGroups) => {
@@ -123,7 +130,12 @@ function App() {
               ...state,
               profile,
               busiGroups,
-              groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
+              groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type') as {
+                [index: string]: {
+                  name: string;
+                  id: number;
+                }[];
+              },
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
             };
