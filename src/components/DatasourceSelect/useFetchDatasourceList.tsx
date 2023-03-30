@@ -24,7 +24,9 @@ export default function useFetchDatasourceList(props?: IProps) {
 
   useEffect(() => {
     getDatasourceList(pluginTypes).then((res) => {
-      const grouped = _.groupBy(res, 'plugin_type');
+      const grouped = _.groupBy(res, 'plugin_type') as {
+        [index: string]: IDatasource[];
+      };
       setData({
         datasourceList: res,
         groupedDatasourceList: grouped,
