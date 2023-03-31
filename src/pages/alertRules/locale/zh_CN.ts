@@ -1,6 +1,7 @@
 const zh_CN = {
   title: '告警规则',
   search_placeholder: '搜索名称或标签',
+  prod: '监控类型',
   severity: '级别',
   notify_groups: '告警接收组',
   basic_configs: '基础配置',
@@ -41,7 +42,7 @@ const zh_CN = {
   callbacks: '回调地址',
   annotations: '附加信息',
   annotationsOptions: {
-    preview_link: '预览链接',
+    plan_link: '预案链接',
     dashboard_link: '仪表盘链接',
     desc: '描述',
   },

@@ -15,7 +15,7 @@
  *
  */
 /**
- * 大盘列表页面
+ * 仪表盘列表页面
  */
 import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, Link } from 'react-router-dom';
@@ -32,6 +32,7 @@ import BlankBusinessPlaceholder from '@/components/BlankBusinessPlaceholder';
 import { CommonStateContext } from '@/App';
 import { BusinessGroup } from '@/pages/targets';
 import usePagination from '@/components/usePagination';
+import { getDefaultDatasourceValue } from '@/utils';
 import Header from './Header';
 import FormCpt from './Form';
 import Export from './Export';
@@ -93,9 +94,14 @@ export default function index() {
                   className: 'name-column',
                   render: (text: string, record: DashboardType) => {
                     return (
-                      <div className='table-active-text' onClick={() => history.push(`/dashboards/${record.ident || record.id}`)}>
+                      <Link
+                        className='table-active-text'
+                        to={{
+                          pathname: `/dashboards/${record.ident || record.id}`,
+                        }}
+                      >
                         {text}
-                      </div>
+                      </Link>
                     );
                   },
                 },
@@ -168,7 +174,8 @@ export default function index() {
                             to={{
                               pathname: `/dashboards/share/${record.id}`,
                               search: queryString.stringify({
-                                __cluster: localStorage.getItem('curCluster'),
+                                __datasourceValue: getDefaultDatasourceValue('prometheus', commonState.groupedDatasourceList),
+                                __datasourceName: _.find(commonState.datasourceList, { id: getDefaultDatasourceValue('prometheus', commonState.groupedDatasourceList) })?.name,
                                 viewMode: 'fullscreen',
                               }),
                             }}
@@ -265,7 +272,7 @@ export default function index() {
             />
           </div>
         ) : (
-          <BlankBusinessPlaceholder text='监控大盘' />
+          <BlankBusinessPlaceholder text='监控仪表盘' />
         )}
       </div>
     </PageLayout>

@@ -1,6 +1,7 @@
 const en_US = {
   title: 'Alert Rules',
   search_placeholder: 'Search by name or tags',
+  prod: 'Type',
   severity: 'Severity',
   notify_groups: 'Notify Groups',
   basic_configs: 'Basic Configs',
@@ -41,7 +42,7 @@ const en_US = {
   callbacks: 'Callbacks',
   annotations: 'Annotations',
   annotationsOptions: {
-    preview_link: 'Preview Link',
+    plan_link: 'Plan Link',
     dashboard_link: 'Dashboard Link',
     desc: 'Description',
   },

@@ -50,7 +50,7 @@ export default function Title(props: IProps) {
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
-  const { viewMode, themeMode } = query;
+  const { viewMode, themeMode, __datasourceName } = query;
 
   return (
     <div className='dashboard-detail-header'>
@@ -90,7 +90,7 @@ export default function Title(props: IProps) {
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {t('cluster')}：
             {isPreview && !isBuiltin ? (
-              datasourceValue
+              __datasourceName
             ) : (
               <>
                 <Select
@@ -132,7 +132,7 @@ export default function Title(props: IProps) {
                   pathname: location.pathname,
                   search: querystring.stringify(newQuery),
                 });
-                // TODO: 解决大盘 layout resize 问题
+                // TODO: 解决仪表盘 layout resize 问题
                 setTimeout(() => {
                   window.dispatchEvent(new Event('resize'));
                 }, 500);
