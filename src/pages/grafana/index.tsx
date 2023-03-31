@@ -45,10 +45,13 @@ export default function index(props) {
     const pagination = usePagination({ PAGESIZE_KEY: 'dashboard-pagesize' });
 
     useEffect(() => {
-        if (props.match.params.busiGroup) {
-            setBusiGroup(props.match.params.busiGroup)
+        const group = commonState.busiGroups.find(v => v.id === busiId)
+        if(group) {
+            setBusiGroup(group.label_value)
         }
+    }, [])
 
+    useEffect(() => {
         if (busiGroup) {
             getFolder(busiGroup).then(res => {
                 if (res.success) {

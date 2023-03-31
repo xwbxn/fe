@@ -79,3 +79,10 @@ export function getTargetList(data) {
     data,
   });
 }
+
+export function getTargetInstallUrl(params) {
+  return request(`/api/n9e/categraf/getstart`, {
+    method: RequestMethod.Get,
+    params
+  })
+}

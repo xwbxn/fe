@@ -24,7 +24,7 @@ export default function index(props: IProps) {
   const [collapse, setCollapse] = useState(localStorage.getItem('leftlist') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftwidth') || 200));
   const { busiGroups } = useContext(CommonStateContext);
-  const [businessGroupData, setBusinessGroupData] = useState<{ id: number; name: string }[]>([]);
+  const [businessGroupData, setBusinessGroupData] = useState<{ id: number; name: string; label_value?: string }[]>([]);
 
   useEffect(() => {
     setBusinessGroupData(busiGroups);

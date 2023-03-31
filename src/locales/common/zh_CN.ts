@@ -28,6 +28,7 @@ const zh_CN = {
     batch_modify: '批量修改',
     batch_export: '批量导出',
     batch_import: '批量导入',
+    download: '下载',
   },
   table: {
     name: '名称',

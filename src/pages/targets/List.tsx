@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { Table, Tag, Tooltip, Space, Input, Dropdown, Menu, Button, Modal, message } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, DownOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons';
@@ -6,11 +6,12 @@ import { useAntdTable } from 'ahooks';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { BusiGroupItem } from '@/store/commonInterface';
-import { getMonObjectList } from '@/services/targets';
+import { getMonObjectList, getTargetInstallUrl } from '@/services/targets';
 import { timeFormatter } from '@/pages/dashboard/Renderer/utils/valueFormatter';
 import clipboard from './clipboard';
 import OrganizeColumns from './OrganizeColumns';
 import { getDefaultColumnsConfigs, setDefaultColumnsConfigs } from './utils';
+import { CommonStateContext } from '@/App';
 
 export const pageSizeOptions = ['10', '20', '50', '100'];
 
@@ -55,6 +56,7 @@ export default function List(props: IProps) {
   const { t } = useTranslation('targets');
   const { curBusiId, selectedIdents, setSelectedIdents, selectedRowKeys, setSelectedRowKeys, refreshFlag, setRefreshFlag, setOperateType } = props;
   const isAddTagToQueryInput = useRef(false);
+  const { busiGroups } = useContext(CommonStateContext);
   const [searchVal, setSearchVal] = useState('');
   const [tableQueryContent, setTableQueryContent] = useState<string>('');
   const [columnsConfigs, setColumnsConfigs] = useState<{ name: string; visible: boolean }[]>(getDefaultColumnsConfigs());
@@ -367,6 +369,19 @@ export default function List(props: IProps) {
     defaultPageSize: 30,
   });
 
+  const downloadTarget = () => {
+    const group = busiGroups.find(v => v.id === curBusiId)
+    if (group) {
+      getTargetInstallUrl({ busigroup: group.label_value }).then(res => {
+        Modal.info({
+          title: `复制脚本至服务器使用管理员权限执行,安装 ${group.name} 的探针`,
+          content: res.dat.url + "|sh",
+          width: 600
+        })
+      })
+    }
+  };
+
   return (
     <div>
       <div className='table-operate-box'>
@@ -426,6 +441,9 @@ export default function List(props: IProps) {
               {t('common:btn.batch_operations')} <DownOutlined />
             </Button>
           </Dropdown>
+          <Button onClick={downloadTarget}>
+              {t('common:btn.download')}
+            </Button>
         </Space>
       </div>
       <Table
