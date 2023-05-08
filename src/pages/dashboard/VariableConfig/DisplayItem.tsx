@@ -27,17 +27,19 @@ interface IProps {
 
 export default function DisplayItem(props: IProps) {
   const { expression, value, onChange } = props;
-  const { name, multi, allOption, options, type } = expression;
+  const { name, label, multi, allOption, options, type, hide } = expression;
   const [selected, setSelected] = useState<string | string[]>(value);
 
   useEffect(() => {
     setSelected(value);
   }, [JSON.stringify(value)]);
 
+  if (type === 'constant' || hide) return null;
+
   return (
     <div className='tag-content-close-item'>
       <Input.Group>
-        <span className='ant-input-group-addon'>{name}</span>
+        <span className='ant-input-group-addon'>{label || name}</span>
         {type === 'query' || type === 'custom' ? (
           <Select
             mode={multi ? 'tags' : undefined}
@@ -47,12 +49,12 @@ export default function DisplayItem(props: IProps) {
             maxTagCount='responsive'
             onChange={(v) => {
               let val = v;
-              if (multi && allOption && val.includes('all')) {
-                val = ['all'];
-              } else if (multi && !allOption) {
-                let allIndex = val.indexOf('all');
-                if (allIndex !== -1 && typeof val === 'object') {
-                  val.splice(allIndex, 1);
+              if (_.isArray(v)) {
+                const curVal = _.last(v);
+                if (curVal === 'all') {
+                  val = ['all'];
+                } else if (v.includes('all')) {
+                  val = _.without(v, 'all');
                 }
               }
               setSelected(val);

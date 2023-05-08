@@ -19,6 +19,7 @@ import _ from 'lodash';
 import G2PieChart from '@/components/G2PieChart';
 import { IPanel } from '../../../types';
 import getCalculatedValuesBySeries from '../../utils/getCalculatedValuesBySeries';
+import valueFormatter from '../../utils/valueFormatter';
 import './style.less';
 
 interface IProps {
@@ -30,7 +31,19 @@ interface IProps {
 export default function Pie(props: IProps) {
   const { values, series, themeMode } = props;
   const { custom, options } = values;
-  const { calc, legengPosition, max, labelWithName, donut = false } = custom;
+  const { calc, legengPosition, max, labelWithName, labelWithValue, donut = false } = custom;
+  const dataFormatter = (text: number) => {
+   const resFormatter =   valueFormatter(
+      {
+        unit: options?.standardOptions?.util,
+        decimals: options?.standardOptions?.decimals,
+        dateFormat: options?.standardOptions?.dateFormat,
+      },
+      text,
+    );
+    return `${resFormatter.value}${resFormatter.unit}`
+  };
+
   const calculatedValues = getCalculatedValuesBySeries(
     series,
     calc,
@@ -42,7 +55,7 @@ export default function Pie(props: IProps) {
     options?.valueMappings,
   );
 
-  const sortedValues = calculatedValues.sort((a, b) => b.value - a.value);
+  const sortedValues = calculatedValues.sort((a, b) => b.stat - a.stat);
   const data =
     max && sortedValues.length > max
       ? sortedValues
@@ -50,6 +63,7 @@ export default function Pie(props: IProps) {
           .map((i) => ({ name: i.name, value: i.stat }))
           .concat({ name: '其他', value: sortedValues.slice(max).reduce((previousValue, currentValue) => currentValue.stat + previousValue, 0) })
       : sortedValues.map((i) => ({ name: i.name, value: i.stat }));
+
   return (
     <div className='renderer-pie-container'>
       <G2PieChart
@@ -58,6 +72,8 @@ export default function Pie(props: IProps) {
         positon={legengPosition !== 'hidden' ? legengPosition : undefined}
         hidden={legengPosition === 'hidden'}
         labelWithName={labelWithName}
+        labelWithValue={labelWithValue}
+        dataFormatter={dataFormatter}
         donut={donut}
       />
     </div>

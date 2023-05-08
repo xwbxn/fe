@@ -7,11 +7,18 @@ import { CommonStateContext } from '@/App';
 
 const defaultDatasourceCate = 'prometheus';
 
-export default function index({ chartForm, defaultDatasourceValue, variableConfig }) {
+export default function index({ chartForm, variableConfig }) {
   const { t } = useTranslation('dashboard');
   const { groupedDatasourceList } = useContext(CommonStateContext);
   const cates = getAuthorizedDatasourceCates();
   const datasourceVars = _.filter(variableConfig, { type: 'datasource' });
+  const getDefaultDatasourceValue = (datasourceCate) => {
+    const finded = _.find(datasourceVars, { definition: datasourceCate });
+    if (finded) {
+      return `\${${finded.name}}`;
+    }
+    return groupedDatasourceList[datasourceCate]?.[0]?.id;
+  };
 
   return (
     <Space align='start'>
@@ -32,7 +39,7 @@ export default function index({ chartForm, defaultDatasourceValue, variableConfi
                         expr: '',
                       },
                     ],
-                    datasourceValue: undefined,
+                    datasourceValue: getDefaultDatasourceValue('prometheus'),
                   });
                 } else if (val === 'elasticsearch') {
                   chartForm.setFieldsValue({
@@ -53,7 +60,7 @@ export default function index({ chartForm, defaultDatasourceValue, variableConfi
                         },
                       },
                     ],
-                    datasourceValue: groupedDatasourceList.elasticsearch?.[0]?.id,
+                    datasourceValue: getDefaultDatasourceValue('elasticsearch'),
                   });
                 }
               }, 500);
@@ -86,17 +93,13 @@ export default function index({ chartForm, defaultDatasourceValue, variableConfi
                 name='datasourceValue'
                 rules={[
                   {
-                    required: cate !== 'prometheus',
+                    required: true,
                     message: t('query.datasource_msg'),
                   },
                 ]}
+                initialValue={getDefaultDatasourceValue(defaultDatasourceCate)}
               >
-                <Select
-                  allowClear
-                  placeholder={cate !== 'prometheus' ? t('query.datasource_placeholder') : _.find(groupedDatasourceList.prometheus, { id: defaultDatasourceValue })?.name}
-                  style={{ minWidth: 70 }}
-                  dropdownMatchSelectWidth={false}
-                >
+                <Select allowClear placeholder={t('query.datasource_placeholder')} style={{ minWidth: 70 }} dropdownMatchSelectWidth={false}>
                   {_.map(datasourceVars, (item, idx) => {
                     return (
                       <Select.Option value={`\${${item.name}}`} key={`${item.name}_${idx}`}>

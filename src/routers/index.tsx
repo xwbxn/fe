@@ -60,6 +60,8 @@ import Permissions from '@/pages/permissions';
 import SSOConfigs from '@/pages/help/SSOConfigs';
 import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
+import MigrateDashboards from '@/pages/help/migrate';
+import IBEX from '@/pages/help/NotificationSettings/IBEX';
 import Grafana from '@/pages/grafana'
 import { dynamicPackages, Entry } from '@/utils';
 
@@ -149,6 +151,7 @@ export default function Content() {
         <Route exact path='/job-tasks/add' component={TaskAdd} />
         <Route exact path='/job-tasks/:id/result' component={TaskResult} />
         <Route exact path='/job-tasks/:id/detail' component={TaskDetail} />
+        <Route exact path='/ibex-settings' component={IBEX} />
 
         <Route exact path='/help/version' component={Version} />
         <Route exact path='/help/servers' component={Servers} />
@@ -158,6 +161,7 @@ export default function Content() {
         <Route exact path='/help/sso' component={SSOConfigs} />
         <Route exact path='/help/notification-tpls' component={NotificationTpls} />
         <Route exact path='/help/notification-settings' component={NotificationSettings} />
+        <Route exact path='/help/migrate' component={MigrateDashboards} />
 
         <Route exact path='/trace/explorer' component={TraceExplorer} />
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
