@@ -98,7 +98,7 @@ export default function index(props) {
                             columns={[
                                 {
                                     title: t('name'),
-                                    dataIndex: 'name',
+                                    dataIndex: 'title',
                                     className: 'name-column',
                                     render: (text: string, record: DashboardType) => {
                                         return (
