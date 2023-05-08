@@ -1,6 +1,6 @@
 {
   "name": "n9e-fe",
-  "version": "6.0.0-ga.2",
+  "version": "6.0.0-ga.6",
   "scripts": {
     "dev": "vite --port 8765 --host",
     "dev:advanced": "vite --port 8765 --host --mode advanced",
@@ -24,7 +24,7 @@
     "@codemirror/state": "^0.19.0",
     "@codemirror/view": "^0.19.0",
     "@fc-components/menu": "~1.1.17",
-    "@fc-plot/ts-graph": "^0.22.14",
+    "@fc-plot/ts-graph": "^0.22.18",
     "@minko-fe/use-antd-resizable-header": "^2.5.0",
     "@uiw/react-codemirror": "4.6.0",
     "ahooks": "3.1.5",
@@ -35,7 +35,6 @@
     "color": "^4.0.1",
     "d3": "^4.10.0",
     "d3-hexbin": "^0.2.2",
-    "dayjs": "^1.10.4",
     "dompurify": "^2.4.4",
     "i18next": "20.3.2",
     "json-2-csv": "^3.18.0",

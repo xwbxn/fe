@@ -157,6 +157,10 @@ const getMenuList = (t) => {
           key: '/job-tasks',
           label: t('执行历史'),
         },
+        {
+          key: '/ibex-settings',
+          label: t('自愈配置'),
+        },
       ],
     },
     {
@@ -208,6 +212,10 @@ const getMenuList = (t) => {
         {
           key: '/help/servers',
           label: t('告警引擎'),
+        },
+        {
+          key: '/help/migrate',
+          label: t('仪表盘迁移'),
         },
         {
           key: '/help/version',

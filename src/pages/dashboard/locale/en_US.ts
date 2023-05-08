@@ -46,7 +46,9 @@ const en_US = {
     },
     name: 'Name',
     name_msg: 'Only support number and character underline',
+    label: 'Label',
     type: 'Type',
+    hide: 'Hide',
     definition: 'Definition',
     reg: 'Regex',
     reg_tip: 'Optional, can filter options or extract values by regex',
@@ -61,7 +63,7 @@ const en_US = {
     },
     constant: {
       definition: 'Constant value',
-      definition_tip: 'Define a hidden constant value',
+      defaultValue_tip: 'Define a hidden constant value',
     },
     datasource: {
       definition: 'Datasource type',
@@ -181,6 +183,7 @@ const en_US = {
         max_tip: 'Exceeded blocks are merged and displayed as other',
         donut: 'Donut',
         labelWithName: 'Label with name',
+        labelWithValue: 'Label with metric value',
       },
       table: {
         displayMode: 'Display mode',
