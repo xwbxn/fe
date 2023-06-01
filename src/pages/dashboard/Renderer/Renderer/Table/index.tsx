@@ -38,6 +38,9 @@ interface IProps {
   themeMode?: 'dark';
 }
 
+const DEFAULT_LIGTH_COLOR = '#ffffff';
+const DEFAULT_DARK_COLOR = '#2c9d3d';
+
 const getColumnsKeys = (data: any[]) => {
   const keys = _.reduce(
     data,
@@ -154,18 +157,17 @@ export default function Stat(props: IProps) {
     },
     {
       title: 'value',
-      dataIndex: 'text',
-      key: 'text',
+      dataIndex: 'value',
+      key: 'value',
       sorter: (a, b) => {
         return a.stat - b.stat;
       },
-      sortOrder: getSortOrder('text', sortObj),
+      sortOrder: getSortOrder('value', sortObj),
       className: 'renderer-table-td-content-value-container',
-      render: (text, record) => {
+      render: (_val, record) => {
         let textObj = {
-          value: text,
-          unit: '',
-          color: record.color || (themeMode === 'dark' ? '#fff' : '#000'),
+          text: record.text,
+          color: record.color || (themeMode === 'dark' ? DEFAULT_LIGTH_COLOR : DEFAULT_DARK_COLOR),
         };
         const overrideProps = getOverridePropertiesByName(overrides, record.fields?.refId);
         if (!_.isEmpty(overrideProps)) {
@@ -175,12 +177,11 @@ export default function Stat(props: IProps) {
           <div
             className='renderer-table-td-content'
             style={{
-              color: colorMode === 'background' ? '#fff' : textObj?.color,
+              color: colorMode === 'background' ? DEFAULT_LIGTH_COLOR : textObj?.color,
               backgroundColor: colorMode === 'background' ? textObj.color : 'unset',
             }}
           >
-            {textObj.value}
-            {textObj.unit}
+            {textObj.text}
           </div>
         );
       },
@@ -205,23 +206,26 @@ export default function Stat(props: IProps) {
         },
         sortOrder: getSortOrder(key, sortObj),
         className: key === 'value' ? 'renderer-table-td-content-value-container' : '',
-        render: (_text, record) => {
+        render: (_val, record) => {
           if (key === 'value') {
-            const textObj = {
-              value: record?.value,
-              unit: record?.unit,
-              color: record.color || (themeMode === 'dark' ? '#fff' : '#000'),
+            let textObj = {
+              text: record?.text,
+              color: record.color || (themeMode === 'dark' ? DEFAULT_LIGTH_COLOR : DEFAULT_DARK_COLOR),
             };
+            const overrideProps = getOverridePropertiesByName(overrides, record.fields?.refId);
+            if (!_.isEmpty(overrideProps)) {
+              textObj = getSerieTextObj(record?.stat, overrideProps?.standardOptions, overrideProps?.valueMappings);
+              textObj.color = textObj.color || (themeMode === 'dark' ? DEFAULT_LIGTH_COLOR : DEFAULT_DARK_COLOR);
+            }
             return (
               <div
                 className='renderer-table-td-content'
                 style={{
-                  color: colorMode === 'background' ? '#fff' : textObj?.color,
+                  color: colorMode === 'background' ? DEFAULT_LIGTH_COLOR : textObj?.color,
                   backgroundColor: colorMode === 'background' ? textObj.color : 'unset',
                 }}
               >
-                {textObj?.value}
-                {textObj?.unit}
+                {textObj?.text}
               </div>
             );
           }
@@ -263,39 +267,32 @@ export default function Stat(props: IProps) {
         title: result[name]?.name,
         dataIndex: name,
         key: name,
-        width: idx < groupNames.length - 1 ? size?.width! / (groupNames.length + 1) : undefined,
+        // TODO: 暂时关闭维度值列的伸缩，降低对目前不太理想的列伸缩交互的理解和操作成本
+        // width: idx < groupNames.length - 1 ? size?.width! / (groupNames.length + 1) : undefined,
         sorter: (a, b) => {
           return _.get(a[name], 'stat') - _.get(b[name], 'stat');
         },
         sortOrder: getSortOrder(name, sortObj),
         className: 'renderer-table-td-content-value-container',
-        render: (text) => {
+        render: (record) => {
           let textObj = {
-            value: text?.text,
-            unit: '',
-            color: text?.color || (themeMode === 'dark' ? '#fff' : '#000'),
+            text: record?.text,
+            color: record?.color || (themeMode === 'dark' ? DEFAULT_LIGTH_COLOR : DEFAULT_DARK_COLOR),
           };
           const overrideProps = getOverridePropertiesByName(overrides, name);
           if (!_.isEmpty(overrideProps)) {
-            textObj = getSerieTextObj(
-              text?.stat,
-              {
-                ...(overrideProps?.standardOptions || {}),
-                unit: overrideProps?.standardOptions?.util, // TODO: 兼容性问题，后续需要修改
-              },
-              overrideProps?.valueMappings,
-            );
+            textObj = getSerieTextObj(record?.stat, overrideProps?.standardOptions, overrideProps?.valueMappings);
+            textObj.color = textObj.color || (themeMode === 'dark' ? DEFAULT_LIGTH_COLOR : DEFAULT_DARK_COLOR);
           }
           return (
             <div
               className='renderer-table-td-content'
               style={{
-                color: colorMode === 'background' ? '#fff' : textObj?.color,
+                color: colorMode === 'background' ? DEFAULT_LIGTH_COLOR : textObj?.color,
                 backgroundColor: colorMode === 'background' ? textObj?.color : 'unset',
               }}
             >
-              {textObj?.value}
-              {textObj?.unit}
+              {textObj?.text}
             </div>
           );
         },

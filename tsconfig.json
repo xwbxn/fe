@@ -10,7 +10,8 @@
       "@/store/eventWallInterface": [
         "src/Packages/EventWall/interface/index.ts"
       ],
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "plus:/*": ["src/plus/*"],
     },
     "skipLibCheck": true,
     "esModuleInterop": false,
@@ -32,5 +33,5 @@
     "esm": true
   },
   "include": ["./src"],
-  "exclude": ["./src/store/miniDva/*", "./src/Packages/", "src/components/Dantd/**/*", "./node_modules/**/*"]
+  "exclude": ["./src/Packages/", "./node_modules/**/*"]
 }

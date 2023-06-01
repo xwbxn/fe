@@ -25,7 +25,12 @@ import replaceExpressionBracket from '../utils/replaceExpressionBracket';
 import { getSerieName } from './utils';
 import prometheusQuery from './prometheus';
 import elasticsearchQuery from './elasticsearch';
-import aliyunSLS from './aliyunSLS';
+// @ts-ignore
+import { datasource as aliyunSLS } from 'plus:/datasource/aliyunSLS';
+// @ts-ignore
+import { datasource as zabbix } from 'plus:/datasource/zabbix';
+// @ts-ignore
+import { datasource as influxDB } from 'plus:/datasource/influxDB';
 
 interface IProps {
   id?: string;
@@ -37,6 +42,7 @@ interface IProps {
   variableConfig?: IVariable[];
   inViewPort?: boolean;
   spanNulls?: boolean;
+  scopedVars?: any;
 }
 
 export default function usePrometheus(props: IProps) {
@@ -52,6 +58,8 @@ export default function usePrometheus(props: IProps) {
     prometheus: prometheusQuery,
     elasticsearch: elasticsearchQuery,
     'aliyun-sls': aliyunSLS,
+    zabbix: zabbix,
+    influxdb: influxDB,
   };
   const { run: fetchData } = useDebounceFn(
     () => {
