@@ -23,13 +23,13 @@ import { useTranslation } from 'react-i18next';
 import PageLayout from '@/components/pageLayout';
 import { getN9EServers } from '@/services/help';
 import { CommonStateContext } from '@/App';
-import { ReactComponent as SystemInfoSvg } from '../../../../public/image/system-info.svg';
+import SystemInfoSvg from '../../../../public/image/system-info.svg';
+import localeCompare from '@/pages/dashboard/Renderer/utils/localeCompare';
 import './locale';
 
 export default function Servers() {
   const { t } = useTranslation('servers');
-  const { profile, groupedDatasourceList } = useContext(CommonStateContext);
-  const datasourceList = _.get(groupedDatasourceList, 'prometheus', []);
+  const { profile, datasourceList } = useContext(CommonStateContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const fetchData = () => {
@@ -70,16 +70,25 @@ export default function Servers() {
                     title: t('instance'),
                     dataIndex: 'instance',
                     key: 'instance',
+                    sorter: (a: any, b: any) => {
+                      return localeCompare(a.instance, b.instance);
+                    },
                   },
                   {
                     title: t('cluster'),
                     dataIndex: 'cluster',
                     key: 'cluster',
+                    sorter: (a: any, b: any) => {
+                      return localeCompare(a.cluster, b.cluster);
+                    },
                   },
                   {
                     title: t('datasource'),
                     dataIndex: 'datasource_id',
                     key: 'datasource_id',
+                    sorter: (a: any, b: any) => {
+                      return localeCompare(a.datasource_id, b.datasource_id);
+                    },
                     render: (text) => {
                       return _.get(_.find(datasourceList, { id: text }), 'name');
                     },
@@ -88,6 +97,9 @@ export default function Servers() {
                     title: t('clock'),
                     dataIndex: 'clock',
                     key: 'clock',
+                    sorter: (a: any, b: any) => {
+                      return localeCompare(a.clock, b.clock);
+                    },
                     render: (text) => {
                       return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
                     },

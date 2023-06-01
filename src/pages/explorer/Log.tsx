@@ -25,6 +25,7 @@ import './index.less';
 
 const MetricExplorerPage = () => {
   const { t } = useTranslation('explorer');
+
   return (
     <PageLayout title={t('title')} icon={<LineChartOutlined />}>
       <div className='prometheus-page'>
@@ -34,12 +35,12 @@ const MetricExplorerPage = () => {
             const cateOptions = isShow[0]
               ? [
                   {
-                    label: '阿里云SLS',
-                    value: 'aliyun-sls',
-                  },
-                  {
                     label: 'Elasticsearch',
                     value: 'elasticsearch',
+                  },
+                  {
+                    label: '阿里云SLS',
+                    value: 'aliyun-sls',
                   },
                 ]
               : [

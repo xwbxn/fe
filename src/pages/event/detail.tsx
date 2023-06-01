@@ -28,11 +28,15 @@ import { priorityColor } from '@/utils/constant';
 import { deleteAlertEventsModal } from '.';
 import { parseValues } from '@/pages/alertRules/utils';
 import { CommonStateContext } from '@/App';
+// @ts-ignore
+import { Event as ElasticsearchDetail } from 'plus:/datasource/elasticsearch';
+// @ts-ignore
+import { Event as AliyunSLSDetail } from 'plus:/datasource/aliyunSLS';
+// @ts-ignore
+import { Event as InfluxDBDetail } from 'plus:/datasource/influxDB';
 import Preview from './Preview';
 import LogsDetail from './LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
-import ElasticsearchDetail from './Detail/Elasticsearch';
-import AliyunSLSDetail from './Detail/AliyunSLS';
 import Host from './Detail/Host';
 import './detail.less';
 
@@ -59,37 +63,61 @@ const EventDetailPage: React.FC = () => {
       label: t('detail.rule_name'),
       key: 'rule_name',
       render(content, { rule_id }) {
-        return (
-          <Link
-            to={{
-              pathname: `/alert-rules/edit/${rule_id}`,
-            }}
-            target='_blank'
-          >
-            {content}
-          </Link>
-        );
+        if (!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod)) {
+          return (
+            <Link
+              to={{
+                pathname: `/alert-rules/edit/${rule_id}`,
+              }}
+              target='_blank'
+            >
+              {content}
+            </Link>
+          );
+        }
+        return content;
       },
     },
-    {
-      label: t('detail.group_name'),
-      key: 'group_name',
-      render(content, { group_id }) {
-        return (
-          <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
-            {content}
-          </Button>
-        );
-      },
-    },
+    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod)
+      ? [
+          {
+            label: t('detail.group_name'),
+            key: 'group_name',
+            render(content, { group_id }) {
+              return (
+                <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
+                  {content}
+                </Button>
+              );
+            },
+          },
+        ]
+      : [
+          {
+            label: t('detail.detail_url'),
+            key: 'rule_config',
+            render(val) {
+              const detail_url = _.get(val, 'detail_url');
+              return (
+                <a href={detail_url} target='_blank'>
+                  {detail_url}
+                </a>
+              );
+            },
+          },
+        ]),
     { label: t('detail.rule_note'), key: 'rule_note' },
-    {
-      label: t('detail.datasource_id'),
-      key: 'datasource_id',
-      render(content) {
-        return _.find(datasourceList, (item) => item.id === content)?.name;
-      },
-    },
+    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod)
+      ? [
+          {
+            label: t('detail.datasource_id'),
+            key: 'datasource_id',
+            render(content) {
+              return _.find(datasourceList, (item) => item.id === content)?.name;
+            },
+          },
+        ]
+      : [false]),
     {
       label: t('detail.severity'),
       key: 'severity',
@@ -117,7 +145,7 @@ const EventDetailPage: React.FC = () => {
           : '';
       },
     },
-    { label: t('detail.target_note'), key: 'target_note' },
+    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
     {
       label: t('detail.trigger_time'),
       key: 'trigger_time',
@@ -194,8 +222,9 @@ const EventDetailPage: React.FC = () => {
         })
       : [false]),
     ...(eventDetail?.cate === 'elasticsearch' ? ElasticsearchDetail() : [false]),
-    ...(eventDetail?.cate === 'aliyun-sls' ? AliyunSLSDetail() : [false]),
+    ...(eventDetail?.cate === 'aliyun-sls' ? AliyunSLSDetail(t) : [false]),
     ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
+    ...(eventDetail?.cate === 'influxdb' ? InfluxDBDetail(t) : [false]),
     {
       label: t('detail.prom_eval_interval'),
       key: 'prom_eval_interval',
@@ -239,17 +268,6 @@ const EventDetailPage: React.FC = () => {
           : '';
       },
     },
-    {
-      label: t('detail.runbook_url'),
-      key: 'runbook_url',
-      render(url) {
-        return (
-          <a href={url} target='_balank'>
-            {url}
-          </a>
-        );
-      },
-    },
   ];
 
   if (eventDetail?.annotations) {
@@ -272,7 +290,7 @@ const EventDetailPage: React.FC = () => {
   }
 
   useEffect(() => {
-    const requestPromise = isHistory ? getHistoryEventsById(busiId, eventId) : getAlertEventsById(busiId, eventId);
+    const requestPromise = isHistory ? getHistoryEventsById(eventId) : getAlertEventsById(eventId);
     requestPromise.then((res) => {
       setEventDetail(res.dat);
     });
@@ -332,7 +350,7 @@ const EventDetailPage: React.FC = () => {
           >
             {eventDetail && (
               <div>
-                {parsedEventDetail.rule_algo || parsedEventDetail.cate === 'elasticsearch' || parsedEventDetail.cate === 'aliyun-sls' ? (
+                {parsedEventDetail.rule_prod === 'anomaly' || parsedEventDetail.cate === 'elasticsearch' || parsedEventDetail.cate === 'aliyun-sls' ? (
                   <Preview
                     data={parsedEventDetail}
                     triggerTime={eventDetail.trigger_time}

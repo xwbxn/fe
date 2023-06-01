@@ -23,8 +23,10 @@ import { CommonStateContext } from '@/App';
 import { getAuthorizedDatasourceCates } from '@/components/AdvancedWrap';
 import DatasourceValueSelect from '@/pages/alertRules/Form/components/DatasourceValueSelect';
 import IntervalAndDuration from '@/pages/alertRules/Form/components/IntervalAndDuration';
-import ElasticsearchSettings from './ElasticsearchSettings';
-import AliyunSLSSettings from './AliyunSLSSettings';
+// @ts-ignore
+import { AlertRule as AliyunSLSSettings } from 'plus:/datasource/aliyunSLS';
+// @ts-ignore
+import { AlertRule as ElasticsearchSettings } from 'plus:/datasource/elasticsearch';
 
 export default function index() {
   const { t } = useTranslation('alertRules');

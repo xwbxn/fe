@@ -35,6 +35,27 @@ const en_US = {
     title: 'Links',
     name: 'Name',
     url: 'URL',
+    url_tip: `
+      Variables usage
+      <1 />
+      \${variable_name}: dashboard variable value
+      <1 />
+      \${__field.name}: series name
+      <1 />
+      \${__field.value}: series value
+      <1 />
+      \${__field.labels.X}: specified label value
+      <1 />
+      \${__field.labels.__name__}: metric name
+      <1 />
+      \${__from}: Unix millisecond
+      <1 />
+      \${__from_date_seconds}: Unix seconds epoch
+      <1 />
+      \${__from_date_iso}: ISO 8601/RFC 3339
+      <1 />
+      The syntax above also works with \${__to}
+      `,
     isNewBlank: 'Open in new tab',
   },
   var: {
@@ -177,6 +198,8 @@ const en_US = {
       reverseColorOrder: 'Reverse color order', // hexbin
       colorDomainAuto: 'Color domain auto', // hexbin
       colorDomainAuto_tip: 'By default, the min max value is automatically taken from the series', // hexbin
+      detailName: 'Link name',
+      detailUrl: 'Link addr',
       pie: {
         legengPosition: 'Legend position',
         max: 'Max',
@@ -184,6 +207,8 @@ const en_US = {
         donut: 'Donut',
         labelWithName: 'Label with name',
         labelWithValue: 'Label with metric value',
+        detailName: 'Link name',
+        detailUrl: 'Link addr',
       },
       table: {
         displayMode: 'Display mode',

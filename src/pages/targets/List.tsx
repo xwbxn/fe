@@ -1,7 +1,7 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Table, Tag, Tooltip, Space, Input, Dropdown, Menu, Button, Modal, message } from 'antd';
 import { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, DownOutlined, ReloadOutlined, CopyOutlined } from '@ant-design/icons';
+import { SearchOutlined, DownOutlined, ReloadOutlined, CopyOutlined, ApartmentOutlined } from '@ant-design/icons';
 import { useAntdTable } from 'ahooks';
 import _ from 'lodash';
 import moment from 'moment';
@@ -13,6 +13,7 @@ import clipboard from './clipboard';
 import OrganizeColumns from './OrganizeColumns';
 import { getDefaultColumnsConfigs, setDefaultColumnsConfigs } from './utils';
 import { CommonStateContext } from '@/App';
+import CollectsDrawer from './CollectsDrawer';
 
 export const pageSizeOptions = ['10', '20', '50', '100'];
 
@@ -61,6 +62,13 @@ export default function List(props: IProps) {
   const [searchVal, setSearchVal] = useState('');
   const [tableQueryContent, setTableQueryContent] = useState<string>('');
   const [columnsConfigs, setColumnsConfigs] = useState<{ name: string; visible: boolean }[]>(getDefaultColumnsConfigs());
+  const [collectsDrawerVisible, setCollectsDrawerVisible] = useState(false);
+  const [collectsDrawerIdent, setCollectsDrawerIdent] = useState('');
+  const [requestParams, setRequestParams] = useState({
+    current: 1,
+    pageSize: 30,
+  });
+
   const columns: ColumnsType<any> = [
     {
       title: (
@@ -116,6 +124,23 @@ export default function List(props: IProps) {
         </Space>
       ),
       dataIndex: 'ident',
+      render: (text) => {
+        return (
+          <Space>
+            {text}
+            {import.meta.env['VITE_IS_COLLECT'] && (
+              <Tooltip title='查看关联采集配置'>
+                <ApartmentOutlined
+                  onClick={() => {
+                    setCollectsDrawerVisible(true);
+                    setCollectsDrawerIdent(text);
+                  }}
+                />
+              </Tooltip>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
@@ -368,7 +393,7 @@ export default function List(props: IProps) {
     }
   });
 
-  const featchData = ({ current, pageSize }): Promise<any> => {
+  const featchData = ({ current, pageSize }: { current: number; pageSize: number }): Promise<any> => {
     const query = {
       query: tableQueryContent,
       bgid: curBusiId,
@@ -387,9 +412,8 @@ export default function List(props: IProps) {
     return t('common:table.total', { total });
   };
 
-  const { tableProps } = useAntdTable(featchData, {
-    refreshDeps: [tableQueryContent, curBusiId, refreshFlag],
-    defaultPageSize: 30,
+  const { tableProps, run } = useAntdTable(featchData, {
+    manual: true,
   });
 
   const downloadTarget = () => {
@@ -404,6 +428,10 @@ export default function List(props: IProps) {
       })
     }
   };
+
+  useEffect(() => {
+    run(requestParams);
+  }, [tableQueryContent, curBusiId, refreshFlag, JSON.stringify(requestParams)]);
 
   return (
     <div>
@@ -489,8 +517,15 @@ export default function List(props: IProps) {
           showQuickJumper: true,
           pageSizeOptions: pageSizeOptions,
         }}
+        onChange={(pagination) => {
+          setRequestParams({
+            current: pagination.current!,
+            pageSize: pagination.pageSize!,
+          });
+        }}
         scroll={{ x: 'max-content' }}
       />
+      <CollectsDrawer visible={collectsDrawerVisible} setVisible={setCollectsDrawerVisible} ident={collectsDrawerIdent} />
     </div>
   );
 }

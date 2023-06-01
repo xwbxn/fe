@@ -63,6 +63,9 @@ import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
 import IBEX from '@/pages/help/NotificationSettings/IBEX';
 import Grafana from '@/pages/grafana'
+import Collects, { Add as CollectAdd, Edit as CollectEdit } from '@/pages/collects';
+// @ts-ignore
+import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 import { dynamicPackages, Entry } from '@/utils';
 
 const Packages = dynamicPackages();
@@ -123,13 +126,16 @@ export default function Content() {
         <Route exact path='/alert-rules' component={AlertRules} />
         <Route exact path='/alert-rules-built-in' component={AlertRulesBuiltin} />
         <Route exact path='/alert-rules-built-in/detail' component={AlertRulesBuiltinDetail} />
-        {/* <Route exact path='/alert-rules/brain/:id' component={StrategyBrain} /> */}
+        <Route exact path='/alert-rules/brain/:id' component={StrategyBrain} />
         <Route exact path='/alert-mutes' component={Shield} />
         <Route exact path='/alert-mutes/add/:from?' component={AddShield} />
         <Route exact path='/alert-mutes/edit/:id' component={ShieldEdit} />
         <Route exact path='/alert-subscribes' component={Subscribe} />
         <Route exact path='/alert-subscribes/add' component={SubscribeAdd} />
         <Route exact path='/alert-subscribes/edit/:id' component={SubscribeEdit} />
+        <Route exact path='/collects' component={Collects} />
+        <Route exact path='/collects/add/:bgid' component={CollectAdd} />
+        <Route exact path='/collects/edit/:id' component={CollectEdit} />
 
         <Route exact path='/recording-rules/:id?' component={RecordingRule} />
         <Route exact path='/recording-rules/add/:group_id' component={RecordingRuleAdd} />
