@@ -28,6 +28,7 @@ import TaskHostOutput from '@/pages/taskOutput/host';
 import { getAuthorizedDatasourceCates } from '@/components/AdvancedWrap';
 import { GetProfile } from '@/services/account';
 import { getBusiGroups, getDatasourceList, getDatasourceBriefList } from '@/services/common';
+import { getLicense } from '@/components/AdvancedWrap/License';
 import HeaderMenu from './components/menu';
 import Content from './routers';
 
@@ -73,6 +74,9 @@ export interface ICommonState {
   setCurBusiId: (id: number) => void;
   profile: IProfile;
   setProfile: (profile: IProfile) => void;
+  licenseRulesRemaining?: number;
+  licenseExpireDays?: number;
+  licenseExpired: boolean;
 }
 
 // 可以匿名访问的路由 TODO: job-task output 应该也可以匿名访问
@@ -112,6 +116,7 @@ function App() {
     setProfile: (profile: IProfile) => {
       setCommonState((state) => ({ ...state, profile }));
     },
+    licenseExpired: false,
   });
 
   useEffect(() => {
@@ -122,6 +127,7 @@ function App() {
           const { dat: profile } = await GetProfile();
           const { dat: busiGroups } = await getBusiGroups();
           const datasourceList = await getDatasourceList();
+          const { licenseRulesRemaining, licenseExpireDays } = await getLicense(t);
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
           window.localStorage.setItem('curBusiId', String(defaultBusiId));
           initialized.current = true;
@@ -138,6 +144,9 @@ function App() {
               },
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
+              licenseRulesRemaining,
+              licenseExpireDays,
+              licenseExpired: licenseExpireDays !== undefined && licenseExpireDays <= 0,
             };
           });
           if (_.isEmpty(datasourceList) && !_.startsWith(location.pathname, '/help/source')) {

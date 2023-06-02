@@ -19,10 +19,10 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, Link } from 'react-router-dom';
 import _ from 'lodash';
 import moment from 'moment';
-import { Table, Tag, Switch, Modal, Space, Button, Row, Col, Radio, message, Select } from 'antd';
+import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select } from 'antd';
 import { ColumnType } from 'antd/lib/table';
 import AdvancedWrap from '@/components/AdvancedWrap';
-import { Pure as DatasourceSelect } from '@/components/DatasourceSelect';
+import { DatasourceSelectInSearch } from '@/components/DatasourceSelect';
 import RefreshIcon from '@/components/RefreshIcon';
 import SearchInput from '@/components/BaseSearchInput';
 import usePagination from '@/components/usePagination';
@@ -168,6 +168,11 @@ export default function List(props: ListProps) {
       },
     },
     {
+      title: t('common:table.update_by'),
+      dataIndex: 'update_by',
+      width: 60,
+    },
+    {
       title: t('common:table.enabled'),
       dataIndex: 'disabled',
       render: (disabled, record) => (
@@ -302,6 +307,7 @@ export default function List(props: ListProps) {
                     {
                       label: 'Anomaly',
                       value: 'anomaly',
+                      pro: true,
                     },
                   ];
                 }
@@ -311,6 +317,7 @@ export default function List(props: ListProps) {
                     {
                       label: 'Log',
                       value: 'logging',
+                      pro: true,
                     },
                   ];
                 }
@@ -338,40 +345,28 @@ export default function List(props: ListProps) {
                 );
               }}
             </AdvancedWrap>
-            <AdvancedWrap var='VITE_IS_ALERT_ES,VITE_IS_SLS_DS'>
-              {(isShow) => {
-                return (
-                  <DatasourceSelect
-                    datasourceCate={filter.cate}
-                    onDatasourceCateChange={(val) => {
-                      setFilter({
-                        ...filter,
-                        cate: val,
-                      });
-                    }}
-                    datasourceValue={filter.datasourceIds}
-                    datasourceValueMode='multiple'
-                    onDatasourceValueChange={(val: number[]) => {
-                      setFilter({
-                        ...filter,
-                        datasourceIds: val,
-                      });
-                    }}
-                    filterCates={(cates) => {
-                      return _.filter(cates, (item) => {
-                        if (item.value === 'elasticsearch') {
-                          return isShow[0];
-                        }
-                        if (item.value === 'aliyun-sls') {
-                          return isShow[1];
-                        }
-                        return true;
-                      });
-                    }}
-                  />
-                );
+            <DatasourceSelectInSearch
+              datasourceCate={filter.cate}
+              onDatasourceCateChange={(val) => {
+                setFilter({
+                  ...filter,
+                  cate: val,
+                });
               }}
-            </AdvancedWrap>
+              datasourceValue={filter.datasourceIds}
+              datasourceValueMode='multiple'
+              onDatasourceValueChange={(val: number[]) => {
+                setFilter({
+                  ...filter,
+                  datasourceIds: val,
+                });
+              }}
+              filterCates={(cates) => {
+                return _.filter(cates, (item) => {
+                  return !!item.alertRule;
+                });
+              }}
+            />
             <Select
               mode='multiple'
               placeholder={t('severity')}
@@ -430,6 +425,7 @@ export default function List(props: ListProps) {
           },
         }}
         columns={columns}
+        scroll={{ x: 'max-content' }}
       />
     </div>
   );

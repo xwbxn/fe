@@ -17,6 +17,7 @@
 import React from 'react';
 import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
 import querystring from 'query-string';
+import _ from 'lodash';
 import NotFound from '@/pages/notFound';
 import Page403 from '@/pages/notFound/Page403';
 import Login from '@/pages/login';
@@ -63,9 +64,10 @@ import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
 import IBEX from '@/pages/help/NotificationSettings/IBEX';
 import Grafana from '@/pages/grafana'
-import Collects, { Add as CollectAdd, Edit as CollectEdit } from '@/pages/collects';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
+// @ts-ignore
+import plusLoader from 'plus:/utils/loader';
 import { dynamicPackages, Entry } from '@/utils';
 
 const Packages = dynamicPackages();
@@ -133,9 +135,6 @@ export default function Content() {
         <Route exact path='/alert-subscribes' component={Subscribe} />
         <Route exact path='/alert-subscribes/add' component={SubscribeAdd} />
         <Route exact path='/alert-subscribes/edit/:id' component={SubscribeEdit} />
-        <Route exact path='/collects' component={Collects} />
-        <Route exact path='/collects/add/:bgid' component={CollectAdd} />
-        <Route exact path='/collects/edit/:id' component={CollectEdit} />
 
         <Route exact path='/recording-rules/:id?' component={RecordingRule} />
         <Route exact path='/recording-rules/add/:group_id' component={RecordingRuleAdd} />
@@ -177,6 +176,9 @@ export default function Content() {
         <Route exact path='/dashboard-grafana' component={Grafana} />
 
         {lazyRoutes.map((route, i) => (
+          <RouteWithSubRoutes key={i} {...route} />
+        ))}
+        {_.map(plusLoader.routes, (route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
         ))}
         <Route path='/' exact>

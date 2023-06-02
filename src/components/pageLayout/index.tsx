@@ -15,10 +15,10 @@
  *
  */
 import React, { ReactNode, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import Icon, { RollbackOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { Menu, Dropdown } from 'antd';
+import { Menu, Dropdown, Space } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { Logout } from '@/services/login';
 import AdvancedWrap, { License } from '@/components/AdvancedWrap';
@@ -126,7 +126,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
 
               {rightArea}
 
-              <AdvancedWrap var='VITE_IS_ALERT_AI,VITE_IS_SLS_DS'>
+              <AdvancedWrap var='VITE_IS_DS_SETTING,VITE_IS_COMMON_DS'>
                 <License />
               </AdvancedWrap>
 
