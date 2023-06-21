@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Button, Dropdown, Form, Input, Menu, message, Modal, Select, Space, Table, Tag, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
 import { BusinessGroup } from '@/pages/targets';
 import { CommonStateContext } from '@/App';
 
@@ -464,6 +464,23 @@ export default function () {
                 {
                   title: t('memo'),
                   dataIndex: 'memo',
+                },
+                {
+                  title: t('status'),
+                  dataIndex: 'status',
+                  render(value) {
+                    return value === 1 ? (
+                      <Space>
+                        <CheckCircleOutlined style={{ color: 'green' }} />
+                        已生效
+                      </Space>
+                    ) : (
+                      <Space>
+                        <CheckCircleOutlined style={{ color: 'grey' }} />
+                        未生效
+                      </Space>
+                    );
+                  },
                 },
                 {
                   title: t('common:table.operations'),

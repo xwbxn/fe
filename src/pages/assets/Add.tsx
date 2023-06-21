@@ -8,7 +8,7 @@ export default function () {
 
   return (
     <PageLayout title={t('title')} showBack>
-      <Form initialValues={{ }}></Form>
+      <Form initialValues={{}} initParams={{}}></Form>
     </PageLayout>
   );
 }

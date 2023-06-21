@@ -16,6 +16,7 @@ const zh_CN = {
     info: '配置信息',
     search_placeholder: "按名称/地址/标签查找",
     tags: "标签",
+    status: "监控配置",
 
     bind_tag: {
         title: '绑定标签',

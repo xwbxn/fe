@@ -2,7 +2,7 @@ import './style.less';
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, message, Row, Select, Space } from 'antd';
+import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } from 'antd';
 import FormItem from 'antd/lib/form/FormItem';
 import { useTranslation } from 'react-i18next';
 import CodeMirror from '@uiw/react-codemirror';
@@ -13,7 +13,7 @@ import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, upda
 import { CommonStateContext } from '@/App';
 import { FileAddOutlined } from '@ant-design/icons';
 
-export default function (props) {
+export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [curBusiId] = useState<number>(commonState.curBusiId);
@@ -34,13 +34,20 @@ export default function (props) {
     }
   };
 
-  const setDefaultConfig = () => {
+  const genDefaultConfig = () => {
     const name = form.getFieldValue('type');
     const data = form.getFieldsValue();
-    delete data.configs;
-    getAssetDefaultConfig(name, data).then((res) => {
-      form.setFieldsValue({ configs: res.dat.content });
-    });
+    if (data.configs) {
+      Modal.confirm({
+        title: '将会覆盖原有配置,是否继续?',
+        onOk: () => {
+          delete data.configs;
+          getAssetDefaultConfig(name, data).then((res) => {
+            form.setFieldsValue({ configs: res.dat.content });
+          });
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -69,12 +76,13 @@ export default function (props) {
   }, []);
 
   useEffect(() => {
-    form.setFieldsValue(props.initialValues);
     genForm();
+    form.setFieldsValue(props.initialValues);
   }, [props]);
 
   const submitForm = async (values) => {
     values.group_id = curBusiId;
+    values.params = JSON.stringify(values);
     if (props.mode === 'edit') {
       await updateAsset(values);
     } else {
@@ -128,8 +136,8 @@ export default function (props) {
           <Row gutter={10}>
             {params.map((v) => {
               return (
-                <Col span={12}>
-                  <FormItem label={v.label} name={v.name}>
+                <Col key={`col=${v.name}`} span={12}>
+                  <FormItem key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
                     {v.items ? (
                       <Select
                         style={{ width: '100%' }}
@@ -154,8 +162,8 @@ export default function (props) {
                 label={
                   <Space>
                     采集配置
-                    <Button type='primary' icon={<FileAddOutlined />} size='small' onClick={setDefaultConfig}>
-                      生成
+                    <Button type='primary' icon={<FileAddOutlined />} size='small' onClick={genDefaultConfig}>
+                      自动生成
                     </Button>
                   </Space>
                 }
