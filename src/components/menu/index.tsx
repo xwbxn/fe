@@ -140,6 +140,10 @@ const getMenuList = (t) => {
           key: '/targets',
           label: t('监控机器'),
         },
+        {
+          key: '/assets',
+          label: t('资产管理'),
+        },
       ],
     },
 
