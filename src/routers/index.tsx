@@ -148,8 +148,8 @@ export default function Content() {
         <Route exact path='/targets' component={Targets} />
 
         <Route exact path='/assets' component={Assets} />
-        {/* <Route exact path='/assets/add/:bgid' component={AddAsset} /> */}
-        {/* <Route exact path='/assets/:id' component={EditAsset} /> */}
+        <Route exact path='/assets/add/:bgid' component={AddAsset} />
+        <Route exact path='/assets/:id' component={EditAsset} />
 
         <Route exact path='/job-tpls' component={TaskTpl} />
         <Route exact path='/job-tpls/add' component={TaskTplAdd} />
