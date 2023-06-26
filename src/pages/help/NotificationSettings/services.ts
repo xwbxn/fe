@@ -62,8 +62,12 @@ export const putNotifyContacts = function (data: ChannelType[]) {
   });
 };
 
-export const getNotifyConfig = function (ckey: 'smtp_config' | 'ibex_server'): Promise<string> {
-  return request('/api/n9e/notify-config', {
+export const getNotifyConfig = function (ckey: string): Promise<string> {
+  let url = '/api/n9e/notify-config';
+  if (import.meta.env.VITE_IS_DS_SETTING === 'true') {
+    url = '/api/n9e-plus/notify-config';
+  }
+  return request(url, {
     method: RequestMethod.Get,
     params: { ckey },
   }).then((res) => {
@@ -71,8 +75,12 @@ export const getNotifyConfig = function (ckey: 'smtp_config' | 'ibex_server'): P
   });
 };
 
-export const putNotifyConfig = function (data: { ckey: 'smtp_config' | 'ibex_server'; cvalue: string }) {
-  return request(`/api/n9e/notify-config`, {
+export const putNotifyConfig = function (data: { ckey: string; cvalue: string }) {
+  let url = '/api/n9e/notify-config';
+  if (import.meta.env.VITE_IS_DS_SETTING === 'true') {
+    url = '/api/n9e-plus/notify-config';
+  }
+  return request(url, {
     method: RequestMethod.Put,
     data,
   });

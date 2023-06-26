@@ -37,7 +37,10 @@ export function getFields(datasourceValue: number, index?: string, type?: string
     method: RequestMethod.Get,
     silence: true,
   }).then((res) => {
-    return mappingsToFields(res, type);
+    return {
+      allFields: mappingsToFields(res),
+      fields: type ? mappingsToFields(res, type) : [],
+    };
   });
 }
 
@@ -67,6 +70,15 @@ export function getDsQuery(datasourceValue: number, requestBody) {
     },
   }).then((res) => {
     const dat = _.get(res, 'responses[0].aggregations.A.buckets');
+    return dat;
+  });
+}
+
+export function getESVersion(datasourceValue: number) {
+  return request(`/api/n9e/proxy/${datasourceValue}`, {
+    method: RequestMethod.Get,
+  }).then((res) => {
+    const dat = _.get(res, 'version.number');
     return dat;
   });
 }
