@@ -99,6 +99,7 @@ function App() {
           [index: string]: {
             name: string;
             id: number;
+            plugin_type: string;
           }[];
         }
       }));
@@ -140,6 +141,7 @@ function App() {
                 [index: string]: {
                   name: string;
                   id: number;
+                  plugin_type: string;
                 }[];
               },
               datasourceList: datasourceList,
