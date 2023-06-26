@@ -1,17 +1,15 @@
 import './style.less';
-
 import React, { useContext, useEffect, useState } from 'react';
 
 import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } from 'antd';
-import FormItem from 'antd/lib/form/FormItem';
 import { useTranslation } from 'react-i18next';
-import CodeMirror from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/stream-parser';
-import { toml } from '@codemirror/legacy-modes/mode/toml';
-import { useForm } from 'antd/lib/form/Form';
-import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset } from '@/services/assets';
+
 import { CommonStateContext } from '@/App';
+import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset } from '@/services/assets';
 import { FileAddOutlined } from '@ant-design/icons';
+import { toml } from '@codemirror/legacy-modes/mode/toml';
+import { StreamLanguage } from '@codemirror/stream-parser';
+import CodeMirror from '@uiw/react-codemirror';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
@@ -20,7 +18,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; items?: [] }[]>([]);
-  const [form] = useForm();
+  const [form] = Form.useForm()
 
   const panelBaseProps: any = {
     size: 'small',
@@ -102,31 +100,31 @@ export default function (props: { initialValues: object; initParams: object; mod
         genForm();
       }}
     >
-      <FormItem hidden name='id'>
+      <Form.Item hidden name='id'>
         <Input></Input>
-      </FormItem>
+      </Form.Item>
       <div className='card-wrapper'>
         <Card {...panelBaseProps} title={t('basic')}>
           <Row gutter={10}>
             <Col span={12}>
-              <FormItem label='类型' name='type' rules={[{ required: true }]}>
+              <Form.Item label='类型' name='type' rules={[{ required: true }]}>
                 <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={props.mode === 'edit'} />
-              </FormItem>
+              </Form.Item>
             </Col>
             <Col span={12}>
-              <FormItem label='名称' name='name' rules={[{ required: true }]}>
+              <Form.Item label='名称' name='name' rules={[{ required: true }]}>
                 <Input placeholder='请输入资产名称' />
-              </FormItem>
+              </Form.Item>
             </Col>
             <Col span={12}>
-              <FormItem label='标识' name='label' rules={[{ required: true }]}>
+              <Form.Item label='标识' name='label' rules={[{ required: true }]}>
                 <Input placeholder='请输入资产名称' />
-              </FormItem>
+              </Form.Item>
             </Col>
             <Col span={12}>
-              <FormItem label='备注' name='memo'>
+              <Form.Item label='备注' name='memo'>
                 <Input placeholder='填写备注' />
-              </FormItem>
+              </Form.Item>
             </Col>
           </Row>
         </Card>
@@ -137,7 +135,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             {params.map((v) => {
               return (
                 <Col key={`col=${v.name}`} span={12}>
-                  <FormItem key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
+                  <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
                     {v.items ? (
                       <Select
                         style={{ width: '100%' }}
@@ -148,17 +146,17 @@ export default function (props: { initialValues: object; initParams: object; mod
                     ) : (
                       <Input placeholder={`填写${v.label}`} />
                     )}
-                  </FormItem>
+                  </Form.Item>
                 </Col>
               );
             })}
             <Col span={12}>
-              <FormItem label='探针' name='ident'>
+              <Form.Item label='探针' name='ident'>
                 <Select style={{ width: '100%' }} options={identList} />
-              </FormItem>
+              </Form.Item>
             </Col>
             <Col span={24}>
-              <FormItem
+              <Form.Item
                 label={
                   <Space>
                     采集配置
@@ -171,13 +169,13 @@ export default function (props: { initialValues: object; initParams: object; mod
                 rules={[{ required: true }]}
               >
                 <CodeMirror height='200px' extensions={[StreamLanguage.define(toml)]}></CodeMirror>
-              </FormItem>
+              </Form.Item>
             </Col>
           </Row>
         </Card>
       </div>
       <div className='card-wrapper'>
-        <FormItem>
+        <Form.Item>
           <Space>
             <Button type='primary' htmlType='submit'>
               保存
@@ -190,7 +188,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               取消
             </Button>
           </Space>
-        </FormItem>
+        </Form.Item>
       </div>
     </Form>
   );
