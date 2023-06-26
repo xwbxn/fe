@@ -98,7 +98,7 @@ function index(props: IProps) {
     table: () => <Table {...subProps} themeMode={themeMode} />,
     pie: () => <Pie {...subProps} themeMode={themeMode} time={time} />,
     hexbin: () => <Hexbin {...subProps} themeMode={themeMode} time={time} />,
-    barGauge: () => <BarGauge {...subProps} themeMode={themeMode} />,
+    barGauge: () => <BarGauge {...subProps} themeMode={themeMode} time={time} />,
     text: () => <Text {...subProps} />,
     gauge: () => <Gauge {...subProps} themeMode={themeMode} />,
     iframe: () => <Iframe {...subProps} time={time} />,
@@ -113,7 +113,7 @@ function index(props: IProps) {
       ref={ref}
     >
       <div className='renderer-body-wrap' ref={bodyWrapRef}>
-        <div className='renderer-header graph-header dashboards-panels-item-drag-handle'>
+        <div className='renderer-header graph-header'>
           {tipsVisible ? (
             <Tooltip
               placement='leftTop'
@@ -155,7 +155,7 @@ function index(props: IProps) {
           )}
           <div className='renderer-header-content'>
             <Tooltip title={name} getPopupContainer={() => ref.current!}>
-              <div className='renderer-header-title'>{name}</div>
+              <div className='renderer-header-title dashboards-panels-item-drag-handle'>{name}</div>
             </Tooltip>
           </div>
           <div className='renderer-header-loading'>

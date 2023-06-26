@@ -28,7 +28,7 @@ import TaskHostOutput from '@/pages/taskOutput/host';
 import { getAuthorizedDatasourceCates } from '@/components/AdvancedWrap';
 import { GetProfile } from '@/services/account';
 import { getBusiGroups, getDatasourceList, getDatasourceBriefList } from '@/services/common';
-import { getLicense } from '@/components/AdvancedWrap/License';
+import { getLicense } from '@/components/AdvancedWrap';
 import HeaderMenu from './components/menu';
 import Content from './routers';
 
@@ -48,22 +48,22 @@ interface IProfile {
   contacts: { string?: string };
 }
 
+interface Datasource {
+  id: number;
+  name: string;
+  plugin_type: string;
+}
+
 export interface ICommonState {
   datasourceCateOptions: {
     label: string;
     value: string;
   }[];
   groupedDatasourceList: {
-    [index: string]: {
-      name: string;
-      id: number;
-    }[];
+    [index: string]: Datasource[];
   };
-  datasourceList: {
-    name: string;
-    id: number;
-  }[];
-  setDatasourceList: (list: { name: string; id: number }[]) => void;
+  datasourceList: Datasource[];
+  setDatasourceList: (list: Datasource[]) => void;
   busiGroups: {
     name: string;
     id: number;

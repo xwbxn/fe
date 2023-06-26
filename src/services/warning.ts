@@ -214,8 +214,6 @@ export const getAlertEvents = function (data) {
  * 获取全量告警历史页面
  */
 export const getHistoryEvents = function (data) {
-  console.log(data);
-
   return request(`/api/n9e/history-alert-events`, {
     method: RequestMethod.Get,
     params: data,
@@ -445,6 +443,15 @@ export function getIndices(datasourceValue: number) {
     },
   }).then((res) => {
     return _.sortBy(_.compact(_.map(res, 'index')));
+  });
+}
+
+export function getESVersion(datasourceValue: number) {
+  return request(`/api/n9e/proxy/${datasourceValue}/`, {
+    method: RequestMethod.Get,
+  }).then((res) => {
+    const dat = _.get(res, 'version.number');
+    return dat;
   });
 }
 

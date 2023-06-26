@@ -19,16 +19,16 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 // 获取数据源列表
-export function getDatasourceList(pluginTypes?: string[]): Promise<{ name: string; id: number }[]> {
+export function getDatasourceList(pluginTypes?: string[]): Promise<{ name: string; id: number; plugin_type: string }[]> {
   let url = '/api/n9e/datasource/list';
-  if (import.meta.env.VITE_IS_COMMON_DS === 'true') {
-    url = '/api/v1/datasource/list';
-  }
+  // if (import.meta.env.VITE_IS_COMMON_DS === 'true') {
+  //   url = '/api/v1/datasource/list';
+  // }
   return request(url, {
     method: RequestMethod.Post,
     data: {
       p: 1,
-      limit: 100, // TODO: 假设 n9e 里面需要选择的数据源不会超过 100 个
+      limit: 5000, // TODO: 假设 n9e 里面需要选择的数据源不会超过 5000 个
     },
   })
     .then((res) => {
@@ -51,7 +51,7 @@ export function getDatasourceList(pluginTypes?: string[]): Promise<{ name: strin
 }
 
 // 匿名获取数据源列表
-export function getDatasourceBriefList(): Promise<{ name: string; id: number }[]> {
+export function getDatasourceBriefList(): Promise<{ name: string; id: number; plugin_type: string }[]> {
   const url = '/api/n9e/datasource/brief';
   return request(url, {
     method: RequestMethod.Get,
@@ -64,7 +64,7 @@ export function getDatasourceBriefList(): Promise<{ name: string; id: number }[]
     });
 }
 
-export function getBusiGroups(query = '', limit: number = 200) {
+export function getBusiGroups(query = '', limit: number = 5000) {
   return request(`/api/n9e/busi-groups`, {
     method: RequestMethod.Get,
     params: Object.assign(
@@ -73,6 +73,10 @@ export function getBusiGroups(query = '', limit: number = 200) {
       },
       query ? { query } : {},
     ),
+  }).then((res) => {
+    return {
+      dat: _.sortBy(res.dat, 'name'),
+    };
   });
 }
 

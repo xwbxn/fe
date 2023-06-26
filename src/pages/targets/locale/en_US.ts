@@ -18,9 +18,9 @@ const en_US = {
   arch: 'CPU Arch',
   unixtime: 'Unixtime',
   unixtime_tip: `
-    machine time offset within 1 minute is green <1 />
-    machine time offset is yellow at 1 minute-3 minutes  <1 />
-    machine time offset above 3 minutes is red
+    Heartbeat within 1 minute: Green <1 />
+    Heartbeat within 3 minutes: yellow <1 />
+    No heartbeat within 3 minutes: red
   `,
   remote_addr: 'Remote Addr',
   note: 'Note',
@@ -41,6 +41,7 @@ const en_US = {
     placeholder: 'Tag format is key=value, separated by enter or space',
     msg1: 'Please fill in at least one tag!',
     msg2: 'Tag format is incorrect, please check!',
+    msg3: 'Tag key cannot have duplicate',
     render_tip1: 'Tag length should be less than or equal to 64 bits',
     render_tip2: 'Tag format should be key=value. And key starts with a letter or underscore, and is composed of letters, numbers and underscores.',
   },

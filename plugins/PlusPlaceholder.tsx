@@ -34,4 +34,11 @@ function Jobs() {
   return null;
 }
 
-export { AlertRule, QueryBuilder, datasource, Event, EventLogs, EventPreview, Explorer, Jobs };
+const advancedCates = [];
+const envCateMap = {};
+enum AdvancedDatasourceCateEnum {}
+const getLicense = async () => {
+  return {};
+};
+
+export { AlertRule, QueryBuilder, datasource, Event, EventLogs, EventPreview, Explorer, Jobs, advancedCates, envCateMap, AdvancedDatasourceCateEnum, getLicense };
