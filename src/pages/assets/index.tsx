@@ -18,7 +18,6 @@ import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import classNames from 'classnames';
 import { getBusiGroups } from '@/services/common';
-import TextArea from 'antd/lib/input/TextArea';
 
 export { Add, Edit };
 
@@ -31,6 +30,8 @@ enum OperateType {
   Delete = 'delete',
   None = 'none',
 }
+
+const { TextArea } = Input;
 
 const OperationModal = ({ operateType, setOperateType, assets, names, reloadList }) => {
   const { t } = useTranslation('assets');
