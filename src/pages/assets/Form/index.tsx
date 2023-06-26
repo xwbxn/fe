@@ -18,7 +18,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; items?: [] }[]>([]);
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
 
   const panelBaseProps: any = {
     size: 'small',
@@ -34,6 +34,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const genDefaultConfig = () => {
     const name = form.getFieldValue('type');
+    debugger;
     const data = form.getFieldsValue();
     if (data.configs) {
       Modal.confirm({
@@ -44,6 +45,10 @@ export default function (props: { initialValues: object; initParams: object; mod
             form.setFieldsValue({ configs: res.dat.content });
           });
         },
+      });
+    } else {
+      getAssetDefaultConfig(name, data).then((res) => {
+        form.setFieldsValue({ configs: res.dat.content });
       });
     }
   };
