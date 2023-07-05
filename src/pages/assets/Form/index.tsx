@@ -17,7 +17,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [curBusiId] = useState<number>(commonState.curBusiId);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
-  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; items?: [] }[]>([]);
+  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
 
   const panelBaseProps: any = {
@@ -95,6 +95,23 @@ export default function (props: { initialValues: object; initParams: object; mod
     history.back();
   };
 
+  const renderForm = (v) => {
+    if (v.items) {
+      return (
+        <Select
+          style={{ width: '100%' }}
+          options={v.items.map((v) => {
+            return { label: v, value: v };
+          })}
+        ></Select>
+      );
+    }
+    if (v.password) {
+      return <Input.Password placeholder={`填写${v.label}`} />;
+    }
+    return <Input placeholder={`填写${v.label}`} />;
+  };
+
   return (
     <Form
       name='asset'
@@ -141,16 +158,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               return (
                 <Col key={`col=${v.name}`} span={12}>
                   <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
-                    {v.items ? (
-                      <Select
-                        style={{ width: '100%' }}
-                        options={v.items.map((v) => {
-                          return { label: v, value: v };
-                        })}
-                      ></Select>
-                    ) : (
-                      <Input placeholder={`填写${v.label}`} />
-                    )}
+                    {renderForm(v)}
                   </Form.Item>
                 </Col>
               );

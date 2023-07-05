@@ -35,5 +35,8 @@ const zh_CN = {
   通知模板: '通知模板',
   通知设置: '通知设置',
   采集配置: '采集配置',
+
+  profile: '个人信息',
+  logout: '退出',
 };
 export default zh_CN;
