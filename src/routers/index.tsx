@@ -39,7 +39,10 @@ import Shield, { Add as AddShield, Edit as ShieldEdit } from '@/pages/warning/sh
 import Subscribe, { Add as SubscribeAdd, Edit as SubscribeEdit } from '@/pages/warning/subscribe';
 import Event from '@/pages/event';
 import EventDetail from '@/pages/event/detail';
+import orderformDetail from '@/pages/event/orderformdetail';
+
 import historyEvents from '@/pages/historyEvents';
+import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
 import Assets, {Add as AddAsset, Edit as EditAsset} from '@/pages/assets';
 import Demo from '@/pages/demo';
@@ -48,6 +51,7 @@ import TaskTplAdd from '@/pages/taskTpl/add';
 import TaskTplDetail from '@/pages/taskTpl/detail';
 import TaskTplModify from '@/pages/taskTpl/modify';
 import TaskTplClone from '@/pages/taskTpl/clone';
+import InspectionPlans from '@/pages/inspection/plans';
 import Task from '@/pages/task';
 import TaskAdd from '@/pages/task/add';
 import TaskResult from '@/pages/task/result';
@@ -143,6 +147,8 @@ export default function Content() {
 
         <Route exact path='/alert-cur-events' component={Event} />
         <Route exact path='/alert-his-events' component={historyEvents} />
+        <Route exact path='/alert-orderform-events' component={orderformEvents} />
+        <Route exact path='/alert-orderform-events/:eventId' component={orderformDetail} />
         <Route exact path='/alert-cur-events/:eventId' component={EventDetail} />
         <Route exact path='/alert-his-events/:eventId' component={EventDetail} />
         <Route exact path='/targets' component={Targets} />
@@ -175,7 +181,7 @@ export default function Content() {
 
         <Route exact path='/trace/explorer' component={TraceExplorer} />
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
-
+        <Route exact path='/inspection/plans' component={InspectionPlans} />
         <Route exact path='/permissions' component={Permissions} />
 
         <Route exact path='/dashboard-grafana' component={Grafana} />
