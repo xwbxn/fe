@@ -5,6 +5,9 @@ const zh_CN = {
     create: '创建用户',
     edit: '编辑用户',
   },
+  inspect:{
+    plan_title: '巡检任务管理',
+  },
   team: {
     title: '团队管理',
     list: '团队列表',
