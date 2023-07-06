@@ -1,40 +1,23 @@
-/*
- * Copyright 2022 Nightingale Team
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-import { FloatFcMenu } from '@fc-components/menu';
-import React, { FC, useState, useEffect, useContext } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import Icon from '@ant-design/icons';
-import _ from 'lodash';
-import classNames from 'classnames';
-import { useTranslation } from 'react-i18next';
-import querystring from 'query-string';
-import { getMenuPerm } from '@/services/common';
 import { CommonStateContext } from '@/App';
+import { getMenuPerm } from '@/services/common';
+import Icon, { DownOutlined } from '@ant-design/icons';
+import querystring from 'query-string';
+import { Dropdown, Menu, Space } from 'antd';
+import _ from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import IconFont from '../IconFont';
-import menuIcon from './configs';
-import './menu.less';
+import { useHistory, useLocation } from 'react-router-dom';
+
+import './topMenu.less';
 import './locale';
+import { Logout } from '@/services/login';
 
 const getMenuList = (t) => {
   const menuList = [
     {
       key: 'dashboard',
       icon: <IconFont type='icon-Menu_Dashboard' />,
-      activeIcon: <Icon component={menuIcon.Dashboard as any} />,
       label: t('仪表盘'),
       children: [
         {
@@ -54,7 +37,6 @@ const getMenuList = (t) => {
     {
       key: 'alarm',
       icon: <IconFont type='icon-Menu_AlarmManagement' />,
-      activeIcon: <Icon component={menuIcon.AlarmManagement as any} />,
       label: t('告警管理'),
       children: [
         {
@@ -81,16 +63,11 @@ const getMenuList = (t) => {
           key: '/alert-his-events',
           label: t('历史告警'),
         },
-        {
-          key: '/alert-orderform-events',
-          label: t('工单处理'),
-        },
       ],
     },
     {
       key: 'metric',
       icon: <IconFont type='icon-IndexManagement1' />,
-      activeIcon: <Icon component={menuIcon.IndexManagement as any} />,
       label: t('时序指标'),
       children: [
         {
@@ -110,7 +87,6 @@ const getMenuList = (t) => {
     {
       key: 'log',
       icon: <IconFont type='icon-Menu_LogAnalysis' />,
-      activeIcon: <Icon component={menuIcon.LogAnalysis as any} />,
       label: t('日志分析'),
       children: [
         {
@@ -122,7 +98,6 @@ const getMenuList = (t) => {
     {
       key: 'trace',
       icon: <IconFont type='icon-Menu_LinkAnalysis' />,
-      activeIcon: <Icon component={menuIcon.LinkAnalysis as any} />,
       label: t('链路追踪'),
       children: [
         {
@@ -136,33 +111,8 @@ const getMenuList = (t) => {
       ],
     },
     {
-      key: 'inspection',
-      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
-      activeIcon: <Icon component={menuIcon.LinkAnalysis as any} />,
-      label: t('巡检管理'),
-      children: [
-        {
-          key: '/inspection/plans',
-          label: t('巡检计划'),
-        },
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('人工巡检'),
-        // },,
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('自动巡检'),
-        // },
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('巡检评审'),
-        // },
-      ],
-    },
-    {
       key: 'targets',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
-      activeIcon: <Icon component={menuIcon.Infrastructure as any} />,
       label: t('基础设施'),
       children: [
         {
@@ -179,7 +129,6 @@ const getMenuList = (t) => {
     {
       key: 'job',
       icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
-      activeIcon: <Icon component={menuIcon.AlarmSelfhealing as any} />,
       label: t('告警自愈'),
       children: [
         {
@@ -199,7 +148,6 @@ const getMenuList = (t) => {
     {
       key: 'manage',
       icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
-      activeIcon: <Icon component={menuIcon.PersonnelOrganization as any} />,
       label: t('人员组织'),
       children: [
         {
@@ -223,7 +171,6 @@ const getMenuList = (t) => {
     {
       key: 'help',
       icon: <IconFont type='icon-Menu_SystemInformation' />,
-      activeIcon: <Icon component={menuIcon.SystemInformation as any} />,
       label: t('系统配置'),
       children: [
         {
@@ -269,54 +216,16 @@ const getMenuList = (t) => {
   return menuList;
 };
 
-const SideMenu: FC = () => {
+export default function () {
   const { t, i18n } = useTranslation('menu');
-  const { profile } = useContext(CommonStateContext);
-  const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
+
   const menuList = getMenuList(t);
   const [menus, setMenus] = useState(menuList);
-  const history = useHistory();
+  const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
   const location = useLocation();
+  const history = useHistory();
   const { pathname } = location;
-  const [collapsed, setCollapsed] = useState<'0' | '1' | '2' | string | null>(localStorage.getItem('menuCollapsed') || '0');
-  const switchCollapsed = () => {
-    if (!isNaN(Number(collapsed))) {
-      const newColl = (Number(collapsed) === 2 ? -1 : Number(collapsed)) + 1 + '';
-      setCollapsed(newColl);
-      localStorage.setItem('menuCollapsed', newColl);
-    } else {
-      setCollapsed('1');
-      localStorage.setItem('menuCollapsed', '1');
-    }
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 500);
-  };
-  const handleClick = (key) => {
-    if ((key as string).startsWith('/')) {
-      history.push(key as string);
-    }
-  };
-  const hideSideMenu = () => {
-    if (
-      location.pathname === '/login' ||
-      location.pathname.startsWith('/chart/') ||
-      location.pathname.startsWith('/dashboards/share/') ||
-      location.pathname === '/callback' ||
-      location.pathname.indexOf('/polaris/screen') === 0
-    ) {
-      return true;
-    }
-    // 大盘全屏模式下也需要隐藏左侧菜单
-    if (location.pathname.indexOf('/dashboard') === 0) {
-      const query = querystring.parse(location.search);
-      if (query?.viewMode === 'fullscreen') {
-        return true;
-      }
-      return false;
-    }
-    return false;
-  };
+  const { profile } = useContext(CommonStateContext);
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
@@ -360,42 +269,79 @@ const SideMenu: FC = () => {
     }
   }, [profile?.roles, i18n.language]);
 
+  const hideSideMenu = () => {
+    if (
+      location.pathname === '/login' ||
+      location.pathname.startsWith('/chart/') ||
+      location.pathname.startsWith('/dashboards/share/') ||
+      location.pathname === '/callback' ||
+      location.pathname.indexOf('/polaris/screen') === 0
+    ) {
+      return true;
+    }
+    // 大盘全屏模式下也需要隐藏左侧菜单
+    if (location.pathname.indexOf('/dashboard') === 0) {
+      const query = querystring.parse(location.search);
+      if (query?.viewMode === 'fullscreen') {
+        return true;
+      }
+      return false;
+    }
+    return false;
+  };
+
+  const handleClick = (item) => {
+    if ((item.key as string).startsWith('/')) {
+      history.push(item.key as string);
+    }
+  };
+
+  const topRightMenu = (
+    <Menu>
+      <Menu.Item
+        onClick={() => {
+          history.push('/account/profile/info');
+        }}
+      >
+        {t('profile')}
+      </Menu.Item>
+      <Menu.Item
+        onClick={() => {
+          Logout().then(() => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('curBusiId');
+            history.push('/login');
+          });
+        }}
+      >
+        {t('logout')}
+      </Menu.Item>
+    </Menu>
+  );
+
   return hideSideMenu() ? null : (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '10px 0 10px 10px',
-      }}
-      className={classNames({
-        'menu-container': true,
-        'menu-container-en': i18n.language === 'en_US' && collapsed === '0',
-      })}
-    >
-      {/* {collapsed !== '2' && (
-        <div
-          className={classNames({
-            home: true,
-            collapse: collapsed === '1',
-          })}
+    <div className='top-menu'>
+      <Menu mode='horizontal' onClick={handleClick} items={menus} />
+      <div>
+        <span
+          className='language'
+          onClick={() => {
+            let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
+            i18n.changeLanguage(language);
+            localStorage.setItem('language', language);
+          }}
         >
-          <div className='name' onClick={() => history.push('/metric/explorer')} key='overview'>
-            <img src={collapsed === '1' ? '/image/logo.svg' : '/image/logo-l.svg'} alt='' className='logo' />
-          </div>
-        </div>
-      )} */}
-      <FloatFcMenu
-        fullModeWidth={i18n.language === 'en_US' ? 180 : undefined}
-        items={menus}
-        selectedKeys={defaultSelectedKeys}
-        onClick={handleClick}
-        collapsed={collapsed}
-        switchCollapsed={switchCollapsed}
-        quickIcon={<IconFont type='icon-Menu_Search' />}
-        quickActiveIcon={<Icon component={menuIcon.Menu_Search as any} />}
-      />
+          {i18n.language == 'zh_CN' ? 'EN' : '中'}
+        </span>
+        <Dropdown overlay={topRightMenu} trigger={['click']}>
+          <span className='avator'>
+            <img src={profile.portrait || '/image/avatar1.png'} alt='' />
+            <span className='display-name'>{profile.nickname || profile.username}</span>
+            <DownOutlined />
+          </span>
+        </Dropdown>
+      </div>
     </div>
   );
-};
-
-export default SideMenu;
+}

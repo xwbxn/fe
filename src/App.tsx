@@ -34,6 +34,7 @@ import Content from './routers';
 
 import './App.less';
 import './global.variable.less';
+import TopMenu from './components/menu/topMenu';
 
 interface IProfile {
   admin?: boolean;
@@ -194,7 +195,8 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
-                <HeaderMenu />
+                {/* <HeaderMenu /> */}
+                <TopMenu></TopMenu>
                 <Content />
               </>
             </Switch>

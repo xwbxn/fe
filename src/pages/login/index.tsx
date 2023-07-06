@@ -154,6 +154,7 @@ export default function Login() {
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
                   marginBottom: 16,
+                  height: '35px'
                 }}
                 onClick={refreshCaptcha}
                 alt='点击获取验证码'
