@@ -63,6 +63,10 @@ const getMenuList = (t) => {
           key: '/alert-his-events',
           label: t('历史告警'),
         },
+        {
+          key: '/alert-orderform-events',
+          label: t('工单处理'),
+        },
       ],
     },
     {
@@ -108,6 +112,29 @@ const getMenuList = (t) => {
           key: '/trace/dependencies',
           label: t('拓扑分析'),
         },
+      ],
+    },
+    {
+      key: 'inspection',
+      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+      label: t('巡检管理'),
+      children: [
+        {
+          key: '/inspection/plans',
+          label: t('巡检计划'),
+        },
+        // {
+        //   key: '/trace/dependencies',
+        //   label: t('人工巡检'),
+        // },,
+        // {
+        //   key: '/trace/dependencies',
+        //   label: t('自动巡检'),
+        // },
+        // {
+        //   key: '/trace/dependencies',
+        //   label: t('巡检评审'),
+        // },
       ],
     },
     {
