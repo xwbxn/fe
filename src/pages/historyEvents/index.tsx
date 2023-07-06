@@ -163,7 +163,7 @@ const Event: React.FC = () => {
             }}
           >
             {hoursOptions.map((item) => {
-              return <Select.Option value={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
+              return <Select.Option value={item.value} key={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
             })}
           </Select>
           <AdvancedWrap var='VITE_IS_ALERT_AI,VITE_IS_ALERT_ES,VITE_IS_SLS_DS,VITE_IS_COMMON_DS'>
@@ -269,7 +269,7 @@ const Event: React.FC = () => {
             }}
           >
             {_.map(busiGroups, (item) => {
-              return <Select.Option value={item.id}>{item.name}</Select.Option>;
+              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
             })}
           </Select>
           <Select
