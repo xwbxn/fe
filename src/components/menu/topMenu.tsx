@@ -70,6 +70,17 @@ const getMenuList = (t) => {
       ],
     },
     {
+      key: 'inspection',
+      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+      label: t('巡检管理'),
+      children: [
+        {
+          key: '/inspection/plans',
+          label: t('巡检计划'),
+        },
+      ],
+    },
+    {
       key: 'metric',
       icon: <IconFont type='icon-IndexManagement1' />,
       label: t('时序指标'),
@@ -112,29 +123,6 @@ const getMenuList = (t) => {
           key: '/trace/dependencies',
           label: t('拓扑分析'),
         },
-      ],
-    },
-    {
-      key: 'inspection',
-      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
-      label: t('巡检管理'),
-      children: [
-        {
-          key: '/inspection/plans',
-          label: t('巡检计划'),
-        },
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('人工巡检'),
-        // },,
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('自动巡检'),
-        // },
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('巡检评审'),
-        // },
       ],
     },
     {

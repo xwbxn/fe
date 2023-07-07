@@ -15,8 +15,9 @@
  *
  */
 import React, { useEffect, useState, useImperativeHandle, ReactNode } from 'react';
-import { Form, Input, Select, Space } from 'antd';
+import { Button, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd';
 import { getUserInfo, getNotifyChannels, getRoles } from '@/services/manage';
+import PageLayout from '@/components/pageLayout';
 import { UserAndPasswordFormProps, Contacts, ContactsItem, User } from '@/store/manageInterface';
 import { MinusCircleOutlined, PlusCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +34,32 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
   const [contactsList, setContactsList] = useState<ContactsItem[]>([]);
   const [roleList, setRoleList] = useState<{ name: string; note: string }[]>([]);
 
+  const formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 14 },
+    },
+  };
+  const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+  };
+  const tailFormItemLayout = {
+    wrapperCol: {
+      xs: {
+        span: 24,
+        offset: 0,
+      },
+      sm: {
+        span: 14,
+        offset: 6,
+      },
+    },
+  };
   useImperativeHandle(ref, () => ({
     form: form,
   }));
@@ -77,56 +104,87 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
   };
 
   return !loading ? (
-    <Form layout='vertical' form={form} initialValues={initialValues} preserve={false}>
-      {!userId && (
-        <Form.Item
-          label={t('巡检任务名称')}
-          name='username'
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-      )}
-      <Form.Item label={t('巡检负责人')} name='nickname'>
-        <Input />
-      </Form.Item>     
-      <Form.Item
-        label={t('巡检时间')}
-        name='roles'
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-      >
-        <Select mode='multiple'>
-          {roleList.map((item, index) => (
-            <Option value={item.name} key={index}>
-              <div>
-                <div>{item.name}</div>
-                <div style={{ color: '#8c8c8c' }}>{item.note}</div>
-              </div>
-            </Option>
-          ))}
-        </Select>
-      </Form.Item>
-      <Form.Item label={t('巡检区域')} name='email'>
-        <Input />
-      </Form.Item>
-      <Form.Item label={t('巡检报备')} name='phone'>
-        <Input />
-      </Form.Item>
-      <Form.Item label={t('报告接收人')} name='phone'>
-        <Input />
-      </Form.Item>
-      <Form.Item label={t('asdf')} name='phone'>
-        <Input />
-      </Form.Item>
-    </Form>
+    <PageLayout title={t('添加巡检计划')} showBack backPath='/inspection/plans'>
+      <div className='event-detail-container'>
+        <Form  {...layout} form={form} initialValues={initialValues} preserve={false}>
+          <Form.Item
+            {...formItemLayout}
+            label={t('巡检任务名称')}
+            name='username'
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item label={t('巡检负责人')} name='nickname'  {...formItemLayout}>
+            <Input />
+          </Form.Item>
+          <Form.Item label={t('巡检区域')}
+            name='roles'
+            {...formItemLayout}
+            rules={[
+              {
+                required: true,
+              },
+            ]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            {...formItemLayout}
+            label={t('巡检时间')}
+            name='roles'
+          >
+            <Row gutter={16}>
+              <Col span={6}>
+                <Form.Item label={t('时')} name='recover_duration' tooltip={t('recover_duration_tip')}>
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item label={t('时')} name='recover_duration' tooltip={t('recover_duration_tip')}>
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={t('分')}
+                  name='notify_repeat_step'
+                >
+                  <InputNumber min={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label={t('秒')}
+                  name='notify_max_number'
+                  // rules={[
+                  //   {
+                  //     required: true,
+                  //   },
+                  // ]}
+                  tooltip={t('notify_max_number_tip')}
+                >
+                  <InputNumber min={0} precision={0} style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Form.Item>
+
+          <Form.Item  {...formItemLayout} label={t('巡检报备')} name='phone'>
+            <Input />
+          </Form.Item>
+          <Form.Item  {...formItemLayout} label={t('报告接收人')} name='phone'>
+            <Input />
+          </Form.Item>
+          <Form.Item {...tailFormItemLayout}>
+            <Button type="primary" htmlType="submit">保存</Button>
+          </Form.Item>
+        </Form>
+      </div>
+    </PageLayout>
   ) : null;
 });
 export default UserForm;

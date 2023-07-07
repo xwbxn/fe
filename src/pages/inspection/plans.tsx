@@ -21,6 +21,7 @@ import { Button, Input, message, Row, Modal, Table } from 'antd';
 import { SearchOutlined, UserOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAntdTable } from 'ahooks';
 import PageLayout from '@/components/pageLayout';
 import UserInfoModal from '../inspection/createModal';
@@ -41,6 +42,7 @@ const Resource: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const { profile } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
+  const history = useHistory();
   const userColumn: ColumnsType<User> = [
     {
       title: t('巡检任务名称'),
@@ -201,7 +203,9 @@ const Resource: React.FC = () => {
             <div className='event-table-search-right'>
               {profile.roles?.includes('Admin') && (
                 <div className='user-manage-operate'>
-                  <Button type='primary' onClick={() => handleClick(ActionType.CreateUser)}>
+                  <Button type='primary' onClick={() =>{
+                      history.push(`/inspection/plans/add`);
+                  }}>
                     {t('common:btn.add')}
                   </Button>
                 </div>
@@ -219,16 +223,7 @@ const Resource: React.FC = () => {
             }}
           />
         </div>
-        <UserInfoModal
-          visible={visible}
-          action={action as ActionType}
-          width={500}
-          userType={UserType.User}
-          onClose={handleClose}
-          userId={userId}
-          teamId={undefined}
-          memberId={memberId}
-        />
+        
       </div>
     </PageLayout>
   );

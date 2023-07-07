@@ -52,6 +52,7 @@ import TaskTplDetail from '@/pages/taskTpl/detail';
 import TaskTplModify from '@/pages/taskTpl/modify';
 import TaskTplClone from '@/pages/taskTpl/clone';
 import InspectionPlans from '@/pages/inspection/plans';
+import InspectionPlansAdd from '@/pages/inspection/taskForm';
 import Task from '@/pages/task';
 import TaskAdd from '@/pages/task/add';
 import TaskResult from '@/pages/task/result';
@@ -182,6 +183,7 @@ export default function Content() {
         <Route exact path='/trace/explorer' component={TraceExplorer} />
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
         <Route exact path='/inspection/plans' component={InspectionPlans} />
+        <Route exact path='/inspection/plans/add' component={InspectionPlansAdd} />
         <Route exact path='/permissions' component={Permissions} />
 
         <Route exact path='/dashboard-grafana' component={Grafana} />
