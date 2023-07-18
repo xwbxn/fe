@@ -44,6 +44,8 @@ import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
 import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
+
+import AssetMgt, {Add as AddInfoAsset} from '@/pages/assetmgt/index';
 import Assets, {Add as AddAsset, Edit as EditAsset} from '@/pages/assets';
 import Demo from '@/pages/demo';
 import TaskTpl from '@/pages/taskTpl';
@@ -52,7 +54,8 @@ import TaskTplDetail from '@/pages/taskTpl/detail';
 import TaskTplModify from '@/pages/taskTpl/modify';
 import TaskTplClone from '@/pages/taskTpl/clone';
 import InspectionPlans from '@/pages/inspection/plans';
-import InspectionPlansAdd from '@/pages/inspection/taskForm';
+import InspectionApplyList from '@/pages/inspection/applylist';
+import InspectionPlansAdd from '@/pages/inspection/form/index';
 import Task from '@/pages/task';
 import TaskAdd from '@/pages/task/add';
 import TaskResult from '@/pages/task/result';
@@ -154,10 +157,12 @@ export default function Content() {
         <Route exact path='/alert-his-events/:eventId' component={EventDetail} />
         <Route exact path='/targets' component={Targets} />
 
-        <Route exact path='/assets' component={Assets} />
-        <Route exact path='/assets/add/:bgid' component={AddAsset} />
-        <Route exact path='/assets/:id' component={EditAsset} />
+        <Route exact path='/assetmgt' component={AssetMgt} />
+        <Route exact path='/assetmgt/add/:bgid/:nodeid' component={AddInfoAsset} />
 
+        <Route exact path='/assets' component={Assets} />
+        <Route exact path='/assets/add/:bgid' component={AddAsset} />        
+        <Route exact path='/assets/:id' component={EditAsset} />
         <Route exact path='/job-tpls' component={TaskTpl} />
         <Route exact path='/job-tpls/add' component={TaskTplAdd} />
         <Route exact path='/job-tpls/add/task' component={TaskAdd} />
@@ -183,6 +188,7 @@ export default function Content() {
         <Route exact path='/trace/explorer' component={TraceExplorer} />
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
         <Route exact path='/inspection/plans' component={InspectionPlans} />
+        <Route exact path='/inspection/applylist' component={InspectionApplyList} />
         <Route exact path='/inspection/plans/add' component={InspectionPlansAdd} />
         <Route exact path='/permissions' component={Permissions} />
 

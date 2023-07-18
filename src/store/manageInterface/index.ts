@@ -108,6 +108,14 @@ export interface ModalProps {
   onSearch?: any;
   width?: number;
 }
+
+export interface ApplyProps {
+  visible: boolean;
+  onClose?: any;
+  action: string;
+  keyId?: string;
+  width?: number;
+}
 export interface TeamProps {
   onClose?: any;
   teamId?: string;

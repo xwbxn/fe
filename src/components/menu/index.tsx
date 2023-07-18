@@ -145,10 +145,10 @@ const getMenuList = (t) => {
           key: '/inspection/plans',
           label: t('巡检计划'),
         },
-        // {
-        //   key: '/trace/dependencies',
-        //   label: t('人工巡检'),
-        // },,
+        {
+          key: '/inspection/applylist',
+          label: t('巡检审批'),
+        },
         // {
         //   key: '/trace/dependencies',
         //   label: t('自动巡检'),

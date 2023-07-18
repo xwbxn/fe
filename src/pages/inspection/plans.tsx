@@ -17,32 +17,39 @@
 import React, { useState, useContext } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
-import { Button, Input, message, Row, Modal, Table } from 'antd';
+import { Button, Input, message, Row, Modal, Table, Select } from 'antd';
 import { SearchOutlined, UserOutlined } from '@ant-design/icons';
 import { ColumnsType } from 'antd/lib/table';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useAntdTable } from 'ahooks';
 import PageLayout from '@/components/pageLayout';
-import UserInfoModal from '../inspection/createModal';
 import { getUserInfoList, deleteUser } from '@/services/manage';
 import { User, UserType, ActionType } from '@/store/manageInterface';
 import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
+import RefreshIcon from '@/components/RefreshIcon';
 // import './index.less';
 // import './locale';
 const { confirm } = Modal;
-
 const Resource: React.FC = () => {
   const { t } = useTranslation('user');
-  const [visible, setVisible] = useState<boolean>(false);
-  const [action, setAction] = useState<ActionType>();
-  const [userId, setUserId] = useState<string>('');
-  const [memberId, setMemberId] = useState<string>('');
   const [query, setQuery] = useState<string>('');
   const { profile } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
+  const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const history = useHistory();
+  const [filter, setFilter] = useState<{
+    name?: string;
+    status?: number;
+  }>({});
+
+
+  const filterObj = Object.assign(
+    filter.name !== undefined ? { name: filter.name } : {},
+    filter.status !== undefined ? { status: filter.status } : {},
+  );
+
   const userColumn: ColumnsType<User> = [
     {
       title: t('巡检任务名称'),
@@ -106,10 +113,15 @@ const Resource: React.FC = () => {
       width: '240px',
       render: (text: string, record) => (
         <>
-          <Button className='oper-name' type='link' onClick={() => handleClick(ActionType.EditUser, record.id)}>
+          <Link
+            to={{
+              pathname: '/inspection/plans/add',
+              search: `?id=${record.id}`,
+            }}
+          >
             {t('common:btn.modify')}
-          </Button>
-         
+          </Link>
+
           <a
             style={{
               color: 'red',
@@ -119,16 +131,15 @@ const Resource: React.FC = () => {
               confirm({
                 title: t('common:confirm.delete'),
                 onOk: () => {
-                  deleteUser(record.id).then((_) => {
-                    message.success(t('common:success.delete'));
-                    handleClose();
-                  });
+                  // deleteUser(record.id).then((_) => {
+                  //   message.success(t('common:success.delete'));
+                  // });
                 },
-                onCancel: () => {},
+                onCancel: () => { },
               });
             }}
           >
-            {t('作废')}
+            {t('删除')}
           </a>
           <Button className='oper-name' type='link' onClick={() => handleClick(ActionType.Reset, record.id)}>
             {t('执行')}
@@ -138,49 +149,16 @@ const Resource: React.FC = () => {
     },
   ];
 
-  if (!profile.roles?.includes('Admin')) {
-    userColumns.pop(); //普通用户不展示操作列
-  }
 
-  const handleClick = (type: ActionType, id?: string, memberId?: string) => {
-    if (id) {
-      setUserId(id);
-    } else {
-      setUserId('');
-    }
-
-    if (memberId) {
-      setMemberId(memberId);
-    } else {
-      setMemberId('');
-    }
-
-    setAction(type);
-    setVisible(true);
-  };
-
-  // 弹窗关闭回调
-  const handleClose = () => {
-    setVisible(false);
-    setRefreshFlag(_.uniqueId('refresh_flag'));
-  };
-
-  const onSearchQuery = (e) => {
-    let val = e.target.value;
-    setQuery(val);
-  };
-
-  const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const getTableData = ({ current, pageSize }): Promise<any> => {
     const params = {
       p: current,
       limit: pageSize,
+      ...filterObj,
     };
 
     return getUserInfoList({
-      ...params,
-      query,
-    }).then((res) => {
+      ...params}).then((res) => {
       return {
         total: res.dat.total,
         list: res.dat.list,
@@ -189,8 +167,9 @@ const Resource: React.FC = () => {
   };
   const { tableProps } = useAntdTable(getTableData, {
     defaultPageSize: pagination.pageSize,
-    refreshDeps: [query, refreshFlag],
+    refreshDeps: [refreshFlag, JSON.stringify(filterObj)],
   });
+
 
   return (
     <PageLayout title={t('inspect.plan_title')} icon={<UserOutlined />}>
@@ -198,13 +177,47 @@ const Resource: React.FC = () => {
         <div className='user-content'>
           <Row className='event-table-search'>
             <div className='event-table-search-left'>
-              <Input className={'searchInput'} prefix={<SearchOutlined />} onPressEnter={onSearchQuery} placeholder={t('user.search_placeholder')} />
+              <RefreshIcon
+                onClick={() => {
+                  setRefreshFlag(_.uniqueId('refresh_'));
+                }}
+              />
+              <Input className={'searchInput'}  value={filter.name} prefix={<SearchOutlined />}
+                onChange={(e) => {
+                  setFilter({
+                    ...filter,
+                    name: e.target.value,
+                  });
+                }}
+                onPressEnter={(e) => {
+                  setRefreshFlag(_.uniqueId('refresh_'));
+                }}
+                placeholder={t('巡检计划名称')} />
+              <Select
+                style={{ minWidth: 80 }}
+                placeholder={t('计划状态')}
+                allowClear
+                value={filter.status}
+                onChange={(val) => {
+                  setFilter({
+                    ...filter,
+                    status: val,
+                  });
+                }}
+              >
+                <Select.Option key={0} value={0}>未处理</Select.Option>
+                <Select.Option key={1} value={1}>已处理</Select.Option>
+                <Select.Option key={2} value={2}>关闭</Select.Option>
+              </Select>
+
+
             </div>
+
             <div className='event-table-search-right'>
               {profile.roles?.includes('Admin') && (
                 <div className='user-manage-operate'>
-                  <Button type='primary' onClick={() =>{
-                      history.push(`/inspection/plans/add`);
+                  <Button type='primary' onClick={() => {
+                    history.push(`/inspection/plans/add`);
                   }}>
                     {t('common:btn.add')}
                   </Button>
@@ -223,7 +236,7 @@ const Resource: React.FC = () => {
             }}
           />
         </div>
-        
+
       </div>
     </PageLayout>
   );
