@@ -325,7 +325,7 @@ export default function () {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
 
   useEffect(() => {
-    getAssets(curBusiId, searchVal).then((res) => {
+    getAssets(curBusiId, searchVal,null).then((res) => {
       setList(res.dat);
     });
   }, [searchVal, refreshKey, curBusiId]);
