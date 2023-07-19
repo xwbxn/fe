@@ -141,7 +141,8 @@ const Resource: React.FC = () => {
           >
             {t('删除')}
           </a>
-          <Button className='oper-name' type='link' onClick={() => handleClick(ActionType.Reset, record.id)}>
+          {/* onClick={() => handleClick(ActionType.Reset, record.id)} */}
+          <Button className='oper-name' type='link' >
             {t('执行')}
           </Button>
         </>

@@ -62,7 +62,7 @@ const OperationModal = ({ operateType, setOperateType, assets, names, reloadList
   const [assetsList, setAssetsList] = useState<string[]>(assets);
   const [tagsList, setTagsList] = useState<string[]>([]);
   const detailProp = operateType === OperateType.UnbindTag ? tagsList : busiGroups;
-  const [organizeData, setOrganizeData] = useState<OrgType>();
+  const [organizeData, setOrganizeData] = useState<OrgType[]>([]);;
   // 绑定标签弹窗内容
   const bindTagDetail = () => {
     // 校验单个标签格式是否正确
@@ -483,12 +483,12 @@ export default function () {
 
       if (item.children) {
         return (
-          <TreeNode title={item.title} key={item.key} style={{ width: "100%" }}>
+          <TreeNode title={item.title} key={item.key} style={{ width: "100%" }}  >
             {renderTreeNodes(item.children)}
           </TreeNode>
         );
       }
-      return <TreeNode title={item.title} key={item.key} />;
+      return <TreeNode title={item.title} key={item.key}  />;
     });
 
     return nodeArr;
@@ -613,7 +613,7 @@ export default function () {
       });
   }
 
-  const onSelect = (e:number) => {
+  const onSelect = (e) => {
     selectNode(parseInt(e[0]));
   }
 
@@ -643,7 +643,7 @@ export default function () {
 
             <div style={{ margin: '0 10prx ' }}><Switch checkedChildren="开启管理" defaultChecked={modifyType} unCheckedChildren="关闭管理" onChange={onTypeChange} /></div>
           </div>
-          <Tree onSelect={onSelect} >
+          <Tree  onExpand={onExpand}  defaultExpandAll onSelect={onSelect}>
             {renderTreeNodes(treeData)}
           </Tree>
         </div>

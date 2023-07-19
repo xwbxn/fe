@@ -2,11 +2,11 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import { assetsType } from '@/store/assetsInterfaces';
 
-export const getAssets = function (bgid, query, organizeId) {
+export const getAssets = function (bgid, query, organize_id) {
     return request("/api/n9e/assets", {
         method: RequestMethod.Get,
         params: {
-            bgid, query, organizeId
+            bgid, query, organize_id
         }
     })
 }
