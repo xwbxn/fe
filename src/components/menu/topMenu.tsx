@@ -78,6 +78,10 @@ const getMenuList = (t) => {
           key: '/inspection/plans',
           label: t('巡检计划'),
         },
+        {
+          key: '/inspection/applylist',
+          label: t('巡检审批'),
+        },
       ],
     },
     {
@@ -137,6 +141,10 @@ const getMenuList = (t) => {
         {
           key: '/assets',
           label: t('资产管理'),
+        },
+        {
+          key: '/assetmgt',
+          label: t('资产管理<新>'),
         },
       ],
     },

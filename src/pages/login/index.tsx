@@ -89,12 +89,12 @@ export default function Login() {
 
   const login = async () => {
     let { username, password, verifyvalue } = form.getFieldsValue();
-    const rsaConf = await getRSAConfig();
-    const {
-      dat: { OpenRSA, RSAPublicKey },
-    } = rsaConf;
-    const authPassWord = OpenRSA ? RsaEncry(password, RSAPublicKey) : password;
-    authLogin(username, authPassWord, captchaidRef.current!, verifyvalue)
+    // const rsaConf = await getRSAConfig();
+    // const {
+    //   dat: { OpenRSA, RSAPublicKey },
+    // } = rsaConf;
+    // const authPassWord = OpenRSA ? RsaEncry(password, RSAPublicKey) : password;
+    authLogin(username, password, captchaidRef.current!, verifyvalue)
       .then((res) => {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
