@@ -72,7 +72,9 @@ export interface ICommonState {
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
+  organizeId:number;
   setCurBusiId: (id: number) => void;
+  setOrganizeId:(id: number) => void;
   profile: IProfile;
   setProfile: (profile: IProfile) => void;
   licenseRulesRemaining?: number;
@@ -110,9 +112,16 @@ function App() {
       setCommonState((state) => ({ ...state, busiGroups }));
     },
     curBusiId: window.localStorage.getItem('curBusiId') ? Number(window.localStorage.getItem('curBusiId')) : 0,
+
     setCurBusiId: (id: number) => {
       window.localStorage.setItem('curBusiId', String(id));
       setCommonState((state) => ({ ...state, curBusiId: id }));
+    },
+    organizeId:window.localStorage.getItem('organizeId') ? Number(window.localStorage.getItem('organizeId')) : 0,
+
+    setOrganizeId:(id: number) => {
+      window.localStorage.setItem('organizeId', String(id));
+      setCommonState((state) => ({ ...state, organizeId: id }));
     },
     profile: {} as IProfile,
     setProfile: (profile: IProfile) => {
@@ -131,7 +140,9 @@ function App() {
           const datasourceList = await getDatasourceList();
           const { licenseRulesRemaining, licenseExpireDays } = await getLicense(t);
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
+          const defaultOrganizeId = commonState.organizeId || 0;
           window.localStorage.setItem('curBusiId', String(defaultBusiId));
+          window.localStorage.setItem('organizeId', String(defaultOrganizeId));
           initialized.current = true;
           setCommonState((state) => {
             return {
@@ -147,6 +158,7 @@ function App() {
               },
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
+              organizeId:defaultOrganizeId,
               licenseRulesRemaining,
               licenseExpireDays,
               licenseExpired: licenseExpireDays !== undefined && licenseExpireDays <= 0,
