@@ -158,7 +158,7 @@ export default function Content() {
         <Route exact path='/targets' component={Targets} />
 
         <Route exact path='/assetmgt' component={AssetMgt} />
-        <Route exact path='/assetmgt/add/:bgid/:nodeid' component={AddInfoAsset} />
+        <Route exact path='/assetmgt/add/:orgid' component={AddInfoAsset} />
 
         <Route exact path='/assets' component={Assets} />
         <Route exact path='/assets/add/:bgid' component={AddAsset} />        
