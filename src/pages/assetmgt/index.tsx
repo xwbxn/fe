@@ -83,10 +83,20 @@ export default function () {
     if (node.isEditable) {
       return (
         <div>
-          <input
+          <Input
             defaultValue={node.name || ''}
+            maxLength={25}
+            style={{width:'200px'}}
             onChange={(e) => {
               setcurValue(e.target.value);
+            }}
+            onPressEnter={e=>{
+                saveNode(node);
+            }}
+            onKeyDown={(e)=>{
+              if(e.code==="Escape"){
+                onClose(node);
+              }
             }}
           />
           <CloseOutlined
@@ -110,7 +120,7 @@ export default function () {
                 style={{ marginLeft: 10 }}
                 onClick={() => {
                   confirm({
-                    title: '确认要删除吗',
+                    title: '确认要删除吗?',
                     onOk: () => {
                       deleteNode(node);
                     },
