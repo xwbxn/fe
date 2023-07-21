@@ -2,11 +2,11 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import { assetsType } from '@/store/assetsInterfaces';
 
-export const getAssets = function (bgid, query) {
+export const getAssets = function (bgid, query, organize_id) {
     return request("/api/n9e/assets", {
         method: RequestMethod.Get,
         params: {
-            bgid, query
+            bgid, query, organize_id
         }
     })
 }
@@ -105,7 +105,44 @@ export function getAssetsTags(params) {
 // 修改对象备注
 export function updateAssetNote(data) {
     return request(`/api/n9e/assets/note`, {
-      method: RequestMethod.Put,
-      data,
+        method: RequestMethod.Put,
+        data,
     });
-  }
+}
+
+export function getOrganizeTree(data) {
+    return request(`/api/n9e/organize/list`, {
+        method: RequestMethod.Get,
+        data
+    });
+}
+
+export const addOrganize = function (data) {
+    return request("/api/n9e/organize/add", {
+        method: RequestMethod.Post,
+        data
+    })
+}
+
+//修改
+export const updateOrganize = function (id, data) {
+    return request(`/api/n9e/organize/` + id, {
+        method: RequestMethod.Put,
+        data
+    })
+}
+//删除
+export const deleteOrganize = function (id) {
+    return request(`/api/n9e/organize/del/` + id, {//organize
+        method: RequestMethod.Delete
+    })
+}
+
+
+//修改
+export const changeAssetOrganize = function (data) {
+    return request(`/api/n9e/assets/updatesOrganize`, {//organize
+        method: RequestMethod.Post,
+        data
+    })
+}

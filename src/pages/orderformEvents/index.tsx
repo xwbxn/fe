@@ -56,6 +56,7 @@ const Event: React.FC = () => {
     severity?: number;
     eventType?: number;
     queryContent: string;
+    status?: number;
     rule_prods: string[];
   }>({
     hours: getDefaultHours(),
@@ -63,6 +64,17 @@ const Event: React.FC = () => {
     queryContent: '',
     rule_prods: [],
   });
+  const statusLable = (status: number) => {
+    if (status === 0) {
+      return "未处理"
+    } else if (status === 1) {
+      return "已处理"
+    } else if (status === 2) {
+      return "已关闭"
+    } else {
+      return "未定义"
+    }
+  };
   const columns = [
     {
       title: t('prod'),
@@ -107,9 +119,9 @@ const Event: React.FC = () => {
             <div>
               <Link
                 to={{
-                  pathname: `/alert-his-events/${id}`,
+                  pathname: `/alert-orderform-events/${id}`,
                 }}
-                target='_blank'
+                target='_self'
               >
                 {title}
               </Link>
@@ -121,7 +133,37 @@ const Event: React.FC = () => {
         );
       },
     },
-
+    {
+      title: t('状态'),
+      dataIndex: 'status',
+      width: 120,
+      render(value) {
+        return statusLable(value);
+      },
+    },
+    {
+      title: t('common:table.operations'),
+      width: '98px',
+      dataIndex: 'operation',
+      render: (value, record) => {
+        if (record.status === 0) {
+          return (
+            <>
+              <div>
+                <Link
+                  to={{
+                    pathname: `/alert-orderform-events/${record.id}`,
+                  }}
+                  target='_self'
+                >
+                  处理
+                </Link>
+              </div>
+            </>
+          );
+        }
+      },
+    },
     {
       title: t('last_eval_time'),
       dataIndex: 'last_eval_time',
@@ -138,6 +180,7 @@ const Event: React.FC = () => {
     filter.severity !== undefined ? { severity: filter.severity } : {},
     filter.queryContent ? { query: filter.queryContent } : {},
     filter.eventType !== undefined ? { is_recovered: filter.eventType } : {},
+    filter.status !== undefined ? { status: filter.status } : {},
     { bgid: filter.bgid },
     filter.rule_prods.length ? { rule_prods: _.join(filter.rule_prods, ',') } : {},
   );
@@ -163,7 +206,7 @@ const Event: React.FC = () => {
             }}
           >
             {hoursOptions.map((item) => {
-              return <Select.Option value={item.value} key={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
+              return <Select.Option key={item.value} value={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
             })}
           </Select>
           <AdvancedWrap var='VITE_IS_ALERT_AI,VITE_IS_ALERT_ES,VITE_IS_SLS_DS,VITE_IS_COMMON_DS'>
@@ -269,7 +312,7 @@ const Event: React.FC = () => {
             }}
           >
             {_.map(busiGroups, (item) => {
-              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
+              return <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>;
             })}
           </Select>
           <Select
@@ -284,24 +327,25 @@ const Event: React.FC = () => {
               });
             }}
           >
-            <Select.Option value={1}>S1</Select.Option>
-            <Select.Option value={2}>S2</Select.Option>
-            <Select.Option value={3}>S3</Select.Option>
+            <Select.Option key={1} value={1}>S1</Select.Option>
+            <Select.Option key={2} value={2}>S2</Select.Option>
+            <Select.Option key={3} value={3}>S3</Select.Option>
           </Select>
           <Select
             style={{ minWidth: 60 }}
-            placeholder={t('eventType')}
+            placeholder={t('状态')}
             allowClear
-            value={filter.eventType}
+            value={filter.status}
             onChange={(val) => {
               setFilter({
                 ...filter,
-                eventType: val,
+                status: val,
               });
             }}
           >
-            <Select.Option value={0}>Triggered</Select.Option>
-            <Select.Option value={1}>Recovered</Select.Option>
+            <Select.Option key={0} value={0}>未处理</Select.Option>
+            <Select.Option key={1} value={1}>已处理</Select.Option>
+            <Select.Option key={2} value={2}>关闭</Select.Option>
           </Select>
           <Input
             className='search-input'
@@ -340,6 +384,7 @@ const Event: React.FC = () => {
   }
 
   const fetchData = ({ current, pageSize }) => {
+    filterObj.is_recovered = 0;
     return getEvents({
       p: current,
       limit: pageSize,
@@ -354,11 +399,11 @@ const Event: React.FC = () => {
 
   const { tableProps } = useAntdTable(fetchData, {
     refreshDeps: [refreshFlag, JSON.stringify(filterObj)],
-    defaultPageSize: 30,
+    defaultPageSize: 10,
   });
 
   return (
-    <PageLayout icon={<AlertOutlined />} title={t('title')}>
+    <PageLayout icon={<AlertOutlined />} title={t('工单管理')}>
       <div className='event-content'>
         <div className='table-area'>
           {renderLeftHeader()}
@@ -371,7 +416,7 @@ const Event: React.FC = () => {
             }}
             pagination={{
               ...tableProps.pagination,
-              pageSizeOptions: ['30', '100', '200', '500'],
+              pageSizeOptions: ['10', '100', '200', '500'],
             }}
           />
         </div>

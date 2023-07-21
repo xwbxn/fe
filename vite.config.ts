@@ -29,6 +29,8 @@ const chunk2 = [
   '@codemirror/view',
   'codemirror-promql',
   '@codemirror/basic-setup',
+  '@codemirror/stream-parser',
+  '@codemirror/legacy-modes/mode/toml',
 ];
 const chunk3 = ['react-ace'];
 const chunk1 = ['react', 'react-router-dom', 'react-dom', 'moment', '@ant-design/icons', 'umi-request', 'lodash', 'react-grid-layout', 'd3', 'ahooks', 'color'];

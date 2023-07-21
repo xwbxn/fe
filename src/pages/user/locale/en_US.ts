@@ -5,6 +5,9 @@ const en_US = {
     create: 'Create User',
     edit: 'Edit User',
   },
+  inspect:{
+    plan_title: 'Inspection Task Management',
+  },
   team: {
     title: 'Team Management',
     list: 'Team List',

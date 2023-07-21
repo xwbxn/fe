@@ -87,6 +87,16 @@ export interface Title {
 }
 export type TitleKey = keyof Title;
 
+export interface CommonProps {
+  visible: boolean;
+  onClose?: any;
+  action: string;
+  id?: string;
+  width?: number;
+  isRecovered:number;
+}
+
+
 export interface ModalProps {
   visible: boolean;
   userType?: string;
@@ -96,6 +106,14 @@ export interface ModalProps {
   teamId?: string;
   memberId?: string;
   onSearch?: any;
+  width?: number;
+}
+
+export interface ApplyProps {
+  visible: boolean;
+  onClose?: any;
+  action: string;
+  keyId?: string;
   width?: number;
 }
 export interface TeamProps {

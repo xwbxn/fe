@@ -63,6 +63,25 @@ const getMenuList = (t) => {
           key: '/alert-his-events',
           label: t('历史告警'),
         },
+        {
+          key: '/alert-orderform-events',
+          label: t('工单处理'),
+        },
+      ],
+    },
+    {
+      key: 'inspection',
+      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+      label: t('巡检管理'),
+      children: [
+        {
+          key: '/inspection/plans',
+          label: t('巡检计划'),
+        },
+        {
+          key: '/inspection/applylist',
+          label: t('巡检审批'),
+        },
       ],
     },
     {
@@ -122,6 +141,10 @@ const getMenuList = (t) => {
         {
           key: '/assets',
           label: t('资产管理'),
+        },
+        {
+          key: '/assetmgt',
+          label: t('资产管理<新>'),
         },
       ],
     },
