@@ -141,7 +141,7 @@ export const deleteOrganize = function (id) {
 
 //修改
 export const changeAssetOrganize = function (data) {
-    return request(`/api/n9e//assets/updatesOrganize`, {//organize
+    return request(`/api/n9e/assets/updatesOrganize`, {//organize
         method: RequestMethod.Post,
         data
     })
