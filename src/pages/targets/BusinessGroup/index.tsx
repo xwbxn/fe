@@ -75,7 +75,7 @@ export function listToTree(data: { id: number; name: string }[]) {
       }
     } else {
       treeData.push({
-        title: item.name,
+        title: item.name + ' ', // 防止节点跟组名称重复 antd tree 不会渲染同名节点问题
         key: item.id,
         id: item.id,
       });
@@ -181,7 +181,12 @@ export default function index(props: IProps) {
                         setLocaleCollapsedNodes(newCollapsedNodes);
                       }}
                     >
-                      <Space>
+                      <Space
+                        style={{
+                          width: '100%',
+                          justifyContent: 'space-between',
+                        }}
+                      >
                         {item.title}
                         {!_.includes(collapsedNodes, item.key) ? <DownOutlined /> : <RightOutlined />}
                       </Space>
