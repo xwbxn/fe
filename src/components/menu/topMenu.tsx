@@ -16,74 +16,49 @@ import { Logout } from '@/services/login';
 const getMenuList = (t) => {
   const menuList = [
     {
+      key: '/assetmgt',
+      icon: <IconFont type='icon-Menu_Infrastructure' />,
+      label: t('首页')
+    },
+    {
+      key: 'targets',
+      icon: <IconFont type='icon-Menu_Infrastructure' />,
+      label: t('资产管理'),
+      children: [
+        {
+          key: '/targets',
+          label: t('监控资产'),
+        },
+        {
+          key: '/assets',
+          label: t('业务资产'),
+        },
+        {
+          key: '/assetmgt',
+          label: t('业务资产<新>'),
+        },
+      ],
+    },
+    {
       key: 'dashboard',
       icon: <IconFont type='icon-Menu_Dashboard' />,
-      label: t('仪表盘'),
+      label: t('监测管理'),
       children: [
         {
           key: '/dashboards',
-          label: t('监控仪表盘'),
+          label: t('业务监测'),
         },
         {
           key: '/dashboards-built-in',
           label: t('内置仪表盘'),
         },
-        {
-          key: '/dashboard-grafana',
-          label: t('grafana'),
-        },
+        // {
+        //   key: '/dashboard-grafana',
+        //   label: t('grafana'),
+        // },
       ],
     },
-    {
-      key: 'alarm',
-      icon: <IconFont type='icon-Menu_AlarmManagement' />,
-      label: t('告警管理'),
-      children: [
-        {
-          key: '/alert-rules',
-          label: t('告警规则'),
-        },
-        {
-          key: '/alert-rules-built-in',
-          label: t('内置规则'),
-        },
-        {
-          key: '/alert-mutes',
-          label: t('屏蔽规则'),
-        },
-        {
-          key: '/alert-subscribes',
-          label: t('订阅规则'),
-        },
-        {
-          key: '/alert-cur-events',
-          label: t('活跃告警'),
-        },
-        {
-          key: '/alert-his-events',
-          label: t('历史告警'),
-        },
-        {
-          key: '/alert-orderform-events',
-          label: t('工单处理'),
-        },
-      ],
-    },
-    {
-      key: 'inspection',
-      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
-      label: t('巡检管理'),
-      children: [
-        {
-          key: '/inspection/plans',
-          label: t('巡检计划'),
-        },
-        {
-          key: '/inspection/applylist',
-          label: t('巡检审批'),
-        },
-      ],
-    },
+
     {
       key: 'metric',
       icon: <IconFont type='icon-IndexManagement1' />,
@@ -103,6 +78,92 @@ const getMenuList = (t) => {
         },
       ],
     },
+
+    {
+      key: 'inspection',
+      icon: <IconFont type='icon-Menu_LinkAnalysis' />,
+      label: t('巡检管理'),
+      children: [
+        {
+          key: '/inspection/plans',
+          label: t('巡检任务'),
+        },
+        {
+          key: '/inspection/applylist',
+          label: t('巡检历史'),
+        },
+      ],
+    },
+    {
+      key: 'alarm',
+      icon: <IconFont type='icon-Menu_AlarmManagement' />,
+      label: t('告警管理'),
+      children: [
+        {
+          key: '/alert-rules-built-in',
+          label: t('告警设置'),
+          children: [
+            {
+              key: '/alert-rules-built-in',
+              label: t('内置规则'),
+            },
+            {
+              key: '/alert-rules',
+              label: t('告警规则'),
+            },
+            {
+              key: '/alert-subscribes',
+              label: t('订阅规则'),
+            },
+            
+            {
+              key: '/alert-mutes',
+              label: t('屏蔽规则'),
+            },
+            {
+              key: '/help/notification-settings',
+              label: t('通知设置'),
+            },
+            {
+              key: '/help/notification-tpls',
+              label: t('通知模板'),
+            },
+          ]
+        },        
+       
+        {
+          key: '/alert-cur-events',
+          label: t('当前告警'),
+        },
+        {
+          key: '/alert-his-events',
+          label: t('历史告警'),
+        },
+        {
+          key: '/alert-orderform-events',
+          label: t('工单处理'),
+        },
+        {
+          key: 'job',
+          label: t('告警自愈'),
+          children: [
+            {
+              key: '/job-tpls',
+              label: t('自愈脚本'),
+            },
+            {
+              key: '/job-tasks',
+              label: t('执行历史'),
+            },
+            {
+              key: '/ibex-settings',
+              label: t('自愈配置'),
+            },
+          ],
+        },
+      ],
+    },   
+   
     {
       key: 'log',
       icon: <IconFont type='icon-Menu_LogAnalysis' />,
@@ -129,66 +190,44 @@ const getMenuList = (t) => {
         },
       ],
     },
+   
     {
-      key: 'targets',
-      icon: <IconFont type='icon-Menu_Infrastructure' />,
-      label: t('基础设施'),
-      children: [
-        {
-          key: '/targets',
-          label: t('监控机器'),
-        },
-        {
-          key: '/assets',
-          label: t('资产管理'),
-        },
-        {
-          key: '/assetmgt',
-          label: t('资产管理<新>'),
-        },
-      ],
-    },
-
-    {
-      key: 'job',
-      icon: <IconFont type='icon-Menu_AlarmSelfhealing' />,
-      label: t('告警自愈'),
-      children: [
-        {
-          key: '/job-tpls',
-          label: t('自愈脚本'),
-        },
-        {
-          key: '/job-tasks',
-          label: t('执行历史'),
-        },
-        {
-          key: '/ibex-settings',
-          label: t('自愈配置'),
-        },
-      ],
-    },
-    {
-      key: 'manage',
+      key: 'report',
       icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
-      label: t('人员组织'),
+      label: t('报表管理'),
       children: [
         {
           key: '/users',
-          label: t('用户管理'),
+          label: t('综合统计'),
         },
         {
           key: '/user-groups',
-          label: t('团队管理'),
+          label: t('历史报告'),
+          children: [
+            {
+              key: '/trace/explorer',
+              label: t('巡检报表'),
+            },
+            {
+              key: '/trace/dependencies',
+              label: t('告警报表'),
+            },
+          ]
         },
         {
           key: '/busi-groups',
-          label: t('业务组管理'),
-        },
-        {
-          key: '/permissions',
-          label: t('权限管理'),
-        },
+          label: t('报表模板'),
+          children: [
+            {
+              key: '/trace/explorer',
+              label: t('巡检报表'),
+            },
+            {
+              key: '/trace/dependencies',
+              label: t('告警报表'),
+            },
+          ]
+        }
       ],
     },
     {
@@ -197,33 +236,58 @@ const getMenuList = (t) => {
       label: t('系统配置'),
       children: [
         {
-          key: '/help/source',
-          label: t('数据源'),
-        },
-        {
-          key: '/help/notification-settings',
-          label: t('通知设置'),
-        },
-        {
-          key: '/help/notification-tpls',
-          label: t('通知模板'),
-        },
+          key: 'manage',
+          icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
+          label: t('人员组织'),
+          children: [
+            {
+              key: '/users',
+              label: t('用户管理'),
+            },
+            {
+              key: '/user-groups',
+              label: t('团队管理'),
+            },
+            {
+              key: '/busi-groups',
+              label: t('业务组管理'),
+            },
+            {
+              key: '/permissions',
+              label: t('权限管理'),
+            },
+          ],
+        },              
         {
           key: '/help/sso',
           label: t('单点登录'),
-        },
-        {
-          key: '/help/servers',
-          label: t('告警引擎'),
-        },
-        {
-          key: '/help/migrate',
-          label: t('仪表盘迁移'),
-        },
+        }, 
         {
           key: '/help/version',
           label: t('系统版本'),
         },
+
+        {
+          key: '/help/source',
+          label: t('其他'),
+          children: [
+            {
+              key: '/help/source',
+              label: t('数据源'),
+            },
+            {
+              key: '/help/servers',
+              label: t('告警引擎'),
+            },
+            {
+              key: '/help/migrate',
+              label: t('仪表盘迁移'),
+            },
+           
+
+          ]
+        }, 
+
       ],
     },
   ];

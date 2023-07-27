@@ -24,6 +24,12 @@ export const addAsset = function (data: assetsType) {
     })
 }
 
+export const putOptionalMetrics = function (data) {
+    return request("/api/n9e/assets/set/optmetrics", {
+        method: RequestMethod.Put,
+        data
+    })
+}
 export const updateAsset = function (data: assetsType) {
     return request("/api/n9e/assets", {
         method: RequestMethod.Put,

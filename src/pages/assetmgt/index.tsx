@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
 import { EditOutlined, PlusOutlined, MinusOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
-
+import PromQueryBuilderItemModal from '@/components/PromQueryBuilder/PromQueryBuilderItemModal';
 import { CommonStateContext } from '@/App';
-
+import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
@@ -39,7 +39,26 @@ export interface OrgType {
   isEditable?: boolean;
 }
 
-export default function () {
+interface IProps {
+  url?: string;
+  datasourceValue: number;
+  contentMaxHeight?: number;
+  type?: 'table' | 'graph';
+  onTypeChange?: (type: 'table' | 'graph') => void;
+  defaultTime?: IRawTimeRange | number;
+  onTimeChange?: (time: IRawTimeRange) => void; // 用于外部控制时间范围
+  promQL?: string;
+  graphOperates?: {
+    enabled: boolean;
+  };
+  globalOperates?: {
+    enabled: boolean;
+  };
+  headerExtra?: HTMLDivElement | null;
+  executeQuery?: (promQL?: string) => void;
+}
+
+export default function (props: IProps) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [list, setList] = useState<any[]>([]);
@@ -56,15 +75,28 @@ export default function () {
     { id: 0, name: '根节点', parent_id: 0, children: [] },
     { id: -1, name: '全部', parent_id: 0, children: [] },
   ]);
+  const {
+    url = '/api/n9e/proxy',
+    datasourceValue = 0,
+    promQL
+  } = props;
+
   const [modifyType, setModifyType] = useState<boolean>(false);
   const [curValue, setcurValue] = useState<string>('');
-  const history = useHistory();
+
+  const history = useHistory(); 
+  const [assetId, setAssetId] = useState<number>(); 
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   const loadingTree = () => {
     getOrganizeTree({}).then(({ dat }) => {
       treeData[0].children = dat || [];
       setTreeData(treeData.slice());
     });
+  };
+
+  const metricRender = (optionValue) => {
+    console.log(assetId,optionValue);
   };
 
   useEffect(() => {
@@ -282,7 +314,7 @@ export default function () {
                     <Menu
                       style={{ width: '100px' }}
                       onClick={({ key }) => {
-                        setOperateType(key as OperateType);
+                          setOperateType(key as OperateType);
                       }}
                       items={[
                         { key: OperateType.BindTag, label: t('bind_tag.title') },
@@ -384,6 +416,20 @@ export default function () {
                         }}
                       >
                         {t('common:btn.delete')}
+                      </div>
+                      <div
+                        onClick={async () => {
+                          setAssetId(record.id);
+                          PromQueryBuilderItemModal({
+                            range,                            
+                            datasourceValue:2,
+                            value:""+record.id,
+                            type:record.type,
+                            onChange: metricRender,
+                          });
+                        }}
+                      >
+                        {t('指标设置')}
                       </div>
                     </div>
                   ),
