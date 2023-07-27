@@ -57,7 +57,15 @@ export default function Title(props: IProps) {
   return (
     <div className='dashboard-detail-header'>
       <div className='dashboard-detail-header-left'>
-        {isPreview && !isBuiltin ? null : <RollbackOutlined className='back' onClick={() => history.push(props.gobackPath || '/dashboards')} />}
+        {isPreview && !isBuiltin ? null : (
+          <RollbackOutlined
+            className='back'
+            onClick={() => {
+              if (props.gobackPath) history.push(props.gobackPath);
+              else history.goBack();
+            }}
+          />
+        )}
         <div className='title'>{dashboard.name}</div>
       </div>
       <div className='dashboard-detail-header-right'>

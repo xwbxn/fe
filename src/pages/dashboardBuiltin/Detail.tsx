@@ -32,7 +32,7 @@ export default function index() {
 
   if (loading) return null;
   if (initialValues) {
-    return <Detail isPreview isBuiltin gobackPath='/dashboards-built-in' builtinParams={initialValues} />;
+    return <Detail isPreview isBuiltin builtinParams={initialValues} />;
   }
   return (
     <PageLayout title={t('title')} showBack backPath='/dashboards-built-in'>

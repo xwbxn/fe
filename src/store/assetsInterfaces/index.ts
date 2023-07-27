@@ -9,4 +9,5 @@ export interface assetsType {
     target: string;
     memo: string;
     configs: string;
+    dashboard?: string;
 }

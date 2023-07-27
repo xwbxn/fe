@@ -54,7 +54,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   useEffect(() => {
-    getAssetsIdents({ bgid: -1 }).then((res) => {
+    getAssetsIdents().then((res) => {
       const items = res.dat.map((v) => {
         return {
           value: v.ident,

@@ -48,10 +48,9 @@ export const getAssetDefaultConfig = function (type: string, data) {
 }
 
 //获取可用监控探针
-export const getAssetsIdents = function (params) {
+export const getAssetsIdents = function () {
     return request('/api/n9e/assets/idents', {
-        method: RequestMethod.Get,
-        params
+        method: RequestMethod.Get
     })
 }
 
