@@ -29,9 +29,14 @@ export interface PromVisualQueryOperation {
 export interface QueryWithOperations {
   operations: PromVisualQueryOperation[];
 }
+export interface MetricItem {
+  metric: string;
+  labels: PromVisualQueryLabelFilter[];
+}
 
 export interface PromVisualQuery {
   metric?: string;
+  items?:MetricItem[];
   labels: PromVisualQueryLabelFilter[];
   operations: PromVisualQueryOperation[];
   binaryQueries?: Array<PromVisualQueryBinary<PromVisualQuery>>;

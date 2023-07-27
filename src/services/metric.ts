@@ -24,6 +24,14 @@ export const GetTagPairs = function (data: object) {
     data,
   });
 };
+//返回资产类型的所有指标 包括（默认+可选指标）
+export const GetAssetType = function () {
+  return request(`/api/n9e/assets/types`, {
+    method: RequestMethod.Get
+  });
+};
+
+
 
 // 查询 Metrics
 export const GetMetrics = function (data: object) {

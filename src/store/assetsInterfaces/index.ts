@@ -8,5 +8,6 @@ export interface assetsType {
     type: string;
     target: string;
     memo: string;
+    optional_metrics: string;
     configs: string;
 }
