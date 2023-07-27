@@ -10,4 +10,5 @@ export interface assetsType {
     memo: string;
     optional_metrics: string;
     configs: string;
+    dashboard?: string;
 }

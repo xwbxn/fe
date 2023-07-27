@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Button, Dropdown, Form, Input, Menu, message, Modal, Select, Space, Table, Tag, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleOutlined, DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, DownOutlined, EyeOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
 import { BusinessGroup } from '@/pages/targets';
 import { CommonStateContext } from '@/App';
 
@@ -325,7 +325,7 @@ export default function () {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
 
   useEffect(() => {
-    getAssets(curBusiId, searchVal,null).then((res) => {
+    getAssets(curBusiId, searchVal, null).then((res) => {
       setList(res.dat);
     });
   }, [searchVal, refreshKey, curBusiId]);
@@ -498,13 +498,13 @@ export default function () {
                               message.success(t('common:success.delete'));
                               setRefreshKey(_.uniqueId('refreshKey_'));
                             },
-
                             onCancel() {},
                           });
                         }}
                       >
                         {t('common:btn.delete')}
                       </div>
+                      <a href={record.dashboard}>监控</a>
                     </div>
                   ),
                 },
