@@ -143,12 +143,12 @@ export interface QueryBuilderOperationParamDef {
   name: string;
   type: 'string' | 'number' | 'boolean';
   options?:
-    | string[]
-    | number[]
-    | {
-        label: string;
-        value: string | number;
-      }[];
+  | string[]
+  | number[]
+  | {
+    label: string;
+    value: string | number;
+  }[];
   hideName?: boolean;
   restParam?: boolean;
   optional?: boolean;

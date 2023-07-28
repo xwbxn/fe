@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
 import { EditOutlined, PlusOutlined, MinusOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
-
+import PromQueryBuilderItemModal from '@/components/PromQueryBuilder/PromQueryBuilderItemModal';
 import { CommonStateContext } from '@/App';
-
+import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
@@ -39,7 +39,26 @@ export interface OrgType {
   isEditable?: boolean;
 }
 
-export default function () {
+interface IProps {
+  url?: string;
+  datasourceValue: number;
+  contentMaxHeight?: number;
+  type?: 'table' | 'graph';
+  onTypeChange?: (type: 'table' | 'graph') => void;
+  defaultTime?: IRawTimeRange | number;
+  onTimeChange?: (time: IRawTimeRange) => void; // 用于外部控制时间范围
+  promQL?: string;
+  graphOperates?: {
+    enabled: boolean;
+  };
+  globalOperates?: {
+    enabled: boolean;
+  };
+  headerExtra?: HTMLDivElement | null;
+  executeQuery?: (promQL?: string) => void;
+}
+
+export default function (props: IProps) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [list, setList] = useState<any[]>([]);
@@ -56,9 +75,13 @@ export default function () {
     { id: 0, name: '根节点', parent_id: 0, children: [] },
     { id: -1, name: '全部', parent_id: 0, children: [] },
   ]);
+  const { url = '/api/n9e/proxy', datasourceValue = 0, promQL } = props;
+
   const [modifyType, setModifyType] = useState<boolean>(false);
   const [curValue, setcurValue] = useState<string>('');
+
   const history = useHistory();
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   const loadingTree = () => {
     getOrganizeTree({}).then(({ dat }) => {
@@ -86,15 +109,15 @@ export default function () {
           <Input
             defaultValue={node.name || ''}
             maxLength={25}
-            style={{width:'200px'}}
+            style={{ width: '200px' }}
             onChange={(e) => {
               setcurValue(e.target.value);
             }}
-            onPressEnter={e=>{
-                saveNode(node);
+            onPressEnter={(e) => {
+              saveNode(node);
             }}
-            onKeyDown={(e)=>{
-              if(e.code==="Escape"){
+            onKeyDown={(e) => {
+              if (e.code === 'Escape') {
                 onClose(node);
               }
             }}
@@ -149,13 +172,13 @@ export default function () {
     expandedKeys.push(node.id);
     setExpandedKeys(expandedKeys.slice());
     setModifyType(false);
-    setModifySwitch(false)
+    setModifySwitch(false);
   };
 
   const editNode = (node) => {
     node.isEditable = true;
     setModifyType(false);
-    setModifySwitch(false)
+    setModifySwitch(false);
     setTreeData(treeData.slice());
   };
 
@@ -178,7 +201,7 @@ export default function () {
       });
     }
     setModifyType(true);
-    setModifySwitch(true)
+    setModifySwitch(true);
   };
 
   const deepFind = (items: OrgType[], id): OrgType | null => {
@@ -219,7 +242,13 @@ export default function () {
           <span className='organize_title_cls'>组织树列表</span>
           <div style={{ position: 'relative', alignItems: 'revert', display: 'flex', float: 'right', marginRight: '10px', marginTop: '5px' }}>
             <div style={{ margin: '0 10prx ' }}>
-              <Switch checkedChildren='管理' disabled={!modifySwitch} defaultChecked={modifyType} unCheckedChildren='管理' onChange={(checked: boolean) => setModifyType(checked)} />
+              <Switch
+                checkedChildren='管理'
+                disabled={!modifySwitch}
+                defaultChecked={modifyType}
+                unCheckedChildren='管理'
+                onChange={(checked: boolean) => setModifyType(checked)}
+              />
             </div>
           </div>
           <Tree
@@ -368,7 +397,24 @@ export default function () {
                   width: '180px',
                   render: (text: string, record: assetsType) => (
                     <div className='table-operator-area'>
-                      <div
+                      <Button size='small' href={record.dashboard}>
+                        监控
+                      </Button>
+                      <Button
+                        size='small'
+                        onClick={async () => {
+                          PromQueryBuilderItemModal({
+                            range,
+                            datasourceValue: 1,
+                            value: record.id.toString(),
+                            type: record.type,
+                          });
+                        }}
+                      >
+                        {t('指标')}
+                      </Button>
+                      <Button
+                        size='small'
                         className='table-operator-area-warning'
                         onClick={async () => {
                           Modal.confirm({
@@ -384,7 +430,7 @@ export default function () {
                         }}
                       >
                         {t('common:btn.delete')}
-                      </div>
+                      </Button>
                     </div>
                   ),
                 },

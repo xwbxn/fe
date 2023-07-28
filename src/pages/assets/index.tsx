@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Button, Dropdown, Form, Input, Menu, message, Modal, Select, Space, Table, Tag, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleOutlined, DownOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, DownOutlined, EyeOutlined, GroupOutlined, SearchOutlined } from '@ant-design/icons';
 import { BusinessGroup } from '@/pages/targets';
 import { CommonStateContext } from '@/App';
 
@@ -18,6 +18,8 @@ import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import classNames from 'classnames';
 import { getBusiGroups } from '@/services/common';
+import PromQueryBuilderItemModal from '@/components/PromQueryBuilder/PromQueryBuilderItemModal';
+import { IRawTimeRange } from '@/components/TimeRangePicker';
 
 export { Add, Edit };
 
@@ -323,9 +325,10 @@ export default function () {
   const history = useHistory();
   const [searchVal, setSearchVal] = useState('');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   useEffect(() => {
-    getAssets(curBusiId, searchVal,null).then((res) => {
+    getAssets(curBusiId, searchVal, null).then((res) => {
       setList(res.dat);
     });
   }, [searchVal, refreshKey, curBusiId]);
@@ -488,7 +491,24 @@ export default function () {
                   width: '180px',
                   render: (text: string, record: assetsType) => (
                     <div className='table-operator-area'>
-                      <div
+                      <Button size='small' href={record.dashboard}>
+                        监控
+                      </Button>
+                      <Button
+                        size='small'
+                        onClick={async () => {
+                          PromQueryBuilderItemModal({
+                            range,
+                            datasourceValue: 1,
+                            value: record.id.toString(),
+                            type: record.type,
+                          });
+                        }}
+                      >
+                        {t('指标')}
+                      </Button>
+                      <Button
+                        size='small'
                         className='table-operator-area-warning'
                         onClick={async () => {
                           Modal.confirm({
@@ -504,7 +524,7 @@ export default function () {
                         }}
                       >
                         {t('common:btn.delete')}
-                      </div>
+                      </Button>
                     </div>
                   ),
                 },

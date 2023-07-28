@@ -24,6 +24,12 @@ export const addAsset = function (data: assetsType) {
     })
 }
 
+export const putOptionalMetrics = function (data) {
+    return request("/api/n9e/assets/set/optmetrics", {
+        method: RequestMethod.Put,
+        data
+    })
+}
 export const updateAsset = function (data: assetsType) {
     return request("/api/n9e/assets", {
         method: RequestMethod.Put,
@@ -48,10 +54,9 @@ export const getAssetDefaultConfig = function (type: string, data) {
 }
 
 //获取可用监控探针
-export const getAssetsIdents = function (params) {
+export const getAssetsIdents = function () {
     return request('/api/n9e/assets/idents', {
-        method: RequestMethod.Get,
-        params
+        method: RequestMethod.Get
     })
 }
 

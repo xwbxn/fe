@@ -1,6 +1,5 @@
 import PageLayout from '@/components/pageLayout';
 import { getAsset } from '@/services/assets';
-import { update } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';

@@ -274,10 +274,10 @@ export default function List(props: IProps) {
         render(text, reocrd) {
           if (reocrd.cpu_num === -1) return 'unknown';
           let backgroundColor = RED_COLOR;
-          if (text < 2000) {
+          if (Math.abs(text) < 5000 * 60) {
             backgroundColor = YELLOW_COLOR;
           }
-          if (text < 1000) {
+          if (Math.abs(text) < 1000 * 60) {
             backgroundColor = GREEN_COLOR;
           }
           if (reocrd.target_up === 0) {
