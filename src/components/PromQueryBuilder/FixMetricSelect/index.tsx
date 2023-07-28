@@ -38,6 +38,7 @@ export default function index(props: IProps) {
           };
         })}
         value={searchValue}
+        placeholder={'请选择指标'}   //添加提示
         filterOption={(inputValue, option) => {
           if (option && option.value && typeof option.value === 'string') {
             return option.value.indexOf(inputValue) !== -1;

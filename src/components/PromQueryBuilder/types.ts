@@ -31,11 +31,13 @@ export interface QueryWithOperations {
 }
 export interface MetricItem {
   metric: string;
+  name: string;
   labels: PromVisualQueryLabelFilter[];
 }
 
 export interface PromVisualQuery {
   metric?: string;
+  name?: string;
   items?:MetricItem[];
   labels: PromVisualQueryLabelFilter[];
   operations: PromVisualQueryOperation[];

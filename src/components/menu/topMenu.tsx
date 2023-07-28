@@ -16,7 +16,7 @@ import { Logout } from '@/services/login';
 const getMenuList = (t) => {
   const menuList = [
     {
-      key: '/assetmgt',
+      key: '/home',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
       label: t('首页')
     },
@@ -100,7 +100,7 @@ const getMenuList = (t) => {
       label: t('告警管理'),
       children: [
         {
-          key: '/alert-rules-built-in',
+          key: '/alert-rules-built-ins',
           label: t('告警设置'),
           children: [
             {
@@ -197,33 +197,33 @@ const getMenuList = (t) => {
       label: t('报表管理'),
       children: [
         {
-          key: '/users',
+          key: '/statics',
           label: t('综合统计'),
         },
         {
-          key: '/user-groups',
+          key: '/report-group1',
           label: t('历史报告'),
           children: [
             {
-              key: '/trace/explorer',
+              key: '/report/explorer',
               label: t('巡检报表'),
             },
             {
-              key: '/trace/dependencies',
+              key: '/report/explorer2',
               label: t('告警报表'),
             },
           ]
         },
         {
-          key: '/busi-groups',
+          key: '/report-group2',
           label: t('报表模板'),
           children: [
             {
-              key: '/trace/explorer',
+              key: '/report/explorer3',
               label: t('巡检报表'),
             },
             {
-              key: '/trace/dependencies',
+              key: '/report/explorer4',
               label: t('告警报表'),
             },
           ]
@@ -268,8 +268,8 @@ const getMenuList = (t) => {
         },
 
         {
-          key: '/help/source',
-          label: t('其他'),
+          key: '/help/other',
+          label: t('其它设置'),
           children: [
             {
               key: '/help/source',
