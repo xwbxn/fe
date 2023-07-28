@@ -29,16 +29,9 @@ export interface PromVisualQueryOperation {
 export interface QueryWithOperations {
   operations: PromVisualQueryOperation[];
 }
-export interface MetricItem {
-  metric: string;
-  name: string;
-  labels: PromVisualQueryLabelFilter[];
-}
 
 export interface PromVisualQuery {
   metric?: string;
-  name?: string;
-  items?:MetricItem[];
   labels: PromVisualQueryLabelFilter[];
   operations: PromVisualQueryOperation[];
   binaryQueries?: Array<PromVisualQueryBinary<PromVisualQuery>>;
@@ -150,12 +143,12 @@ export interface QueryBuilderOperationParamDef {
   name: string;
   type: 'string' | 'number' | 'boolean';
   options?:
-    | string[]
-    | number[]
-    | {
-        label: string;
-        value: string | number;
-      }[];
+  | string[]
+  | number[]
+  | {
+    label: string;
+    value: string | number;
+  }[];
   hideName?: boolean;
   restParam?: boolean;
   optional?: boolean;

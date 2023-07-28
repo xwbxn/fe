@@ -82,32 +82,6 @@ export function renderQuery(query: PromVisualQuery, nested?: boolean) {
 
   return queryString;
 }
-/**
- * 格式化指标数据存储（多指标-Map存储）
- * @param query 
- * @param nested 
- * @returns 
- */
-export function renderQueryMap(query: PromVisualQuery, nested?: boolean) {
-  let metrics = new Map<string,string>();
-  query.items?.forEach(item => {
-      let queryString = `${item.metric ?? ''}${renderLabels(item.labels)}`;
-      queryString = renderOperations(queryString, query.operations);
-
-      if (!nested && hasBinaryOp(query) && Boolean(query.binaryQueries?.length)) {
-        queryString = `(${queryString})`;
-      }
-
-      queryString = renderBinaryQueries(queryString, query.binaryQueries);
-
-      if (nested && (hasBinaryOp(query) || Boolean(query.binaryQueries?.length))) {
-        queryString = `(${queryString})`;
-      }
-      metrics.set(item.metric, queryString);
- })
-  return metrics;
-}
-
 
 export default function index(props: { query: PromVisualQuery; datasourceValue: number }) {
   const promql = renderQuery(props.query);

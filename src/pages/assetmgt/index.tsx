@@ -75,17 +75,12 @@ export default function (props: IProps) {
     { id: 0, name: '根节点', parent_id: 0, children: [] },
     { id: -1, name: '全部', parent_id: 0, children: [] },
   ]);
-  const {
-    url = '/api/n9e/proxy',
-    datasourceValue = 0,
-    promQL
-  } = props;
+  const { url = '/api/n9e/proxy', datasourceValue = 0, promQL } = props;
 
   const [modifyType, setModifyType] = useState<boolean>(false);
   const [curValue, setcurValue] = useState<string>('');
 
-  const history = useHistory(); 
-  const [assetId, setAssetId] = useState<number>(); 
+  const history = useHistory();
   const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   const loadingTree = () => {
@@ -93,10 +88,6 @@ export default function (props: IProps) {
       treeData[0].children = dat || [];
       setTreeData(treeData.slice());
     });
-  };
-
-  const metricRender = (optionValue) => {
-    console.log(assetId,optionValue);
   };
 
   useEffect(() => {
@@ -118,15 +109,15 @@ export default function (props: IProps) {
           <Input
             defaultValue={node.name || ''}
             maxLength={25}
-            style={{width:'200px'}}
+            style={{ width: '200px' }}
             onChange={(e) => {
               setcurValue(e.target.value);
             }}
-            onPressEnter={e=>{
-                saveNode(node);
+            onPressEnter={(e) => {
+              saveNode(node);
             }}
-            onKeyDown={(e)=>{
-              if(e.code==="Escape"){
+            onKeyDown={(e) => {
+              if (e.code === 'Escape') {
                 onClose(node);
               }
             }}
@@ -181,13 +172,13 @@ export default function (props: IProps) {
     expandedKeys.push(node.id);
     setExpandedKeys(expandedKeys.slice());
     setModifyType(false);
-    setModifySwitch(false)
+    setModifySwitch(false);
   };
 
   const editNode = (node) => {
     node.isEditable = true;
     setModifyType(false);
-    setModifySwitch(false)
+    setModifySwitch(false);
     setTreeData(treeData.slice());
   };
 
@@ -210,7 +201,7 @@ export default function (props: IProps) {
       });
     }
     setModifyType(true);
-    setModifySwitch(true)
+    setModifySwitch(true);
   };
 
   const deepFind = (items: OrgType[], id): OrgType | null => {
@@ -251,7 +242,13 @@ export default function (props: IProps) {
           <span className='organize_title_cls'>组织树列表</span>
           <div style={{ position: 'relative', alignItems: 'revert', display: 'flex', float: 'right', marginRight: '10px', marginTop: '5px' }}>
             <div style={{ margin: '0 10prx ' }}>
-              <Switch checkedChildren='管理' disabled={!modifySwitch} defaultChecked={modifyType} unCheckedChildren='管理' onChange={(checked: boolean) => setModifyType(checked)} />
+              <Switch
+                checkedChildren='管理'
+                disabled={!modifySwitch}
+                defaultChecked={modifyType}
+                unCheckedChildren='管理'
+                onChange={(checked: boolean) => setModifyType(checked)}
+              />
             </div>
           </div>
           <Tree
@@ -314,7 +311,7 @@ export default function (props: IProps) {
                     <Menu
                       style={{ width: '100px' }}
                       onClick={({ key }) => {
-                          setOperateType(key as OperateType);
+                        setOperateType(key as OperateType);
                       }}
                       items={[
                         { key: OperateType.BindTag, label: t('bind_tag.title') },
@@ -400,7 +397,24 @@ export default function (props: IProps) {
                   width: '180px',
                   render: (text: string, record: assetsType) => (
                     <div className='table-operator-area'>
-                      <div
+                      <Button size='small' href={record.dashboard}>
+                        监控
+                      </Button>
+                      <Button
+                        size='small'
+                        onClick={async () => {
+                          PromQueryBuilderItemModal({
+                            range,
+                            datasourceValue: 1,
+                            value: record.id.toString(),
+                            type: record.type,
+                          });
+                        }}
+                      >
+                        {t('指标')}
+                      </Button>
+                      <Button
+                        size='small'
                         className='table-operator-area-warning'
                         onClick={async () => {
                           Modal.confirm({
@@ -416,21 +430,7 @@ export default function (props: IProps) {
                         }}
                       >
                         {t('common:btn.delete')}
-                      </div>
-                      <div
-                        onClick={async () => {
-                          setAssetId(record.id);
-                          PromQueryBuilderItemModal({
-                            range,                            
-                            datasourceValue:2,
-                            value:""+record.id,
-                            type:record.type,
-                            onChange: metricRender,
-                          });
-                        }}
-                      >
-                        {t('指标设置')}
-                      </div>
+                      </Button>
                     </div>
                   ),
                 },

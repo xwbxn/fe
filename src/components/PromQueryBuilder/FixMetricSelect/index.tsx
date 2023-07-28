@@ -6,22 +6,24 @@ import FormItem from '../components/FormItem';
 
 interface IProps {
   datasourceValue: number;
-  metrics: string[];
   params: {
     start: number;
     end: number;
+    match?: string[];
   };
   value?: string;
   onChange: (val: string) => void;
 }
 
 export default function index(props: IProps) {
-  const { datasourceValue,metrics, params, value, onChange } = props;
-  const [metricData, setMetricData] = useState<string[]>(metrics);
+  const { datasourceValue, params, value, onChange } = props;
+  const [metricData, setMetricData] = useState<string[]>([]);
   const [searchValue, setSearchValue] = useState<string | undefined>();
 
   useEffect(() => {
-
+    getMetric(params, datasourceValue).then((res) => {
+      setMetricData(res.data);
+    });
   }, []);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function index(props: IProps) {
   }, [value]);
 
   return (
-    <FormItem  label='指标'  >
+    <FormItem label='指标'>
       <AutoComplete
         style={{ width: '100%' }}
         options={_.map(metricData, (item) => {
@@ -38,7 +40,7 @@ export default function index(props: IProps) {
           };
         })}
         value={searchValue}
-        placeholder={'请选择指标'}   //添加提示
+        placeholder={'请选择指标'} //添加提示
         filterOption={(inputValue, option) => {
           if (option && option.value && typeof option.value === 'string') {
             return option.value.indexOf(inputValue) !== -1;

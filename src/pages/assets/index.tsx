@@ -18,6 +18,8 @@ import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import classNames from 'classnames';
 import { getBusiGroups } from '@/services/common';
+import PromQueryBuilderItemModal from '@/components/PromQueryBuilder/PromQueryBuilderItemModal';
+import { IRawTimeRange } from '@/components/TimeRangePicker';
 
 export { Add, Edit };
 
@@ -323,6 +325,7 @@ export default function () {
   const history = useHistory();
   const [searchVal, setSearchVal] = useState('');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+  const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   useEffect(() => {
     getAssets(curBusiId, searchVal, null).then((res) => {
@@ -488,7 +491,24 @@ export default function () {
                   width: '180px',
                   render: (text: string, record: assetsType) => (
                     <div className='table-operator-area'>
-                      <div
+                      <Button size='small' href={record.dashboard}>
+                        监控
+                      </Button>
+                      <Button
+                        size='small'
+                        onClick={async () => {
+                          PromQueryBuilderItemModal({
+                            range,
+                            datasourceValue: 1,
+                            value: record.id.toString(),
+                            type: record.type,
+                          });
+                        }}
+                      >
+                        {t('指标')}
+                      </Button>
+                      <Button
+                        size='small'
                         className='table-operator-area-warning'
                         onClick={async () => {
                           Modal.confirm({
@@ -498,13 +518,13 @@ export default function () {
                               message.success(t('common:success.delete'));
                               setRefreshKey(_.uniqueId('refreshKey_'));
                             },
+
                             onCancel() {},
                           });
                         }}
                       >
                         {t('common:btn.delete')}
-                      </div>
-                      <a href={record.dashboard}>监控</a>
+                      </Button>
                     </div>
                   ),
                 },

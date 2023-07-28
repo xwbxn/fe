@@ -17,6 +17,7 @@
 import _ from 'lodash';
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
+import { stringify } from 'query-string';
 
 // 仪表盘列表
 export const getDashboards = function (id: number | string) {
@@ -196,6 +197,7 @@ export const getMetric = function (data = {}, datasourceValue: number) {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
+    paramsSerializer: (params) => stringify(params, { arrayFormat: 'bracket' })
   });
 };
 
