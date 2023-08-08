@@ -73,7 +73,6 @@ import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
 import IBEX from '@/pages/help/NotificationSettings/IBEX';
-import Grafana from '@/pages/grafana'
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 // @ts-ignore
@@ -194,8 +193,6 @@ export default function Content() {
         <Route exact path='/inspection/applylist' component={InspectionApplyList} />
         <Route exact path='/inspection/plans/add' component={InspectionPlansAdd} /> */}
         <Route exact path='/permissions' component={Permissions} />
-
-        <Route exact path='/dashboard-grafana' component={Grafana} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
