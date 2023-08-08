@@ -16,9 +16,9 @@ import { Logout } from '@/services/login';
 const getMenuList = (t) => {
   const menuList = [
     {
-      key: '/home',
+      key: 'home',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
-      label: t('首页')
+      label: t('首页'),
     },
     {
       key: 'targets',
@@ -378,6 +378,9 @@ export default function () {
   };
 
   const handleClick = (item) => {
+    if((item.key as string) === "home") {
+      window.location.href = '/prod-api/'
+    }
     if ((item.key as string).startsWith('/')) {
       history.push(item.key as string);
     }
