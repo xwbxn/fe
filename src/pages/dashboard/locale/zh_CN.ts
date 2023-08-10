@@ -30,6 +30,9 @@ const zh_CN = {
     label: '仪表盘 JSON',
     import_grafana: '导入 Grafana 仪表盘 JSON',
     import_grafana_tip: '目前只支持导入 v8+ 版本的仪表盘配置，导入完的图表只支持夜莺目前支持的图表类型和功能',
+    import_grafana_tip_version_error: '不支持导入小于 v7 版本的仪表盘配置',
+    import_grafana_tip_version_warning: '导入小于 v8 版本的仪表盘配置，可能会有部分图表不支持，以及图表无法正常渲染问题',
+    continueToImport: '继续导入',
   },
   link: {
     title: '仪表盘链接',
@@ -122,6 +125,12 @@ const zh_CN = {
         isNewBlank: '是否新窗口打开',
       },
       description: '备注',
+      repeatOptions: {
+        title: '图表重复',
+        byVariable: '变量',
+        byVariableTip: '根据变量的值来重复图表',
+        maxPerRow: '每行最多显示',
+      },
     },
     options: {
       legend: {
@@ -291,6 +300,7 @@ const zh_CN = {
   },
   detail: {
     datasource_empty: '没有数据源信息，请先配置数据源',
+    invalidTimeRange: '无效的 __from 和 __to 值',
   },
 };
 export default zh_CN;

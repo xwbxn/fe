@@ -30,6 +30,9 @@ const en_US = {
     label: 'Dashboard JSON',
     import_grafana: 'Import Grafana dashboard JSON',
     import_grafana_tip: 'Currently only support import dashboard config of v8+ version, imported panels only support the chart types and features that n9e currently supports',
+    import_grafana_tip_version_error: 'Import of dashboard config less than v7 version is not supported',
+    import_grafana_tip_version_warning: 'The imported dashboard config version is less than v8, some panels may not be displayed properly, do you want to continue importing?',
+    continueToImport: 'Continue to import',
   },
   link: {
     title: 'Links',
@@ -122,6 +125,12 @@ const en_US = {
         isNewBlank: 'Open in new tab',
       },
       description: 'Description',
+      repeatOptions: {
+        title: 'Repeat options',
+        byVariable: 'Repeat by variable',
+        byVariableTip: 'Repeat the panel for each value of the variable',
+        maxPerRow: 'Max per row',
+      },
     },
     options: {
       legend: {
@@ -281,6 +290,7 @@ const en_US = {
   },
   detail: {
     datasource_empty: 'Please configure the data source first',
+    invalidTimeRange: 'Invalid __from and __to values',
   },
 };
 export default en_US;
