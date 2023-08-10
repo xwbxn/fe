@@ -73,9 +73,9 @@ export interface ICommonState {
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
-  organizeId:number;
+  organizationId:number;
   setCurBusiId: (id: number) => void;
-  setOrganizeId:(id: number) => void;
+  setOrganizationId:(id: number) => void;
   profile: IProfile;
   setProfile: (profile: IProfile) => void;
   licenseRulesRemaining?: number;
@@ -129,11 +129,11 @@ function App() {
       window.localStorage.setItem('curBusiId', String(id));
       setCommonState((state) => ({ ...state, curBusiId: id }));
     },
-    organizeId:window.localStorage.getItem('organizeId') ? Number(window.localStorage.getItem('organizeId')) : 0,
+    organizationId:window.localStorage.getItem('organizationId') ? Number(window.localStorage.getItem('organizationId')) : 0,
 
-    setOrganizeId:(id: number) => {
-      window.localStorage.setItem('organizeId', String(id));
-      setCommonState((state) => ({ ...state, organizeId: id }));
+    setOrganizationId:(id: number) => {
+      window.localStorage.setItem('organizationId', String(id));
+      setCommonState((state) => ({ ...state, organizationId: id }));
     },
     profile: {} as IProfile,
     setProfile: (profile: IProfile) => {
@@ -162,9 +162,9 @@ function App() {
             versions = await getVersions();
           }
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
-          const defaultOrganizeId = commonState.organizeId || 0;
+          const defaultOrganizationId = commonState.organizationId || 0;
           window.localStorage.setItem('curBusiId', String(defaultBusiId));
-          window.localStorage.setItem('organizeId', String(defaultOrganizeId));
+          window.localStorage.setItem('organizationId', String(defaultOrganizationId));
           initialized.current = true;
           setCommonState((state) => {
             return {
@@ -175,7 +175,7 @@ function App() {
               groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
-              organizeId:defaultOrganizeId,
+              organizationId:defaultOrganizationId,
               licenseRulesRemaining,
               licenseExpireDays,
               licenseExpired: licenseExpireDays !== undefined && licenseExpireDays <= 0,

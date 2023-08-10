@@ -3,7 +3,7 @@ import { Alert, Form, Input, Modal, Select, Tag, Tooltip, TreeSelect } from 'ant
 import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
 import { debounce } from 'lodash';
-import { bindTags, deleteAssets, getAssetsTags, moveTargetBusi, unbindTags, updateAssetNote, changeAssetOrganize } from '@/services/assets';
+import { bindTags, deleteAssets, getAssetsTags, moveTargetBusi, unbindTags, updateAssetNote, changeAssetOrganization } from '@/services/assets';
 import { getBusiGroups } from '@/services/common';
 import { OperateType } from './index';
 
@@ -117,7 +117,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   const changeOrganizeDetail = () => {
     return {
       operateTitle: t('变更资产所属组织树'),
-      requestFunc: changeAssetOrganize,
+      requestFunc: changeAssetOrganization,
       isFormItem: true,
       render() {
         return (

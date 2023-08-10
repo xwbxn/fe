@@ -2,11 +2,11 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import { assetsType } from '@/store/assetsInterfaces';
 
-export const getAssets = function (bgid, query, organize_id) {
+export const getAssets = function (bgid, query, organization_id) {
     return request("/api/n9e/assets", {
         method: RequestMethod.Get,
         params: {
-            bgid, query, organize_id
+            bgid, query, organization_id
         }
     })
 }
@@ -25,7 +25,7 @@ export const addAsset = function (data: assetsType) {
 }
 
 export const putOptionalMetrics = function (data) {
-    return request("/api/n9e/assets/set/optmetrics", {
+    return request("/api/n9e/assets/optmetrics", {
         method: RequestMethod.Put,
         data
     })
@@ -115,39 +115,39 @@ export function updateAssetNote(data) {
     });
 }
 
-export function getOrganizeTree(data) {
-    return request(`/api/n9e/organize/list`, {
+export function getOrganizationTree(data) {
+    return request(`/api/n9e/organization`, {
         method: RequestMethod.Get,
         data
     });
 }
 
-export const addOrganize = function (data) {
-    return request("/api/n9e/organize/add", {
+export const addOrganization = function (data) {
+    return request("/api/n9e/organization", {
         method: RequestMethod.Post,
         data
     })
 }
 
 //修改
-export const updateOrganize = function (id, data) {
-    return request(`/api/n9e/organize/` + id, {
+export const updateOrganization = function (data) {
+    return request(`/api/n9e/organization`, {
         method: RequestMethod.Put,
         data
     })
 }
 //删除
-export const deleteOrganize = function (id) {
-    return request(`/api/n9e/organize/del/` + id, {//organize
+export const deleteOrganization = function (id) {
+    return request(`/api/n9e/organization/${id}`, {
         method: RequestMethod.Delete
     })
 }
 
 
-//修改
-export const changeAssetOrganize = function (data) {
-    return request(`/api/n9e/assets/updatesOrganize`, {//organize
-        method: RequestMethod.Post,
+//修改资产所属组织
+export const changeAssetOrganization = function (data) {
+    return request(`/api/n9e/assets/orgnazation`, {
+        method: RequestMethod.Put,
         data
     })
 }

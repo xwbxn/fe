@@ -14,7 +14,7 @@ import CodeMirror from '@uiw/react-codemirror';
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [organizeId] = useState<number>(commonState.organizeId);
+  const [organizeId] = useState<number>(commonState.organizationId);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);

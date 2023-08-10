@@ -14,7 +14,7 @@ import _ from 'lodash';
 import Add from './Add';
 import Edit from './Edit';
 import { assetsType } from '@/store/assetsInterfaces';
-import { deleteAssets, getAssets, getOrganizeTree, updateOrganize, deleteOrganize, addOrganize } from '@/services/assets';
+import { deleteAssets, getAssets, getOrganizationTree, updateOrganization, deleteOrganization, addOrganization } from '@/services/assets';
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -65,7 +65,7 @@ export default function (props: IProps) {
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
-  const [selectedOrganizeId, setSelectedOrganizeId] = useState(0);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState(0);
   const [modifySwitch, setModifySwitch] = useState(true);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
@@ -84,17 +84,17 @@ export default function (props: IProps) {
   const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
 
   const loadingTree = () => {
-    getOrganizeTree({}).then(({ dat }) => {
+    getOrganizationTree({}).then(({ dat }) => {
       treeData[0].children = dat || [];
       setTreeData(treeData.slice());
     });
   };
 
   useEffect(() => {
-    getAssets(-1, searchVal, selectedOrganizeId).then((res) => {
+    getAssets(-1, searchVal, selectedOrganizationId).then((res) => {
       setList(res.dat);
     });
-  }, [searchVal, refreshKey, selectedOrganizeId]);
+  }, [searchVal, refreshKey, selectedOrganizationId]);
 
   useEffect(() => {
     setExpandedKeys([0]);
@@ -188,7 +188,7 @@ export default function (props: IProps) {
         id: node.id,
         name: curValue,
       };
-      updateOrganize(node.id, param).then(() => {
+      updateOrganization(param).then(() => {
         loadingTree();
       });
     } else {
@@ -196,7 +196,7 @@ export default function (props: IProps) {
         parent_id: node.parent_id,
         name: curValue,
       };
-      addOrganize(param).then(() => {
+      addOrganization(param).then(() => {
         loadingTree();
       });
     }
@@ -230,7 +230,7 @@ export default function (props: IProps) {
   };
 
   const deleteNode = (node) => {
-    deleteOrganize(node.id).then(() => {
+    deleteOrganization(node.id).then(() => {
       loadingTree();
     });
   };
@@ -254,7 +254,7 @@ export default function (props: IProps) {
           <Tree
             onSelect={(keys, e) => {
               setSelectedKeys(keys);
-              setSelectedOrganizeId(e.node.id);
+              setSelectedOrganizationId(e.node.id);
             }}
             titleRender={titleRender}
             treeData={treeData}
@@ -289,9 +289,9 @@ export default function (props: IProps) {
                 <Button
                   type='primary'
                   onClick={() => {
-                    if (selectedOrganizeId >= 0) {
-                      commonState.setOrganizeId(selectedOrganizeId);
-                      history.push(`/assetmgt/add/${selectedOrganizeId}`);
+                    if (selectedOrganizationId >= 0) {
+                      commonState.setOrganizationId(selectedOrganizationId);
+                      history.push(`/assetmgt/add/${selectedOrganizationId}`);
                     } else {
                       message.open({
                         type: 'error',
