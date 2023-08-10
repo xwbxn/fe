@@ -7,7 +7,7 @@ import { IVariable } from '../../VariableConfig/definition';
 import replaceExpressionBracket from '../utils/replaceExpressionBracket';
 import { completeBreakpoints, getSerieName } from './utils';
 import replaceFieldWithVariable from '../utils/replaceFieldWithVariable';
-import { replaceExpressionVars } from '../../VariableConfig/constant';
+import { replaceExpressionVars, getOptionsList } from '../../VariableConfig/constant';
 
 interface IOptions {
   id?: string; // panelId
@@ -54,7 +54,21 @@ export default async function prometheusQuery(options: IOptions) {
       start = start - (start % _step!);
       end = end - (end % _step!);
 
-      const realExpr = variableConfig ? replaceFieldWithVariable(dashboardId, target.expr, variableConfig, scopedVars) : target.expr;
+      const realExpr = variableConfig
+        ? replaceFieldWithVariable(
+            dashboardId,
+            target.expr,
+            getOptionsList(
+              {
+                dashboardId,
+                variableConfigWithOptions: variableConfig,
+              },
+              time,
+              _step,
+            ),
+            scopedVars,
+          )
+        : target.expr;
       if (realExpr) {
         if (target.instant) {
           batchInstantParams.push({
@@ -114,7 +128,7 @@ export default async function prometheusQuery(options: IOptions) {
               name: target?.legend ? replaceExpressionBracket(target?.legend, serie.metric) : getSerieName(serie.metric),
               metric: serie.metric,
               expr: item.expr,
-              data: !spanNulls ? completeBreakpoints(_step, [serie.value]) : [serie.value],
+              data: serie.values ? serie.values : [serie.value],
             });
           });
         }

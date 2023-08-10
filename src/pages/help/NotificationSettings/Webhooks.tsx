@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Alert, Form, Input, Switch, Button, Space, InputNumber, Row, Col, message } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined, CloseOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import _ from 'lodash';
 import { getWebhooks, putWebhooks } from './services';
 
@@ -123,7 +123,7 @@ export default function Webhooks() {
                       </Form.List>
                       <Space align='baseline'>
                         {t('webhooks.skip_verify')}
-                        <Form.Item {...field} name={[field.name, 'skip_verify']} noStyle>
+                        <Form.Item {...field} name={[field.name, 'skip_verify']} noStyle valuePropName='checked'>
                           <Switch />
                         </Form.Item>
                       </Space>
@@ -178,6 +178,21 @@ export default function Webhooks() {
             </Button>
           </div>
         </Form>
+      </div>
+      <div className='webhooks-doc'>
+        <Alert
+          type='info'
+          message={
+            <Trans
+              ns='notificationSettings'
+              i18nKey='webhooks.help'
+              components={{
+                a: <a href='https://console.flashcat.cloud/?from=n9e' target='_blank' />,
+                br: <br />,
+              }}
+            />
+          }
+        />
       </div>
     </div>
   );

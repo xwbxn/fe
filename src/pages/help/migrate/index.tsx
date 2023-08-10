@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { Button, Table, Tag, Alert } from 'antd';
 import moment from 'moment';
 import _ from 'lodash';
@@ -72,9 +72,17 @@ export default function index() {
                   setSettingOpen(true);
                 }}
               >
-                迁移
+                {t('migrate')}
               </Button>
             </div>
+            <Alert
+              message={
+                <div>
+                  <Trans ns='migrationDashboard' i18nKey='help' components={{ br: <br /> }} />
+                </div>
+              }
+              type='warning'
+            />
             <Table
               size='small'
               loading={loading}
