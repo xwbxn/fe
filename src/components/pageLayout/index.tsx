@@ -23,6 +23,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Logout } from '@/services/login';
 import AdvancedWrap, { License } from '@/components/AdvancedWrap';
 import { CommonStateContext } from '@/App';
+import Version from './Version';
 import './index.less';
 import './locale';
 

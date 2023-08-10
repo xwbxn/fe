@@ -102,7 +102,7 @@ const getMenuList = (t) => {
           label: t('快捷视图'),
         },
         {
-          key: import.meta.env['VITE_IS_DS_SETTING'] ? '/plus-recording-rules' : '/recording-rules',
+          key: '/recording-rules',
           label: t('记录规则'),
         },
       ],
@@ -261,8 +261,9 @@ const getMenuList = (t) => {
       ],
     },
   ];
-  if (import.meta.env['VITE_IS_COLLECT']) {
+  if (import.meta.env['VITE_IS_PRO']) {
     const targets = _.find(menuList, (item) => item.key === 'targets');
+
     if (targets) {
       targets.children?.push({
         key: '/collects',
