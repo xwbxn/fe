@@ -352,6 +352,7 @@ export default function () {
                     active: curBusiId === 0,
                   })}
                   onClick={() => {
+                    commonState.setCurBusiId(0);
                     setCurBusiId(0);
                   }}
                 >
@@ -363,6 +364,7 @@ export default function () {
                     active: curBusiId === -1,
                   })}
                   onClick={() => {
+                    commonState.setCurBusiId(-1);
                     setCurBusiId(-1);
                   }}
                 >

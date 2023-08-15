@@ -65,10 +65,10 @@ export default function (props: IProps) {
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState(0);
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState(commonState.organizationId);
   const [modifySwitch, setModifySwitch] = useState(true);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([selectedOrganizationId]);
   const [searchVal, setSearchVal] = useState('');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [treeData, setTreeData] = useState<OrgType[]>([
@@ -87,6 +87,7 @@ export default function (props: IProps) {
     getOrganizationTree({}).then(({ dat }) => {
       treeData[0].children = dat || [];
       setTreeData(treeData.slice());
+      setSelectedKeys([selectedOrganizationId]);
     });
   };
 
@@ -255,6 +256,7 @@ export default function (props: IProps) {
             onSelect={(keys, e) => {
               setSelectedKeys(keys);
               setSelectedOrganizationId(e.node.id);
+              commonState.setOrganizationId(e.node.id);
             }}
             titleRender={titleRender}
             treeData={treeData}
