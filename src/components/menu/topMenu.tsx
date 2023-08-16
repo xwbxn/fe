@@ -52,10 +52,6 @@ const getMenuList = (t) => {
           key: '/dashboards-built-in',
           label: t('内置仪表盘'),
         },
-        // {
-        //   key: '/dashboard-grafana',
-        //   label: t('grafana'),
-        // },
       ],
     },
 
@@ -279,12 +275,6 @@ const getMenuList = (t) => {
               key: '/help/servers',
               label: t('告警引擎'),
             },
-            {
-              key: '/help/migrate',
-              label: t('仪表盘迁移'),
-            },
-           
-
           ]
         }, 
 
