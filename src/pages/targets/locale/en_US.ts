@@ -26,6 +26,7 @@ const en_US = {
     No heartbeat within 3 minutes: red
   `,
   remote_addr: 'Remote Addr',
+  current_version: 'Client Ver',
   note: 'Note',
   ip_address: 'Ip Address',
   organize_columns: {

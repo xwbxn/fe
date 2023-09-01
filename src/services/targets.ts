@@ -84,9 +84,26 @@ export function getTargetList(data) {
   });
 }
 
-export function getTargetInstallUrl(params) {
-  return request(`/api/n9e/categraf/getstart`, {
-    method: RequestMethod.Get,
-    params
+// 获取探针可使用版本
+export function getTargetVersion(ident) {
+  return request(`/api/n9e/target/${ident}/version`, {
+    method: RequestMethod.Get
+  })
+}
+
+// 更新探针目标版本
+export function updateTargetVersion(ident, data) {
+  return request(`/api/n9e/target/${ident}/version`, {
+    method: RequestMethod.Put,
+    data
+  })
+}
+
+// 上传探针版本
+export function uploadTargetVersion(data) {
+  return request(`/api/n9e/target/version`, {
+    method: RequestMethod.Post,
+    requestType: "form",
+    data
   })
 }

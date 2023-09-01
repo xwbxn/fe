@@ -262,7 +262,10 @@ const getMenuList = (t) => {
           key: '/help/version',
           label: t('系统版本'),
         },
-
+        {
+          key: '/target/version',
+          label: t('客户端版本')
+        },
         {
           key: '/help/other',
           label: t('其它设置'),

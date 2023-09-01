@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Table, Tag, Tooltip, Space, Input, Dropdown, Menu, Button, Modal, message, Select } from 'antd';
+import { Table, Tag, Tooltip, Space, Input, Dropdown, Menu, Button, Modal, message, Select, MenuProps } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, DownOutlined, ReloadOutlined, CopyOutlined, ApartmentOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useAntdTable } from 'ahooks';
@@ -7,7 +7,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { useTranslation, Trans } from 'react-i18next';
 import { BusiGroupItem } from '@/store/commonInterface';
-import { getMonObjectList, getTargetInstallUrl } from '@/services/targets';
+import { getMonObjectList, getTargetVersion, updateTargetVersion } from '@/services/targets';
 import { timeFormatter } from '@/pages/dashboard/Renderer/utils/valueFormatter';
 import clipboard from './clipboard';
 import OrganizeColumns from './OrganizeColumns';
@@ -70,6 +70,7 @@ export default function List(props: IProps) {
   const [collectsDrawerVisible, setCollectsDrawerVisible] = useState(false);
   const [collectsDrawerIdent, setCollectsDrawerIdent] = useState('');
   const [downtime, setDowntime] = useState();
+  const [versionOptions, setVersionOptions] = useState<{ label: string; value: string }[]>([]);
   const columns: ColumnsType<any> = [
     {
       title: (
@@ -385,8 +386,45 @@ export default function List(props: IProps) {
         title: t('ip_address'),
         dataIndex: 'ip_address',
         render: (val, reocrd) => {
-          if (reocrd.ip_address === "") return 'unknown';
+          if (reocrd.ip_address === '') return 'unknown';
           return val;
+        },
+      });
+    }
+    if (item.name === 'current_version') {
+      columns.push({
+        title: t('current_version'),
+        dataIndex: 'current_version',
+        render: (val, record) => {
+          if (record.current_version === '') return 'unknown';
+          return (
+            <Select
+              bordered={false}
+              value={val}
+              options={versionOptions}
+              onDropdownVisibleChange={(open) => {
+                if (open) {
+                  getTargetVersion(record.ident).then((res) => {
+                    setVersionOptions(
+                      res.dat.map((v) => {
+                        return { label: v, value: v };
+                      }),
+                    );
+                  });
+                }
+              }}
+              onSelect={(val) => {
+                Modal.confirm({
+                  title: '确定变更探针版本吗?',
+                  onOk: () => {
+                    updateTargetVersion(record.ident, { latest_version: val }).then(() => {
+                      setRefreshFlag(_.uniqueId('refreshFlag_'));
+                    });
+                  },
+                });
+              }}
+            ></Select>
+          );
         },
       });
     }
@@ -416,19 +454,6 @@ export default function List(props: IProps) {
     manual: true,
     defaultPageSize: 30,
   });
-
-  const downloadTarget = () => {
-    const group = busiGroups.find(v => v.id === curBusiId)
-    if (group) {
-      getTargetInstallUrl({ busigroup: group.label_value }).then(res => {
-        Modal.info({
-          title: `复制脚本至服务器使用管理员权限执行,安装 ${group.name} 的探针`,
-          content: res.dat.url + "|sh",
-          width: 600
-        })
-      })
-    }
-  };
 
   useEffect(() => {
     run({
@@ -511,9 +536,6 @@ export default function List(props: IProps) {
               {t('common:btn.batch_operations')} <DownOutlined />
             </Button>
           </Dropdown>
-          <Button onClick={downloadTarget}>
-              {t('common:btn.download')}
-            </Button>
         </Space>
       </div>
       <Table

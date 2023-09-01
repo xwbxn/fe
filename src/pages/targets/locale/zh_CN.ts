@@ -27,6 +27,7 @@ const zh_CN = {
   remote_addr: '来源IP',
   note: '备注',
   ip_address: 'IP地址',
+  current_version: '探针版本',
   organize_columns: {
     title: '显示列',
   },

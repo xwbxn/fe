@@ -46,8 +46,8 @@ import historyEvents from '@/pages/historyEvents';
 import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
 
-import AssetMgt, {Add as AddInfoAsset} from '@/pages/assetmgt/index';
-import Assets, {Add as AddAsset, Edit as EditAsset} from '@/pages/assets';
+import AssetMgt, { Add as AddInfoAsset } from '@/pages/assetmgt/index';
+import Assets, { Add as AddAsset, Edit as EditAsset } from '@/pages/assets';
 import Demo from '@/pages/demo';
 import TaskTpl from '@/pages/taskTpl';
 import TaskTplAdd from '@/pages/taskTpl/add';
@@ -73,6 +73,7 @@ import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
 import IBEX from '@/pages/help/NotificationSettings/IBEX';
+import TargetVersion from '@/pages/targets/version';
 import { dynamicPackages, Entry } from '@/utils';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
@@ -168,7 +169,7 @@ export default function Content() {
         <Route exact path='/assetmgt/add/:orgid' component={AddInfoAsset} />
 
         <Route exact path='/assets' component={Assets} />
-        <Route exact path='/assets/add/:bgid' component={AddAsset} />        
+        <Route exact path='/assets/add/:bgid' component={AddAsset} />
         <Route exact path='/assets/:id' component={EditAsset} />
         <Route exact path='/job-tpls' component={TaskTpl} />
         <Route exact path='/job-tpls/add' component={TaskTplAdd} />
@@ -198,6 +199,8 @@ export default function Content() {
         <Route exact path='/inspection/applylist' component={InspectionApplyList} />
         <Route exact path='/inspection/plans/add' component={InspectionPlansAdd} /> */}
         <Route exact path='/permissions' component={Permissions} />
+
+        <Route exact path='/target/version' component={TargetVersion} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
