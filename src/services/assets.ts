@@ -122,6 +122,12 @@ export function getOrganizationTree(data) {
     });
 }
 
+export function getOrganizationsByIds(data) {
+    return request(`/api/n9e/organization/name`, {
+        method: RequestMethod.Post,
+        data
+    });
+}
 export const addOrganization = function (data) {
     return request("/api/n9e/organization", {
         method: RequestMethod.Post,
