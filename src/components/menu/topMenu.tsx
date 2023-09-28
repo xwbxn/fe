@@ -37,6 +37,10 @@ const getMenuList = (t) => {
           key: '/assetmgt',
           label: t('业务资产<新>'),
         },
+        {
+          key: '/devicemgt',
+          label: t('资产'),
+        },
       ],
     },
     {
@@ -277,6 +281,10 @@ const getMenuList = (t) => {
             {
               key: '/help/servers',
               label: t('告警引擎'),
+            },
+            {
+              key: '/types/dictype',
+              label: t('数据字典'),
             },
           ]
         }, 

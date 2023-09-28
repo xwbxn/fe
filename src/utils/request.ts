@@ -64,16 +64,18 @@ request.interceptors.request.use((url, options) => {
   };
 });
 
+request
 /**
  * 响应拦截
  */
 request.interceptors.response.use(
   async (response, options) => {
     const { status } = response;
-
     //来自grafana的响应在这里集中处理
     if (response.url.includes('/grafana/api')) {
+      
       if (status == 200) {
+        
         return response.clone().json().then(data => {
           return { dat: data, success: true }
         })
@@ -83,8 +85,10 @@ request.interceptors.response.use(
         })
       }
     }
-
     if (status === 200) {
+      if(options.responseType=="blob"){
+        return response       
+      }else{
       return response
         .clone()
         .json()
@@ -132,6 +136,7 @@ request.interceptors.response.use(
             }
           }
         });
+      }
     } else if (status === 401) {
       if (response.url.indexOf('/api/n9e/auth/refresh') > 0) {
         location.href = `/login${location.pathname != '/' ? '?redirect=' + location.pathname + location.search : ''}`;

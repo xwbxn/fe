@@ -45,9 +45,10 @@ import orderformDetail from '@/pages/event/orderformdetail';
 import historyEvents from '@/pages/historyEvents';
 import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
-
+import DictTypes from  '@/pages/dictType/index';
 import AssetMgt, { Add as AddInfoAsset } from '@/pages/assetmgt/index';
 import Assets, { Add as AddAsset, Edit as EditAsset } from '@/pages/assets';
+import DeviceMgt, {Add as AddInfoAssets} from '@/pages/deviceMgt/index';
 import Demo from '@/pages/demo';
 import TaskTpl from '@/pages/taskTpl';
 import TaskTplAdd from '@/pages/taskTpl/add';
@@ -167,10 +168,13 @@ export default function Content() {
 
         <Route exact path='/assetmgt' component={AssetMgt} />
         <Route exact path='/assetmgt/add/:orgid' component={AddInfoAsset} />
+        <Route exact path='/devicemgt' component={DeviceMgt} />
+        <Route exact path='/devicemgt/add/:type' component={AddInfoAssets} /> 
 
         <Route exact path='/assets' component={Assets} />
         <Route exact path='/assets/add/:bgid' component={AddAsset} />
         <Route exact path='/assets/:id' component={EditAsset} />
+        <Route exact path='/types/dictype' component={DictTypes} />
         <Route exact path='/job-tpls' component={TaskTpl} />
         <Route exact path='/job-tpls/add' component={TaskTplAdd} />
         <Route exact path='/job-tpls/add/task' component={TaskAdd} />

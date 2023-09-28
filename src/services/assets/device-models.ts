@@ -17,46 +17,28 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-const profileApi = 'api/n9e/self/profile';
-// 修改个人信息
-export const UpdateProfile = function (data: object) {
-  return request(`/${profileApi}`, {
-    method: RequestMethod.Put,
-    data,
-  });
-};
-
-export const GetProfile = function () {
-  return request(`/${profileApi}`, {
+export const getDeviceModelByCondition = function (data) {
+  return request('/api/n9e/device-model/getmodel', {
     method: RequestMethod.Get,
+    params:data
   });
 };
-
-const secretApi = 'api/n9e/self/token';
-// 获取个人秘钥
-export const GetSecret = function () {
-  return request(`/${secretApi}`, {
-    method: RequestMethod.Get,
-  });
-};
-
-export const UpdateSecret = function (data: object) {
-  return request(`/${secretApi}`, {
+// updateDeviceModel,addDeviceModel,getDeviceModelByCondition
+export const updateDeviceModel = function (data) {
+  return request('api/n9e/device-model/', {
     method: RequestMethod.Put,
-    data,
+    data
   });
 };
-
-export const CreateSecret = function () {
-  return request(`/${secretApi}`, {
+export const addDeviceModel = function (data) {
+  return request('api/n9e/device-model', {
     method: RequestMethod.Post,
+    data
   });
 };
-
-export const getUsers = function () {
-  return request('/api/n9e/user/getNames', {
-    method: RequestMethod.Get,
+export const deleteDeviceModel = function (data) {
+  return request('/api/n9e/device-model/batch-del', {
+    method: RequestMethod.Post,
+    data
   });
 };
-
-

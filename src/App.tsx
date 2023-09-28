@@ -74,8 +74,10 @@ export interface ICommonState {
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
   organizationId:number;
+  queryCondition: string;
   setCurBusiId: (id: number) => void;
   setOrganizationId:(id: number) => void;
+  setQueryCondition: (queryCondition:string) => void;
   profile: IProfile;
   setProfile: (profile: IProfile) => void;
   licenseRulesRemaining?: number;
@@ -130,10 +132,16 @@ function App() {
       setCommonState((state) => ({ ...state, curBusiId: id }));
     },
     organizationId:window.localStorage.getItem('organizationId') ? Number(window.localStorage.getItem('organizationId')) : 0,
+    
 
     setOrganizationId:(id: number) => {
       window.localStorage.setItem('organizationId', String(id));
       setCommonState((state) => ({ ...state, organizationId: id }));
+    },
+    queryCondition: window.localStorage.getItem('queryCondition')? window.localStorage.getItem('queryCondition') : '',
+    setQueryCondition:(condition: string) => {
+      window.localStorage.setItem('queryCondition', condition);
+      setCommonState((state) => ({ ...state, queryCondition: condition }));
     },
     profile: {} as IProfile,
     setProfile: (profile: IProfile) => {
@@ -163,8 +171,10 @@ function App() {
           }
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
           const defaultOrganizationId = commonState.organizationId || 0;
+          const queryCondition = commonState.queryCondition|| '';
           window.localStorage.setItem('curBusiId', String(defaultBusiId));
           window.localStorage.setItem('organizationId', String(defaultOrganizationId));
+          window.localStorage.setItem('queryCondition', queryCondition);
           initialized.current = true;
           setCommonState((state) => {
             return {
@@ -176,6 +186,7 @@ function App() {
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
               organizationId:defaultOrganizationId,
+              queryCondition: queryCondition,
               licenseRulesRemaining,
               licenseExpireDays,
               licenseExpired: licenseExpireDays !== undefined && licenseExpireDays <= 0,
