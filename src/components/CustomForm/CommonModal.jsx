@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Modal } from 'antd';
 import CommonForm from "./CommonForm";
+import "./CommonModal.less"
 //(CommonTable为通用封装的table组件)
 import { Fragment } from 'react';
 class CommonModal extends Component {
@@ -12,12 +13,13 @@ class CommonModal extends Component {
     componentDidMount() {
     }
 
+    
+
     render() {
-        
         let currentValue = this.props.defaultValue?this.props.defaultValue:{};
-        console.log("currentValue",currentValue)
+        // console.log("currentValue",currentValue)
         let title = `${this.props.operate}${this.props.Modal?.title}`
-        console.log("current props",this.props)
+        // console.log("current props",this.props)
         return (
            <>
             <Modal

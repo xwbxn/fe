@@ -2,68 +2,57 @@ import React, { createRef, useEffect, useState } from 'react';
 import './index.less';
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { OperationModal } from './OperationModal';
-import locale from 'antd/es/date-picker/locale/zh_CN';
 import { getProducersByType } from '@/services/assets/producer';
-
 import { Button, Card, Checkbox, Col, DatePicker, Form, FormInstance, Input, Modal, Radio, Row, Select, Space, Table, Tabs, TimePicker, TreeSelect, Upload, message } from 'antd';
 import { getDictValueEnum } from '@/services/system/dict';
-import {  insertAssetAlert, getAssetTableByTypeAndId,getAssetAlerts ,getAssetTreeByDeviceType, getAssetById, getAssetExtendsById } from '@/services/assets/asset';
-
+import { getAssetsTree,insertAssetAlert, getAssetTableByTypeAndId, getAssetAlerts, getAssetTreeByDeviceType, getAssetById, getAssetExtendsById } from '@/services/assets/asset';
+import { getAssetTreeBelongId } from '@/services/assets/asset-tree';
 import { getCabinetList } from '@/services/assets/device-cabinet';
-import CommonModal from './CommonModal';
-import moment from 'moment';
+import {modelsAttributes as modelsAttributes} from './device_type_models';
 
+import CommonModal from '@/components/CustomForm/CommonModal';
+import moment from 'moment';
+import { ColumnsType } from 'antd/lib/table/Table';
+import { OperateType } from './operate_type';
+import _ from 'lodash';
+import { useHistory } from 'react-router-dom';
 
 interface Props {
-  handleClick: (value, id, fields, category,recordId) => Promise<void>;  //回调函数
+  handleClick: (value, id, fields, category, recordId) => Promise<void>;  //回调函数
   text: string;   //【未使用】
   type: number;  //资产设备类型
-  formAttrbutes: any;  //加载所有的资产类型表单配置信息
   keyId: number; //资产Id， >0 则有资产信息
   options: {}    //初始化参数值 Map
 }
 
 //弹框操作 业务
-export enum OperateType {
-  ChangeOrganize = 'changeOrganize',
-  None = 'none',
-}
+// export enum OperateType {
+//   ChangeOrganize = 'changeOrganize',
+//   None = 'none',
+// }
 export default function CustomForm(props: Props) {
-  let attrs: any = props.formAttrbutes[0].models;
-  props.formAttrbutes.map(attr => {
-    if ("" + attr.type_id === "" + props.type) {
-      attrs = attr.models;
-    }
-  })
-  const [dialogIsOpen, setDiallogIsOpen] = useState<boolean>(false);
 
-  const [hasEdit, setHasEdit] = useState<boolean>(false);
-
-  const searchParams = new URLSearchParams(window.location.search);  
-
-
-  const [queryList, setQueryList] = useState<any>([]);
-
+  
+const history = useHistory();
+  let attrs: any = modelsAttributes["type_"+props.type].models;
   type LayoutType = Parameters<typeof Form>[0]['layout'];
-
+  const [modalWidth, setModalWidth] = useState<number>(650)
+  const [dialogIsOpen, setDiallogIsOpen] = useState<boolean>(false);
+  const [hasEdit, setHasEdit] = useState<boolean>(false);
+  const searchParams = new URLSearchParams(window.location.search);
+  const [queryList, setQueryList] = useState<any>([]);
   const [formLayout, setFormLayout] = useState<LayoutType>('inline');
-
   const buttonItemLayout = formLayout === 'horizontal' ? { wrapperCol: { span: 14, offset: 4 } } : null;
-
   //处理各个表单的字段和中文信息
   const [formFieldMap, setFormFieldMap] = useState<any>({});
-
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
-
   const [operateName, setOperateName] = useState<string>("");
   //弹框操作的信息
   const [operateField, setOperateField] = useState<any>({});
-
   //页面中所有表单 Ref
   const [refArr, setRefArr] = useState({});
-
   //弹框初始化数据 若存储弹框
-  const [dialogInitData, setDialogInitData] = useState();
+  const [dialogInitData, setDialogInitData] = useState<any>();
 
   const [dataMap, setDataMap] = useState({});
   //  根据字段中数据来源渲染初始化数据
@@ -82,6 +71,48 @@ export default function CustomForm(props: Props) {
   const [tabFFIndex, setTabFFIndex] = useState<string>()
   //页面表单初始化数据
   const [selectMap, setSelectMap] = useState({});
+  //页面表单运维服务项选择
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  //设备/资产信息
+  const [assetInfo, setAssetInfo] = useState<any>({});
+
+  const [assetStatus, setAssetStatus] = useState<number>(0);
+
+  const columns_maintain_services: ColumnsType<any> = [
+    {
+      title: '服务选项',
+      dataIndex: 'service_id',
+      render: (text: string) => {
+        return text;
+      },
+      className: "notshow",
+      key: 'service_id'
+    },
+
+    {
+      title: '服务选项',
+      dataIndex: 'service_name',
+      render: (text: string) => {
+        return text;
+      },
+      key: 'service_name'
+    },
+    {
+      title: '服务对象',
+      dataIndex: 'service_object',
+      key: 'service_object',
+      render: (text: string, record: any) => {
+        return <div><Input style={{ width: "180px" }} id={"service_object:" + record.service_id} defaultValue={text}></Input></div>
+      }
+    }, {
+      title: '服务期限',
+      dataIndex: 'service_expire',
+      key: 'service_expire',
+    }
+  ]
+
+
+
   //变更表单初始化
   const [alertState, setAlertState] = useState<any>({
     TableData: [],
@@ -124,80 +155,23 @@ export default function CustomForm(props: Props) {
     },
     Loading: true,
   })
-  const [alertListState, setAlertListState] = useState({
-      searchOption: [
-       {
-          type: "daterange",
-          name: "name",
-          isRequired: false,
-          label: "变更日期",
-          placeholder: "请输入变更日期",
-          value: ""
-       },{
-        type: "select",
-        name: "alertType",
-        isRequired: false,
-        label: "变更事项",
-        placeholder: "请输入角色名称",
-        option: []
-      }],
-      ButtonArr: [], 
-      Loading:false,     
-      TableData:[],
-      TableColumns: [
-        {
-          title: '管理IP',
-          dataIndex: 'management_ip',
-        },
-        {
-          title: '设备名称',
-          dataIndex: 'device_name',
-        },
-        {
-          title: '序列号',
-          dataIndex: 'serial_number',
-        },
-        {
-          title: '型号',
-          dataIndex: 'device_model_name',
-        },
-        {
-          title: '设备类型',
-          dataIndex: 'device_type_name',
-        },
-        {
-          title: '纳管状态',
-          dataIndex: 'managed_state',
-          render(val) {
-            return '未定义来源';
-          },
-        },                   
-        {
-          title: '操作',
-          width: '180px',
-          render: (e) => (
-            <></>
-          ),
-        },
-      ],    
-  })
 
-  const [assetInfo,setAssetInfo] =useState({})
 
-  const datalDealValue=(value,key,data_type,hasSelect) => {
-    if(hasSelect){
-      value =""+value;
-    }else{
-      if(value!=null && data_type=="date"){        
-        value=  moment(value*1000);//.format("YYYY-MM-DD")
-      }else if(value!=null && data_type=="timestamp"){
-        value= moment(value*1000);//.format("YYYY-MM-DD HH:mm:ss")
+
+  const datalDealValue = (value, key, data_type, hasSelect) => {
+    if (hasSelect) {
+      value = "" + value;
+    } else {
+      if (value != null && data_type == "date") {
+        value = moment(value * 1000);//.format("YYYY-MM-DD")
+      } else if (value != null && data_type == "timestamp") {
+        value = moment(value * 1000);//.format("YYYY-MM-DD HH:mm:ss")
       }
     }
-    
-    
-    return value;  
-}
+
+
+    return value;
+  }
   //变更表单编辑
   const EditTableFun = (row) => {
     let items = [{
@@ -267,10 +241,12 @@ export default function CustomForm(props: Props) {
   const rowSelection = {
 
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-       debugger
+      console.log("selectedRowKeys: " + selectedRows)
       console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      setSelectedRows(selectedRows);
+      // var name = document.getElementById('service_object:'+selectedRowKeys[0]).value;
     },
-    getCheckboxProps: (record: any) => ({       
+    getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
       name: record.name,
     }),
@@ -285,18 +261,64 @@ export default function CustomForm(props: Props) {
     }
     //初始化需要的字典---添加变更表单用
     getDictValueEnum("alert_event").then((value) => {
-       modalInitOptions["alertType"] =  value;
-       setModalInitOptions({ ...modalInitOptions });
+      modalInitOptions["alertType"] = value;
+      setModalInitOptions({ ...modalInitOptions });
     })
 
     //处理每个表单对应的字段信息为保存数据存储来判断
     dealFieldsToEveryForm(attrs);
-    if (searchParams.get("edit") != null && searchParams.get("edit")=="1" ) {      
-      setHasEdit(true)    
-   }
+    if (searchParams.get("edit") != null && searchParams.get("edit") == "1") {
+      setHasEdit(true)
+    }
 
   }, []);
 
+  const dealOnOffline=(e,status: number) => {
+    console.log("dealOnOffline",status);
+    if(status ==2){//上线
+      getAssetById(props.keyId).then(({ dat }) => {
+          let assets = new Array();  
+          assets.push(dat);
+          setDialogInitData(assets)
+          setModalWidth(1050);
+          setOperateType(OperateType.Online)         
+      })
+
+    }
+    if(status ==1){//下线
+      getAssetById(props.keyId).then(({ dat }) => {
+        setModalWidth(650);
+        // setOperateType(key as OperateType);
+        let offlineInit ={};
+        console.log("offline init: " + offlineInit)
+        getAssetsTree(assetStatus).then(({dat}) => { 
+          console.log("查询当前资产所属的树   ") 
+          offlineInit["init_tree_data"] = dat;  
+          offlineInit["init_asset_id"] = dat;         
+          let assetIds = new Array();
+          assetIds.push(dat.id);
+          getAssetTreeBelongId(assetIds).then(({dat}) => {      
+            let ids = new Array<number>();
+            dat.forEach((item)=>{
+              ids.push(item.id);
+            });
+            offlineInit["init_catalog_id"] = ids; 
+            setDialogInitData(offlineInit);
+            setOperateType(OperateType.Offline);
+          })
+  
+  
+        })
+
+
+      })
+
+    }
+      
+    
+
+
+  };
 
   const dealFieldsToEveryForm = (attrs) => {
     //处理中文和每个表单每个块要提交的字段信息
@@ -310,7 +332,7 @@ export default function CustomForm(props: Props) {
             name: property.name,
             has_next: false,
             name_cn: property.label,
-            data_type:property.data_type?property.data_type:"string"
+            data_type: property.data_type ? property.data_type : "string"
           })
         })
         child.push({
@@ -323,17 +345,20 @@ export default function CustomForm(props: Props) {
       formFieldMap[modelF.id] = child;
     })
     setFormFieldMap({ ...formFieldMap })
+
+    // debugger
+
   }
 
 
   useEffect(() => {
-    if(tabFIndex.indexOf("component-")<0){
-       tabRender(tabFIndex);
+    if (tabFIndex.indexOf("component-") < 0) {
+      tabRender(tabFIndex);
     }
     // if(tabFIndex==="form_base_position "){
     //   loadingAlertQuery(null);
     // }
-    
+
   }, [tabFIndex]);
 
   useEffect(() => {
@@ -342,36 +367,33 @@ export default function CustomForm(props: Props) {
 
 
   const addAlert = (event) => {
-    // setDiallogIsOpen(true);
-    console.log("assetInfo",assetInfo);
-
-
+    console.log("assetInfo", assetInfo);
     EditTableFun({});
   }
 
-  const loadingAlertQuery= (values) => {
-      let others :any ={};
-      let param ={
-              asset: props.keyId,
-              page: 1,
-              limit: 10,
+  const loadingAlertQuery = (values) => {
+    let others: any = {};
+    let param = {
+      asset: props.keyId,
+      page: 1,
+      limit: 10,
+    }
+    if (values != null) {
+      if (values.alter_at != undefined && values.alter_at.length > 0) {
+        others.start = moment(moment(values.alter_at[0]).format('YYYY-MM-DD HH:mm:ss')).valueOf() / 1000;
+        others.end = moment(moment(values.alter_at[1]).format('YYYY-MM-DD HH:mm:ss')).valueOf() / 1000;
       }
-      if(values!=null){
-        if(values.alter_at!=undefined && values.alter_at.length>0) {
-          others.start =moment(moment(values.alter_at[0]).format('YYYY-MM-DD HH:mm:ss')).valueOf()/1000;
-          others.end =moment(moment(values.alter_at[1]).format('YYYY-MM-DD HH:mm:ss')).valueOf()/1000;
-        }
-        if(values.alter_event_key!=undefined ){
-          others.event =values.alter_event_key;
-        }
+      if (values.alter_event_key != undefined) {
+        others.event = values.alter_event_key;
       }
-      
-      getAssetAlerts({...param, ...others}).then(({dat,err}) => {     
-       if(err==""){
-         setQueryList(dat.list);
-       }         
-      });
-    
+    }
+
+    getAssetAlerts({ ...param, ...others }).then(({ dat, err }) => {
+      if (err == "") {
+        setQueryList(dat.list);
+      }
+    });
+
   }
 
   useEffect(() => {
@@ -382,11 +404,11 @@ export default function CustomForm(props: Props) {
           if (item.source == 'dict') {
             getDictValueEnum(item.refer).then((value) => {
               let options = new Array();
-              if (item.name == "ext_maintain_services") {
+              if (item.name == "service_config") {
                 value.forEach((item) => {
                   let option = {
                     service_id: item.value,
-                    service_name: item.value,
+                    service_name: item.label,
                     service_object: '整机',
                     service_expire: ''
                   }
@@ -413,7 +435,7 @@ export default function CustomForm(props: Props) {
       }
 
     }
-    
+
     // console.log("initOptions", initOptions)
 
     // console.log("setSelectMap",selectMap);
@@ -430,6 +452,7 @@ export default function CustomForm(props: Props) {
       getAssetById(props.keyId).then(({ dat }) => {
         formValues["group_base"][0] = dat;
         formValues["group_position"][0] = dat;
+        setAssetStatus(dat.device_status);
         // console.log("formValues", formValues)
         refForm.current?.setFieldsValue(formValues);
         let modelList = new Array();
@@ -443,7 +466,7 @@ export default function CustomForm(props: Props) {
         });
         selectMap[formId + ".device_model"] = modelList;
         setSelectMap({ ...selectMap })
-        getCabinetList(dat.equipment_room).then((res) => {          
+        getCabinetList(dat.equipment_room).then((res) => {
           let cabinetList = new Array()
           res.dat.forEach((item) => {
             cabinetList.push({
@@ -453,7 +476,8 @@ export default function CustomForm(props: Props) {
           })
           selectMap[formId + ".owning_cabinet"] = cabinetList;
           setSelectMap({ ...selectMap });
-        });      
+        });
+
         setAssetInfo(formValues);
       })
     }
@@ -478,7 +502,7 @@ export default function CustomForm(props: Props) {
           let formValues = refForm.getFieldsValue();
           // console.log("formValues",formValues)
           for (let i = 0; i < cfg.items.length; i++) {
-            let id = cfg.items[i].id;            
+            let id = cfg.items[i].id;
             if (refForm != null && categoryData[id]) {
               formValues[id] = categoryData[id];
             }
@@ -517,32 +541,32 @@ export default function CustomForm(props: Props) {
 
   //点击 一级导航 TAB标记
   const tabClick = (key: string, parentId?: any) => {
-    if(props.keyId < 1){
+    if (props.keyId < 1) {
       message.error("未保存基本信息，不能编辑其他信息")
-      return 
+      return
     }
     //初始化数据，来源资产扩展信息 根据大类来局部加载数据
-    if (parentId == "0" && key.indexOf("component-") > -1){
+    if (parentId == "0" && key.indexOf("component-") > -1) {
       setTabFIndex(key)
       //不处理表单数据
-    }else if (parentId == "0" && key.indexOf("table-") > -1) {
+    } else if (parentId == "0" && key.indexOf("table-") > -1) {
       // 处理不同数据源的信息
-      let keys = key.split("-");      
+      let keys = key.split("-");
       let formId = key;
       formIdMap[formId] = null;
-      setFormIdMap({...formIdMap})
+      setFormIdMap({ ...formIdMap })
       let fieldMap = formFieldMap[formId];
-      console.log("fieldMap",fieldMap);
+      console.log("fieldMap", fieldMap);
       getAssetTableByTypeAndId(keys[1], props.keyId).then((res) => {
-         console.log("优化处理--------对应不同的设备");
-        if(res!=null && res.dat!=null){
+        console.log("优化处理--------对应不同的设备");
+        if (res != null && res.dat != null) {
           const valueMap = new Map()
           for (const k of Object.keys(res.dat)) {
             valueMap.set(k, res.dat[k])
           }
           //优化处理--------对应不同的设备
-          if(key=="table-maintenance" || res.dat.maintenance_type!=undefined) {
-            getProducersByType(res.dat.maintenance_type).then(({dat})=>{
+          if (key == "table-maintenance" || res.dat.maintenance_type != undefined) {
+            getProducersByType(res.dat.maintenance_type).then(({ dat }) => {
               let list = new Array()
               dat.forEach((item) => {
                 list.push({
@@ -555,25 +579,25 @@ export default function CustomForm(props: Props) {
             })
           }
           formIdMap[formId] = res.dat.id;
-          setFormIdMap({...formIdMap})
+          setFormIdMap({ ...formIdMap })
           let formFields = formFieldMap[formId];
           for (let index in formFields) {
             let groupFields = formFields[index];
             let rowDataMap = new Map()
             for (let itemIndex in groupFields.item) {
-                let field = groupFields.item[itemIndex];
-                rowDataMap.set(field.name, valueMap.has(field.name) ? datalDealValue(valueMap.get(field.name),field.name,field.data_type,field.type=="select"?true:false): null)
+              let field = groupFields.item[itemIndex];
+              rowDataMap.set(field.name, valueMap.has(field.name) ? datalDealValue(valueMap.get(field.name), field.name, field.data_type, field.type == "select" ? true : false) : null)
             }
             let group = new Array();
             group.push(Object.fromEntries(rowDataMap));
             categoryData[groupFields.name] = group;
-            setCategoryData({ ...categoryData });            
+            setCategoryData({ ...categoryData });
           }
 
         }
-        setTabFIndex(key);        
+        setTabFIndex(key);
       });
-      
+
 
     } else if (parentId == "0" && key.indexOf("form-") > -1) {
       let params = {
@@ -628,7 +652,7 @@ export default function CustomForm(props: Props) {
   const onFieldsChange = (formId: string, id: string, value: any, group_id, field_list_index: number) => {
     // 该方法对所有表单根据业务情况 来判断处理，每一个表单 form 每一个属性 id 来控制
     // ※※※※※※※※※后期优化部分※※※※※※※※※※
-    console.log("※※※※※※※※※后期优化部分※※※※※※※※※※",formId);
+    console.log("※※※※※※※※※后期优化部分※※※※※※※※※※", formId);
     let refForm = refArr[formId].current;
     if (formId == "form_base_position") {//处理资产基本信息的表单
       let formValues = refForm.getFieldsValue();
@@ -657,14 +681,14 @@ export default function CustomForm(props: Props) {
             formValues[group_id][field_list_index]["subtype"] = item.subtype;
             formValues[group_id][field_list_index]["outline_structure"] = item.outline_structure;
             formValues[group_id][field_list_index]["specifications"] = item.specifications;
-            formValues[group_id][field_list_index]["u_number"] = item.u_number;           
-            
+            formValues[group_id][field_list_index]["u_number"] = item.u_number;
+
           }
         });
         refForm.setFieldsValue(formValues);
       } else if (id == "equipment_room") {
         getCabinetList(value).then(({ dat }) => {
-          
+
           let cabinetList = new Array()
           dat.forEach((item) => {
             cabinetList.push({
@@ -676,10 +700,15 @@ export default function CustomForm(props: Props) {
           setSelectMap({ ...selectMap });
         });
       }
-      
-    }else if(formId ==="table-maintenance"){
-       if(id=="maintenance_type"){
-        getProducersByType(value).then(({dat})=>{
+
+    } else if (formId === "table-maintenance") {
+      let formValues = refForm.getFieldsValue();
+      console.log("调试", formId, formValues);
+
+      if (id == "maintenance_type") {
+        formValues[group_id][field_list_index]["maintenance_provider"] = null;
+        refForm.setFieldsValue(formValues);
+        getProducersByType(value).then(({ dat }) => {
           let list = new Array()
           dat.forEach((item) => {
             list.push({
@@ -690,7 +719,7 @@ export default function CustomForm(props: Props) {
           selectMap[formId + ".maintenance_provider"] = list;
           setSelectMap({ ...selectMap });
         })
-       }
+      }
 
     }
 
@@ -706,9 +735,10 @@ export default function CustomForm(props: Props) {
       item.groupId = groupId
       setOperateField(item);
       getAssetTreeByDeviceType(13, 1).then(({ dat }) => {
-        setDialogInitData(dat)
-        setOperateType(OperateType.ChangeOrganize)
+        setDialogInitData(dat);
+        setOperateType(OperateType.SelectUseStorage)
         setOperateName(item.extend.label);
+        
       })
 
     } else if (item.extend.type === "checkbox") {
@@ -723,10 +753,32 @@ export default function CustomForm(props: Props) {
 
   }
 
+
+  const backToList=()=>{
+       history.push('/devicemgt')
+  }
+
   //提交表单数据
-  const handleClick = (e: any, formId: string, category) => {
-    let record_id = formIdMap[formId]!=undefined ? formIdMap[formId]:null;
-    props.handleClick(e, formId, formFieldMap[formId], category,record_id);
+  const handleClick = (values: any, formId: string, category) => {
+    let record_id = formIdMap[formId] != undefined ? formIdMap[formId] : null;
+    console.log("提交的数据", values, "---------", formId, category)
+    if (formId == "table-maintenance") {
+      if (selectedRows.length > 0) {
+        
+        let service_config = new Array();
+        selectedRows.forEach(row => {
+          let dom =document.getElementById('service_object:' + row.service_id);
+          service_config.push({
+            service_obj_key: row.service_id,
+            service_option_code: "maintenance_service",
+            service_obj_value: dom?.value,
+            deadline: row.service_expire?row.service_expire:null
+          })
+        })
+        values["form-maintenance"][0]["service_config"] = service_config;
+      }
+    }
+    props.handleClick(values, formId, formFieldMap[formId], category, record_id);
   };
   //表单样式初始化
   const formItemLayout = {
@@ -757,32 +809,32 @@ export default function CustomForm(props: Props) {
       case "input":
         return <Col span={span} >
           <Form.Item label={item.label}>
-            <Form.Item 
-              
+            <Form.Item
+
               name={multiple ? [field.name, item.name] : item.name}
               key={sn}
               rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
             >
               <Input placeholder={`请输入您的${item.label}`} disabled={item.readonly} style={{ width: '150px' }} />
-             
+
             </Form.Item>
-              <template slot='append' style={(item.unit ||item.extend) ?{display:'block'}:{}}>
-               {item.unit &&(
-                   <span className='unit_style_gray'>{item.unit?item.unit:''}</span>
-                )}
-                {item.extend && item.extend.type == 'dialog' && (
-                  <span className='extends_style_button' onClick={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}>{item.extend.label}</span>
-                )}
-                {item.extend && item.extend.type == 'checkbox' && (
-                  <span className='extends_style_gray' >{item.extend.title}
-                      <Checkbox id="hasLine" className='checkbox_extend' onChange={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}></Checkbox>
-                  </span>
-                )}
-               </template>
-            </Form.Item>
-          
-         
-          
+            <template slot='append' style={(item.unit || item.extend) ? { display: 'block' } : {}}>
+              {item.unit && (
+                <span className='unit_style_gray'>{item.unit ? item.unit : ''}</span>
+              )}
+              {item.extend && item.extend.type == 'dialog' && (
+                <span className='extends_style_button' onClick={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}>{item.extend.label}</span>
+              )}
+              {item.extend && item.extend.type == 'checkbox' && (
+                <span className='extends_style_gray' >{item.extend.title}
+                  <Checkbox id="hasLine" className='checkbox_extend' onChange={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}></Checkbox>
+                </span>
+              )}
+            </template>
+          </Form.Item>
+
+
+
         </Col>
       case "password":
         return <Col span={span} key={"item-" + sn}>
@@ -895,7 +947,7 @@ export default function CustomForm(props: Props) {
           key={sn}
           rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
         >
-          <DatePicker locale={locale} placeholder={`请输入您的${item.label}`} />
+          <DatePicker  format="YYYY-MM-DD" placeholder={`请输入您的${item.label}`} />
         </Form.Item></Col>
       case "timepicker":
         return <Col span={span} key={"item-" + sn}><Form.Item
@@ -913,7 +965,8 @@ export default function CustomForm(props: Props) {
             <Table
               rowSelection={rowSelection}
               rowKey={item.key}
-              columns={item.option}
+              columns={columns_maintain_services}
+              pagination ={false}
               dataSource={selectMap[formId + "." + item.name]} />
           </div>
         </div>
@@ -957,7 +1010,12 @@ export default function CustomForm(props: Props) {
           <span style={{ zIndex: 10, display: tabFIndex == 'component-alert' ? 'block' : 'none' }}
             onClick={(e) => addAlert(e)}
           >添加变更</span>
-          <span>  上线  </span>
+          {assetStatus == 1 && (
+            <span style={{ zIndex: 10}} onClick={(e)=>{dealOnOffline(e,2)}}>  上线  </span>
+          )}
+          {assetStatus == 2 && (
+            <span style={{ zIndex: 10}} onClick={(e)=>{dealOnOffline(e,1)}}>  下线  </span>
+          )}
         </div>
         <Tabs className='tab-list' activeKey={tabFIndex} onTabClick={(key) => {
           tabClick(key, "0");
@@ -988,8 +1046,8 @@ export default function CustomForm(props: Props) {
                       refArr[modelFF.id] = createRef<FormInstance>();
                       initOptions[modelFF.id] = modelFF.initial_data;
                       dataMap[modelFF.id] = [{}];
-                      if(modelFF.base_attributes?.length>0){
-                        dataMap["base_"+modelFF.id] = [{}];
+                      if (modelFF.base_attributes?.length > 0) {
+                        dataMap["base_" + modelFF.id] = [{}];
                       }
                       return (
                         <Tabs.TabPane tab={modelFF.name} key={modelFF.id}  >
@@ -1003,27 +1061,27 @@ export default function CustomForm(props: Props) {
                                 handleClick(e, modelFF.id, modelF.id);
                               }}
                             >
-                              {modelFF.base_attributes?.length>0 && (
-                              <Form.List key={"bfield_list_" + index} name={'base_'+modelFF.id} initialValue={dataMap['base_'+modelFF.id]}>
-                                {(field, { add, remove }) => {
+                              {modelFF.base_attributes?.length > 0 && (
+                                <Form.List key={"bfield_list_" + index} name={'base_' + modelFF.id} initialValue={dataMap['base_' + modelFF.id]}>
+                                  {(field, { add, remove }) => {
 
-                                  return (
-                                    <>
-                                      {field.map((item, _idnex) => (
-                                        <div key={"bF" + _idnex}>
-                                          <Row style={{ marginTop: '0px' }}>
-                                            {modelFF.base_attributes.map((property, sn) => {
-                                              let span = property.span ? property.span : modelFF.span;
-                                              return (CreateForm('base_'+modelFF.id, property, sn, modelFF.span, true, item, 'base_'+modelFF.id, _idnex))
-                                            })}
-                                          </Row>
-                                        </div>
-                                      ))}                                     
-                                    </>
-                                  )
-                                }
-                                }
-                              </Form.List>
+                                    return (
+                                      <>
+                                        {field.map((item, _idnex) => (
+                                          <div key={"bF" + _idnex}>
+                                            <Row style={{ marginTop: '0px' }}>
+                                              {modelFF.base_attributes.map((property, sn) => {
+                                                let span = property.span ? property.span : modelFF.span;
+                                                return (CreateForm('base_' + modelFF.id, property, sn, modelFF.span, true, item, 'base_' + modelFF.id, _idnex))
+                                              })}
+                                            </Row>
+                                          </div>
+                                        ))}
+                                      </>
+                                    )
+                                  }
+                                  }
+                                </Form.List>
                               )}
                               <Form.List key={"field_list_" + index} name={modelFF.id} initialValue={dataMap[modelFF.id]}>
                                 {(field, { add, remove }) => {
@@ -1034,7 +1092,7 @@ export default function CustomForm(props: Props) {
                                         <div key={"F" + _idnex}>
                                           <Row key={'index-' + _idnex}>
                                             <div className='head_card'>
-                                              <div  className="title" >{modelFF.name}{_idnex + 1}</div>
+                                              <div className="title" >{modelFF.name}{_idnex + 1}</div>
                                               <div className="dashed"><hr className='dhr'></hr></div>
                                               {_idnex > 0 ? (
                                                 <MinusCircleOutlined
@@ -1058,7 +1116,7 @@ export default function CustomForm(props: Props) {
                                           style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', marginTop: '10px', textAlign: 'center' }}
                                         >
                                           {hasEdit && (
-                                             <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
+                                            <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
                                           )}
                                           {modelFF.multiple && (
                                             <>
@@ -1067,7 +1125,7 @@ export default function CustomForm(props: Props) {
                                               }}> 添加</Button>
                                             </>
                                           )}
-                                          {/* <Button className='ret_button_form'>返回</Button> */}
+                                          <Button className='ret_button_form' onClick={backToList}>返回</Button>
                                         </Space>
                                       </Row>
                                     </>
@@ -1099,51 +1157,51 @@ export default function CustomForm(props: Props) {
                     }}
                   >
                     {modelF.models.map((formInfo, index) => {
-                      
-                      return (
-                      <Form.List key={"Formlist" + index} name={formInfo.id} initialValue={dataMap[modelF.id] ? dataMap[modelF.id] : [{}]}>
-                        {(feilds, { add, remove }) => {
-                          return (
-                            <React.Fragment key={'key' + index}>
-                              <div className='group_title' key={"groupForm" + index}>
-                                <span style={{ marginLeft: '3px' }}>{formInfo.name}</span>
-                                {formInfo.multiple && (
-                                  <>
-                                    <Button type="primary"  className='button_form_add' onClick={() => {
-                                      add()
-                                    }}> ＋添加</Button>
-                                  </>
-                                )}
-                              </div>
-                              {feilds.map((item, _suoyi) => (
-                                <div key={"big_row_zone" + _suoyi}>
-                                  {formInfo.multiple && (
-                                    <Row key={'index-' + _suoyi}>
-                                       <div className='head_card'>
-                                         <div  className="title" >{formInfo.name}{_suoyi + 1}</div>
-                                         <div className="dashed"><hr className='dhr'></hr></div>
-                                        {_suoyi > 0 ? (
-                                          <MinusCircleOutlined
-                                            className="dynamic-delete-button"
-                                            style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
-                                            onClick={() => remove(_suoyi)} />
-                                        ) : null}
-                                      </div>
-                                    </Row>
-                                  )}
-                                  <Row key={'ind-' + _suoyi} style={{ marginTop: '5px' }}>
-                                    {formInfo.attributes.map((property, sn) => {
-                                      let span = property.span ? property.span : formInfo.span;
-                                      return (CreateForm(modelF.id, property, sn, span, true, item, formInfo.id, _suoyi))
-                                    })}
-                                  </Row>
-                                </div>
-                              ))}
-                            </React.Fragment>
-                          )
 
-                        }}
-                      </Form.List>
+                      return (
+                        <Form.List key={"Formlist" + index} name={formInfo.id} initialValue={dataMap[modelF.id] ? dataMap[modelF.id] : [{}]}>
+                          {(feilds, { add, remove }) => {
+                            return (
+                              <React.Fragment key={'key' + index}>
+                                <div className='group_title' key={"groupForm" + index}>
+                                  <span style={{ marginLeft: '3px' }}>{formInfo.name}</span>
+                                  {formInfo.multiple && (
+                                    <>
+                                      <Button type="primary" className='button_form_add' onClick={() => {
+                                        add()
+                                      }}> ＋添加</Button>
+                                    </>
+                                  )}
+                                </div>
+                                {feilds.map((item, _suoyi) => (
+                                  <div key={"big_row_zone" + _suoyi}>
+                                    {formInfo.multiple && (
+                                      <Row key={'index-' + _suoyi}>
+                                        <div className='head_card'>
+                                          <div className="title" >{formInfo.name}{_suoyi + 1}</div>
+                                          <div className="dashed"><hr className='dhr'></hr></div>
+                                          {_suoyi > 0 ? (
+                                            <MinusCircleOutlined
+                                              className="dynamic-delete-button"
+                                              style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
+                                              onClick={() => remove(_suoyi)} />
+                                          ) : null}
+                                        </div>
+                                      </Row>
+                                    )}
+                                    <Row key={'ind-' + _suoyi} style={{ marginTop: '5px' }}>
+                                      {formInfo.attributes.map((property, sn) => {
+                                        let span = property.span ? property.span : formInfo.span;
+                                        return (CreateForm(modelF.id, property, sn, span, true, item, formInfo.id, _suoyi))
+                                      })}
+                                    </Row>
+                                  </div>
+                                ))}
+                              </React.Fragment>
+                            )
+
+                          }}
+                        </Form.List>
                       )
                     })}
 
@@ -1153,27 +1211,27 @@ export default function CustomForm(props: Props) {
                       >
                         {/* <Button type="primary" htmlType="submit" className='button_form'>保存</Button> */}
                         {hasEdit && (
-                            <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
+                          <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
                         )}
-                        {/* <Button className='ret_button_form'>返回</Button> */}
+                        <Button className='ret_button_form' onClick={backToList}>返回</Button>
                       </Space>
                     </Row>
                   </Form>
                 )}
                 {modelF.form_type == "component" && (
                   <div>
-                  {/* <Card style={{ width: '100%' }}> */}
-                      <Form
-                        // layout={formLayout}
-                        // form={queryForm}
-                        onFinish={values=>{loadingAlertQuery(values)}}
-                        initialValues={{ layout: 'inline' }}
-                        style={{display:'inline-flex',marginTop:'10px',marginLeft:'-70px' ,width:'100%'}}
-                      >
-      
-                       <Space>
+                    {/* <Card style={{ width: '100%' }}> */}
+                    <Form
+                      // layout={formLayout}
+                      // form={queryForm}
+                      onFinish={values => { loadingAlertQuery(values) }}
+                      initialValues={{ layout: 'inline' }}
+                      style={{ display: 'inline-flex', marginTop: '10px', marginLeft: '-70px', width: '100%' }}
+                    >
+
+                      <Space>
                         <Form.Item label="变更日期：" name={"alter_at"}>
-                          <DatePicker.RangePicker  style={{ width: '100%' }} />
+                          <DatePicker.RangePicker style={{ width: '100%' }} />
                         </Form.Item>
                         <Form.Item label="变更事项" name={"alter_event_key"} >
                           <Select
@@ -1184,14 +1242,14 @@ export default function CustomForm(props: Props) {
                           />
                         </Form.Item>
                         <Form.Item {...buttonItemLayout}>
-                          <Button type="primary"  htmlType="submit" >搜索</Button>
+                          <Button type="primary" htmlType="submit" >搜索</Button>
                         </Form.Item>
-                        </Space>
-                      </Form>
-      
+                      </Space>
+                    </Form>
+
                     {/* </Card> */}
                     <Card style={{ width: '100%' }}>
-                    <Table
+                      <Table
                         dataSource={queryList}
                         rowSelection={{
                           onChange: (_, rows) => {
@@ -1201,35 +1259,35 @@ export default function CustomForm(props: Props) {
                         }}
                         columns={[
                           {
-                            title:'变更日期',
+                            title: '变更日期',
                             dataIndex: 'alter_at',
-                            render (value){
-                              return moment(value*1000).format("YYYY-MM-DD HH:mm:ss")
+                            render(value) {
+                              return moment(value * 1000).format("YYYY-MM-DD HH:mm:ss")
                             }
                           },
                           {
                             title: '变更状态',
                             dataIndex: 'alter_status',
-                            render (val){
-                               return val==1?"已确认":"未确认"
+                            render(val) {
+                              return val == 1 ? "已确认" : "未确认"
                             }
                           },
                           {
-                            title:'变更事项',
+                            title: '变更事项',
                             dataIndex: 'alter_event_key',
-                            render (val){
+                            render(val) {
                               let list = modalInitOptions["alertType"];
-                              let title= "";
-                              list.map((item,_) => {                                  
-                                if(item.value === val){
-                                  title= item.label
+                              let title = "";
+                              list.map((item, _) => {
+                                if (item.value === val) {
+                                  title = item.label
                                 }
                               })
                               return title;
                             }
                           },
                           {
-                            title:'变更前',
+                            title: '变更前',
                             dataIndex: 'before_alter',
                           },
                           {
@@ -1237,26 +1295,26 @@ export default function CustomForm(props: Props) {
                             dataIndex: 'after_alter',
                           },
                           {
-                            title:'变更说明',
+                            title: '变更说明',
                             dataIndex: 'alter_instruction',
                             render(val) {
                               return val;
                             },
-                          }, 
+                          },
                           {
-                            title:'变更人',
+                            title: '变更人',
                             dataIndex: 'managed_state',
                             render(val) {
                               return val;
                             },
-                          }, 
+                          },
                           {
-                            title:'发起人',
+                            title: '发起人',
                             dataIndex: 'alter_sponsor',
                             render(val) {
                               return val;
                             },
-                          },                   
+                          },
                           {
                             title: '创建方式',
                             width: '180px',
@@ -1269,29 +1327,7 @@ export default function CustomForm(props: Props) {
                         size='small'
                       ></Table>
                     </Card>
-              </div>
-                  // <CommonTable  
-                  //      searchOption={alertListState.searchOption} 
-                  //      TableColumns={alertListState.TableColumns}
-                  //      TableData={alertListState.TableData}
-                  //      queryTable={async (value) => {
-                  //       let param ={
-                  //         asset: 39,
-                  //         start: 1,
-                  //         limit: 10,
-                  //       }
-                  //       param = {...param, ...value}
-                  //       getAssetAlerts(param).then(({dat,err}) => {
-                  //         console.log(dat);
-                  //          if(err==""){
-                  //              alertListState.TableData = dat.list;
-                  //             //  setAlertListState(alertListState)
-                  //              debugger
-                  //          }         
-                  //       });
-                
-                  //     }}
-                  // ></CommonTable>
+                  </div>
                 )}
               </Tabs.TabPane>
             )
@@ -1301,19 +1337,22 @@ export default function CustomForm(props: Props) {
 
       </div>
       <OperationModal
+        width={modalWidth}
+        theme={operateName}
         operateType={operateType}
-        setOperateType={setOperateType}
-        handlerClick={async (value: any) => {
-          let refForm = refArr[operateField.formId].current;
-          if (operateField.formId != operateField.groupId) {
-            let formValues = refForm.getFieldsValue()
-            formValues[operateField.groupId][operateField.index][operateField.extend.ctrl_name] = value.name;
-            refForm.setFieldsValue(formValues);
-            setSelectMap(selectMap)
-          }
-        }}
+        setOperateType={setOperateType}        
         initData={dialogInitData}
-        name={operateName}
+        reloadList={async(value:any,operateType:string) => {
+          if(operateType==OperateType.SelectUseStorage){
+            let refForm = refArr[operateField.formId].current;
+            if (operateField.formId != operateField.groupId) {
+              let formValues = refForm.getFieldsValue()
+              formValues[operateField.groupId][operateField.index][operateField.extend.ctrl_name] = value.name;
+              refForm.setFieldsValue(formValues);
+            }
+          }
+          
+        }}
       />
       <CommonModal Form={alertState.Form} operate="" Modal={alertState.Modal} isOpen={dialogIsOpen} ></CommonModal>
 

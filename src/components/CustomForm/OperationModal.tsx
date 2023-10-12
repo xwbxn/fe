@@ -2,7 +2,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Form, Input, Modal, Select, Tag, Tooltip, Tree, message } from 'antd';
 import { getOrganizationTree } from '@/services/assets';
 import CommonForm from './CommonForm';
-import index from './index';
 export enum OperateType {
   ChangeOrganize = 'changeOrganize',
   FormEdit ="formEdit",
@@ -16,7 +15,6 @@ export const OperationModal = ({ operateType, setOperateType,initData,handlerCli
   const [treeData, setTreeData] = useState();
 
   const onSelect = (selectedKeys: React.Key[], info) => {
-
       console.log("selectedKeys",selectedKeys);
       if(info.node.type=="asset"){
         setInfo(info.node);
@@ -25,6 +23,7 @@ export const OperationModal = ({ operateType, setOperateType,initData,handlerCli
       }
       
   };
+  
   
   const formEdit = () => {
     return (

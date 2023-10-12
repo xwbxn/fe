@@ -17,6 +17,11 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
+export const getDeviceModelById = function (id) {
+  return request('/api/n9e/device-model/'+id, {
+    method: RequestMethod.Get
+  });
+};
 export const getDeviceModelByCondition = function (data) {
   return request('/api/n9e/device-model/getmodel', {
     method: RequestMethod.Get,

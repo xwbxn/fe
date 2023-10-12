@@ -2,61 +2,6 @@ import { DictValueEnumObj } from '@/components/DictTag';
 import { Space } from 'antd';
 import React from 'react';
 
-export const SetConfigCatelog = [
-  {
-    label: '设备类型',
-    refer: 'device_type',
-    source: 'table',
-    fields: ['id', 'name'],
-    id: 'device_model_set',
-    type:'group'
-  },//设备类型
-  // {
-  //   label: '普通资产类型',
-  //   source: 'self',
-  //   id: 'common_asset_type_set',
-  // },
-  {
-    label: '厂商信息',
-    value: 'producer-type',
-    source: 'dict',
-    id: 'producer_set',
-    type:'single'
-  },//厂商
-  {
-    label: '备件基础数据',
-    value: 'spare-base-data',
-    source: 'dict',
-    id: 'spare_base_data_set',
-    type:'single'
-  },
-  {
-    label: '扩展字段',
-    source: 'dict',
-    value: 'asset_expansion_fields',
-    id: 'asset_expansion_set',
-    type:'single'
-  }, 
-  {
-    label: '资产完整性设置',
-    source: 'self',
-    id: 'asset_integrity_set',
-    type:'group'
-  },
-  {
-    label: '设备生命期限设置',
-    source: 'self',
-    id: 'asset_life_period_set',
-    type:'group'
-  },
-  {
-    label: '机柜空间设置',
-    source: 'self',
-    id: 'cabinet_space_set',
-    type:'group'
-  },
-];
-
 export const SetConfigTables = {
   device_model_set: {
     searchOption: [
@@ -78,7 +23,6 @@ export const SetConfigTables = {
       },
     ],
     itemClick:Function,
-    renderFields:Function,
     ButtonArr: [
       {
         ButtonText: "添加",
@@ -108,11 +52,8 @@ export const SetConfigTables = {
       },
       {
         title: '厂商',
-        dataIndex: 'producer_id',
-        key: 'producer_id',
-        render(text, record, index) {
-          return SetConfigTables.device_model_set.renderFields.call(this,text,record,'producer_id');
-        }
+        dataIndex: 'alias',
+        key: 'alias',
       },
       {
         title: '型号',
@@ -134,6 +75,7 @@ export const SetConfigTables = {
         dataIndex: 'describe',
         key: 'describe',
       },
+
     ],
     TableData: []
   },
@@ -1081,657 +1023,210 @@ export const SetConfigTables = {
 
 }
 export const SetConfigForms = {
-  device_model_set: {
+  scrap_set: {
     Modal: {
-      title: "添加",
+      title: "报废的设备",
       width: 650,
-      cancel: Function
+      cancel: Function,
+      submit: Function
     },
+    itemClick:Function,
     FormOnChange: Function,
     Form: {
       col: 2,
+      groups:[{
+        label:"",
+        items:[{
+           type: "datepicker",
+           name: "scrap_at",
+           label: "报废时间",
+           data_type: "date",
+           required:true,
+         },{
+           type: "treeselect",
+           name: "tree",
+           label: "选择报废目录",
+           source:'initial',
+           required:true,
+           data_type: "int"
+         }
+        ]
+      }],
       items: [
         {
           type: "input",
-          name: "name",
-          label: "名称",
-          required:true,
-        }, {
-          type: "select",
-          name: "subtype",
-          label: "子类型",
-          source:'initial',
+          name: "device_name",
+          label: "设备名称",
+          required:false,
         },{
-          type: "select",
-          name: "producer_id",
+          type: "input",
+          name: "serial_number",
+          label: "序列号",
+          required:true,
+          
+        }, {
+          type: "input",
+          name: "old_management_ip",
+          label: "原管理IP",
+          required:false,
+        },{
+          type:"hidden",
+          name:"device_producer"
+        },{
+          type:"hidden",
+          name:"device_model",
+          data_type:"string"          
+        },{
+          type: "input",
+          name: "device_producer_name",
           label: "厂商",
+          readonly:true,
+          required:false,
+        },{
+          type: "select",
+          name: "device_type",
+          label: "设备类型",
           source:'initial',
+          readonly:true,
           required:true,
         },{
           type: "input",
-          name: "model",
+          name: "device_model_name",
           label: "型号",
-          require:true,
+          required:false,
         },{
           type: "input",
-          name: "series",
-          label: "系列",
+          name: "old_location",
+          label: "原所在位置",
+        },{
+          type: "datepicker",
+          name: "purchase_at",
+          label: "采购日期",
         },{
           type: "input",
-          name: "u_number",
-          required:true,
-          label: "U数",
-          data_type: "int",
+          name: "old_device_manager",
+          label: "原责任人",
         },{
-          type: "select",
-          name: "outline_structure",
-          label: "外形结构",
+          type: "treeselect",
+          name: "old_belong_organization",
+          label: "所属组织机构",
           source:'initial',
+          
         },{
-          type: "input",
-          name: "specifications",
-          label: "规格",
-        },{
-          type: "input",
-          name: "maximum_memory",
-          label: "最大内存数",
-          data_type: "int",
-        },{
-          type: "input",
-          name: "working_consumption",
-          label: "工作功耗",
-          data_type: "float",
-        },{
-          type: "input",
-          name: "rated_consumption",
-          label: "额定功耗",
-          data_type: "float",
-        },{
-          type: "input",
-          name: "peak_consumption",
-          label: "峰值功率",
-          data_type: "float",
-        },{
-          type: "input",
-          name: "weight",
-          label: "设备重量",
-          data_type: "float",
-        },{
-          type: "select",
-          name: "out_band_version",
-          label: "带外版本",
-          source:'initial',
-        },{
-          type: "input",
-          name: "enlistment",
-          label: "服务期限",
-          data_type: "int",
-        },{
-          type: "input",
-          name: "describe",
-          label: "描述",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  producer: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alias",
-          label: "厂商简称",
-          required:true,
-        }, {
-          type: "input",
-          name: "chinese_name",
-          label: "中文名称",
-          required:true,
-        },{
-          type: "input",
-          name: "company_name",
-          label: "公司全称",
-          required:true,
-        },{
-          type: "input",
-          name: "ext_producer_type",
-          label: "厂商类别",
-          readonly:true,
-          value:'厂商',
-        },{
-          type: "checkbox",
-          name: "is_domestic",
-          label: "是否国产",
-          data_type:"boolean",
-          value: 1
-        },{
-        },{
-          type: "input",
-          name: "official",
-          label: "官方站点",
-        },{
-          type: "checkbox",
-          name: "is_display_chinese",
-          required:false,
-          label: "是否显示中文",
-          data_type:"boolean",
-          value: 1
-        }
-      ]
-    },
-    Loading: true,
-  },
-  third_party_maintenance: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alias",
-          label: "厂商简称",
-          required:true,
-        }, {
-          type: "input",
-          name: "chinese_name",
-          label: "中文名称",
-          required:false,
-        },{
-          type: "input",
-          name: "company_name",
-          label: "公司全称",
-          required:true,
-        },{
-          type: "input",
-          name: "ext_producer_type",
-          label: "厂商类别",
-          readonly:true,
-          value:'第三方维保服务商',
-        },
-        {
-          type: "input",
-          name: "service_tel",
-          label: "服务电话",
-          required:false,
-        },{
-          type: "input",
-          name: "service_email",
-          label: "服务邮箱",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "country",
-          label: "国家",
-          required:false,
-        },{
-          type: "input",
-          name: "city",
-          label: "城市",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "address",
-          label: "地址",
-          required:false,
-        },{
-          type: "input",
-          name: "fax",
-          label: "传真",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_person",
-          label: "联系人",
-          required:false,
-        },{
-          type: "input",
-          name: "contact_number",
-          label: "联系人电话",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_email",
-          label: "联系人邮箱",
-          required:false,
-        },{
-          type: "input",
-          name: "official",
-          label: "官方站点",
-          required:false,
-        },
-        {
-          type: "checkbox",
-          name: "is_domestic",
-          label: "是否国产",
-          value: 1
-        },{
-          type: "checkbox",
-          name: "is_display_chinese",
-          required:false,
-          label: "是否显示中文",
-          value: 1
-        }
-      ]
-    },
-    Loading: true,
-  },
-  supplier: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alias",
-          label: "供应商简称",
-          required:true,
-        }, {
-          type: "input",
-          name: "chinese_name",
-          label: "中文名称",
-          required:false,
-        },{
-          type: "input",
-          name: "company_name",
-          label: "公司全称",
-          required:true,
-        },{
-          type: "input",
-          name: "ext_producer_type",
-          label: "厂商类别",
-          readonly:true,
-          value:'供应商',
-        },
-        {
-          type: "input",
-          name: "service_tel",
-          label: "服务电话",
-          required:false,
-        },{
-          type: "input",
-          name: "service_email",
-          label: "服务邮箱",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "country",
-          label: "国家",
-          required:false,
-        },{
-          type: "input",
-          name: "city",
-          label: "城市",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "address",
-          label: "地址",
-          required:false,
-        },{
-          type: "input",
-          name: "fax",
-          label: "传真",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_person",
-          label: "联系人",
-          required:false,
-        },{
-          type: "input",
-          name: "contact_number",
-          label: "联系人电话",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_email",
-          label: "联系人邮箱",
-          required:false,
-        },{
-          type: "input",
-          name: "official",
-          label: "官方站点",
-          required:false,
-        },
-        {
-          type: "checkbox",
-          name: "is_domestic",
-          label: "是否国产",
-          value: 1
-        },{
-          type: "checkbox",
-          name: "is_display_chinese",
-          required:false,
-          label: "是否显示中文",
-          value: 1
-        }
-      ]
-    },
-    Loading: true,
-  },
-  component_brand: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alias",
-          label: "部件品牌",
-          required:true,
-        }, {
-          type: "input",
-          name: "chinese_name",
-          label: "中文名称",
-          required:false,
-        },{
-          type: "input",
-          name: "company_name",
-          label: "公司全称",
-          required:true,
-        },{
-          type: "input",
-          name: "ext_producer_type",
-          label: "厂商类别",
-          readonly:true,
-          value:'部件品牌',
-        },
-        {
-          type: "input",
-          name: "service_tel",
-          label: "服务电话",
-          required:false,
-        },{
-          type: "input",
-          name: "service_email",
-          label: "服务邮箱",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "country",
-          label: "国家",
-          required:false,
-        },{
-          type: "input",
-          name: "city",
-          label: "城市",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "address",
-          label: "地址",
-          required:false,
-        },{
-          type: "input",
-          name: "fax",
-          label: "传真",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_person",
-          label: "联系人",
-          required:false,
-        },{
-          type: "input",
-          name: "contact_number",
-          label: "联系人电话",
-          required:false,
-        },
-        {
-          type: "input",
-          name: "contact_email",
-          label: "联系人邮箱",
-          required:false,
-        },{
-          type: "input",
-          name: "official",
-          label: "官方站点",
-          required:false,
-        },
-        {
-          type: "checkbox",
-          name: "is_domestic",
-          label: "是否国产",
-          value: 1
-        },{
-          type: "checkbox",
-          name: "is_display_chinese",
-          required:false,
-          label: "是否显示中文",
-          value: 1
-        }
-      ]
-    },
-    Loading: true,
-  },
-  spare_party_base: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  party_type: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  device_type: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  inventory_alert_set: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  warehouse_information: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
-        {
-          type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  asset_expand_field: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 24,
-      isInline: true,
-      items: [
-        {
-          type: "input",
-          name: "dict_category",
-          value: '基本信息',
-          label: "内容分类",
-          readonly :true,
-          col: 24,
-        }, {
-          type: "select",
-          name: "sn",
-          label: "序号",
-          source:'number',
-          value:20,
-          col: 24,
-          option: [],
-          data_type: "int"
-        }, {
-          type: "input",
-          name: "dict_value",
-          label: "数据项别名",
-          require:true,
-          col: 24,
-        },
-        {
           type: "textarea",
           name: "remark",
-          label: "描述",
-          col: 24,
+          label: "报废说明",
+          col:2
         }
       ]
     },
     Loading: true,
   },
-  asset_integrity_set: {
+  room_set: {
     Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
+      title: "机房",
+      width: 750,
+      cancel: Function,
+      submit: Function
     },
+    itemClick:Function,
     FormOnChange: Function,
     Form: {
       col: 2,
       items: [
         {
           type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  asset_life_period_set: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 2,
-      items: [
+          name: "room_name",
+          label: "机房名称",
+          required:true,
+        },{
+          type: "input",
+          name: "room_code",
+          label: "中心编码",
+          required:true,
+        },{
+          type: "select",
+          name: "idc_location",
+          label: "所在的IDC",
+          source:'initial',
+        },{
+          type: "input",
+          name: "asd",
+          label: "所在楼座（Error）",
+          required:true,
+          data_type:'int',
+        },{
+          type: "input",
+          name: "floor",
+          label: "所在楼层",
+          required:true,
+          data_type:'int',
+        },{
+          type: "input",
+          name: "voltage",
+          label: "电压",
+          data_type: "float",
+          require:false,
+        },{
+          type: "input",
+          name: "electric",
+          label: "电流",
+          data_type: "float",
+          require:false,
+        },{
+          type: "input",
+          name: "row_max",
+          label: "最大行数",
+          data_type: "int",
+          required:true,
+        },
         {
           type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
-        }
-      ]
-    },
-    Loading: true,
-  },
-  cabinet_space_set: {
-    Modal: {
-      title: "添加",
-      width: 620,
-      cancel: Function
-    },
-    FormOnChange: Function,
-    Form: {
-      col: 24,
-      items: [
+          name: "column_max",
+          label: "最大列数",
+          data_type: "int",
+          required:true,
+        },
         {
           type: "input",
-          name: "alter_sponsor",
-          label: "请添加所有",
+          name: "cabinet_number",
+          label: "可容纳机柜数",
+          data_type: "int",
+          required:true,
+        },
+        {
+          type: "input",
+          name: "room_bearing_capacity",
+          label: "机房承重",
+          data_type: "int",
+          require:false,
+        },
+        {
+          type: "input",
+          name: "rated_power",
+          label: "额定功率",
+          data_type: "float",
+          require:false,
+        },
+        {
+          type: "input",
+          name: "room_area",
+          label: "机房面积",
+          data_type: "float",
+          require:false,
+        },{
+          type: "select",
+          name: "duty_person_one",
+          label: "责任人1",
+          source:'initial',
+        },{
+          type: "select",
+          name: "duty_person_two",
+          label: "责任人2",
+          source:'initial',
         }
       ]
     },
     Loading: true,
-  },
+  },  
 }

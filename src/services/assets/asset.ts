@@ -60,6 +60,14 @@ export const insertDeviceOnline = function (data) {
   });
 };
 
+export const deleteDeviceOnline = function (data) {
+  return request('/api/n9e/asset-basic/del', {
+    method: RequestMethod.Post,
+    data
+  });
+};
+
+
 
 
 export const updateAssetManagement = function (data) {
@@ -135,8 +143,17 @@ export const exportAssetTemplet = function () {
 export const exportTemplet = function (url,data) {
   return request(url, {
     method: RequestMethod.Post,
-    params:data,
+    data,
     responseType:"blob"
+  });
+}
+export const importAssetSetData = function (url,data) {
+  return request(url, {
+    headers: {
+       "enctype": "multipart/form-data"
+    },
+    body:data,
+    method: RequestMethod.Post    
   });
 }
 export const importtAssets = function (data) {

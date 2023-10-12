@@ -23,3 +23,29 @@ export const getRoomList = function (params) {
     params
   });
 };
+export const addRoom = function (data) {
+  return request('/api/n9e/computer-room', {
+       method: RequestMethod.Post,
+       data
+  });
+};
+
+export const getRoomListByDatacenterId = function (centerId) {
+  return request('/api/n9e/computer-room/datacenterId?idcLocation='+centerId, {
+    method: RequestMethod.Get
+  });
+};
+
+
+export const updateRoom = function (data) {
+  return request('/api/n9e/computer-room', {
+       method: RequestMethod.Put,
+       data
+  });
+};
+
+export const deleteRoom = function (id) {
+  return request('/api/n9e/computer-room/'+id, {
+       method: RequestMethod.Delete
+  });
+};

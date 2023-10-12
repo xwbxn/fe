@@ -28,6 +28,11 @@ export const getProducersListByType = function (type,data) {
        params:data
   });
 };
+export const getProducerList = function () {
+  return request('/api/n9e/device-producer/getName', {
+       method: RequestMethod.Get
+  });
+};
 export const addDeviceProducer = function (data) {
   return request('/api/n9e/device-producer', {
        method: RequestMethod.Post,

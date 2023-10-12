@@ -14,13 +14,11 @@ import { getDictValueEnum,getDictDataExpByType,deleteDictDatas} from '@/services
 import { addDictDataBySingle, updateDictDataSingle} from '@/services/system/dictdata';
 import { EditOutlined } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid'
-import { OperationModal } from '.././OperationModal';
+import { OperationModal } from '../Form/OperationModal';
 import { useAntdTable } from 'ahooks';
+import { OperateType } from '../Form/operate_type';
+import { render } from 'react-dom';
 
-export enum OperateType {
-  AssetBatchImport = 'assetBatchImport',
-  None = 'none',
-}
 
 export default function () {
   const [tableData, setTableData] = useState<any[]>([]);
@@ -40,8 +38,7 @@ export default function () {
 
   const [theme, setTheme] = useState({});
 
-
-  useEffect(() => {
+  const initialPage =()=>{
     getProducersByType('producer').then(({ dat }) => {
       console.log('厂商', dat);
       let producers = new Array()
@@ -68,7 +65,10 @@ export default function () {
       initData["out_band_version"] = res;
       setInitData({ ...initData })
     });
+  }
 
+  useEffect(() => {    
+     
   }, []);
 
   const deleteOperates = async (type, ids) => {
@@ -95,11 +95,11 @@ export default function () {
     let exportTitle = "资产";
     console.log("exportDatas",businessForm);
     if (businessForm.businessId == "device_model_set") {
-        url = "/api/n9e/device-model/outport";
+        url = "/api/n9e/device-model/export-xls";
         exportTitle = "设备型号"
-        params["deviceType"] = businessForm.key;
+        params["deviceType"] = parseInt(businessForm.key);
     } else if (businessForm.businessId == "producer_set") {
-        url = "/api/n9e/device-producer/outport";
+        url = "/api/n9e/device-producer/export-xls";
         exportTitle = businessForm.title;
         params["type"] = businessForm.key;
     }
@@ -184,8 +184,12 @@ export default function () {
       businessForm.operate = text;
       businessForm.operateEN = action;
       setBusinessForm(_.cloneDeep(businessForm));
+       
+      console.log("初始化数据",initData)
+
+
     } else if (action == "delete") {//删除操作
-      debugger;
+      // debugger;
       let rowsKey = localStorage.getItem(businessForm.businessId + "-select-rows")?.split(",");
       if (rowsKey != null && rowsKey.length > 0) {
         Modal.confirm({
@@ -200,7 +204,7 @@ export default function () {
         message.error("请选择要删除的数据");
       }
     } else if (action == "import") {//导入弹框
-      setOperateType("assetBatchImport" as OperateType);      
+      setOperateType(OperateType.AssetSetBatchImport as OperateType);      
       setTheme(businessForm);
       console.log("businessForm", businessForm);
     }else if(action == "export") {//导出数据
@@ -252,7 +256,23 @@ export default function () {
       return null;
     }      
 }
+  const renderFields = (text,record, field, currentConfigId)=>{
+      console.log("渲染数据列",text,record,field,currentConfigId);
+      let value = record[field];
+      if(currentConfigId=="device_model_set"){//型号
+         if(field=="producer_id"){
+          initData[field].forEach((item)=>{
+              if(item.value==text){
+                value = item.label;
+              }
+          })
 
+         }
+      }
+
+      return value;
+
+  }
 
   const formSubmit = (values, businessForm) => {
     let currentID = businessForm.businessId;
@@ -341,9 +361,11 @@ export default function () {
         <Accordion
           handleClick={async (values: any) => {
             setTableData([])
+            console.log("选中----------------------",values);
+            initialPage();
             let currentConfigId = "";
             if (values.type === "group") {
-              currentConfigId = values.businessId;
+               currentConfigId = values.businessId;
             } else {
               currentConfigId = values.key;
             }
@@ -364,6 +386,9 @@ export default function () {
             businessZip.businessId = currentConfigId;
             businessZip.Modal = SetConfigForms[currentConfigId].Modal;
             businessZip.Modal.title = "-" + businessForm.title;
+            businessZip.renderFields =(text,record,field)=>{
+                 return renderFields(text,record,field,currentConfigId);
+            };
             businessZip.Modal.cancel = () => {
               businessForm.isOpen = false;
               setBusinessForm(_.cloneDeep(businessForm))
@@ -399,7 +424,6 @@ export default function () {
         />
       </div>
       <div className='table-content' style={{ marginLeft: "20px" }}>
-
         <CommonModal
           Modal={props.Modal}
           Form={props.Form}
@@ -419,14 +443,19 @@ export default function () {
           queryTable={queryTable}
           TableData={tableData}
         ></CommonTable>
+
+
         <OperationModal
           operateType={operateType}
           setOperateType={setOperateType}
-          assets={selectedAssetRows}
-          devicetype={deviceTypeOption}
+          initData={selectedAssetRows}
           theme={theme}
-          reloadList={() => {
-            console.log('setRefreshKey')
+          width={650}
+          reloadList={async(value:any,operateType:string) => {
+            if(operateType=="assetSetBatchImport"){
+              queryTable(businessForm.query,1,pageSize);
+              setOperateType(OperateType.None);
+            }
 
           }}
         />

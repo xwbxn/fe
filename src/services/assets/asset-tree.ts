@@ -30,11 +30,24 @@ export const addAssetTree = function (data) {
     data
   });
 };
+export const updateAssetTree = function (data) {
+  return request('/api/n9e/asset-tree', {
+    method: RequestMethod.Put,
+    data
+  });
+};
 export const deleteAssetTree = function (id) {
   return request('/api/n9e/asset-tree/'+id, {
     method: RequestMethod.Delete
   });
 };
+export const getAssetTreeBelongId = function (data) {
+  return request('/api/n9e/asset-tree/asset', {
+    method: RequestMethod.Post,
+    data
+  });
+};
+
 
 
 

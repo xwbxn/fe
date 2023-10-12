@@ -17,36 +17,23 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-export const getDataCenterList = function (params) {
-  return request('/api/n9e/datacenter/list', {
+export const getScrapList = function (params) {
+  let page= params["page"];
+  let limit= params["limit"];
+  delete params["limit"];
+  delete params["page"];
+  return request('/api/n9e/device-scrap?limit='+limit+'&page='+page, {
     method: RequestMethod.Get,
     params
   });
 };
-export const addDataCenter = function (data) {
-  return request('/api/n9e/datacenter', {
+
+
+export const addScrap = function (data) {
+  let  tree = data["tree"];
+  delete data["tree"];
+  return request('/api/n9e/device-scrap?tree='+tree, {
        method: RequestMethod.Post,
        data
   });
 };
-
-export const getDataCenterById = function (id) {
-  return request('api/n9e/datacenter/'+id, {
-    method: RequestMethod.Get
-  });
-};
-
-
-export const updateDataCenter = function (data) {
-  return request('/api/n9e/datacenter', {
-       method: RequestMethod.Put,
-       data
-  });
-};
-
-export const deleteDataCenter = function (id) {
-  return request('/api/n9e/datacenter/'+id, {
-       method: RequestMethod.Delete
-  });
-};
-

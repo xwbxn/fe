@@ -1,26 +1,25 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Form, message } from 'antd';
+import React, { Fragment, createRef, useContext, useEffect, useState } from 'react';
+import { Button, Checkbox, Col, DatePicker, Form, FormInstance, Input, Radio, Row, Select, Space, Table, Tabs, TimePicker, TreeSelect, message } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { GroupOutlined } from '@ant-design/icons';
-import { useLocation, useParams } from 'react-router-dom'
+import { GroupOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { CommonStateContext } from '@/App';
-import { IRawTimeRange } from '@/components/TimeRangePicker';
 import { v4 as uuidv4 } from 'uuid';
-import Accordion from '@/components/Accordion';
-import CustomForm from '@/components/CustomForm';
+import Accordion from './Accordion';
+import CustomForm from './Form';
 import './locale';
 import './style.less';
+import './Form/index.less'
 import _ from 'lodash';
-import {assetStatus} from './Form/asset_utils'
+import { AssetStatusUtils } from './Form/operate_type';
 import { getOrganizationTree } from '@/services/assets';
 import { getRoomList } from '@/services/assets/computer-room';
 import { getCabinetList } from '@/services/assets/device-cabinet';
 import { getUsers } from '@/services/account';
 import { getDictValueEnum } from '@/services/system/dict';
-import {insertAssetMaintenance,insertAssetManagement, updateAssetMaintenance, updateAssetManagement} from '@/services/assets/asset';
+import { getAssetExtendsById, insertAssetMaintenance, insertAssetManagement, updateAssetMaintenance, updateAssetManagement } from '@/services/assets/asset';
 import { getDeviceModelByCondition } from '@/services/assets/device-models';
-import { getAssetById, insertAsset, updateAsset ,insertAssetExtends } from '@/services/assets/asset';
+import { getAssetById, insertAsset, updateAsset, insertAssetExtends } from '@/services/assets/asset';
 
 
 
@@ -29,51 +28,35 @@ export enum OperateType {
   None = 'none',
 }
 
-import modelsAttributes from './Form/device_type_models';
+import { modelsAttributes } from './Form/device_type_models';
 import queryString from 'query-string';
 import moment from 'moment';
+import { useHistory } from 'react-router-dom';
 
 const deviceType = location.pathname.split('/')[3];
 // 
 
-interface IProps {
-  url?: string;
-  datasourceValue: number;
-  contentMaxHeight?: number;
-  type?: 'table' | 'graph';
-  onTypeChange?: (type: 'table' | 'graph') => void;
-  defaultTime?: IRawTimeRange | number;
-  onTimeChange?: (time: IRawTimeRange) => void; // 用于外部控制时间范围
-  promQL?: string;
-  graphOperates?: {
-    enabled: boolean;
-  };
-  globalOperates?: {
-    enabled: boolean;
-  };
-  headerExtra?: HTMLDivElement | null;
-  executeQuery?: (promQL?: string) => void;
-}
+
 
 
 const optionMap = {};
 
-if(deviceType!=null){
+if (deviceType != null) {
   getRoomList({}).then(({ dat }) => {
-      var roomList  = new Array()
-      dat.list.forEach((item) => {
-        roomList.push({
-          value: item.id,
-          label: item.room_name
-        });
-      })
-      optionMap["rooms"] = roomList;
-  }); 
+    var roomList = new Array()
+    dat.list.forEach((item) => {
+      roomList.push({
+        value: item.id,
+        label: item.room_name
+      });
+    })
+    optionMap["rooms"] = roomList;
+  });
   getOrganizationTree({}).then(({ dat }) => {
     optionMap["organs"] = dat;
-  });  
-  let params ={
-    deviceType:deviceType
+  });
+  let params = {
+    deviceType: deviceType
   }
   getDeviceModelByCondition(params).then(({ dat }) => {
     var map = new Map()
@@ -114,8 +97,8 @@ if(deviceType!=null){
     optionMap["providers"] = userList;
   });
 
-  
-  
+
+
 }
 
 
@@ -124,209 +107,725 @@ export default function () {
 
   const { t } = useTranslation('assets');
 
+  let attrs: any = modelsAttributes["type_" + deviceType].models;
+
   const commonState = useContext(CommonStateContext);
 
   const assetId = queryString.parse(location.search).id === undefined ? 0 : parseInt("" + queryString.parse(location.search).id);
 
+  //后期要优化的内容，Jeff Guo
+  // const [tabFIndex, setTabFIndex] = useState<string>("form_base_position")
+  // const [tabFFIndex, setTabFFIndex] = useState<string>();
+  // let formRef = createRef<FormInstance>();
+  // const [formPosition, setFormPosition] = useState<string>("form_base_position");
+  // const [formModel, setFormModel] = useState<any>({});
+  // const [formRelations, setFormRelations] = useState<any>({});
+  // const [selectMap, setSelectMap] = useState({});
+  // const [hasEdit, setHasEdit] = useState<boolean>(true);
 
-  const getFieldsMap=(form_id,current_form)=>{
+  const history = useHistory();
+  
+
+
+
+  const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'))
+
+
+
+  const getFieldsMap = (form_id, current_form) => {
     let strMap = new Map();
-    console.log("form_id",current_form)
+    console.log("form_id", current_form)
     current_form.map((modelF, _) => {
-      if(form_id==modelF.name){
-        if(modelF.has_next){
+      if (form_id == modelF.name) {
+        if (modelF.has_next) {
           modelF.item.map((modelFF, _) => {
-             strMap.set(modelFF.name,{
-               name_cn :modelFF.name_cn,
-               data_type:modelFF.data_type?modelFF.data_type:"string"
-             })          
+            strMap.set(modelFF.name, {
+              name_cn: modelFF.name_cn,
+              data_type: modelFF.data_type ? modelFF.data_type : "string"
+            })
           })
-        }else{
+        } else {
           current_form.map((modelF, _) => {
-            strMap.set(modelF.name,{
-              name_cn :modelF.name_cn,
-              data_type:modelF.data_type?modelF.data_type:"string"
-            })         
-         })
+            strMap.set(modelF.name, {
+              name_cn: modelF.name_cn,
+              data_type: modelF.data_type ? modelF.data_type : "string"
+            })
+          })
         }
-      }      
+      }
     })
     return strMap
   }
 
+  const fieldSpecialEvent = (e, item: any, formId: string, groupId: string, index) => {
+    // item.formId = formId;
+    // item.groupId = groupId;
+    // console.log('extendEvent', item);
+    // if (item.extend.type === "dialog") {
+    //   console.log("extendEvent", item);
+    //   item.index = index;
+    //   item.groupId = groupId
+    //   setOperateField(item);
+    //   getAssetTreeByDeviceType(13, 1).then(({ dat }) => {
+    //     setDialogInitData(dat);
+    //     setOperateType(OperateType.SelectUseStorage)
+    //     setOperateName(item.extend.label);
+        
+    //   })
+
+    // } else if (item.extend.type === "checkbox") {
+    //   console.log("hasCheckoutEvt", e.target.checked);
+    //   let refForm = refArr[formId].current;
+    //   // 
+    //   let formValues = refForm.getFieldsValue();
+    //   formValues[groupId][0][item.extend.ctrl_name] = (e.target.checked ? 1 : 0);
+    //   console.log("formValues", formValues)
+    //   refForm.setFieldsValue(formValues);
+    // }
+
+  }
+
+  const onFieldsChange = (formId: string, id: string, value: any, group_id, field_list_index: number) => {
+    // 该方法对所有表单根据业务情况 来判断处理，每一个表单 form 每一个属性 id 来控制
+    // ※※※※※※※※※后期优化部分※※※※※※※※※※
+    // console.log("※※※※※※※※※后期优化部分※※※※※※※※※※", formId);
+    // let refForm = refArr[formId].current;
+    // if (formId == "form_base_position") {//处理资产基本信息的表单
+    //   let formValues = refForm.getFieldsValue();
+    //   if (id == "device_producer") {
+    //     formValues[group_id][field_list_index].subtype = "";
+    //     formValues[group_id][field_list_index].outline_structure = "";
+    //     formValues[group_id][field_list_index].specifications = "";
+    //     formValues[group_id][field_list_index].u_number = "";
+    //     formValues[group_id][field_list_index].device_model = ""
+    //     refForm.setFieldsValue(formValues);
+    //     let modelList = new Array();
+    //     selectMap["device_models"].forEach(item => {
+    //       if (item.producer_id == value) {
+    //         modelList.push({
+    //           value: item.id,
+    //           label: item.name
+    //         })
+    //       }
+    //     });
+    //     selectMap[formId + ".device_model"] = modelList;
+    //     setSelectMap({ ...selectMap });
+    //   } else if (id == "device_model") {
+    //     let formValues = refForm.getFieldsValue();
+    //     selectMap["device_models"].forEach(item => {
+    //       if (item.id == value) {
+    //         formValues[group_id][field_list_index]["subtype"] = item.subtype;
+    //         formValues[group_id][field_list_index]["outline_structure"] = item.outline_structure;
+    //         formValues[group_id][field_list_index]["specifications"] = item.specifications;
+    //         formValues[group_id][field_list_index]["u_number"] = item.u_number;
+
+    //       }
+    //     });
+    //     refForm.setFieldsValue(formValues);
+    //   } else if (id == "equipment_room") {
+    //     getCabinetList(value).then(({ dat }) => {
+
+    //       let cabinetList = new Array()
+    //       dat.forEach((item) => {
+    //         cabinetList.push({
+    //           value: item.id,
+    //           label: item.cabinet_code
+    //         });
+    //       })
+    //       selectMap[formId + ".owning_cabinet"] = cabinetList;
+    //       setSelectMap({ ...selectMap });
+    //     });
+    //   }
+
+    // } else if (formId === "table-maintenance") {
+    //   let formValues = refForm.getFieldsValue();
+    //   console.log("调试", formId, formValues);
+
+    //   if (id == "maintenance_type") {
+    //     formValues[group_id][field_list_index]["maintenance_provider"] = null;
+    //     refForm.setFieldsValue(formValues);
+    //     getProducersByType(value).then(({ dat }) => {
+    //       let list = new Array()
+    //       dat.forEach((item) => {
+    //         list.push({
+    //           value: item.id,
+    //           label: item.alias
+    //         });
+    //       })
+    //       selectMap[formId + ".maintenance_provider"] = list;
+    //       setSelectMap({ ...selectMap });
+    //     })
+    //   }
+
+    // }
+
+  };
+
+  //渲染表单每一项
+  const CreateForm = (formId, item, sn, span, multiple, field: any, group_id: any, field_list_index) => {
+    // console.log("渲染表单每一项",formId, multiple, field,group_id);
+    switch (item.type) {
+      case "hidden":
+        return <React.Fragment key={sn}>
+          <Form.Item hidden={true}
+            name={multiple ? [field.name, item.name] : item.name}
+            key={sn}
+          >
+            <Input placeholder={`请输入您的${item.label}`} />
+          </Form.Item>
+        </React.Fragment>
+      case "input":
+        return <Col span={span} >
+          <Form.Item label={item.label}>
+            <Form.Item
+
+              name={multiple ? [field.name, item.name] : item.name}
+              key={sn}
+              rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
+            >
+              <Input placeholder={`请输入您的${item.label}`} disabled={item.readonly} style={{ width: '150px' }} />
+
+            </Form.Item>
+            <template slot='append' style={(item.unit || item.extend) ? { display: 'block' } : {}}>
+              {item.unit && (
+                <span className='unit_style_gray'>{item.unit ? item.unit : ''}</span>
+              )}
+              {item.extend && item.extend.type == 'dialog' && (
+                <span className='extends_style_button' onClick={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}>{item.extend.label}</span>
+              )}
+              {item.extend && item.extend.type == 'checkbox' && (
+                <span className='extends_style_gray' >{item.extend.title}
+                  <Checkbox id="hasLine" className='checkbox_extend' onChange={e => { fieldSpecialEvent(e, item, formId, group_id, field_list_index) }}></Checkbox>
+                </span>
+              )}
+            </template>
+          </Form.Item>
+
+
+
+        </Col>
+      case "password":
+        return <Col span={span} key={"item-" + sn}>
+          <Form.Item
+            label={item.label}
+            name={multiple ? [field.name, item.name] : item.name}
+            key={sn}
+            rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
+          >
+            <Input.Password disabled={item.readonly} placeholder={`请输入您的${item.label}`}
+              style={{ width: '150px' }} />
+          </Form.Item>
+        </Col>
+      case "radio":
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
+        >
+          {
+            item.isGroup ? (
+              <Radio.Group>
+                {
+                  item.radioArr.map((radio, index) => {
+                    return (
+                      <Radio key={index} value={radio.value}>{radio.label}</Radio>
+                    )
+                  })
+                }
+              </Radio.Group>
+            ) : (
+              <>
+                <Radio value={item.radio.value}>{item.radio.label}</Radio>
+              </>
+            )
+          }
+
+        </Form.Item></Col>
+      case "select":
+        if (item.options?.length > 0) {
+          selectMap[formId + "." + item.name] = item.options
+        }
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
+        >
+          <Select
+            placeholder={`请选择您的${item.label}`}
+            options={selectMap[formId + "." + item.name]}
+            style={{ width: '150px' }}
+            onChange={(value: any) => onFieldsChange(formId, item.name, value, group_id, field_list_index)}
+          >
+          </Select>
+        </Form.Item></Col>
+      case "textarea":
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
+        >
+          <Input.TextArea placeholder={`请输入您的${item.label}`} />
+        </Form.Item></Col>
+      case "treeselect":
+        return <Col span={span} key={"item-" + sn}>
+          <Form.Item
+            label={item.label}
+            name={multiple ? [field.name, item.name] : item.name}
+            key={sn}
+            rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
+          >
+            <TreeSelect
+              showSearch
+              style={{ width: '100%' }}
+              dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+              placeholder={`请输入您的${item.label}`}
+              allowClear
+              treeDataSimpleMode
+              treeData={selectMap[formId + "." + item.name]}
+              fieldNames={{ label: 'name', value: 'id', children: 'children' }}
+              treeDefaultExpandAll={true}
+            ></TreeSelect>
+          </Form.Item></Col>
+      // 多选
+      case "multiple":
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
+        >
+        </Form.Item></Col>
+      //checkbox
+      // case "checkbox":
+      //   return <Col span={span} key={"item-"+sn}></Col><Form.Item
+      //     label={item.label}
+      //     name={item.name}
+      //     key={i}
+      //     rules={[{ required: item.isRequired, message: `请选择您的${item.label}` }]}
+      //   >
+      //   </Form.Item></Col>
+      //checkbox
+      case "datepicker":
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
+        >
+          <DatePicker  format="YYYY-MM-DD" placeholder={`请输入您的${item.label}`} />
+        </Form.Item></Col>
+      case "timepicker":
+        return <Col span={span} key={"item-" + sn}><Form.Item
+          label={item.label}
+          name={multiple ? [field.name, item.name] : item.name}
+          key={sn}
+          rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
+        >
+          <TimePicker placeholder={`请输入您的${item.label}`} />
+        </Form.Item></Col>
+      case "table":
+        return <div className='table_specal1' key={"item-" + sn}>
+          <span className='table_label'>{item.label}</span>
+          <div>
+            {/* <Table
+              rowSelection={rowSelection}
+              rowKey={item.key}
+              columns={columns_maintain_services}
+              pagination ={false}
+              dataSource={selectMap[formId + "." + item.name]} /> */}
+          </div>
+        </div>
+      // case "richtext":
+      //     return <Form.Item
+      //         label={item.label}
+      //         name={item.name}
+      //         key={i}
+      //         rules={[{ message: `请选择您的${item.label}` }]}
+      //     >
+      //         <RichText that={this.props.that} ></RichText>
+      //     </Form.Item>
+      // case "uploadexcel":
+      //     return <Form.Item
+      //         label={item.label}
+      //         name={item.name}
+      //         key={i}
+      //         valuePropName="fileList" getValueFromEvent={this.normFile}
+      //     >
+      //         <Upload.Dragger {...this.state.prexcel}>
+      //             <p className="ant-upload-drag-icon">
+      //                 <InboxOutlined />
+      //             </p>
+      //             <p className="ant-upload-text">单击或拖动文件到该区域进行上传</p>
+      //             <p className="ant-upload-hint">支持单个或批量上传</p>
+      //         </Upload.Dragger>
+      //     </Form.Item>
+      default:
+        return (
+          <>
+          </>
+        )
+    }
+  }
 
   useEffect(() => {
-
-
-
+    // tabClick(tabFIndex,"0");
   }, []);
 
-  const datalDealValue=(value,key,data_type) => {
-      if(value!=null && data_type=="date"){
-          value= moment(moment(value).format('YYYY-MM-DD')).valueOf()/1000
-      }else if(value!=null &&  data_type=="int"){
-        value= parseInt(value);
-      }else if(value!=null &&  data_type=="float"){
-        value= parseFloat(value);
-      }else if(value!=null && data_type=="timestamp"){
-        value= moment(moment(value).format('YYYY-MM-DD HH:mm:ss')).valueOf()/1000
-      }
-      return value;  
+  const datalDealValue = (value, key, data_type) => {
+    if (value != null && data_type == "date") {
+      value = moment(moment(value).format('YYYY-MM-DD')).valueOf() / 1000
+    } else if (value != null && data_type == "int") {
+      value = parseInt(value);
+    } else if (value != null && data_type == "float") {
+      value = parseFloat(value);
+    } else if (value != null && data_type == "timestamp") {
+      value = moment(moment(value).format('YYYY-MM-DD HH:mm:ss')).valueOf() / 1000
+    }
+    return value;
   }
 
-  const submitForm =(formValue: any, formId: string,fields:{},category,recordId)=>{
-      console.log("submitForm",formId,fields)
-      if (formId === 'form_base_position') {
-        let postParams :any= { device_status: 1, device_type: parseInt(deviceType) };
-        let baseFieldMap = getFieldsMap("group_base",fields);
-        let positionFieldMap = getFieldsMap("group_position",fields);
-        let submitFieldMap = new Map();
-        for (let fieldkey in formValue.group_base[0]){
-            let value = formValue.group_base[0][fieldkey];
-            if(baseFieldMap.has(fieldkey)){
-              submitFieldMap.set(fieldkey,datalDealValue(value,fieldkey,baseFieldMap.get(fieldkey).data_type) )
-            }
-        }
-        for (let fieldkey in formValue.group_position[0]){
-          let value = formValue.group_position[0][fieldkey];
-          if(positionFieldMap.has(fieldkey)){
-              submitFieldMap.set(fieldkey,datalDealValue(value,fieldkey,positionFieldMap.get(fieldkey).data_type) )
-          }
-        }
-        if(assetId>0){
-          postParams.id = assetId
-          let params = {...postParams, ...Object.fromEntries(submitFieldMap)}
-          delete params.device_status;
-          updateAsset(params).then((res) => {
-              message.success('修改成功');
-          })
-        }else{
-          insertAsset({ ...postParams, ...Object.fromEntries(submitFieldMap) }).then((res) => {
-            message.success('添加成功');
-            window.location.href = "/devicemgt/add/" + deviceType + "?id=" + res.dat+"&status=1&index=2&edit=1";
-          })
-          // }   
-          console.log('Success:', postParams);
-        }                
-      }
-      
-      if (formId === 'form_cpu' || formId === 'form_memory' || formId==='form_physical_disk' || formId==='form_logical_disk'
-      || formId==='form_power' || formId === 'form_network_port' || formId === 'form_display_code'   || formId === 'form_fan'            
-      || formId==='form-netconfig') {
-        
-        let subItem = new Array;                
-        for (let nodeKey in formValue) {  
-          let fieldMap = getFieldsMap(nodeKey,fields);
-          for (let key in formValue[nodeKey]) {
-            console.log(nodeKey,key)
-            let value = formValue[nodeKey][key];
-            let groupId = uuidv4();                   
 
-            for (let item in value) {
-              let cn_datatype = fieldMap.has(item)?fieldMap.get(item):null;
-              let row = {
-                property_category: nodeKey,
-                property_name: item,
-                property_value: datalDealValue(value[item],item,cn_datatype!=null?cn_datatype.data_type:"string"),
-                property_name_cn: cn_datatype!=null?cn_datatype.name_cn:item,
-                group_id: groupId,
-                asset_id: assetId,
-                config_category: category!=null?category:formId,
-              }
-              subItem.push(row)
+  const backToList = () => {
+    history.push('/devicemgt')
+  }
+
+  const submitForm = (formValue: any, formId: string, fields: {}, category, recordId) => {
+    console.log("submitForm", formId, fields)
+    if (formId === 'form_base_position') {
+      let postParams: any = { device_status: 1, device_type: parseInt(deviceType) };
+      let baseFieldMap = getFieldsMap("group_base", fields);
+      let positionFieldMap = getFieldsMap("group_position", fields);
+      let submitFieldMap = new Map();
+      for (let fieldkey in formValue.group_base[0]) {
+        let value = formValue.group_base[0][fieldkey];
+        if (baseFieldMap.has(fieldkey)) {
+          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, baseFieldMap.get(fieldkey).data_type))
+        }
+      }
+      for (let fieldkey in formValue.group_position[0]) {
+        let value = formValue.group_position[0][fieldkey];
+        if (positionFieldMap.has(fieldkey)) {
+          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, positionFieldMap.get(fieldkey).data_type))
+        }
+      }
+      if (assetId > 0) {
+        postParams.id = assetId
+        let params = { ...postParams, ...Object.fromEntries(submitFieldMap) }
+        delete params.device_status;
+        updateAsset(params).then((res) => {
+          message.success('修改成功');
+        })
+      } else {
+        insertAsset({ ...postParams, ...Object.fromEntries(submitFieldMap) }).then((res) => {
+          message.success('添加成功');
+          setRefreshLeft(_.uniqueId('refresh_left'));
+          window.location.href = "/devicemgt/add/" + deviceType + "?id=" + res.dat + "&status=1&index=2&edit=1";
+        })
+        // }   
+        console.log('Success:', postParams);
+      }
+    }
+
+    if (formId === 'form_cpu' || formId === 'form_memory' || formId === 'form_physical_disk' || formId === 'form_logical_disk'
+      || formId === 'form_power' || formId === 'form_network_port' || formId === 'form_display_code' || formId === 'form_fan'
+      || formId === 'form-netconfig') {
+
+      let subItem = new Array;
+      for (let nodeKey in formValue) {
+        let fieldMap = getFieldsMap(nodeKey, fields);
+        for (let key in formValue[nodeKey]) {
+          console.log(nodeKey, key)
+          let value = formValue[nodeKey][key];
+          let groupId = uuidv4();
+
+          for (let item in value) {
+            let cn_datatype = fieldMap.has(item) ? fieldMap.get(item) : null;
+            let row = {
+              property_category: nodeKey,
+              property_name: item,
+              property_value: datalDealValue(value[item], item, cn_datatype != null ? cn_datatype.data_type : "string"),
+              property_name_cn: cn_datatype != null ? cn_datatype.name_cn : item,
+              group_id: groupId,
+              asset_id: assetId,
+              config_category: category != null ? category : formId,
             }
+            subItem.push(row)
           }
         }
-        insertAssetExtends(subItem).then((res) => {
+      }
+      insertAssetExtends(subItem).then((res) => {
+        message.success('添加成功');
+      })
+    } else if (formId === 'table-maintenance') {
+      console.log('submit form', fields, formValue)
+      let fieldMap = getFieldsMap("form-maintenance", fields);
+      let submitFieldMap = new Map();
+      for (let fieldkey in formValue["form-maintenance"][0]) {
+        let value = formValue["form-maintenance"][0][fieldkey];
+        if (fieldMap.has(fieldkey)) {
+          let field = fieldMap.get(fieldkey);
+          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, field.data_type))
+        }
+      }
+      let postParams: any = { ...{ asset_id: assetId }, ...Object.fromEntries(submitFieldMap) };
+      if (postParams.maintenance_type != undefined && postParams.maintenance_type != null) {
+        postParams.maintenance_type = postParams.maintenance_type
+      }
+      if (recordId != null && parseInt(recordId) > 0) {
+        postParams.id = recordId;
+        updateAssetMaintenance(postParams).then((res) => {
+          message.success('修改成功');
+        })
+
+      } else {
+        insertAssetMaintenance(postParams).then((res) => {
           message.success('添加成功');
         })
-      }else if(formId==='table-maintenance'){
-          console.log('submit form',fields,formValue)
-          let fieldMap = getFieldsMap("form-maintenance",fields);
-          let submitFieldMap = new Map();
-          for (let fieldkey in formValue["form-maintenance"][0]){
-              let value = formValue["form-maintenance"][0][fieldkey];
-              if(fieldMap.has(fieldkey)){
-                 let field = fieldMap.get(fieldkey);
-                 submitFieldMap.set(fieldkey, datalDealValue(value,fieldkey,field.data_type))
-              }
-          }
-          let postParams :any= { ...{ asset_id: assetId}, ...Object.fromEntries(submitFieldMap)};
-          if(postParams.maintenance_type!=undefined && postParams.maintenance_type!=null){
-              postParams.maintenance_type =postParams.maintenance_type
-          }
-          if(recordId!=null && parseInt(recordId)>0){
-            postParams.id =recordId;
-            updateAssetMaintenance(postParams).then((res) => {
-              message.success('修改成功');
-            })           
+      }
 
-          }else{
-            insertAssetMaintenance(postParams).then((res) => {
-              message.success('添加成功');
-            })
-          }
-          
-        }else if(formId==='table-management'){
-          let submitFieldMap = new Map(); 
-          for (let nodeKey in formValue) { 
-            console.log(nodeKey);                        
-            let fieldMap = getFieldsMap(nodeKey,fields);
-            for (let fieldkey in formValue[nodeKey]) {
-              console.log(nodeKey,fieldkey)
-              let value = formValue[nodeKey][fieldkey];
-              for (let item in value) {
-                  if(fieldMap.has(item)){
-                    submitFieldMap.set(item, datalDealValue(value[item],item,fieldMap.get(item).data_type))
-                  }
-              }
+    } else if (formId === 'table-management') {
+      let submitFieldMap = new Map();
+      for (let nodeKey in formValue) {
+        console.log(nodeKey);
+        let fieldMap = getFieldsMap(nodeKey, fields);
+        for (let fieldkey in formValue[nodeKey]) {
+          console.log(nodeKey, fieldkey)
+          let value = formValue[nodeKey][fieldkey];
+          for (let item in value) {
+            if (fieldMap.has(item)) {
+              submitFieldMap.set(item, datalDealValue(value[item], item, fieldMap.get(item).data_type))
             }
           }
-          let postParams :any= { ...{ asset_id: assetId}, ...Object.fromEntries(submitFieldMap)};
-          if(recordId!=null && parseInt(recordId)>0){
-              postParams.id =recordId;
-              updateAssetManagement(postParams).then((res) => {
-                  message.success('修改成功');
-              })
-          }else{
-            insertAssetManagement(postParams).then((res) => {
-              message.success('添加成功');
-            })
-          }
         }
+      }
+      let postParams: any = { ...{ asset_id: assetId }, ...Object.fromEntries(submitFieldMap) };
+      if (recordId != null && parseInt(recordId) > 0) {
+        postParams.id = recordId;
+        updateAssetManagement(postParams).then((res) => {
+          message.success('修改成功');
+        })
+      } else {
+        insertAssetManagement(postParams).then((res) => {
+          message.success('添加成功');
+        })
+      }
+    }
 
   }
 
+  const tabClick = (key: string, parentId?: any) => {
+    console.log('TAB change', key, parentId);
+    let operateFormId = "";
+    if (parentId == "0") {
+      setTabFIndex(key)
+      //不处理表单数据  
+      operateFormId = key;
+      if (formRelations[key].length > 1) {
+        setTabFFIndex(formRelations[key][0]) //二级TAB
+        operateFormId = formRelations[key][0];
+      }
+    } else {
+      setTabFFIndex(key) //二级TAB
+      operateFormId = key;
+    }
+    setFormPosition(operateFormId);
+    console.log("表单属性信息", formModel[operateFormId]);
+
+    console.log("是否是数组", _.isArray(formModel[operateFormId]))
+  }
 
   return (
 
     <PageLayout icon={<GroupOutlined />} title={t('title')}>
       <div style={{ display: 'flex' }}>
-        <div style={{ width: '300px', display: 'list-item' }}>
+        <div style={{ width: '400px', display: 'list-item' }}>
           <Accordion
-            assetStatus={assetStatus}
-            handleClick={async (value: any,status,index:any) => {
-              var querysJSON =value.query!=null?eval(value.query):'{}'
+            isAutoInitialized={false}
+            assetStatus={AssetStatusUtils}
+            handleClick={async (value: any, status, index: any) => {
+              var querysJSON = value.query != null ? eval(value.query) : '{}'
               if (value.type === 'asset') {
-                window.location.href = "/devicemgt/add/7?id="+querysJSON.ID+"&index="+index+"&status="+status; 
+                getAssetById(querysJSON.ID).then(({ dat }) => {
+                  window.location.href = "/devicemgt/add/" + dat.device_type + "?id=" + querysJSON.ID + "&index=" + index + "&status=" + status;
+                })
               } else {
                 commonState.setQueryCondition(JSON.stringify(value.query));
-                window.location.href = "/devicemgt?query=1&index="+index+"&status="+status;
+                window.location.href = "/devicemgt?query=1&index=" + index + "&status=" + status;
               }
 
             }}
           />
         </div>
-        <div className='table-content' style={{ paddingLeft: '2px' }}>
-          <CustomForm
-            type={parseInt(deviceType)}
-            text='资产表单信息'
-            options={optionMap}
-            keyId={assetId}
-            formAttrbutes={modelsAttributes}
-            handleClick={async (formValue: any, formId: string,fields:{},category,recordId) => {
-                  submitForm(formValue,formId,fields,category,recordId);
+        <div className='table-content' style={{ paddingLeft: '0px', marginTop: "0px" }}>
+
+          {/* <Tabs className='tab-list' activeKey={tabFIndex} onTabClick={(key) => {
+            tabClick(key, "0");
+          }}>
+            {attrs.length > 0 && attrs.map((modelF, i) => {
+
+              if (modelF.form_type === 'group') {
+                let children = new Array<any>();
+                children.push(modelF.id);
+                formModel[modelF.id] = modelF.models;
+                formRelations[modelF.id] = children;
+              }
+              if (modelF.form_type === 'form') {
+                let modelIds = Array.from(new Set(modelF.models.map(obj => obj.id)))
+                formRelations[modelF.id] = modelIds;
+              }
+
+              return (
+                <Tabs.TabPane tab={modelF.name} key={modelF.id} >
+                  {modelF.form_type === "form" && (
+                    <Tabs className='tab-child-list' activeKey={tabFFIndex} onTabClick={key => {
+                      tabClick(key, modelF.id);
+                    }}>
+                      {modelF.models.map((modelFF, index) => {
+                        formModel[modelFF.id] = modelFF;
+                        return (
+                          <Tabs.TabPane tab={modelFF.name} key={modelFF.id}  >
+                          </Tabs.TabPane>
+                        )
+                      })}
+                    </Tabs>
+                  )}
+                </Tabs.TabPane>
+              )
+            })}
+          </Tabs>
+
+          <Form
+            labelAlign="right"
+            ref={formRef}
+            key={formPosition}
+            style={{ width: '100%' }}
+            onFinish={e => {
+              // handleClick(e, modelF.id, null);
             }}
+          >
+            {_.isArray(formModel[formPosition]) ==true && formModel[formPosition]?.map((formInfo, index) => {
+              return (
+                <Form.List key={"Formlist" + index} name={formInfo.id} initialValue={[{}]}>
+                  {(feilds, { add, remove }) => {
+                    return (
+                      <React.Fragment key={'key' + index}>
+                        <div className='group_title' key={"groupForm" + index}>
+                          <span style={{ marginLeft: '3px' }}>{formInfo.name}</span>
+                          {formInfo.multiple && (
+                            <>
+                              <Button type="primary" className='button_form_add' onClick={() => {
+                                add()
+                              }}> ＋添加</Button>
+                            </>
+                          )}
+                        </div>
+                        {feilds.map((item, _suoyi) => (
+                          <div key={"big_row_zone" + _suoyi}>
+                            {formInfo.multiple && (
+                              <Row key={'index-' + _suoyi}>
+                                <div className='head_card'>
+                                  <div className="title" >{formInfo.name}{_suoyi + 1}</div>
+                                  <div className="dashed"><hr className='dhr'></hr></div>
+                                  {_suoyi > 0 ? (
+                                    <MinusCircleOutlined
+                                      className="dynamic-delete-button"
+                                      style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
+                                      onClick={() => remove(_suoyi)} />
+                                  ) : null}
+                                </div>
+                              </Row>
+                            )}
+                            <Row key={'ind-' + _suoyi} style={{ marginTop: '5px' }}>
+                              {formInfo.attributes.map((property, sn) => {
+                                let span = property.span ? property.span : formInfo.span;
+                                return (CreateForm(formPosition, property, sn, span, true, item, formInfo.id, _suoyi))
+                              })}
+                            </Row>
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    )
+
+                  }}
+                </Form.List>
+              )
+            })}
+            {_.isArray(formModel[formPosition]) == false && (
+              <Form.List key={"field_list_" + formPosition} name={formPosition} initialValue={[{}]}>
+                {(field, { add, remove }) => {
+                  return (
+                    <>
+                      {field.map((item, _index) => (
+                        <div key={"F" + _index}>
+                          <Row key={'index-' + _index}>
+                            <div className='head_card'>
+                              <div className="title" >{formModel[formPosition]?.name}{_index + 1}</div>
+                              <div className="dashed"><hr className='dhr'></hr></div>
+                              {_index > 0 ? (
+                                <MinusCircleOutlined
+                                  className="dynamic-delete-button"
+                                  style={{ position: 'absolute', color: 'red', right: '2%', marginLeft: 8 }}
+                                  onClick={() => remove(_index)} />
+                              ) : null}
+                            </div>
+                          </Row>
+                          <Row style={{ marginTop: '0px' }}>
+                            {formModel[formPosition]?.attributes.map((property, sn) => {
+                              let span = property.span ? property.span : formModel[formPosition]?.span;
+                              return (CreateForm(formPosition,property, sn, span, true, item, formPosition, _index))
+                            })}
+                          </Row>
+                        </div>
+                      ))}
+                      <Row style={{ marginTop: '0px' }}>
+                        <Space
+                          align="baseline"
+                          style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', marginTop: '10px', textAlign: 'center' }}
+                        >
+                          {hasEdit && (
+                            <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
+                          )}
+                          {formModel[formPosition]?.multiple && (
+                            <>
+                              <Button type="primary" className='button_form' onClick={() => {
+                                add()
+                              }}> 添加</Button>
+                            </>
+                          )}
+                          <Button className='ret_button_form' onClick={backToList}>返回</Button>
+                        </Space>
+                      </Row>
+                    </>
+                  )
+                }
+                }
+              </Form.List>
+            )}
+            {_.isArray(formModel[formPosition]) ==true && (
+            <Row>
+              <Space
+                style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', marginTop: '10px', textAlign: 'center' }}
+              >
+                {hasEdit && (
+                  <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
+                )}
+                <Button className='ret_button_form' onClick={backToList}>返回</Button>
+              </Space>
+            </Row>
+            )}
+          </Form> */}
+
+          <CustomForm
+              type={parseInt(deviceType)}
+              text='资产表单信息'
+              options={optionMap}
+              keyId={assetId}
+              handleClick={async (formValue: any, formId: string,fields:{},category,recordId) => {
+                  submitForm(formValue,formId,fields,category,recordId);
+              }}
           />
 
         </div>

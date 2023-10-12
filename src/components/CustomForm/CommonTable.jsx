@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Table, Row, DatePicker,Button, Radio, Select, Form, Input } from 'antd';
+import { Table,Dropdown, Row, DatePicker,Button, Radio, Select, Form, Input,Menu } from 'antd';
 import "./CommonTable.less"
 import { Fragment } from 'react';
 // import ExportJsonExcel from 'js-export-excel'; //引入导出excel表格控件
 const style = { padding: '8px 0',width:'100%' };
+import { DownOutlined} from '@ant-design/icons';
+
 
 
 class CommonTable extends Component {
@@ -49,14 +51,6 @@ class CommonTable extends Component {
     });
   };
 
-  setAgeSort = () => {
-    this.setState({
-      sortedInfo: {
-        order: 'descend',
-        columnKey: 'age',
-      },
-    });
-  };
   onChange = (page, pageSize) => {
     this.setState({
       current: page,
@@ -66,6 +60,8 @@ class CommonTable extends Component {
       this.props.queryTable(page, pageSize)
     }
   };
+
+  
   createForm(item, i) {
     switch (item.type) {
       case "input":
@@ -195,7 +191,6 @@ class CommonTable extends Component {
               }
               return true;
             });
-            debugger
             this.setState({ selectedRowKeys: newSelectedRowKeys });
           },
         },
@@ -223,6 +218,7 @@ class CommonTable extends Component {
           <Form
             layout="inline"
             ref={this.formRef}
+            id={this.props.businessId}
             className='queryFormContainer'
             labelCol={{span: 4 }}
             wrapperCol={{ span: 20 }}
@@ -256,7 +252,7 @@ class CommonTable extends Component {
               )
             }
             </div>
-            <Form.Item className='button_option'> 
+            <div className='button_option'> 
               {
                this.props.ButtonArr ? (
                 this.props.ButtonArr.map((item, i) => {
@@ -266,8 +262,23 @@ class CommonTable extends Component {
               })
               ) : (<Fragment />
               )
-             }
-            </Form.Item>
+              }
+              { 
+               this.props.Menu? (
+                <Dropdown
+                  trigger={['click']}
+                  overlay={
+                  <Menu onClick={({ key }) => {
+                      this.props.Menu.ClickFun(key,this.props.businessId)
+                  }} items={this.props.Menu.items} />
+
+                }>
+                      <Button>{'操作'} <DownOutlined />
+                </Button>
+              </Dropdown>
+               ): (<Fragment /> )
+              }
+            </div>
 
           </Form>
           
@@ -289,7 +300,7 @@ class CommonTable extends Component {
             pageSize:this.state.pageSize,
             total: this.props.total,
             onChange: this.onChange,
-            pageSizeOptions: [5,10, 20, 50, 100]
+            pageSizeOptions: [10, 20, 50, 100]
           }}
         />
       </>

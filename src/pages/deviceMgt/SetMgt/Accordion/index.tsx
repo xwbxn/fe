@@ -22,6 +22,8 @@ export default React.memo((props:Props) => {
   const [bindIndex, setBindIndex] = React.useState(0);
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [selectItem, setSelectItem] = useState<any>(SetConfigCatelog[0]);
+  const [selectedKeys, setSelectedKeys]=useState<number[]>();
+
   const changeItem = (item, index,isDefault) => {
     setBindIndex(index);
     if(selectItem!=null && selectItem.id==item.id && isDefault){
@@ -33,13 +35,18 @@ export default React.memo((props:Props) => {
     if (item?.source == 'dict') {
       treeData.splice(0, treeData.length);
       getDictValueEnum(item.value).then((res) => {
+        let selectIds = new Array<any>();
         res.forEach((values) => {
+          if(index == 0) {
+            selectIds.push(values.value);
+          }
           treeData.push({
             key: "" + values.value,
             title: values.label,
           })
         })
         setTreeData(_.cloneDeep(treeData));
+        setSelectedKeys(selectIds);
         props.handleClick({
           businessId:item.id,
           type:item.type,
@@ -52,13 +59,18 @@ export default React.memo((props:Props) => {
       treeData.splice(0, treeData.length);
       queryAboutTable(item.refer, item.fields).then(({ dat }) => {
         console.log(dat);
-        dat.forEach((values) => {
+      let selectIds = new Array<number>();
+        dat.forEach((values,index) => {
+          if(index == 0) {
+            selectIds.push(values.id);
+          }
           treeData.push({
             key: "" + values.id,
             title: values.name,
           })
         })
         setTreeData(_.cloneDeep(treeData));
+        setSelectedKeys(selectIds);
         props.handleClick({
           businessId:item.id,
           type:item.type,
@@ -78,7 +90,8 @@ export default React.memo((props:Props) => {
     }
   };
   useEffect(() => {
-     changeItem(selectItem,0,false);    
+     changeItem(selectItem,0,false);   
+    
   }, []);
   
   const treeDatas = useMemo(() => {
@@ -87,7 +100,12 @@ export default React.memo((props:Props) => {
 
   const onSelect = (selectedKeys: React.Key[], info: any) => {
      console.log(info.node.key)
-     console.log(selectItem,"item selected")
+     let selecxtId = new Array();
+     selecxtId.push(selectedKeys)
+     setSelectedKeys(selecxtId)
+    // debugger;
+    setSelectedKeys(new Array()[selectItem.id])
+    console.log("Selected",selectedKeys)
      props.handleClick({
       businessId:selectItem.id,
       type:selectItem.type,
@@ -141,6 +159,7 @@ export default React.memo((props:Props) => {
                 defaultExpandAll={true}
                 onSelect={onSelect}
                 treeData={treeDatas}
+                // selectedKeys={selectedKeys}
               />
             </div>
           )}
