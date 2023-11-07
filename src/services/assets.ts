@@ -10,6 +10,18 @@ export const getAssets = function (bgid, query, organization_id) {
         }
     })
 }
+export const getAssetsByCondition = function (data) {
+    // return request("/api/n9e/xh/assets/filter", {
+    //     method: RequestMethod.Post,
+    //     data
+    // })
+    return request("/api/n9e/assets", {
+        method: RequestMethod.Get,
+        params: {
+            bgid:1
+        }
+    })
+}
 
 export const getAsset = function (id: string) {
     return request(`/api/n9e/assets/${id}`, {
@@ -24,6 +36,19 @@ export const addAsset = function (data: assetsType) {
     })
 }
 
+//针对西航项目
+export const insertXHAsset = function (data) {
+    return request('/api/n9e/xh/assets', {
+      method: RequestMethod.Post,
+      data
+    });
+  };
+  export const updateXHAsset = function (data) {
+    return request('/api/n9e/xh/assets', {
+      method: RequestMethod.Put,
+      data
+    });
+  };
 export const putOptionalMetrics = function (data) {
     return request("/api/n9e/assets/optmetrics", {
         method: RequestMethod.Put,
@@ -122,6 +147,36 @@ export function getOrganizationTree(data) {
     });
 }
 
+export function getAssetDirectoryTree() {
+    return request(`/api/n9e/asset-directory/tree`, {
+        method: RequestMethod.Get
+    });
+}
+export function insertAssetDirectoryTree(data) {
+    return request(`/api/n9e/asset-directory`, {
+        method: RequestMethod.Post,
+        data
+    });
+}
+export function deleteAssetDirectoryTree(id:any) {
+    return request(`/api/n9e/asset-directory/`+id, {
+        method: RequestMethod.Delete
+    });
+}
+export function updateAssetDirectoryTree(params) {
+    return request(`/api/n9e/asset-directory`, {
+        method: RequestMethod.Put,
+        params
+    });
+}
+
+export function moveAssetDirectoryTree(params) {
+    return request(`/api/n9e/asset-directory/move`, {
+        method: RequestMethod.Get,
+        params
+    });
+}
+
 export function getOrganizationsByIds(data) {
     return request(`/api/n9e/organization/name`, {
         method: RequestMethod.Post,
@@ -154,6 +209,6 @@ export const deleteOrganization = function (id) {
 export const changeAssetOrganization = function (data) {
     return request(`/api/n9e/assets/orgnazation`, {
         method: RequestMethod.Put,
-        data
+         data
     })
 }

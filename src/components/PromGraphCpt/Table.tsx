@@ -158,14 +158,14 @@ export default function Table(props: IProps) {
     <div className='prom-graph-table-container'>
       <div className='prom-graph-table-controls'>
         <Input.Group>
-          <span className='ant-input-group-addon'>Time</span>
+          <span className='ant-input-group-addon'>时间</span>
           <DatePicker
             value={timestamp ? moment.unix(timestamp) : undefined}
             onChange={(val) => {
               setTimestamp(val ? val.unix() : undefined);
             }}
             showTime
-            placeholder='Evaluation time'
+            placeholder='评估时间'
             getPopupContainer={() => document.body}
             disabledDate={(current) => current > moment()}
           />

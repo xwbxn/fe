@@ -162,7 +162,7 @@ const zh_HK = {
         type: '條件',
         type_tip: `
           <0>範圍值預設值： from=-Infinity; to=Infinity </0>
-          <1>特殊值 Null 說明： 匹配值為 null 或 undefined 或 no data</1>
+          <1>特殊值 空 說明： 匹配值為 空 或 未定义 或 无数据</1>
         `,
         type_map: {
           special: '固定值',

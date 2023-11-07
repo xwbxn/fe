@@ -25,9 +25,11 @@ export default function () {
   const [props, setProps] = useState<any>({});
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
-
-  const [randomId, setRandomId] = useState<string>();
   const [businessForm, setBusinessForm] = useState<any>({});
+
+  
+  const [randomId, setRandomId] = useState<string>();
+  
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssetRows, setSelectedAssetRows] = useState<any>([]);
   const [deviceTypeOption, setDeviceTypeOption] = useState<any[]>();

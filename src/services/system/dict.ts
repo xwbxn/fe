@@ -24,16 +24,16 @@ export async function getDictTypeList(params) {
 }
 
 
-export async function getDictValueEnum(key) {
+export async function getDictValueEnum(keys:string) {
+  let key = keys.split(",");
   const resp = await  request(`/api/n9e/dict-data/`+key, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=UTF-8',
     },
   });
-  if(resp.err === "") {
-    const opts: DictValueEnumObj[] =[];
-    
+  if(resp.err === "" && key.length==1 ) {
+    const opts: DictValueEnumObj[] =[];    
     resp.dat.forEach((item) => {
       opts.push({
         value: item.dict_key,
@@ -41,6 +41,18 @@ export async function getDictValueEnum(key) {
       });
     })
     return opts;
+  }else if(resp.err === "" && key.length>0){
+    let result = {};
+    for (let item of resp.dat) {
+      if (!(item.type_code in result)) {
+        result[item.type_code] = [];
+      }
+      result[item.type_code].push({
+        value: item.dict_key,
+        label: item.dict_value
+      });
+    }
+    return result;
   } else {
     return [];
   }

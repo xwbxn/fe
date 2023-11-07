@@ -15,13 +15,14 @@
  *
  */
 import React, { useEffect, useState, useImperativeHandle, ReactNode } from 'react';
-import { Form, Input, Select, Space } from 'antd';
-import { getUserInfo, getNotifyChannels, getRoles } from '@/services/manage';
+import { Col, Form, Input, Row, Select, Space, TreeSelect } from 'antd';
+import { getUserInfo, getNotifyChannels, getRoles,getTeamInfoList, } from '@/services/manage';
 import { UserAndPasswordFormProps, Contacts, ContactsItem, User } from '@/store/manageInterface';
 import { MinusCircleOutlined, PlusCircleOutlined, CaretDownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { Link } from 'react-router-dom';
+import { getOrganizationTree } from '@/services/assets';
 
 const { Option } = Select;
 const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, ref) => {
@@ -33,6 +34,9 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
   const [contactsList, setContactsList] = useState<ContactsItem[]>([]);
   const [roleList, setRoleList] = useState<{ name: string; note: string }[]>([]);
 
+
+  const [treeData, setTreeData] = useState<any[]>();
+
   useImperativeHandle(ref, () => ({
     form: form,
   }));
@@ -42,7 +46,18 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
     } else {
       setLoading(false);
     }
-
+    getTeamInfoList({ query: '' }).then(({ dat })=> {
+      let contacts: Array<any> = [];
+      dat.forEach((item,index) => {
+          let val: Contacts = {
+            value: item.id,
+            label: item.name,
+          };
+          contacts.push(val);
+        });
+        setTreeData(contacts);
+     });
+    
     getContacts();
     getRoles().then((res) => setRoleList(res));
   }, []);
@@ -75,27 +90,36 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       setLoading(false);
     });
   };
+  const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span:10 } };
 
   return !loading ? (
-    <Form layout='vertical' form={form} initialValues={initialValues} preserve={false}>
-      {!userId && (
-        <Form.Item
-          label={t('account:profile.username')}
-          name='username'
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-      )}
-      <Form.Item label={t('account:profile.nickname')} name='nickname'>
-        <Input />
-      </Form.Item>
+    <Form {...formItemLayout} layout={'horizontal'} form={form} initialValues={initialValues} preserve={false}>
+      <Row>
+        {!userId && (
+          <Col span={12} key={"item-" + 0}>
+          <Form.Item
+            label={t('account:profile.username')}
+            name='username'
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          </Col>
+        )}
+         <Col span={12} key={"item-" + 1}>
+            <Form.Item label={t('account:profile.nickname')} name='nickname'>
+              <Input />
+            </Form.Item>
+        </Col>
+      </Row>
       {!userId && (
         <>
+        <Row>
+         <Col span={12} key={"item-" + 3}>
           <Form.Item
             name='password'
             label={t('account:password.name')}
@@ -108,7 +132,8 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           >
             <Input.Password />
           </Form.Item>
-
+          </Col>
+          <Col span={12} key={"item-" + 4}>
           <Form.Item
             name='confirm'
             label={t('account:password.confirm')}
@@ -131,8 +156,12 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           >
             <Input.Password />
           </Form.Item>
+          </Col>
+          </Row>
         </>
       )}
+       <Row>
+         <Col span={12} key={"item-" + 5}>
       <Form.Item
         label={t('account:profile.role')}
         name='roles'
@@ -153,12 +182,29 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           ))}
         </Select>
       </Form.Item>
+      </Col>
+      <Col span={12} key={"item-" + 6}>
       <Form.Item label={t('account:profile.email')} name='email'>
         <Input />
       </Form.Item>
+      </Col>
+      </Row>
+      <Row>
+      <Col span={12} key={"item-" + 7}>
       <Form.Item label={t('account:profile.phone')} name='phone'>
         <Input />
       </Form.Item>
+      </Col>
+      <Col span={12} key={"item-" + 8}>
+        <Form.Item label={'所属用户组'} name='user_group_id'>
+         <Select mode='multiple' options={treeData}>
+
+          </Select>
+          
+        </Form.Item>
+      </Col>
+       </Row>
+     
       <Form.Item
         label={
           <Space>
@@ -168,7 +214,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             </Link>
           </Space>
         }
-      >
+       >
         <Form.List name='contacts'>
           {(fields, { add, remove }) => (
             <>

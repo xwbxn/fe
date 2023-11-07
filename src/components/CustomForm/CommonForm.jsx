@@ -4,8 +4,8 @@ import locale from 'antd/es/date-picker/locale/zh_CN';
 import { InboxOutlined } from '@ant-design/icons';
 import './form.less';
 const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 12 },
+  labelCol: { span: 8 },
+  wrapperCol: { span: 16 },
 };
 
 const tailLayout = {
@@ -73,18 +73,14 @@ class CommonForm extends Component {
     this.props.Modal.submit(values)
   }
   onValuesChange = (item, allValues) => {
-    console.log(allValues)
+    // console.log(item,allValues)
     if (this.props.FormOnChange) {
       let newValues = this.props.FormOnChange(allValues, item);
-      // debugger;
-      console.log(newValues)
       for (var key in newValues) {
         allValues[key] = values[key];
         console.log(key,)
       }
-      // allValues["device_name"] = "Ceshi";
       this.formRef.current.setFieldsValue(allValues);
-
     }
   }
   normFile = (e) => {
@@ -113,6 +109,7 @@ class CommonForm extends Component {
           onFinish={this.onFinish}
           onValuesChange={this.onValuesChange}
           initialValues={this.props.defaultValue}
+          className="common_form"
         >
           {
             this.props.Form?.items?.length ? (
@@ -128,7 +125,7 @@ class CommonForm extends Component {
           }
           {this.props.Form?.groups?.map((group, index) => (
             <Row key={'ind-'} style={{ marginTop: '5px' }}>
-              {group.label.length > 0 && (
+              {group.label?.length > 0 && (
                 <Col key={"item-" + index} className="group_title_header">
                   <div style={{ width: '100%', height: '30px', lineHeight: '30px', fontSize: '16px' }} >{group.label}</div>
                 </Col>
@@ -139,9 +136,6 @@ class CommonForm extends Component {
             </Row>
           ))
           }
-
-
-
 
           <Form.Item {...tailLayout} >
             <Button key="button" type="primary" htmlType="submit" style={{ width: "100px" }} >确定</Button>
@@ -179,7 +173,7 @@ class CommonForm extends Component {
   //渲染表单每一项
   createForm(item, sn, span) {
     this.copyFormValue(item);
-    console.log('createForm',this.props.initial[item.name])
+    // console.log('createForm',this.props.initial[item.name])
     if (item.type == "select" && item.source == "number") {
       const children = [];
       for (let i = 1; i < item.value; i++) {
@@ -291,6 +285,7 @@ class CommonForm extends Component {
 
         </Form.Item></Col>
       case "select":
+        //  console.log("select",item,this.props.initial[item.name]);
         return <Col span={span} key={"item-" + sn}><Form.Item
           label={item.label}
           name={item.name}
@@ -304,11 +299,12 @@ class CommonForm extends Component {
               item.option?.length ? (
                 item.option.map((select, index) => {
                   return (
-                    <Select.Option key={index} value={select.value}>{select.label}</Select.Option>
+                    <Select.Option key={index} value={select.value}>1111{select.label}</Select.Option>
                   )
                 })
               ) : (
                 item.source == 'initial' && (
+                  
                   this.props.initial[item.name]?.map((select, index) => {
                     return (
                       <Select.Option key={index} value={select.value}>{select.label}</Select.Option>

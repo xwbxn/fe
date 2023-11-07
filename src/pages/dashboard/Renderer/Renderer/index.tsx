@@ -272,7 +272,7 @@ function index(props: IProps) {
         </div>
         <div className='renderer-body' style={{ height: values.name ? `calc(100% - 34px)` : '100%' }}>
           {_.isEmpty(series) && values.type !== 'text' && values.type !== 'iframe' ? (
-            <div className='renderer-body-content-empty'>No Data</div>
+            <div className='renderer-body-content-empty'>无数据展示</div>
           ) : (
             <>{RendererCptMap[values.type] ? RendererCptMap[values.type]() : <div className='unknown-type'>{`无效的图表类型 ${values.type}`}</div>}</>
           )}

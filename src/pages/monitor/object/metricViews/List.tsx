@@ -98,7 +98,7 @@ export default function List(props: IProps) {
       />
       <div className='n9e-metric-views-list-content'>
         {_.isEmpty(list)
-          ? 'No Data'
+          ? '无数据'
           : _.map(
               _.filter(list, (item) => {
                 if (search) {

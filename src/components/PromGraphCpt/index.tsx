@@ -119,7 +119,7 @@ export default function index(props: IProps) {
                 setCompleteEnabled(e.target.checked);
               }}
             >
-              Enable autocomplete
+              启用自动完成
             </Checkbox>
           </div>,
           headerExtra,
@@ -132,7 +132,7 @@ export default function index(props: IProps) {
               setCompleteEnabled(e.target.checked);
             }}
           >
-            Enable autocomplete
+            启用自动完成
           </Checkbox>
         </div>
       )}

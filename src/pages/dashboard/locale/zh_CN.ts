@@ -162,7 +162,7 @@ const zh_CN = {
         type: '条件',
         type_tip: `
           <0>范围值默认值: from=-Infinity; to=Infinity </0>
-          <1>特殊值Null说明: 匹配值为 null 或 undefined 或 no data</1>
+          <1>特殊值Null说明: 匹配值为 空 或 未定义 或 没有数据</1>
         `,
         type_map: {
           special: '固定值',

@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePicker, TreeSelect } from 'antd';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePicker, TreeSelect, Checkbox, Popover } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { DownOutlined, DownloadOutlined, EditOutlined, GroupOutlined, OneToOneOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, DownOutlined, DownloadOutlined, EditOutlined, GroupOutlined, OneToOneOutlined, SearchOutlined, TableOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
 import Accordion from './Accordion';
 import './locale';
 import './style.less';
 import _, { set } from 'lodash';
+import {TableComponent} from 'dynamic-tablelist-colums';
 // import Add from './Add';
 import { getAssetsTree, getAssetsListByFilter, deleteDeviceOnline, getAssetById, exportTemplet } from '@/services/assets/asset'
 import { getDataCenterList } from '@/services/assets/data-center'
@@ -32,6 +33,7 @@ import { getProducerList } from '@/services/assets/producer';
 import { getScrapList ,addScrap} from '@/services/assets/device-scrap';
 
 import { OperateType, SetOperateTypes, AssetStatusUtils } from './Form/operate_type';
+import { Fragment } from 'react';
 
 //初始化选项数据【key=value】
 const optionMap = {};
@@ -40,6 +42,8 @@ const optionMap = {};
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  //原始默认选中的value值
+  
   const [list, setList] = useState<any[]>([]);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -69,6 +73,138 @@ export default function () {
   const [businessForm, setBusinessForm] = useState<any>({});
 
 
+
+  //全部设备、已上线设备、待上线设备、已下线设备
+  const assetTableColumns =[
+    {
+      title: '管理IP',
+      dataIndex: 'management_ip',
+    },
+    {
+      title: '设备名称',
+      dataIndex: 'device_name',
+    },
+    {
+      title: '序列号',
+      dataIndex: 'serial_number',
+    },
+    {
+      title: '型号',
+      dataIndex: 'device_model',
+      render(val) {
+        if (modelMap[val] != null) {
+          return modelMap[val].name;
+        }
+      }
+    },
+    {
+      title: '设备类型',
+      dataIndex: 'device_type',
+      render(val) {
+        let deviceName = val;
+        deviceTypeOption?.forEach((option) => {
+          if (option.value == val) {
+            deviceName = option.label;
+          }
+        })
+        return deviceName;
+      }
+    },
+    {
+      title: '纳管状态',
+      dataIndex: 'managed_state',
+      render(val) {
+        return '未定义来源';
+      },
+    },
+    {
+      title: '操作',
+      width: '180px',
+      align: 'center',
+      render: (text: string, record: any) => (
+        <Space align="baseline"
+          style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', textAlign: 'center' }}
+        >
+
+          <EditOutlined onClick={e => {
+            window.location.href = "/devicemgt/add/" + record.device_type + "?id=" + record.id + "&index=" + leftNavData.index + "&status=" + leftNavData.status + "&edit=1";
+          }} />
+
+          <UnorderedListOutlined />
+
+          <OneToOneOutlined />
+
+          <DownloadOutlined />
+
+        </Space>
+      ),
+    },
+   ];
+
+  //已报废的设备
+  const scrapTableColumns = [
+    {
+      title: t('报废日期'),
+      dataIndex: 'scrap_at',
+    },
+    {
+      title: t('序列号'),
+      dataIndex: 'serial_number',
+    },
+    {
+      title: t('设备名称'),
+      dataIndex: 'device_name',
+    },
+    {
+      title: t('原管理IP'),
+      dataIndex: 'old_management_ip',
+    },
+    {
+      title: t('厂商'),
+      dataIndex: 'device_producer',
+    },
+    {
+      title: t('型号'),
+      dataIndex: 'device_model',
+      render(val) {
+        if (modelMap[val] != null) {
+          return modelMap[val].name;
+        }
+      }
+    },
+    {
+      title: t('设备类型'),
+      dataIndex: 'device_type',
+      render(val) {
+        let deviceName = val;
+        deviceTypeOption?.forEach((option) => {
+          if (option.value == val) {
+            deviceName = option.label;
+          }
+        })
+        return deviceName;
+      }
+    },
+    {
+      title: t('所属部门'),
+      dataIndex: 'old_belong_organization',
+      render(val) {
+        return val;
+      },
+    },
+    {
+      title: t('报废说明'),
+      dataIndex: 'remark',
+      render(val) {
+        return val;
+      },
+    },
+  ]
+
+
+  const [selectColum,setSelectColum]=useState(assetTableColumns)
+
+
   // 展开显示全部标签
   const handlerAll = (val: boolean) => {
     set(!val)
@@ -76,7 +212,64 @@ export default function () {
 
   const [deviceStatusOptions, setDeviceStatusOptions] = useState<any>([]);
   const [scrapStatusOptions, setScrapStatusOptions] = useState<any>([]);
+
+  const initialColumn = [
+    {name: '管理IP', checked: true, value: 0},{name: '设备名称', checked: true, value: 1},
+    {name: '序列号', checked: true, value: 2},{name: '型号', checked: true, value: 3},
+    {name: '设备类型', checked: true, value: 4},{name: '纳管状态', checked: true, value: 5},
+    {name: '操作', checked: true, value: 6}
+  ];
+
+  const [showColumn, setShowColumn] = useState(initialColumn);
+  function handelShowColumn(checkedValues) {
+    let res = initialColumn;
+    res.forEach(item => {
+        item.checked = checkedValues.includes(item.value);
+    });
+    setShowColumn([...res]);  
+    loadingChoosedColumn(assetTableColumns,[...res]);  
+  }
   
+  const loadingChoosedColumn =(tableColumns,showColumns)=>{
+    let showColumnMap = new Map();
+    showColumns.forEach((item)=>{
+        if(item.checked){
+          showColumnMap.set(item.name,item.value);
+        }
+    });
+    console.log("showColumnMap",showColumnMap);
+    let showColumn = new Array();
+    tableColumns.forEach((column)=>{
+      if(showColumnMap.has(column.title)){
+        showColumn.push(column);
+      }
+    });
+    setSelectColum(showColumn);
+  };
+
+
+
+  const pupupContent = (
+    <div>
+        <Checkbox.Group
+            defaultValue={[0,1,2,3,4,5,6]}
+            style={{ width: '100%' }}
+            onChange={handelShowColumn}
+        >
+        {
+            showColumn.map(item => (
+                <Row key={item.value} style={{ marginBottom: '5px' }}>
+                    <Col span={24}>
+                        <Checkbox value={item.value}>{item.name}</Checkbox>
+                    </Col>
+                </Row>
+            ))
+        }
+        </Checkbox.Group>
+    </div>
+);
+
+ 
 
   const onChange = (value: string) => {
     console.log(`selected ${value}`);
@@ -267,146 +460,11 @@ export default function () {
 
   }, []);
 
-  //全部设备、已上线设备、待上线设备、已下线设备
-  const assetTableColumns = [
-    {
-      title: t('管理IP'),
-      dataIndex: 'management_ip',
-    },
-    {
-      title: t('设备名称'),
-      dataIndex: 'device_name',
-    },
-    {
-      title: t('序列号'),
-      dataIndex: 'serial_number',
-    },
-    {
-      title: t('型号'),
-      dataIndex: 'device_model',
-      render(val) {
-        if (modelMap[val] != null) {
-          return modelMap[val].name;
-        }
-      }
-    },
-    {
-      title: t('设备类型'),
-      dataIndex: 'device_type',
-      render(val) {
-        let deviceName = val;
-        deviceTypeOption?.forEach((option) => {
-          if (option.value == val) {
-            deviceName = option.label;
-          }
-        })
-        return deviceName;
-      }
-    },
-    {
-      title: t('纳管状态'),
-      dataIndex: 'managed_state',
-      render(val) {
-        return '未定义来源';
-      },
-    },
-    {
-      title: t('common:table.operations'),
-      width: '180px',
-      align: 'center',
-      render: (text: string, record: any) => (
-        <Space align="baseline"
-          style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', textAlign: 'center' }}
-        >
+  
 
-          <EditOutlined onClick={e => {
-            window.location.href = "/devicemgt/add/" + record.device_type + "?id=" + record.id + "&index=" + leftNavData.index + "&status=" + leftNavData.status + "&edit=1";
-          }} />
-
-          <UnorderedListOutlined />
-
-          <OneToOneOutlined />
-
-          <DownloadOutlined />
-
-        </Space>
-      ),
-    },
-  ]
-
-  //已报废的设备
-  const scrapTableColumns = [
-    {
-      title: t('报废日期'),
-      dataIndex: 'scrap_at',
-    },
-    {
-      title: t('序列号'),
-      dataIndex: 'serial_number',
-    },
-    {
-      title: t('设备名称'),
-      dataIndex: 'device_name',
-    },
-    {
-      title: t('原管理IP'),
-      dataIndex: 'old_management_ip',
-    },
-    {
-      title: t('厂商'),
-      dataIndex: 'device_producer',
-    },
-    {
-      title: t('型号'),
-      dataIndex: 'device_model',
-      render(val) {
-        if (modelMap[val] != null) {
-          return modelMap[val].name;
-        }
-      }
-    },
-    {
-      title: t('设备类型'),
-      dataIndex: 'device_type',
-      render(val) {
-        let deviceName = val;
-        deviceTypeOption?.forEach((option) => {
-          if (option.value == val) {
-            deviceName = option.label;
-          }
-        })
-        return deviceName;
-      }
-    },
-    {
-      title: t('所属部门'),
-      dataIndex: 'old_belong_organization',
-      render(val) {
-        return val;
-      },
-    },
-    {
-      title: t('报废说明'),
-      dataIndex: 'remark',
-      render(val) {
-        return val;
-      },
-    },
-  ]
+  
   useEffect(() => {
-    // if (parseInt(leftNavData.status) == 0) {
-    //   getAssetStatistic().then(({ dat, err }) => {
-    //     if (dat != null && dat.list.length > 0) {
-    //       for (let i = 0; i < dat.list.length; i++) {
-    //         let item = eval(dat.list[i]);
-    //         statistic["status_" + item.type] = item.num;
-    //         setStatistic(statistic);
-    //       }
-    //       statistic["status_total"] = dat.total;
-    //       setStatistic(statistic);
-    //     }
-    //   });
-    // }
+   
     setRefreshFlag(_.uniqueId('refresh_flag'))
     if (leftNavData.status == 4) {
       getAssetsTree(leftNavData.status).then(({ dat }) => {
@@ -767,8 +825,10 @@ export default function () {
                   </Row>
                 </Form>
               </div>
-              <div className='assets-list'>
-                {leftNavData.status >= 0 && leftNavData.status >= 0 && (
+              <div className='assets-list_1'>
+                <div className='operate-container' >
+                  <Fragment>
+                   {leftNavData.status >= 0 && leftNavData.status >= 0 && (
                   <div className='biz-oper-action'>
                     <Space>
                       <Dropdown
@@ -924,11 +984,16 @@ export default function () {
                         </Dropdown>
                       )}
                     </Space>
-
                   </div>
-                )}
-
-
+                   )}
+                   </Fragment>
+                   {leftNavData.status <4 && leftNavData.status >= 0 && (
+                   <Popover placement="bottom" content={pupupContent} trigger="click" className='filter_columns' >
+                     <Button style={{marginRight: '10px'}} icon={<UnorderedListOutlined />}>字段筛选</Button>
+                   </Popover>
+                   )}
+                </div>
+                
                 <Table
                   {...tableProps}
                   pagination={{
@@ -938,11 +1003,27 @@ export default function () {
                     showTotal: (total) => `Total ${total} items`,
                     showSizeChanger: true,
                   }}
+                  onHeaderRow={(columns, index) => {
+                    return {
+                      onClick: () => {}, // 点击表头行
+                    };
+                  }}
                   rowSelection={rowSelection}
-                  columns={leftNavData.status < 4 ? assetTableColumns : scrapTableColumns}
+                  columns={leftNavData.status < 4 ? selectColum : scrapTableColumns}
                   rowKey='id'
                   size='small'
+
+                  
                 ></Table>
+                {/* <TableComponent
+                    columns={leftNavData.status < 4 ? assetTableColumns : scrapTableColumns}
+                    dataSource={getTableData}
+                    total={listTotal}
+                    size={listSize}
+                    defaultCurrent={current}
+                    current={current}
+                    paginationChange={paginationChange}
+                  /> */}
                 <OperationModal
                   operateType={operateType}
                   width={modalWidth}

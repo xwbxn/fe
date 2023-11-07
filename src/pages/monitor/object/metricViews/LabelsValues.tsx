@@ -123,7 +123,7 @@ export default function LabelsValues(props: IProps) {
           {expaned.dynamicLabels && (
             <div className='n9e-metric-views-dynamicLabels'>
               {_.isEmpty(dynamicLabels) ? (
-                <div style={{ marginBottom: 10 }}>No Data</div>
+                <div style={{ marginBottom: 10 }}>无数据</div>
               ) : (
                 _.map(dynamicLabels, (item) => {
                   return (
@@ -261,7 +261,7 @@ export default function LabelsValues(props: IProps) {
 
               <div className='n9e-metric-views-dimensionLabel-content'>
                 {_.isEmpty(dimensionLabelValues) ? (
-                  'No Data'
+                  '无数据'
                 ) : (
                   <div>
                     {_.map(

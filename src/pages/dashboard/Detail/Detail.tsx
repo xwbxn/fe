@@ -245,7 +245,7 @@ export default function DetailV2(props: IProps) {
                 visible: true,
                 id: uuidv4(),
                 initialValues: {
-                  name: 'Panel Title',
+                  name: '面板标题',
                   type,
                   targets: [
                     {

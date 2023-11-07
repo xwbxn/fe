@@ -84,7 +84,7 @@ export default function Metrics(props: IProps) {
             })}
           </ul>
         ) : (
-          <div style={{ textAlign: 'center' }}>No Data</div>
+          <div style={{ textAlign: 'center' }}>无数据</div>
         )}
       </div>
     );

@@ -41,6 +41,11 @@ const getMenuList = (t) => {
           key: '/devicemgt',
           label: t('资产'),
         },
+        {
+          key: '/xh/assetmgt',
+          label: t('西航资产'),
+        },
+      
       ],
     },
     {
@@ -55,6 +60,10 @@ const getMenuList = (t) => {
         {
           key: '/dashboards-built-in',
           label: t('内置仪表盘'),
+        },
+        {
+          key: '/xh/monitor',
+          label: t('西航监控'),
         },
       ],
     },
@@ -163,7 +172,7 @@ const getMenuList = (t) => {
         },
       ],
     },   
-   
+    
     {
       key: 'log',
       icon: <IconFont type='icon-Menu_LogAnalysis' />,
@@ -173,6 +182,19 @@ const getMenuList = (t) => {
           key: '/log/explorer',
           label: t('即时查询'),
         },
+        {
+          key: '/log/debug/switch',
+          label: '日志调试启动开关'
+        },
+        {
+          key: '/log/operlog',
+          label: t('操作日志'),
+        },
+        {
+          key: '/log/syslog',
+          label: t('系统日志'),
+        },
+        
       ],
     },
     {
@@ -256,6 +278,10 @@ const getMenuList = (t) => {
               key: '/permissions',
               label: t('权限管理'),
             },
+            {
+              key: '/organizations',
+              label: t('组织管理'),
+            },
           ],
         },              
         {
@@ -283,11 +309,42 @@ const getMenuList = (t) => {
               label: t('告警引擎'),
             },
             {
+              key: '/system/logo',
+              label: t('LOGO设置'),
+            },
+            {
+              key: '/system/parameters',
+              label: '系统参数设置',
+            },
+            {
+              key: '/system/interface',
+              label: '接口访问设置',
+            },
+            {
               key: '/types/dictype',
               label: t('数据字典'),
             },
+            {
+              key: '/system/upgrade',
+              label: t('系统升级'),
+            },
+            
           ]
         }, 
+        {
+          key: '/license/management',
+          label: t('许可管理'),
+          children: [
+            {
+              key: '/license/base',
+              label:'许可信息',
+            },
+            {
+              key: '/license/device',
+              label:'设备License',
+            },
+          ]
+        },
 
       ],
     },

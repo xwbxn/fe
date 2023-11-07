@@ -49,7 +49,7 @@ export default function Instructions(props: Props) {
           },
         }}
       >
-        {data || 'No Data'}
+        {data || '无数据'}
       </ReactMarkdown>
     </div>
   );

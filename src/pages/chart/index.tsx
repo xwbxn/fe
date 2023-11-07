@@ -33,6 +33,7 @@ import './index.less';
 export default function Chart() {
   const { t } = useTranslation('shareChart');
   const { datasourceCateOptions } = useContext(CommonStateContext);
+  
   const { ids } =
     useParams<{
       ids: string;

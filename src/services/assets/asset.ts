@@ -32,6 +32,9 @@ export const insertAssetAlert = function (data) {
 
 
 
+
+
+
 export const insertAssetMaintenance = function (data) {
   return request('/api/n9e/asset-maintenance', {
     method: RequestMethod.Post,

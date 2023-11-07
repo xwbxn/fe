@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, Fragment } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 import { Table, Tooltip } from 'antd';
@@ -119,6 +119,7 @@ export default function index(props: IProps) {
   }
 
   useEffect(() => {
+    // debugger;
     if (chartEleRef.current) {
       if (chartRef.current) {
         chartRef.current.destroy();
@@ -355,6 +356,7 @@ export default function index(props: IProps) {
         className='renderer-timeseries-graph'
         style={{ height: _chartHeight, minHeight: '70%', width: placement === 'right' ? (isExpanded ? 0 : '60%') : '100%' }}
       />
+      
       {hasLegend && (
         <div
           className='renderer-timeseries-legend-table'
@@ -367,11 +369,13 @@ export default function index(props: IProps) {
           }}
         >
           {displayMode === 'table' && (
-            <div ref={legendEleRef}>
+            <Fragment>
+            <div ref={legendEleRef} >
+              
               <Table
                 rowKey='id'
                 size='small'
-                className='scroll-container-table'
+                className='scroll-container-table table_list'
                 scroll={{ x: 650 }}
                 columns={tableColumn}
                 dataSource={legendData}
@@ -386,6 +390,7 @@ export default function index(props: IProps) {
                   return {
                     onClick: () => {
                       setActiveLegend(activeLegend !== record.id ? record.id : '');
+                      debugger;
                       setSeriesData(
                         _.map(seriesData, (subItem) => {
                           return {
@@ -399,6 +404,7 @@ export default function index(props: IProps) {
                 }}
               />
             </div>
+            </Fragment>
           )}
           {displayMode === 'list' && !_.isEmpty(legendData) && (
             <div className='renderer-timeseries-legend-container' ref={legendEleRef}>

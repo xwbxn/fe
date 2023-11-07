@@ -168,8 +168,6 @@ const history = useHistory();
         value = moment(value * 1000);//.format("YYYY-MM-DD HH:mm:ss")
       }
     }
-
-
     return value;
   }
   //变更表单编辑
@@ -314,10 +312,6 @@ const history = useHistory();
       })
 
     }
-      
-    
-
-
   };
 
   const dealFieldsToEveryForm = (attrs) => {
@@ -345,8 +339,6 @@ const history = useHistory();
       formFieldMap[modelF.id] = child;
     })
     setFormFieldMap({ ...formFieldMap })
-
-    // debugger
 
   }
 

@@ -17,7 +17,8 @@ import { getRoomList } from '@/services/assets/computer-room';
 import { getCabinetList } from '@/services/assets/device-cabinet';
 import { getUsers } from '@/services/account';
 import { getDictValueEnum } from '@/services/system/dict';
-import { getAssetExtendsById, insertAssetMaintenance, insertAssetManagement, updateAssetMaintenance, updateAssetManagement } from '@/services/assets/asset';
+import { getProducersByType } from '@/services/assets/producer';
+import { getAssetExtendsById, getAssetTableByTypeAndId,insertAssetMaintenance, insertAssetManagement, updateAssetMaintenance, updateAssetManagement } from '@/services/assets/asset';
 import { getDeviceModelByCondition } from '@/services/assets/device-models';
 import { getAssetById, insertAsset, updateAsset, insertAssetExtends } from '@/services/assets/asset';
 
@@ -32,106 +33,74 @@ import { modelsAttributes } from './Form/device_type_models';
 import queryString from 'query-string';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
+import { ColumnsType } from 'antd/lib/table';
 
 const deviceType = location.pathname.split('/')[3];
-// 
-
-
-
-
-const optionMap = {};
-
-if (deviceType != null) {
-  getRoomList({}).then(({ dat }) => {
-    var roomList = new Array()
-    dat.list.forEach((item) => {
-      roomList.push({
-        value: item.id,
-        label: item.room_name
-      });
-    })
-    optionMap["rooms"] = roomList;
-  });
-  getOrganizationTree({}).then(({ dat }) => {
-    optionMap["organs"] = dat;
-  });
-  let params = {
-    deviceType: deviceType
-  }
-  getDeviceModelByCondition(params).then(({ dat }) => {
-    var map = new Map()
-    var producerList = new Array()
-    var modelList = new Array()
-    dat.list.forEach((item) => {
-      if (!map.has(item.producer_id)) {
-        producerList.push({
-          value: item.producer_id,
-          label: item.alias
-        })
-        map.set(item.producer_id, item.alias);
-      }
-      modelList.push(item)
-    })
-    optionMap["device_models"] = modelList;
-    optionMap["device_producers"] = producerList;
-  });
-  //获取用户数据
-  getUsers().then(({ dat }) => {
-    var userList = new Array()
-    dat.forEach((item) => {
-      userList.push({
-        value: item.nickname,
-        label: item.nickname
-      })
-    })
-    optionMap["system_users"] = userList;
-  });
-  getUsers().then(({ dat }) => {
-    var userList = new Array()
-    dat.forEach((item) => {
-      userList.push({
-        value: item.id,
-        label: item.nickname
-      })
-    })
-    optionMap["providers"] = userList;
-  });
-
-
-
-}
-
-
 
 export default function () {
 
   const { t } = useTranslation('assets');
-
   let attrs: any = modelsAttributes["type_" + deviceType].models;
-
   const commonState = useContext(CommonStateContext);
-
   const assetId = queryString.parse(location.search).id === undefined ? 0 : parseInt("" + queryString.parse(location.search).id);
 
+  const [formRef, setFormRef] = useState<any>()
   //后期要优化的内容，Jeff Guo
-  // const [tabFIndex, setTabFIndex] = useState<string>("form_base_position")
-  // const [tabFFIndex, setTabFFIndex] = useState<string>();
-  // let formRef = createRef<FormInstance>();
-  // const [formPosition, setFormPosition] = useState<string>("form_base_position");
-  // const [formModel, setFormModel] = useState<any>({});
-  // const [formRelations, setFormRelations] = useState<any>({});
-  // const [selectMap, setSelectMap] = useState({});
-  // const [hasEdit, setHasEdit] = useState<boolean>(true);
+  const [tabFIndex, setTabFIndex] = useState<string>("form_base_position")
+  const [tabFFIndex, setTabFFIndex] = useState<string>();
+  const [initOptions, setInitOptions] = useState({});  //选项值
+  const [formPosition, setFormPosition] = useState<string>("");
+  const [formModel, setFormModel] = useState<any>({});
+  const [formRelations, setFormRelations] = useState<any>({});
+  const [selectMap, setSelectMap] = useState({});
+  const [hasEdit, setHasEdit] = useState<boolean>(true);
+  const [categoryData, setCategoryData] = useState({});
+  //设备/资产信息
+  const [assetInfo, setAssetInfo] = useState<any>({});
+  //处理各个表单的字段和中文信息
+  const [formFieldMap, setFormFieldMap] = useState<any>({});
+
+  const [formIdMap, setFormIdMap] = useState({});
+
+  //页面表单运维服务项选择
+  const [selectedRows, setSelectedRows] = useState<any[]>([]);
+  //服务项
+  const columns_maintain_services: ColumnsType<any> = [
+    {
+      title: '服务选项',
+      dataIndex: 'service_id',
+      render: (text: string) => {
+        return text;
+      },
+      className: "notshow",
+      key: 'service_id'
+    },
+
+    {
+      title: '服务选项',
+      dataIndex: 'service_name',
+      render: (text: string) => {
+        return text;
+      },
+      key: 'service_name'
+    },
+    {
+      title: '服务对象',
+      dataIndex: 'service_object',
+      key: 'service_object',
+      render: (text: string, record: any) => {
+        return <div><Input style={{ width: "180px" }} id={"service_object:" + record.service_id} defaultValue={text}></Input></div>
+      }
+    }, {
+      title: '服务期限',
+      dataIndex: 'service_expire',
+      key: 'service_expire',
+    }
+  ]
+
 
   const history = useHistory();
-  
-
-
-
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'))
-
-
-
   const getFieldsMap = (form_id, current_form) => {
     let strMap = new Map();
     console.log("form_id", current_form)
@@ -156,7 +125,7 @@ export default function () {
     })
     return strMap
   }
-
+  //后期要优化的内容，Jeff Guo
   const fieldSpecialEvent = (e, item: any, formId: string, groupId: string, index) => {
     // item.formId = formId;
     // item.groupId = groupId;
@@ -170,7 +139,7 @@ export default function () {
     //     setDialogInitData(dat);
     //     setOperateType(OperateType.SelectUseStorage)
     //     setOperateName(item.extend.label);
-        
+
     //   })
 
     // } else if (item.extend.type === "checkbox") {
@@ -184,86 +153,85 @@ export default function () {
     // }
 
   }
-
+  //后期要优化的内容，Jeff Guo
   const onFieldsChange = (formId: string, id: string, value: any, group_id, field_list_index: number) => {
     // 该方法对所有表单根据业务情况 来判断处理，每一个表单 form 每一个属性 id 来控制
-    // ※※※※※※※※※后期优化部分※※※※※※※※※※
-    // console.log("※※※※※※※※※后期优化部分※※※※※※※※※※", formId);
-    // let refForm = refArr[formId].current;
-    // if (formId == "form_base_position") {//处理资产基本信息的表单
-    //   let formValues = refForm.getFieldsValue();
-    //   if (id == "device_producer") {
-    //     formValues[group_id][field_list_index].subtype = "";
-    //     formValues[group_id][field_list_index].outline_structure = "";
-    //     formValues[group_id][field_list_index].specifications = "";
-    //     formValues[group_id][field_list_index].u_number = "";
-    //     formValues[group_id][field_list_index].device_model = ""
-    //     refForm.setFieldsValue(formValues);
-    //     let modelList = new Array();
-    //     selectMap["device_models"].forEach(item => {
-    //       if (item.producer_id == value) {
-    //         modelList.push({
-    //           value: item.id,
-    //           label: item.name
-    //         })
-    //       }
-    //     });
-    //     selectMap[formId + ".device_model"] = modelList;
-    //     setSelectMap({ ...selectMap });
-    //   } else if (id == "device_model") {
-    //     let formValues = refForm.getFieldsValue();
-    //     selectMap["device_models"].forEach(item => {
-    //       if (item.id == value) {
-    //         formValues[group_id][field_list_index]["subtype"] = item.subtype;
-    //         formValues[group_id][field_list_index]["outline_structure"] = item.outline_structure;
-    //         formValues[group_id][field_list_index]["specifications"] = item.specifications;
-    //         formValues[group_id][field_list_index]["u_number"] = item.u_number;
+    console.log("※※※※※※※※※后期优化部分※※※※※※※※※※", formId);
+    let refForm = formRef.current;
+    if (formId == "form_base_position") {//处理资产基本信息的表单
+      let formValues = refForm?.getFieldsValue();
+      if (id == "device_producer") {
+        formValues[group_id][field_list_index].subtype = "";
+        formValues[group_id][field_list_index].outline_structure = "";
+        formValues[group_id][field_list_index].specifications = "";
+        formValues[group_id][field_list_index].u_number = "";
+        formValues[group_id][field_list_index].device_model = ""
+        refForm?.setFieldsValue(formValues);
+        let modelList = new Array();
+        selectMap["device_models"].forEach(item => {
+          if (item.producer_id == value) {
+            modelList.push({
+              value: item.id,
+              label: item.name
+            })
+          }
+        });
+        selectMap[formId + ".device_model"] = modelList;
+        setSelectMap({ ...selectMap });
+      } else if (id == "device_model") {
+        let formValues = refForm?.getFieldsValue();
+        selectMap["device_models"].forEach(item => {
+          if (item.id == value) {
+            formValues[group_id][field_list_index]["subtype"] = item.subtype;
+            formValues[group_id][field_list_index]["outline_structure"] = item.outline_structure;
+            formValues[group_id][field_list_index]["specifications"] = item.specifications;
+            formValues[group_id][field_list_index]["u_number"] = item.u_number;
 
-    //       }
-    //     });
-    //     refForm.setFieldsValue(formValues);
-    //   } else if (id == "equipment_room") {
-    //     getCabinetList(value).then(({ dat }) => {
+          }
+        });
+        refForm?.setFieldsValue(formValues);
+      } else if (id == "equipment_room") {
+        getCabinetList(value).then(({ dat }) => {
 
-    //       let cabinetList = new Array()
-    //       dat.forEach((item) => {
-    //         cabinetList.push({
-    //           value: item.id,
-    //           label: item.cabinet_code
-    //         });
-    //       })
-    //       selectMap[formId + ".owning_cabinet"] = cabinetList;
-    //       setSelectMap({ ...selectMap });
-    //     });
-    //   }
+          let cabinetList = new Array()
+          dat.forEach((item) => {
+            cabinetList.push({
+              value: item.id,
+              label: item.cabinet_code
+            });
+          })
+          selectMap[formId + ".owning_cabinet"] = cabinetList;
+          setSelectMap({ ...selectMap });
+        });
+      }
 
-    // } else if (formId === "table-maintenance") {
-    //   let formValues = refForm.getFieldsValue();
-    //   console.log("调试", formId, formValues);
+    } else if (formId === "table-maintenance") {
+      let formValues = refForm?.getFieldsValue();
+      console.log("调试", formId, formValues);
+      if (id == "maintenance_type") {
+        formValues[group_id][field_list_index]["maintenance_provider"] = null;
+        refForm?.setFieldsValue(formValues);
+        getProducersByType(value).then(({ dat }) => {
+          let list = new Array()
+          dat.forEach((item) => {
+            list.push({
+              value: item.id,
+              label: item.alias
+            });
+          })
+          selectMap[formId + ".maintenance_provider"] = list;
+          setSelectMap({ ...selectMap });
+        })
+      }
 
-    //   if (id == "maintenance_type") {
-    //     formValues[group_id][field_list_index]["maintenance_provider"] = null;
-    //     refForm.setFieldsValue(formValues);
-    //     getProducersByType(value).then(({ dat }) => {
-    //       let list = new Array()
-    //       dat.forEach((item) => {
-    //         list.push({
-    //           value: item.id,
-    //           label: item.alias
-    //         });
-    //       })
-    //       selectMap[formId + ".maintenance_provider"] = list;
-    //       setSelectMap({ ...selectMap });
-    //     })
-    //   }
-
-    // }
+    }
 
   };
 
   //渲染表单每一项
   const CreateForm = (formId, item, sn, span, multiple, field: any, group_id: any, field_list_index) => {
     // console.log("渲染表单每一项",formId, multiple, field,group_id);
+    // console.log("渲染表单每一项",item);
     switch (item.type) {
       case "hidden":
         return <React.Fragment key={sn}>
@@ -275,7 +243,7 @@ export default function () {
           </Form.Item>
         </React.Fragment>
       case "input":
-        return <Col span={span} >
+        return <Col span={span} key={"item-" + sn}>
           <Form.Item label={item.label}>
             <Form.Item
 
@@ -312,7 +280,7 @@ export default function () {
             key={sn}
             rules={[{ required: item.required, message: `请输入您的${item.label}` }]}
           >
-            <Input.Password disabled={item.readonly} placeholder={`请输入您的${item.label}`}
+            <Input.Password autoComplete='true'   disabled={item.readonly} placeholder={`请输入您的${item.label}`}
               style={{ width: '150px' }} />
           </Form.Item>
         </Col>
@@ -354,7 +322,7 @@ export default function () {
         >
           <Select
             placeholder={`请选择您的${item.label}`}
-            options={selectMap[formId + "." + item.name]}
+            options={item.refer?selectMap[item.refer]:selectMap[formId + "." + item.name]}
             style={{ width: '150px' }}
             onChange={(value: any) => onFieldsChange(formId, item.name, value, group_id, field_list_index)}
           >
@@ -384,7 +352,7 @@ export default function () {
               placeholder={`请输入您的${item.label}`}
               allowClear
               treeDataSimpleMode
-              treeData={selectMap[formId + "." + item.name]}
+              treeData={item.refer?selectMap[item.refer]:selectMap[formId + "." + item.name]}
               fieldNames={{ label: 'name', value: 'id', children: 'children' }}
               treeDefaultExpandAll={true}
             ></TreeSelect>
@@ -415,7 +383,7 @@ export default function () {
           key={sn}
           rules={[{ required: item.required, message: `请选择您的${item.label}` }]}
         >
-          <DatePicker  format="YYYY-MM-DD" placeholder={`请输入您的${item.label}`} />
+          <DatePicker format="YYYY-MM-DD" placeholder={`请输入您的${item.label}`} />
         </Form.Item></Col>
       case "timepicker":
         return <Col span={span} key={"item-" + sn}><Form.Item
@@ -430,12 +398,12 @@ export default function () {
         return <div className='table_specal1' key={"item-" + sn}>
           <span className='table_label'>{item.label}</span>
           <div>
-            {/* <Table
+           <Table
               rowSelection={rowSelection}
               rowKey={item.key}
               columns={columns_maintain_services}
               pagination ={false}
-              dataSource={selectMap[formId + "." + item.name]} /> */}
+              dataSource={selectMap[formId + "." + item.name]} />
           </div>
         </div>
       // case "richtext":
@@ -471,10 +439,245 @@ export default function () {
   }
 
   useEffect(() => {
-    // tabClick(tabFIndex,"0");
+    initBaseOptions();
+    dealFieldsToEveryForm();
+    tabClick(tabFIndex, "0"); 
+     
   }, []);
 
-  const datalDealValue = (value, key, data_type) => {
+
+  useEffect(() => {
+    console.log("更新表单")
+    if (formPosition=="form_base_position"  && assetId > 0) {      
+      getAssetById(assetId).then(({ dat }) => {
+        let refForm = formRef.current;
+        let formValues = refForm?.getFieldsValue();
+        if(formValues!==undefined) {
+          formValues["group_base"][0] = dat;
+          formValues["group_position"][0] = dat;
+          refForm?.setFieldsValue(formValues);
+        }        
+        let modelList = new Array();
+        selectMap["device_models"].forEach(item => {
+          if (item.producer_id == dat.device_producer) {
+            modelList.push({
+              value: item.id,
+              label: item.name
+            })
+          }
+        });
+        selectMap[formPosition + ".device_model"] = modelList;
+        setSelectMap({ ...selectMap })
+        getCabinetList(dat.equipment_room).then((res) => {
+          let cabinetList = new Array()
+          res.dat.forEach((item) => {
+            cabinetList.push({
+              value: item.id,
+              label: item.cabinet_code
+            });
+          })
+          selectMap[formPosition + ".owning_cabinet"] = cabinetList;
+          setSelectMap({ ...selectMap });
+        });
+
+        setAssetInfo(formValues);
+      })
+    }
+    initSelectOptions(formPosition);
+    if(formPosition!=="form_base_position" && (formPosition.indexOf("form-") > -1 || formPosition.indexOf("form_") > -1) && assetId > 0){
+       dealExtendsion(formPosition);
+    }
+    if(formPosition.indexOf("table-") > -1){
+      dealMantiance2Manage(formPosition);
+    }
+    
+  }, [formPosition]);
+  //处理维保和管理信息
+  const dealMantiance2Manage =(formPosition:string) => {
+    // 处理不同数据源的信息
+    if(assetId<=0){
+       return 
+    }
+    let keys = formPosition.split("-");
+    getAssetTableByTypeAndId(keys[1], assetId).then((res) => {
+      console.log("优化处理--------对应不同的设备");
+      if (res != null && res.dat != null) {
+        const valueMap = new Map()
+        for (const k of Object.keys(res.dat)) {
+          valueMap.set(k, res.dat[k])
+        }
+        //优化处理--------对应不同的设备
+        if (formPosition == "table-maintenance" || res.dat.maintenance_type != undefined) {
+          getProducersByType(res.dat.maintenance_type).then(({ dat }) => {
+            let list = new Array()
+            dat.forEach((item) => {
+              list.push({
+                value: item.id,
+                label: item.alias
+              });
+            })
+            selectMap[formPosition + ".maintenance_provider"] = list;
+            setSelectMap({ ...selectMap });
+          })
+        }
+        formIdMap[formPosition] = res.dat.id;
+        setFormIdMap({ ...formIdMap })
+        let formFields = formFieldMap[formPosition];
+
+        let mapValues = {};
+
+        for (let index in formFields) {
+          let groupFields = formFields[index];
+          let rowDataMap = new Map()
+          for (let itemIndex in groupFields.item) {
+            let field = groupFields.item[itemIndex];
+            rowDataMap.set(field.name,showValue(valueMap.get(field.name),  field.data_type))
+          }
+          let group = new Array();
+          group.push(Object.fromEntries(rowDataMap));
+          mapValues[groupFields.name] = group;
+          console.log("groupFields.name",groupFields.name,group);
+        }
+        formRef.current?.setFieldsValue(mapValues);     
+        //从数据服务上加载数据完成
+      }
+    });
+  }
+
+  //处理扩展信息  
+  const dealExtendsion =(formPosition)=>{
+    if(formPosition!=="form_base_position" && (formPosition.indexOf("form-") > -1 || formPosition.indexOf("form_") > -1) && assetId > 0){
+    let params = {
+      asset_id: assetId,      
+    };
+    if(formPosition.indexOf("form_") > -1){
+      params["property_category"] =formPosition
+    }
+    if(formPosition.indexOf("form-") > -1){
+      params["config_category"] =formPosition
+    }
+    getAssetExtendsById(params).then(({ dat }) => {
+      const map = new Map()
+      dat.forEach((item, index, arr) => {
+        if (!map.has(item.property_category)) {
+          map.set(
+            item.property_category,
+            arr.filter(a => a.property_category == item.property_category)
+          )
+        }
+      })
+      //以上分组加载数据 
+      let mapValues = {};
+      map.forEach(function (value, key) {
+        const formDataMap = new Map()
+        value.forEach((item, index, arr) => {
+          if (!formDataMap.has(item.group_id)) {
+            formDataMap.set(
+              item.group_id,
+              arr.filter(a => a.group_id == item.group_id)
+            )
+          }
+        })
+        let group:any =[];
+        formDataMap.forEach(function (value, i) {
+          let itemsChars = ""
+          value.forEach((item, index, arr) => {
+            itemsChars += "\"" + item.property_name + "\":\"" + item.property_value + "\",";
+          })
+          itemsChars = "{" + itemsChars.substring(0, itemsChars.length - 1) + "}";
+          group.push(JSON.parse(itemsChars));
+        })
+        mapValues[key] = group;
+      }) 
+      formRef.current?.setFieldsValue(mapValues);     
+      //从数据服务上加载数据完成
+      })
+    }
+  }
+
+  const dealFieldsToEveryForm = () => {
+    //处理中文和每个表单每个块要提交的字段信息
+    attrs.map((modelF, i) => {
+      let id = modelF.id;
+      let child = new Array()
+      modelF.models.map((modelFF, index) => {
+        let fieldItem = new Array();
+        modelFF.attributes.map((property, sn) => {
+          fieldItem.push({
+            name: property.name,
+            has_next: false,
+            name_cn: property.label,
+            data_type: property.data_type ? property.data_type : "string"
+          })
+        })
+        child.push({
+          name: modelFF.id,
+          has_next: true,
+          item: fieldItem
+        })
+        formFieldMap[modelFF.id] = child;
+      })
+      formFieldMap[modelF.id] = child;
+    })
+    setFormFieldMap({ ...formFieldMap })
+  }
+
+
+  //页面初始化-赋值操作
+  const initBaseOptions = () => {
+    if (deviceType != null) {
+      getRoomList({}).then(({ dat }) => {
+        var roomList = new Array()
+        dat.list.forEach((item) => {
+          roomList.push({
+            value: item.id,
+            label: item.room_name
+          });
+        })
+        selectMap["rooms"] = roomList;
+        setSelectMap({ ...selectMap });
+      });
+      getOrganizationTree({}).then(({ dat }) => {
+        selectMap["organs"] = dat;
+        setSelectMap({ ...selectMap });
+      });
+      let params = {
+        deviceType: deviceType
+      }
+      getDeviceModelByCondition(params).then(({ dat }) => {
+        var map = new Map()
+        var producerList = new Array()
+        var modelList = new Array()
+        dat.list.forEach((item) => {
+          if (!map.has(item.producer_id)) {
+            producerList.push({
+              value: item.producer_id,
+              label: item.alias
+            })
+            map.set(item.producer_id, item.alias);
+          }
+          modelList.push(item)
+        })
+        selectMap["device_models"] = modelList;
+        selectMap["device_producers"] = producerList;
+        setSelectMap({ ...selectMap });
+      });
+      //获取用户数据
+      getUsers().then(({ dat }) => {
+        var userList = new Array()
+        dat.forEach((item) => {
+          userList.push({
+            value: item.nickname,
+            label: item.nickname
+          })
+        })
+        selectMap["system_users"] = userList;
+        setSelectMap({ ...selectMap });
+      });
+    }
+  }
+
+  const datalDealValue = (value, data_type) => {
     if (value != null && data_type == "date") {
       value = moment(moment(value).format('YYYY-MM-DD')).valueOf() / 1000
     } else if (value != null && data_type == "int") {
@@ -483,16 +686,26 @@ export default function () {
       value = parseFloat(value);
     } else if (value != null && data_type == "timestamp") {
       value = moment(moment(value).format('YYYY-MM-DD HH:mm:ss')).valueOf() / 1000
+    } else if(value != null && data_type == "json"){
+      value = "";
     }
     return value;
   }
-
+  //回显结果调用
+  const showValue = (value, data_type) => {    
+    if (value != null && data_type == "date") {
+      value = moment(value * 1000);
+    } else if (value != null && data_type == "timestamp") {
+      value = moment(value * 1000);
+    }
+    return value;
+  }
 
   const backToList = () => {
     history.push('/devicemgt')
   }
 
-  const submitForm = (formValue: any, formId: string, fields: {}, category, recordId) => {
+  const submitForm = (formValue: any, formId: string, fields: {}, recordId:any) => {
     console.log("submitForm", formId, fields)
     if (formId === 'form_base_position') {
       let postParams: any = { device_status: 1, device_type: parseInt(deviceType) };
@@ -502,13 +715,13 @@ export default function () {
       for (let fieldkey in formValue.group_base[0]) {
         let value = formValue.group_base[0][fieldkey];
         if (baseFieldMap.has(fieldkey)) {
-          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, baseFieldMap.get(fieldkey).data_type))
+          submitFieldMap.set(fieldkey, datalDealValue(value, baseFieldMap.get(fieldkey).data_type))
         }
       }
       for (let fieldkey in formValue.group_position[0]) {
         let value = formValue.group_position[0][fieldkey];
         if (positionFieldMap.has(fieldkey)) {
-          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, positionFieldMap.get(fieldkey).data_type))
+          submitFieldMap.set(fieldkey, datalDealValue(value, positionFieldMap.get(fieldkey).data_type))
         }
       }
       if (assetId > 0) {
@@ -527,9 +740,7 @@ export default function () {
         // }   
         console.log('Success:', postParams);
       }
-    }
-
-    if (formId === 'form_cpu' || formId === 'form_memory' || formId === 'form_physical_disk' || formId === 'form_logical_disk'
+    }else if(formId === 'form_cpu' || formId === 'form_memory' || formId === 'form_physical_disk' || formId === 'form_logical_disk'
       || formId === 'form_power' || formId === 'form_network_port' || formId === 'form_display_code' || formId === 'form_fan'
       || formId === 'form-netconfig') {
 
@@ -546,11 +757,11 @@ export default function () {
             let row = {
               property_category: nodeKey,
               property_name: item,
-              property_value: datalDealValue(value[item], item, cn_datatype != null ? cn_datatype.data_type : "string"),
+              property_value: datalDealValue(value[item],cn_datatype != null ? cn_datatype.data_type :"string" ),
               property_name_cn: cn_datatype != null ? cn_datatype.name_cn : item,
               group_id: groupId,
               asset_id: assetId,
-              config_category: category != null ? category : formId,
+              config_category: tabFIndex,
             }
             subItem.push(row)
           }
@@ -567,7 +778,7 @@ export default function () {
         let value = formValue["form-maintenance"][0][fieldkey];
         if (fieldMap.has(fieldkey)) {
           let field = fieldMap.get(fieldkey);
-          submitFieldMap.set(fieldkey, datalDealValue(value, fieldkey, field.data_type))
+          submitFieldMap.set(fieldkey, datalDealValue(value, field.data_type))
         }
       }
       let postParams: any = { ...{ asset_id: assetId }, ...Object.fromEntries(submitFieldMap) };
@@ -579,7 +790,6 @@ export default function () {
         updateAssetMaintenance(postParams).then((res) => {
           message.success('修改成功');
         })
-
       } else {
         insertAssetMaintenance(postParams).then((res) => {
           message.success('添加成功');
@@ -596,7 +806,7 @@ export default function () {
           let value = formValue[nodeKey][fieldkey];
           for (let item in value) {
             if (fieldMap.has(item)) {
-              submitFieldMap.set(item, datalDealValue(value[item], item, fieldMap.get(item).data_type))
+              submitFieldMap.set(item, datalDealValue(value[item], fieldMap.get(item).data_type))
             }
           }
         }
@@ -613,9 +823,40 @@ export default function () {
         })
       }
     }
-
   }
 
+  const initSelectOptions =(operateFormId) => {
+    for (let i = 0; i < initOptions[operateFormId]?.length; i++) {
+      let item = initOptions[operateFormId][i];
+      if (item.source == 'dict') {
+        getDictValueEnum(item.refer).then((value) => {
+          let options = new Array();
+          if (item.name == "service_config") {
+            value.forEach((item) => {
+              let option = {
+                service_id: item.value,
+                service_name: item.label,
+                service_object: '整机',
+                service_expire: ''
+              }
+              options.push(option);
+            });
+            selectMap[operateFormId + "." + item.name] = options;
+            setSelectMap({ ...selectMap })
+          } else {
+            selectMap[operateFormId + "." + item.name] = value;
+            setSelectMap({ ...selectMap })
+          }
+        })
+      } else if (item.source == 'table') {
+
+      } else if (item.source == 'initial') {
+        selectMap[operateFormId + "." + item.name] = selectMap[item.refer];
+        setSelectMap({ ...selectMap })
+      }
+    }  
+  }
+  //后期要优化的内容，Jeff Guo
   const tabClick = (key: string, parentId?: any) => {
     console.log('TAB change', key, parentId);
     let operateFormId = "";
@@ -632,10 +873,43 @@ export default function () {
       operateFormId = key;
     }
     setFormPosition(operateFormId);
-    console.log("表单属性信息", formModel[operateFormId]);
-
-    console.log("是否是数组", _.isArray(formModel[operateFormId]))
+    setFormRef(createRef<FormInstance>());
+    // console.log("表单属性信息", formModel[operateFormId]);
+    // console.log("是否是数组", _.isArray(formModel[operateFormId]));
+    console.log("operateFormId",operateFormId);
   }
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      console.log("selectedRowKeys: " + selectedRows)
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      setSelectedRows(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === 'Disabled User',
+      name: record.name,
+    }),
+  }
+  //提交表单数据
+  const handleClick = (values: any,  category) => {
+    let record_id = formIdMap[formPosition] != undefined ? formIdMap[formPosition] : null;
+    if (formPosition == "table-maintenance") {
+      if (selectedRows.length > 0) {
+        
+        let service_config = new Array();
+        selectedRows.forEach(row => {
+          let dom =document.getElementById('service_object:' + row.service_id);
+          service_config.push({
+            service_obj_key: row.service_id,
+            service_option_code: "maintenance_service",
+            service_obj_value: dom?.value,
+            deadline: row.service_expire?row.service_expire:null
+          })
+        })
+        values["form-maintenance"][0]["service_config"] = service_config;
+      }
+    }
+    submitForm(values, formPosition, formFieldMap[formPosition], record_id);
+  };
 
   return (
 
@@ -661,16 +935,16 @@ export default function () {
         </div>
         <div className='table-content' style={{ paddingLeft: '0px', marginTop: "0px" }}>
 
-          {/* <Tabs className='tab-list' activeKey={tabFIndex} onTabClick={(key) => {
+          <Tabs className='tab-list' activeKey={tabFIndex} onTabClick={(key) => {
             tabClick(key, "0");
           }}>
             {attrs.length > 0 && attrs.map((modelF, i) => {
-
               if (modelF.form_type === 'group') {
                 let children = new Array<any>();
                 children.push(modelF.id);
                 formModel[modelF.id] = modelF.models;
                 formRelations[modelF.id] = children;
+                initOptions[modelF.id] = modelF.initial_data
               }
               if (modelF.form_type === 'form') {
                 let modelIds = Array.from(new Set(modelF.models.map(obj => obj.id)))
@@ -685,6 +959,7 @@ export default function () {
                     }}>
                       {modelF.models.map((modelFF, index) => {
                         formModel[modelFF.id] = modelFF;
+                        initOptions[modelF.id] = modelFF.initial_data
                         return (
                           <Tabs.TabPane tab={modelFF.name} key={modelFF.id}  >
                           </Tabs.TabPane>
@@ -703,15 +978,15 @@ export default function () {
             key={formPosition}
             style={{ width: '100%' }}
             onFinish={e => {
-              // handleClick(e, modelF.id, null);
+              handleClick(e, null);
             }}
           >
-            {_.isArray(formModel[formPosition]) ==true && formModel[formPosition]?.map((formInfo, index) => {
+            {_.isArray(formModel[formPosition]) == true && formModel[formPosition]?.map((formInfo, index) => {
               return (
                 <Form.List key={"Formlist" + index} name={formInfo.id} initialValue={[{}]}>
                   {(feilds, { add, remove }) => {
                     return (
-                      <React.Fragment key={'key' + index}>
+                      <React.Fragment key={'key' + index} >
                         <div className='group_title' key={"groupForm" + index}>
                           <span style={{ marginLeft: '3px' }}>{formInfo.name}</span>
                           {formInfo.multiple && (
@@ -723,7 +998,7 @@ export default function () {
                           )}
                         </div>
                         {feilds.map((item, _suoyi) => (
-                          <div key={"big_row_zone" + _suoyi}>
+                          <div key={"big_row_zone" + _suoyi} className='item_zone'>
                             {formInfo.multiple && (
                               <Row key={'index-' + _suoyi}>
                                 <div className='head_card'>
@@ -759,7 +1034,7 @@ export default function () {
                   return (
                     <>
                       {field.map((item, _index) => (
-                        <div key={"F" + _index}>
+                        <div key={"F" + _index} className='item_zone'>
                           <Row key={'index-' + _index}>
                             <div className='head_card'>
                               <div className="title" >{formModel[formPosition]?.name}{_index + 1}</div>
@@ -775,7 +1050,7 @@ export default function () {
                           <Row style={{ marginTop: '0px' }}>
                             {formModel[formPosition]?.attributes.map((property, sn) => {
                               let span = property.span ? property.span : formModel[formPosition]?.span;
-                              return (CreateForm(formPosition,property, sn, span, true, item, formPosition, _index))
+                              return (CreateForm(formPosition, property, sn, span, true, item, formPosition, _index))
                             })}
                           </Row>
                         </div>
@@ -804,21 +1079,21 @@ export default function () {
                 }
               </Form.List>
             )}
-            {_.isArray(formModel[formPosition]) ==true && (
-            <Row>
-              <Space
-                style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', marginTop: '10px', textAlign: 'center' }}
-              >
-                {hasEdit && (
-                  <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
-                )}
-                <Button className='ret_button_form' onClick={backToList}>返回</Button>
-              </Space>
-            </Row>
+            {_.isArray(formModel[formPosition]) == true && (
+              <Row>
+                <Space
+                  style={{ marginLeft: '33%', display: 'flex', marginBottom: 8, width: '100%', marginTop: '10px', textAlign: 'center' }}
+                >
+                  {hasEdit && (
+                    <Button type="primary" htmlType="submit" className='button_form'>保存</Button>
+                  )}
+                  <Button className='ret_button_form' onClick={backToList}>返回</Button>
+                </Space>
+              </Row>
             )}
-          </Form> */}
+          </Form>
 
-          <CustomForm
+          {/* <CustomForm
               type={parseInt(deviceType)}
               text='资产表单信息'
               options={optionMap}
@@ -826,7 +1101,7 @@ export default function () {
               handleClick={async (formValue: any, formId: string,fields:{},category,recordId) => {
                   submitForm(formValue,formId,fields,category,recordId);
               }}
-          />
+          /> */}
 
         </div>
       </div>

@@ -25,6 +25,14 @@ import Overview from '@/pages/login/overview';
 import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
 import LoginCallbackOAuth from '@/pages/loginCallback/oauth';
+import LicenseBase from '@/pages/license/base';
+import LicenseDevice from '@/pages/license/device';
+import LogoSet from '@/pages/system/logo_set';
+import LogDebug from '@/pages/system/log_debug';
+import SystemUpgrade from '@/pages/system/upgrade';
+
+import InterfaceSet from '@/pages/system/interface';
+import ParameterSet from '@/pages/system/parameters';
 import AlertRules, { Add as AlertRuleAdd, Edit as AlertRuleEdit } from '@/pages/alertRules';
 import AlertRulesBuiltin, { Detail as AlertRulesBuiltinDetail } from '@/pages/alertRulesBuiltin';
 import Profile from '@/pages/account/profile';
@@ -33,7 +41,9 @@ import Chart from '@/pages/chart';
 import Groups from '@/pages/user/groups';
 import Users from '@/pages/user/users';
 import Business from '@/pages/user/business';
-import { Metric as MetricExplore, Log as LogExplore } from '@/pages/explorer';
+import { Metric as MetricExplore, Log as LogExplore } from '@/pages/explorer';        
+import LogOperate from '@/pages/log/operlog';
+import LogSystem from '@/pages/log/syslog';
 import IndexPatterns, { Fields as IndexPatternFields } from '@/pages/log/IndexPatterns';
 import ObjectExplore from '@/pages/monitor/object';
 import Shield, { Add as AddShield, Edit as ShieldEdit } from '@/pages/warning/shield';
@@ -41,8 +51,11 @@ import Subscribe, { Add as SubscribeAdd, Edit as SubscribeEdit } from '@/pages/w
 import Event from '@/pages/event';
 import EventDetail from '@/pages/event/detail';
 import orderformDetail from '@/pages/event/orderformdetail';
-
 import historyEvents from '@/pages/historyEvents';
+import XhAssetMgt from '@/pages/xh/assetmgt';
+import XhAssetAdd from '@/pages/xh/assetmgt/Add';
+import XhMonitor from '@/pages/xh/monitor';
+import XhMonitorAdd from '@/pages/xh/monitor/Add';
 import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
 import DictTypes from  '@/pages/dictType/index';
@@ -70,6 +83,7 @@ import RecordingRule, { Add as RecordingRuleAdd, Edit as RecordingRuleEdit } fro
 import TraceExplorer, { Dependencies as TraceDependencies } from '@/pages/traceCpt/Explorer';
 import DashboardBuiltin, { Detail as DashboardBuiltinDetail } from '@/pages/dashboardBuiltin';
 import Permissions from '@/pages/permissions';
+import Organization from '@/pages/organization';
 import SSOConfigs from '@/pages/help/SSOConfigs';
 import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
@@ -83,6 +97,7 @@ import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 import plusLoader from 'plus:/utils/loader';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
+
 
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
@@ -124,6 +139,14 @@ export default function Content() {
         <Route path='/callback/oauth' component={LoginCallbackOAuth} exact />
         <Route path='/metric/explorer' component={MetricExplore} exact />
         <Route path='/log/explorer' component={LogExplore} exact />
+        <Route path='/log/operlog' component={LogOperate} exact />
+        <Route path='/log/syslog' component={LogSystem} exact />
+        <Route path='/xh/assetmgt' component={XhAssetMgt} exact />
+        <Route path='/xh/assetmgt/add' component={XhAssetAdd} exact />
+        
+        <Route path='/xh/monitor' component={XhMonitor} exact />
+        <Route path='/xh/monitor/add' component={XhMonitorAdd} exact />
+        {/* <Route path='/xh/monitor/view' component={XhMonitorView} exact />         */}
         <Route path='/log/index-patterns' component={IndexPatterns} exact />
         <Route path='/log/index-patterns/:id' component={IndexPatternFields} exact />
         <Route path='/object/explorer' component={ObjectExplore} exact />
@@ -178,6 +201,8 @@ export default function Content() {
         <Route exact path='/types/dictype' component={DictTypes} />
         <Route exact path='/job-tpls' component={TaskTpl} />
         <Route exact path='/job-tpls/add' component={TaskTplAdd} />
+        
+       
         <Route exact path='/job-tpls/add/task' component={TaskAdd} />
         <Route exact path='/job-tpls/:id/detail' component={TaskTplDetail} />
         <Route exact path='/job-tpls/:id/modify' component={TaskTplModify} />
@@ -194,6 +219,13 @@ export default function Content() {
         <Route exact path='/help/source/:action/:type' component={DatasourceAdd} />
         <Route exact path='/help/source/:action/:type/:id' component={DatasourceAdd} />
         <Route exact path='/help/sso' component={SSOConfigs} />
+         <Route exact path='/license/base' component={LicenseBase} />
+         <Route exact path='/license/device' component={LicenseDevice} /> 
+         <Route exact path='/system/logo' component={LogoSet} /> 
+         <Route exact path='/log/debug/switch' component={LogDebug} /> 
+         <Route exact path='/system/upgrade' component={SystemUpgrade} />
+         <Route exact path='/system/parameters' component={ParameterSet} /> 
+         <Route exact path='/system/interface' component={InterfaceSet} />            
         <Route exact path='/help/notification-tpls' component={NotificationTpls} />
         <Route exact path='/help/notification-settings' component={NotificationSettings} />
         <Route exact path='/help/migrate' component={MigrateDashboards} />
@@ -204,7 +236,7 @@ export default function Content() {
         <Route exact path='/inspection/applylist' component={InspectionApplyList} />
         <Route exact path='/inspection/plans/add' component={InspectionPlansAdd} /> */}
         <Route exact path='/permissions' component={Permissions} />
-
+        <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
 
         {lazyRoutes.map((route, i) => (

@@ -28,9 +28,11 @@ import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/ser
 import { CommonStateContext } from '@/App';
 import { priorityColor } from '@/utils/constant';
 import Tags from '@/components/Tags';
+import './style.less'
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
+import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
 
 interface ListProps {
   bgid?: number;
@@ -179,38 +181,57 @@ export default function List(props: ListProps) {
       dataIndex: 'update_by',
       width: 65,
     },
-    {
-      title: t('common:table.enabled'),
-      dataIndex: 'disabled',
-      width: 65,
-      render: (disabled, record) => (
-        <Switch
-          checked={disabled === AlertRuleStatus.Enable}
-          size='small'
-          onChange={() => {
-            const { id, disabled } = record;
-            bgid &&
-              updateAlertRules(
-                {
-                  ids: [id],
-                  fields: {
-                    disabled: !disabled ? 1 : 0,
-                  },
-                },
-                bgid,
-              ).then(() => {
-                getAlertRules();
-              });
-          }}
-        />
-      ),
-    },
+    // {
+    //   title: t('common:table.enabled'),
+    //   dataIndex: 'disabled',
+    //   width: 65,
+    //   render: (disabled, record) => (
+    //     <Switch
+    //       checked={disabled === AlertRuleStatus.Enable}
+    //       size='small'
+    //       onChange={() => {
+    //         const { id, disabled } = record;
+    //         bgid &&
+    //           updateAlertRules(
+    //             {
+    //               ids: [id],
+    //               fields: {
+    //                 disabled: !disabled ? 1 : 0,
+    //               },
+    //             },
+    //             bgid,
+    //           ).then(() => {
+    //             getAlertRules();
+    //           });
+    //       }}
+    //     />
+    //   ),
+    // },
     {
       title: t('common:table.operations'),
       width: 160,
       render: (record: any) => {
         return (
           <Space>
+              <PoweroffOutlined  
+               title={record.disabled === AlertRuleStatus.Enable ?('已启动'):('未启动')}
+               style={{color:record.disabled === AlertRuleStatus.Enable ?('green'):('gray')}}
+               onClick={e=>{
+                const { id, disabled } = record;
+                bgid &&
+                updateAlertRules(
+                  {
+                    ids: [id],
+                    fields: {
+                      disabled: !disabled ? 1 : 0,
+                    },
+                  },
+                  bgid,
+                ).then(() => {
+                  getAlertRules();
+                });
+
+              }}/> 
             <Link
               className='table-operator-area-normal'
               to={{
@@ -218,8 +239,12 @@ export default function List(props: ListProps) {
               }}
               target='_blank'
             >
-              {t('common:btn.clone')}
+              {/* {t('common:btn.clone')} */}
+              <CopyTwoTone />
             </Link>
+            <ProfileTwoTone />
+
+            <EditOutlined />
             <div
               className='table-operator-area-warning'
               onClick={() => {
@@ -237,7 +262,8 @@ export default function List(props: ListProps) {
                 });
               }}
             >
-              {t('common:btn.delete')}
+               
+               <DeleteOutlined />
             </div>
             {record.prod === 'anomaly' && (
               <div>
@@ -382,6 +408,7 @@ export default function List(props: ListProps) {
         pagination={pagination}
         loading={loading}
         dataSource={filteredData}
+        className='ruler-table_columns'
         rowSelection={{
           selectedRowKeys: selectedRows.map((item) => item.id),
           onChange: (selectedRowKeys: React.Key[], selectedRows: AlertRuleType<any>[]) => {

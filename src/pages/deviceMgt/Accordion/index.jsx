@@ -145,7 +145,7 @@ class Accordions extends Component {
   );
 
   titleRender = (node) => {
-    console.log(node,'titleRender');
+    // console.log(node,'titleRender');
     if(node.management_ip!=null && node.management_ip.length>0  &&  node.type=='asset'){
       node.name = node.management_ip;
     }else if( (node.name ==null || node.name=='') && node.type=='asset'){

@@ -83,10 +83,10 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         createTeam(params).then((_) => {
           message.success(t('common:success.add'));
           onClose(true);
-
-          if (val === 'search') {
-            onSearch(params.name);
-          }
+          onSearch(params.name);
+          // if (val === 'search') {
+          //   onSearch(params.name);
+          // }
         });
       }
 
@@ -94,6 +94,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         changeTeamInfo(teamId, params).then((_) => {
           message.success(t('common:success.modify'));
           onClose('updateName');
+          onSearch(params.name);
         });
       }
     }

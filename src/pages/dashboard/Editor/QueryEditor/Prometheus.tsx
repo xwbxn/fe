@@ -76,7 +76,7 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                     <Row gutter={10}>
                       <Col flex='auto'>
                         <Form.Item
-                          label='Legend'
+                          label='字符矩阵参量'
                           {...field}
                           name={[field.name, 'legend']}
                           tooltip={{
@@ -119,12 +119,12 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                         </Form.Item>
                       </Col>
                       <Col flex='72px'>
-                        <Form.Item label='Step' {...field} name={[field.name, 'step']}>
+                        <Form.Item label='步长' {...field} name={[field.name, 'step']}>
                           <Resolution />
                         </Form.Item>
                       </Col>
                       <Col flex='72px'>
-                        <Form.Item label='Instant' {...field} name={[field.name, 'instant']} valuePropName='checked'>
+                        <Form.Item label='立刻' {...field} name={[field.name, 'instant']} valuePropName='checked'>
                           <Switch />
                         </Form.Item>
                       </Col>
@@ -141,7 +141,7 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                 add({ expr: '', refId: getFirstUnusedLetter(_.map(chartForm.getFieldValue('targets'), 'refId')) });
               }}
             >
-              + add query
+              + 添加查询
             </Button>
           </>
         );

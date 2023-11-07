@@ -22,6 +22,8 @@
   box-sizing: border-box;
 }
 .user-manage-content {
+  flex-grow: 1;
+  width: 78% !important;
   .ant-btn-link {
     color: @primary-color;
   }
@@ -30,6 +32,7 @@
   }
   .event-table-search {
     padding: 0px;
+    display: flex;
   }
   .title {
     font-size: @baseFontSizeMiddle;
@@ -95,6 +98,9 @@
     min-width: 1200px;
     max-width: 1700px;
   }
+  .searchInput_1 {
+    width: 297px;
+  }
   .create-user-btn {
     position: absolute;
     right: 20px;
@@ -116,6 +122,16 @@
   &:not(:first-child) {
     padding-left: 16px;
   }
+}
+.ant-tree {
+  margin-top: -3px !important;  
+}
+.ant-tree .ant-tree-treenode {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0 4px 0;
+  outline: none;
+  width: 100%;
 }
 .sub-container {
   padding: 0 0 0 48px;
@@ -170,4 +186,33 @@
   position: relative;
   padding: 16px;
   padding-right: 26px;
+}
+.user_management {
+  .sub-title {
+    display: inline-flex;
+    height: 50px;
+    line-height: 50px;
+    position: relative;
+    font-weight: 900;
+    font-size: 15px;
+    width: 100%;
+    padding-left: 5px;
+    .ant-btn-sm {
+      height: 50px;
+      line-height: 50px;
+      margin-top: 0px !important;
+      padding: 0px !important;
+      position: absolute;
+      right: 0px;
+      margin-right: 10px;
+    }
+  }
+  .user_table_list {
+      .oper-name {
+         color: #4095E5;
+         margin: 0px 5px;
+         font-size: 16px;
+      }
+  }
+  
 }

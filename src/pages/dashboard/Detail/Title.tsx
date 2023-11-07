@@ -66,7 +66,7 @@ export default function Title(props: IProps) {
             }}
           />
         )}
-        <div className='title'>{dashboard.name}</div>
+        <div className='title' style={{width:'205px'}}>{dashboard.name}</div>
       </div>
       <div className='dashboard-detail-header-right'>
         <Space>

@@ -1157,7 +1157,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
       <Form form={form} labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} labelAlign='left' >
         {isFormItem && render()}
       </Form>
-      {!isFormItem && render()}
+        {!isFormItem && render()}
     </Modal>
   );
 };

@@ -61,7 +61,7 @@ const ExpressionInput = (
     completeEnabled = true,
     trigger = ['onBlur', 'onEnter'],
     datasourceValue,
-    placeholder = 'Input promql to query. Press Shift+Enter for newlines',
+    placeholder = '输入promql进行查询。按Shift+Enter键输入换行符',
   }: CMExpressionInputProps,
   ref,
 ) => {

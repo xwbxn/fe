@@ -38,6 +38,16 @@ export const getBusinessTeamList = function (params = {}) {
     params,
   });
 };
+
+export const updateProperty = function (type,property,data: object) {
+  return request(`/api/n9e/users/update-property?type=`+type+"&property="+property, {
+    method: RequestMethod.Post,
+    data
+  });
+};
+
+
+
 export const getBusinessTeamInfo = function (id: string) {
   return request(`/api/n9e/busi-group/${id}`, {
     method: RequestMethod.Get,
@@ -133,6 +143,13 @@ export const deleteUser = function (id: string) {
     method: RequestMethod.Delete,
   }).then((res) => res && res.dat);
 };
+export const deleteUsers = function (data: number[]) {
+  return request(`api/n9e/users/batch-del`, {
+    method: RequestMethod.Post,
+    data
+  }).then((res) => res && res.dat);
+};
+
 export const deleteTeam = function (id: string) {
   return request(`/api/n9e/user-group/${id}`, {
     method: RequestMethod.Delete,
