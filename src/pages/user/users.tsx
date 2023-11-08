@@ -66,10 +66,10 @@ const Resource: React.FC = () => {
   ];
   const menu ={
     items:  [
-      {
-        label: '添加',
-        key: 'add'
-      },
+      // {
+      //   label: '添加',
+      //   key: 'add'
+      // },
       {
         label: '禁用',
         key: 'stop'
@@ -86,8 +86,6 @@ const Resource: React.FC = () => {
         label: '更换组织',
         key: 'changeOrganize'
       },
-
-
     ]
   };
   const titleRender = (node) => {    
@@ -458,7 +456,7 @@ const Resource: React.FC = () => {
           
             <Row className='event-table-search'>
               <div className='event-table-search-left'>
-                <Input className={'searchInput_1'} prefix={<SearchOutlined />} onPressEnter={onSearchQuery} placeholder={t('输入用户名/角色/名称/邮箱/电话/手机等内容')} />
+                <Input className={'searchInput_1'} suffix={<SearchOutlined />} onPressEnter={onSearchQuery} placeholder={t('输入用户名/角色/名称/邮箱/电话/手机等内容')} />
                 <Select
                   style={{ width: '125px',marginLeft:'10px' }}
                   placeholder="请选择用户状态"
@@ -467,6 +465,12 @@ const Resource: React.FC = () => {
                   options={statusOptions}
                 />
               </div>
+              
+              <div className='event-table-search-rightbutton'>
+                <Button className='btn' type="primary" onClick={()=>{handleOperateClick("add")}}>新增
+                    </Button>
+                
+                </div>  
               <div className='event-table-search-right'>
                 {profile.roles?.includes('Admin') && (
                   <div className='user-manage-operate'>
@@ -478,8 +482,12 @@ const Resource: React.FC = () => {
                       }} items={menu.items} />
 
                     }>
-                      <Button type="primary">{'操作'} <DownOutlined />
-                    </Button>
+                      <Select style={{ width: '125px',marginLeft:'10px'}}
+                      placeholder="操作"
+                      allowClear={true}
+                      onChange={onStatusChange}
+                      options={statusOptions}></Select>
+                      
                  </Dropdown>
                   </div>
                 )}
