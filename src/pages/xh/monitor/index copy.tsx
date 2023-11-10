@@ -12,17 +12,20 @@ import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
-
+// import Add from './Add';
+// import Edit from './Edit';
 import Accordion from '../assetmgt/Accordion';
 import moment from 'moment';
 import { assetsType } from '@/store/assetsInterfaces';
 import { deleteAssets, insertXHAsset,updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
-import { getMonitorInfoList,getMonitorInfo,getMonitorInfoListBasedOnSearch,createMonitor,deleteMonitor,updateMonitor,updateMonitorStatus} from '@/services/manage';
+
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { DataNode } from 'antd/lib/tree';
-
+import { AlertRuleStatus } from '@/pages/alertRules/types';
+import { updateAlertRules, deleteStrategy } from '@/services/warning';
+// export { Add, Edit };
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -35,9 +38,6 @@ export enum OperateType {
   Delete = 'delete',
   ChangeOrganize = 'changeOrganize',
   None = 'none',
-  TurnOnMonitoring = 'turnOnMonitoring',  //启用监控
-  DisableMonitoring = 'disableMonitoring',  //禁止监控
-  // Dismonitoring = 'dismonitoring'   //解除监控
 }
 
 export interface OrgType {
@@ -83,8 +83,7 @@ export default function () {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total,setTotal] = useState<number>(0);
-  const [assetList, setAssetList] = useState<any[]>([]);
-  const [assetInfoList, setAssetInfoList] = useState<any[]>([]);
+
   const [props, setProps] = useState<any>({});
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
@@ -98,15 +97,10 @@ export default function () {
   const [modifyType, setModifyType] = useState<boolean>(false);
 
   const history = useHistory();
-  const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
-  const onSelectNone = () => {
-    setSelectedAssets([]);
-    setSelectedAssetsName([]);
-  };
   const baseColumns: any[] = [
     {
       title: "监控名称",
-      dataIndex: 'monitoring_name',
+      dataIndex: 'name',
       fixed: 'left',
       width: "130px",
       ellipsis:true,
@@ -117,35 +111,21 @@ export default function () {
     {
       title: "资产名称",
       width: "105px",
-      dataIndex: 'asset_id',
+      dataIndex: 'type',
       fixed: 'left',
       ellipsis:true,
-      render(value, record, index) {
-        let name = ""
-        console.log("asdfkllakdsf;;lkas",assetInfoList)
-        assetInfoList.forEach((v)=>{
-          console.log(record.asset_id,v.id)
-          if(record.asset_id+"" == v.id+""){
-            name = v.name;
-          }
-        })
-        return name;
-      },
     },
   ];
   const choooseColumns = [
     {
       title: "描述",
       width: "105px",
-      dataIndex: 'remark',
+      dataIndex: 'ip',
     },
     {
       title: "监控状态",
       width: "105px",
-      dataIndex: 'status',
-      render(value, record, index) {
-        return value==0?'关闭':'正常';
-      },
+      dataIndex: 'producer',
     },
     {
       title: "是否启用告警",
@@ -159,11 +139,11 @@ export default function () {
       width: '120px',
       align: 'center',
       fixed: 'right',
-      render: (text: string, record: any) => (
+      render: (text: string, record: any|assetsType) => (
         <Space>
               <PoweroffOutlined  
-               title={record.status==1?'正常':'失效'}
-               style={{color:record.status === 1 ?('green'):('gray')}}
+               title={record.disabled === AlertRuleStatus.Enable ?('已启动'):('未启动')}
+               style={{color:record.disabled === AlertRuleStatus.Enable ?('green'):('gray')}}
                onClick={e=>{
                 
 
@@ -183,13 +163,8 @@ export default function () {
             <DeleteOutlined onClick={() => {
               Modal.confirm({
                 title: t('common:confirm.delete'),
-                onOk: async () => {
-                  console.log(record);
-                  deleteMonitor(record.id).then((res) => {
-                    message.success('删除成功');
-                    setRefreshFlag(_.uniqueId('refreshFlag_'));
-                
-                });
+                onOk: () => {
+                  
                 },
 
                 onCancel() {},
@@ -212,8 +187,6 @@ export default function () {
     });
     setSelectColum(baseColumns.concat(showColumns).concat(fixColumns));
   }
-
-
   useEffect(() => {
       setSecondAddButton(false)
       getAssetsStypes().then((res) => {
@@ -234,23 +207,13 @@ export default function () {
           setTreeData(_.cloneDeep(treeData));
       });
       setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
-      
-      getAssetsByCondition({}).then(({dat}) => {
-        let items = new Array;
-        dat.list.forEach(v => {
-          items.push(v);
-        })
-        console.log(items)       
-        setAssetInfoList(_.cloneDeep(items));
-      }); 
-      
   },[]);
 
 
   useEffect(() => {
     getTableData();
-      
-  }, [searchVal,refreshFlag,typeId,filterType,refreshKey]);
+    
+  }, [searchVal,typeId,filterType,refreshKey]);
 
   const getTableData = () =>{
     const param = {
@@ -270,13 +233,11 @@ export default function () {
     if(filterType!=null && filterType.length > 0 && searchVal!=null && searchVal.length > 0)  {
       param["filter"] = filterType;
     }
-    
-  getMonitorInfoList(param
-    ).then(({dat}) => {
-        setList(dat.list);
-        setTotal(dat.total)
-    });
-  };
+  //   getAssetsByCondition(param).then((res) => {
+  //       setList(res.dat.list);
+  //       setTotal(res.dat.total)
+  //   });
+  // };
 
   const pupupContent = (
     <div>
@@ -466,66 +427,13 @@ export default function () {
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
             <Space>
-              {/* <RefreshIcon
+              <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              /> */}
+              />
               <div className='table-handle-search'>
-                <Input
-                  className={'searchInput'}
-                  value={searchVal}
-                  
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  suffix={<SearchOutlined />}
-                  // onPressEnter={onSearchQuery}
-                  placeholder={'支持模糊检索表格内容'}
-                />
-                &nbsp; &nbsp; &nbsp; 
-                
-                <Select
-                  // defaultValue="lucy"
-                  placeholder="资产类型"
-                  style={{ width: 120 }}
-                  allowClear
-                  onChange={(value)=>{
-                    setFilterType(value);
-                  }}
-                  options={[
-                     { value: "1", label: '网络交换机' },
-                     { value: "2", label: '主机' },
-                     { value: "3", label: 'MySQL' },
-                     { value: "4", label: 'Redis' },
-                     { value: "5", label: 'Web服务' },
-                     { value: "6", label: '网络连通' },
-                     { value: "7", label: '服务端口监测' },
-                     { value: "8", label: 'ES集群' },
-                     { value: "9", label: 'DNS解析' },
-                     { value: "10", label: 'victoria-metrics' },
-                     { value: "11", label: '负载均衡' },
-                     { value: "12", label: '防火墙' },
-                     { value: "13", label: '上网行为管理' },
-                     { value: "14", label: '入侵防护' },
-                     { value: "15", label: 'WEB应用防火墙' }
-
-                  ]}
-                />
-                &nbsp; &nbsp; &nbsp; 
-                <Select
-                  // defaultValue="lucy"
-                  placeholder="数据源类型"
-                  style={{ width: 120 }}
-                  allowClear
-                  onChange={(value)=>{
-                    setFilterType(value);
-                  }}
-                  options={[
-                     { value: "1", label: 'prometheus' }
-                     
-                     
-                  ]}
-                />
-               {/* <Select
+               <Select
                   // defaultValue="lucy"
                   placeholder="选择过滤器"
                   style={{ width: 120 }}
@@ -539,50 +447,50 @@ export default function () {
                      { value: "3", label: '数据源类型' },
                      { value: "4", label: '解析器' }
                   ]}
-                /> */}
-                
+                />
+                <Input
+                  className={'searchInput'}
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  suffix={<SearchOutlined />}
+                  placeholder={'模糊检索表格内容,多个关键字用空格分隔'}
+                />
               </div>
             </Space>
             <div className='tool_right'>
               <div>
-                <Button className='tool_rightbtn' 
-
+                <Button className='tool_right_btn'
                   onClick={() => {
                     showModal("add",null)
                   }}
-                  
                   type='primary'
                 >
                   {t('新增')}
                 </Button>
-                &nbsp; &nbsp; &nbsp; 
               </div>
               <div>
-                {/* <Button
+                <Button
                   onClick={() => {
                     showModal("view",1)
                   }}
                   type='primary'
                 >
                   {t('查看配置')}
-                </Button> */}
+                </Button>
               </div>
               <div>
-                {/* <Button
+                <Button
                   onClick={() => {
                     showModal("monitor",1)
                   }}
                   type='primary'
                 >
                   {t('查看监控')}
-                </Button> */}
+                </Button>
               </div>
-  
               <div>
                 <Popover placement="bottom" content={pupupContent} trigger="click" className='filter_columns' >
-                  {/* <Button  icon={<UnorderedListOutlined />}>显示列</Button> */}
-                  <Button className='show_columns' >显示列</Button>
-                  &nbsp; &nbsp; &nbsp; 
+                  <Button  icon={<UnorderedListOutlined />}>显示列</Button>
                 </Popover>
               </div>
               <div>
@@ -592,47 +500,19 @@ export default function () {
                     <Menu
                       style={{ width: '100px' }}
                       onClick={({ key }) => {
-                        if(selectedAssets.length<=0){
-                            message.error("未选中监控");
-                            return 
-                        }
-                        if(key=="turnOnMonitoring"){
-                          Modal.confirm({
-                            title: "确认要启用当前选择监控？",
-                            onOk: async () => {
-                              updateMonitorStatus(1,selectedAssets).then((res) => {
-                                message.success('修改成功');
-                                setOperateType(OperateType.None);
-                                setRefreshFlag(_.uniqueId('refreshFlag_'));
-                                onSelectNone();
-                            });
-                            },
-                            onCancel() { },
-                          });
-                          
-                        }else if(key=="disableMonitoring"){
-                          Modal.confirm({
-                            title: "确认要禁止当前用户使用？",
-                            onOk: async () => {
-                              updateMonitorStatus(0,selectedAssets).then((res) => {
-                                message.success('修改成功');
-                                setOperateType(OperateType.None);
-                                setRefreshFlag(_.uniqueId('refreshFlag_'));
-                                onSelectNone();
-                            });
-                            },
-                            onCancel() { },
-                          });
-                        }else{
-                          setOperateType(key as OperateType);
-                        } 
+                        setOperateType(key as OperateType);
                       }}
                       items={[
-                        { key: OperateType.TurnOnMonitoring, label: '启用监控' },
-                        { key: OperateType.DisableMonitoring, label: '禁止监控' },
-                        //{ key: OperateType.Dismonitoring, label: '解除监控' },
+                        { key: OperateType.AssetBatchImport, label: '导入' },
+                        { key: OperateType.AssetBatchExport, label: '导出' },
+                        { key: OperateType.BindTag, label: '绑定标签' },
+                        { key: OperateType.UnbindTag, label: '解绑标签' },
+                        { key: OperateType.UpdateBusi, label: '修改业务组' },
+                        { key: OperateType.RemoveBusi, label: '移出业务组' },
+                        { key: OperateType.UpdateNote, label: '修改备注' },
+                        { key: OperateType.Delete, label: '批量删除' },
+                        { key: OperateType.ChangeOrganize, label: '变更组织树' },
                       ]}
-                      
                     ></Menu>
                   }
                 >
@@ -646,16 +526,13 @@ export default function () {
           <div className='monitor-list' style={{ width:'100%' }}>
             <Table
               dataSource={list}
-            
               className='table-view'
               scroll={{ x: 810,}}
-              
               rowSelection={{
                 onChange: (_, rows) => {
                   setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
                   setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
                 },
-                selectedRowKeys:selectedAssets
               }}
               pagination={{
                 showSizeChanger: true,
@@ -695,4 +572,3 @@ export default function () {
     </PageLayout>
   );
 }
-

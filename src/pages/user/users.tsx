@@ -133,9 +133,9 @@ const Resource: React.FC = () => {
     },
     {
       title: '所属用户组',
-      dataIndex: 'user_group_id',
+      dataIndex: 'group_name',
       render: (val, record) => {        
-        return '未定义'//renderDataMap["organ_"+val];
+        return val.join(",")//renderDataMap["organ_"+val];
       },
     },
     {

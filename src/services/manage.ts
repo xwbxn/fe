@@ -18,6 +18,56 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 import { N9EAPI } from '../../config/constant';
 
+//获取监控列表
+export const getMonitorInfoList = function (params = {}) {
+  return request(`/api/n9e/xh/monitoring/filter`, {
+    method: RequestMethod.Get,
+    params,
+  });
+};
+//根据主键获取监控
+export const getMonitorInfo = function (id: string) {
+  return request(`/api/n9e/xh/monitoring/${id}`, {
+    method: RequestMethod.Get,
+  }).then((res) => res && res.dat);
+};
+//根据检索内容查询监控列表
+export const getMonitorInfoListBasedOnSearch = function (params?: { query: string; limit?: number }) {
+  const data = params ? (params.limit ? params : { ...params, limit: 200 }) : { limit: 200 };
+  return request(`/api/n9e/xh/monitoring`, {
+    method: RequestMethod.Get,
+    params: data,
+  });
+};
+//创建监控
+export const createMonitor = function (data: object) {
+  return request(`/api/n9e/xh/monitoring`, {
+    method: RequestMethod.Post,
+    data,
+  }).then((res) => res && res.dat);
+};
+//删除监控
+export const deleteMonitor = function (id: string) {
+  return request(`/api/n9e/xh/monitoring/${id}`, {
+    method: RequestMethod.Delete,
+  }).then((res) => res && res.dat);
+};
+//更新监控
+export const updateMonitor = function (data: object) {
+  return request(`/api/n9e/xh/monitoring`, {
+    method: RequestMethod.Put,
+    data,
+  }).then((res) => res && res.dat);
+};
+//通过主键更新监控开关
+export const updateMonitorStatus = function (status,data) {
+  return request(`/api/n9e/xh/monitoring/status?status=`+status, {
+    method: RequestMethod.Post,
+    data
+  });
+};
+
+
 // 修改个人信息
 export const getUserInfoList = function (params = {}) {
   return request(`/api/n9e/users`, {

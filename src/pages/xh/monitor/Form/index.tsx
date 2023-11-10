@@ -6,18 +6,21 @@ import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
+import { createMonitor,} from '@/services/manage';
 import TextArea from 'antd/lib/input/TextArea';
 import { FileAddOutlined } from '@ant-design/icons';
 import { toml } from '@codemirror/legacy-modes/mode/toml';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/stream-parser';
+import { locale } from 'moment';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
-  const [assetList, setAssetList] = useState<{ name: string; id: any }[]>([]);
+  const [assetList, setAssetList] = useState<any[]>([]);
+  const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
@@ -47,26 +50,30 @@ export default function (props: { initialValues: object; initParams: object; mod
     });
 
     getAssetsByCondition(param).then((res) => {
-      // const items = res.dat.list.map((v) => {
-      const items = res.dat.map((v) => {
-        return {
+      let options = new Array;
+      const items = res.dat.list.map((v) => {
+        options.push({
           value: v.id,
-          label: v.name + "[" + v.type + "]",
-          ...v,
-        };
+          label: v.name + "[" + v.type + "]"
+        });
       })
-      setAssetList(items);
+      setAssetOptions(options);
+      setAssetList(res.dat.list);
     });
 
   }, []);
 
   const genForm = () => {
-    const asset:any = assetList.find((v) => v.id === form.getFieldValue('asset_id'));
+    console.log("genForm")
+    let formValue = form.getFieldsValue();
+    console.log(formValue);
+    const asset:any = assetList.find((v:any) => v.id === formValue["asset_id"]);
     if (asset) {
+
       form.setFieldsValue({ type: asset.type });
       const assetType:any = assetTypes.find((v) => v.name === asset.type);
       setParams(assetType.form || []);
-      genDefaultConfig()
+      // genDefaultConfig()
     }
   };
   
@@ -89,18 +96,21 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const submitForm = async (values) => {
     // values.group_id = curBusiId;
-    debugger;
-    values.params = JSON.stringify(values);
+    //debugger;
+    //values.params = JSON.stringify(values);
 
     console.log("submitForm",values);
+    createMonitor(values).then(res=>{
+      message.success('操作成功');
+      history.back();
+    })
     // values.organization_id = organizationId;
     // if (props.mode === 'edit') {
     //   await updateAsset(values);
     // } else {
     //   await addAsset(values);
     // }
-    message.success('操作成功');
-    history.back();
+    
   };
 
   const genDefaultConfig = () => {
@@ -143,20 +153,27 @@ export default function (props: { initialValues: object; initParams: object; mod
       <div className='card-wrapper'>
         <Card {...panelBaseProps} title={t('basic')}>
           <Row gutter={10}>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
-                <Select style={{ width: '100%' }}  showSearch options={assetList} placeholder='请选择资产' disabled={props.mode === 'edit'} />
+                <Select style={{ width: '100%' }}  showSearch options={assetOptions} placeholder='请选择资产' disabled={props.mode === 'edit'} />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item label='监控名称' name='name' rules={[{ required: true }]}>
                 <Input placeholder='请输入资产名称' />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
+                <Select options={[{
+                    value:1,label:'普罗米修斯'
+                }]}></Select>
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={10}>
             <Col span={12}>
-              <Form.Item label='监控脚本' name='configs' rules={[{ required: true }]}>
+              <Form.Item label='监控脚本' name='configs' rules={[{ required: false }]}>
                 <TextArea placeholder='请输入监控脚本'  rows={5}/>
               </Form.Item>
             </Col>
@@ -166,13 +183,13 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <Form.Item label='状态' name='status'>
                   <Select style={{ width: '100%' }} options={
                     [
-                      { value: 0, label: '失效' }, { value: 1, label: '正常' }
+                      { value: 0, label: '正常' }, { value: 1, label: '失效' }
                     ]
 
                   } />
                 </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col span={24}>
                   <Form.Item label='采集器' name='ident'>
                     <Select style={{ width: '100%' }} options={identList} />
                   </Form.Item>
@@ -234,7 +251,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             </Button>
             <Button
               onClick={() => {
-                history.back();
+                window.location.href="/xh/monitor"
               }}
             >
               取消

@@ -55,15 +55,19 @@ export default defineConfig({
         changeOrigin: true,
       },
       '/api/n9e/proxy': {
-        target: 'http://127.0.0.1:17000/',
+        //target: 'http://192.168.20.19:17000/',
+        target: 'http://192.168.20.54:17000/',
         changeOrigin: true,
       },
       '/api/n9e/datasource': {
-        target: 'http://127.0.0.1:17000/',
+        //target: 'http://192.168.20.19:17000/',
+        target: 'http://192.168.20.54:17000/',
+
         changeOrigin: true,
       },
       '/api/n9e': {
-        target: 'http://127.0.0.1:17000/',
+        //target: 'http://192.168.20.19:17000/',
+        target: 'http://192.168.20.54:17000/',
         changeOrigin: true,
       },
       '/api/fc-brain': {
