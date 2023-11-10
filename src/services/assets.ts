@@ -11,16 +11,17 @@ export const getAssets = function (bgid, query, organization_id) {
     })
 }
 export const getAssetsByCondition = function (data) {
-    // return request("/api/n9e/xh/assets/filter", {
-    //     method: RequestMethod.Post,
-    //     data
-    // })
-    return request("/api/n9e/assets", {
-        method: RequestMethod.Get,
-        params: {
-            bgid:1
-        }
+    console.log(data)
+    return request("/api/n9e/xh/assets/filter", {
+        method: RequestMethod.Post,
+        data
     })
+    // return request("/api/n9e/assets", {
+    //     method: RequestMethod.Get,
+    //     params: {
+    //         bgid:1
+    //     }
+    // })
 }
 
 export const getAsset = function (id: string) {
@@ -28,6 +29,13 @@ export const getAsset = function (id: string) {
         method: RequestMethod.Get
     })
 }
+export const getXhAsset = function (id: string) {
+    return request(`/api/n9e/xh/assets/id?asset=`+id, {
+        method: RequestMethod.Get
+    })
+}
+
+
 
 export const addAsset = function (data: assetsType) {
     return request("/api/n9e/assets", {
@@ -49,6 +57,19 @@ export const insertXHAsset = function (data) {
       data
     });
   };
+
+
+  export const addXHAssetExpansion = function (data,asset,type) {
+    return request('/api/n9e/xh/assets-expansion?asset='+asset+"&type="+type, {
+      method: RequestMethod.Put,
+      data
+    });
+  };
+
+
+
+
+
 export const putOptionalMetrics = function (data) {
     return request("/api/n9e/assets/optmetrics", {
         method: RequestMethod.Put,
@@ -69,6 +90,16 @@ export const deleteAssets = function (data: { ids: string[] }) {
         data
     })
 }
+
+export const deleteXhAssets = function (data:any) {
+    return request(`/api/n9e/xh/assets/batch-del`, {
+        method: RequestMethod.Post,
+        data
+    })
+}
+
+
+
 
 //获取默认配置模板
 export const getAssetDefaultConfig = function (type: string, data) {
@@ -143,6 +174,23 @@ export function updateAssetNote(data) {
 export function getOrganizationTree(data) {
     return request(`/api/n9e/organization`, {
         method: RequestMethod.Get,
+        data
+    });
+}
+
+
+export const importXhAssetSetData = function (url,data) {
+    return request(url, {
+      headers: {
+         "enctype": "multipart/form-data"
+      },
+      body:data,
+      method: RequestMethod.Post    
+    });
+  }
+export function exportXhAssetSetData(data) {
+    return request(`/api/n9e/xh/asset/export-xls`, {
+        method: RequestMethod.Post,
         data
     });
 }

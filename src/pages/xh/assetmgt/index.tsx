@@ -1,31 +1,28 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, SearchOutlined, UnorderedListOutlined, VideoCameraOutlined } from '@ant-design/icons';
-import { getBusiGroups } from '@/services/common';
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
-import { SetConfigTables, SetConfigForms } from './catalog'
-import { CommonStateContext } from '@/App';
 import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
-import Add from './Add';
-import Edit from './Edit';
+// import Add from './Add';
+// import Edit from './Edit';
 import Accordion from './Accordion';
 import moment from 'moment';
 import { assetsType } from '@/store/assetsInterfaces';
 import { getDeviceType } from '@/services/assets/deviceType';
 import { getDictValueEnum } from '@/services/system/dict';
-import { deleteAssets, insertXHAsset,updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
+import {deleteXhAssets, deleteAssets, insertXHAsset,updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { DataNode } from 'antd/lib/tree';
-export { Add, Edit };
+// export { Add, Edit };
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -86,8 +83,7 @@ export default function () {
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total,setTotal] = useState<number>(0);
   const [assetTypeItems, setAssetTypeItems] = useState<any[]>([]);
-
-  const [props, setProps] = useState<any>({});
+  const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
@@ -96,11 +92,15 @@ export default function () {
   const [dictDatas, setDictDatas] = useState({});
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
   const [modifySwitch, setModifySwitch] = useState(true);  
+  const [viewIndex, setViewIndex] = useState<number>(-1);  
+  
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
 
   const [expandedKeys,setExpandedKeys] =useState<any[]>();
 
   const [modifyType, setModifyType] = useState<boolean>(true);
+
+  const [queryCondition, setQueryCondition] = useState<any>({});
 
   const history = useHistory();
   const baseColumns: any[] = [
@@ -150,6 +150,15 @@ export default function () {
       width: "105px",
       dataIndex: 'status',
       ellipsis:true,
+      render(value, record, index) {
+        let label = "-";
+        if(value==0){
+           label = "下线";
+        }else if(value==1){
+           label = "正常"
+        }
+        return label;
+      },
     },
   ];
   
@@ -226,7 +235,6 @@ export default function () {
           })
           setExpandedKeys(arr);
           setAassetTypes(items);
-          console.log("-------------------------------",items);
           setTreeData(_.cloneDeep(treeData));
       });
 
@@ -241,35 +249,8 @@ export default function () {
     let modelIds = Array.from(new Set(baseColumns.map(obj => obj.title)))
     setDefaultValues(modelIds);
     setOptionColumns(baseColumns);
-    setSelectColum((baseColumns));
+    setSelectColum((baseColumns.concat(fixColumns)));
     //来源数据字典
-    // getDictValueEnum('cpu_specifications,memory_specifications,producer,asset_status,operate_system,asset_ext_fields').then((data) => {
-    //     setDictDatas(data)
-    //     initData["cpu"] = data["cpu_specifications"] ? data["cpu_specifications"] : [];
-    //     initData["memory"] = data["memory_specifications"] ? data["memory_specifications"] : [];
-    //     initData["producer"] = data["producer"] ? data["producer"] : [];
-    //     initData["asset_status"] = data["asset_status"] ? data["asset_status"] : [];
-    //     initData["os"] = data["operate_system"] ? data["operate_system"] : [];
-    //     setInitData({ ...initData});
-    // });
-
-    // getOrganizationTree({}).then(({ dat }) => {
-    //     initData["organization_id"] = dat;
-    //     setInitData({ ...initData});
-    // });
-
-    // getAssetsStypes().then((res) => {
-    //   const options = res.dat
-    //     .map((v) => {
-    //       return {
-    //         label: v.name,
-    //         value: v.name
-    //       };
-    //     })
-    //     // .filter((v) => v.name !== '主机');
-    //     initData["type"] = options;
-    //     setInitData({ ...initData});
-    // });
   }, []);
 
   useEffect(() => {
@@ -277,6 +258,8 @@ export default function () {
   }, [searchVal,typeId,filterType,refreshKey]);
 
   const getTableData = () =>{
+  
+    console.log("------",typeId);
     const param = {
       page: current,
       limit: pageSize,
@@ -285,18 +268,58 @@ export default function () {
     if(searchVal!=null && searchVal.length > 0) {
       param["query"] = searchVal;
     }
-    if (typeId !=null && !modifyType) {
-      param["directory_id"] = typeId;
-    }
-    if(typeId!=null && modifyType){
+    if(typeId!=null && typeId!="0" && modifyType){
       param["type"] = typeId;
     }
     if(filterType!=null && filterType.length > 0 && searchVal!=null && searchVal.length > 0)  {
       param["filter"] = filterType;
     }
-    getAssetsByCondition(param).then((res) => {
-        setList(res.dat.list);
-        setTotal(res.dat.total)
+    setQueryCondition(param);
+
+    getAssetsByCondition(param).then(({dat}) => {
+         dat.list.forEach((entity,index)=>{
+            let  expands = entity.exps;
+            if(expands!=null && expands.length > 0) {
+              const map = new Map()
+              expands.forEach((item, index, arr) => {
+                if (!map.has(item.config_category)) {
+                  map.set(
+                    item.config_category,
+                    arr.filter(a => a.config_category == item.config_category)
+                  )
+                }
+              })
+              console.log("Map",map);
+              //以上分组加载数据 
+              let mapValues = {};
+              map.forEach(function (value, key) {
+                const formDataMap = new Map()
+                value.forEach((item, index, arr) => {
+                  if (!formDataMap.has(item.group_id)) {
+                    formDataMap.set(
+                      item.group_id,
+                      arr.filter(a => a.group_id == item.group_id)
+                    )
+                  }
+                })
+                let group:any =[];
+                formDataMap.forEach(function (value, i) {
+                  let itemsChars = ""
+                  value.forEach((item, index, arr) => {
+                      itemsChars += "\"" + item.name + "\":\"" + item.value + "\",";
+                  })
+                  itemsChars = "{" + itemsChars.substring(0, itemsChars.length - 1) + "}";
+                  group.push(JSON.parse(itemsChars));
+                })
+                mapValues[key] = group;
+                
+              }) 
+              entity.expands = mapValues;
+            }
+
+         })
+        setList(dat.list);
+        setTotal(dat.total)
     });
   };
 
@@ -336,28 +359,6 @@ export default function () {
     })
   }
 
-  const dealFieldsToForm = (props) => {
-    //处理中文和每个表单每个块要提交的字段名称+类型
-    let fieldMap = new Map();
-    let items = props.Form.items;
-    items.map((item, index) => {
-      fieldMap.set(item.name, {
-        name_cn: item.label,
-        data_type: item.data_type ? item.data_type : "string"
-      })
-    })
-    let groups = props.Form.groups;
-    groups?.map((group, index) => {
-      group.items.map((item, index) => {
-        fieldMap.set(item.name, {
-          name_cn: item.label,
-          data_type: item.data_type ? item.data_type : "string"
-        })
-      })
-    })
-    return fieldMap;
-  }
-  
 
 
   const datalDealValue = (value, data_type) => {
@@ -378,50 +379,100 @@ export default function () {
       return null;
     }
   }
-  
 
+  const detailInfo =(id, data)=>{
+    let columns = groupColumns[id];
+    console.log(columns,data);
+    return <Table 
+         style={{width:'650px'}} 
+         dataSource={data} 
+         columns={columns} 
+         pagination={false}>
+    </Table>
+  }
+  
+  const renderItem = (field, record, index) => {
+    
+    let key = field.split(".")[1];
+    let values=record.expands?record.expands[key]:[];
+    console.log("render", key, values);
+    return <>
+      <Popover content={detailInfo(key,values)} title="详细记录">
+        <Button type="primary">详情</Button>
+      </Popover>
+    </>
+  }
+
+  const renderMetricsItem = (field, record, index) => {
+    let vaue :any= null;
+    for (let item of record.metrics_list){
+      if(item.label==field){
+          vaue = parseFloat(item.val).toFixed(1);
+          break;
+        }
+    }
+    return vaue;
+  }
   const getAssetTypeItems = (type) => {
     const extendType: any = assetTypes.find((v) => v.name === type);
     if (extendType) {
       //TODO：处理分组属性
-      const extra_items = new Array();      
+      const extra_items = new Array();   
+      extendType.metrics?.forEach(element => {
+        let  newItem = {
+          name: element.metrics,
+          label: element.name,                 
+        };
+        extra_items.push(newItem);
+      });   
       let extra_props = extendType.extra_props; 
-      for (let property  in extra_props) {          
+      for (let property  in extra_props) {         
           let group  = extra_props[property];
+          let columns = new Array;
           if(group!=null){
-            for( let item  of group.props ){
-              if (item.type === "list") {
-                  for( let entity  of item.items ){
-                   let  newItem = {
-                       name: property+"."+(entity.name),
-                       label: group.label+"-"+entity.label,
-                   };
-                    console.log("newItem",newItem) 
-                    extra_items.push(newItem);
-                 };
-              } else {
-                let  newItem = {
-                  name: property+"."+(item.name),
-                  label: group.label+"-"+item.label,
-                };
-                console.log("newItem",newItem)
-                extra_items.push(newItem);
-              }
+            for( let item  of group.props ){              
+              item.items.forEach(element => {
+                columns.push({
+                    title: element.label,
+                    dataIndex: element.name,
+                    width: "120px",
+                    ellipsis:true,
+                 })
+              });
+              let  newItem = {
+                name: property+"."+(item.name),
+                label: item.label,                 
+              };
+              extra_items.push(newItem);
            }
-          }               
-      }
+          }
+          groupColumns[property]=columns;
+          setGroupColumns({...groupColumns})                   
+      }      
+      
       const cloumns = new Array();
       extra_items.map(item =>{
         cloumns.push({
           title: item.label,
           dataIndex: item.name,
-          width: "140px",
+          width: "80px",
+          align: "center",
           ellipsis:true,
+          render: (val,record,i) => {
+            if(item.name.split(".").length>1){
+               return renderItem(item.name,record,i);
+            }else{
+              return  renderMetricsItem(item.name,record,i);
+            }
+            
+          }
         })
       })
+      
       let columns = baseColumns.concat(cloumns);
       setOptionColumns(_.cloneDeep(columns));
-      setSelectColum(_.cloneDeep(baseColumns));
+      console.log(columns);
+      setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
     }
 
   }
@@ -431,6 +482,8 @@ export default function () {
 
     if(action=="add"){
       history.push('/xh/assetmgt/add');    
+    }else if(action=="update"){
+      history.push('/xh/assetmgt/add?id='+formData.id);    
     }
 
   }
@@ -440,60 +493,8 @@ export default function () {
     setPageSize(pageSize);
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
-  const formSubmit = (values, businessForm, action, businessZip) => {
-
-    let fields = dealFieldsToForm(businessZip);
-    console.log("_Submit", values, businessForm);
-    let submitFieldMap = new Map();
-    for (let item in values) {
-      let value = datalDealValue(values[item], fields.get(item).data_type);
-      if (value) {
-        submitFieldMap.set(item, value)
-      }
-    }
-    console.log("提交数据", businessForm, values);
-    if (action == "add") {
-      insertXHAsset(Object.fromEntries(submitFieldMap)).then((res) => {
-        setRefreshLeft(_.uniqueId('refresh_left'));
-        console.log(refreshLeft);
-        businessForm.isOpen = false;
-        setBusinessForm(businessForm)
-        // loadDataCenter();
-        setRefreshKey(_.uniqueId('refreshKey_'));
-      })
-    }else{
-      submitFieldMap.set("id",businessForm["operateId"]);
-      updateXHAsset(Object.fromEntries(submitFieldMap)).then((res) => {
-        setRefreshLeft(_.uniqueId('refresh_left'));
-        console.log(refreshLeft);
-        businessForm.isOpen = false;
-        setBusinessForm(businessForm)
-        // loadDataCenter();
-        setRefreshKey(_.uniqueId('refreshKey_'));
-      })
-    }
-  };
-  const FormOnChange = (values, item) => {    
-    // console.log("FormOnChange", item, values,businessForm);
-    if (businessForm["businessId"] == "asset_set") {
-      let itemKey = "";//控制的字段
-      for (var key in item) {
-        itemKey = key;
-      }
-      // console.log(itemKey)
-      if(itemKey==="type"){
-          let itemType = extendTypes().type1;
-          delete props.Form.groups;
-          let groups = new Array<any>()
-          groups.push({
-            items:itemType
-          })
-          props.Form["groups"]= groups;
-          setProps(_.cloneDeep(props))
-      }
-    }
-    setFormData(values);
-  }
+ 
+  
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
       <div style={{ display: 'flex' }} className='asset_list_view'>
@@ -529,6 +530,7 @@ export default function () {
               }
               if (type == "query" && modifyType) {
                 getAssetTypeItems(key);
+                setTypeId(key);
                 setRefreshKey(_.uniqueId('refreshKey_'));
            }
               if (key < 0) {
@@ -589,6 +591,7 @@ export default function () {
                 <Input
                   className={'searchInput'}
                   value={searchVal}
+                  allowClear
                   onChange={(e) => setSearchVal(e.target.value)}
                   prefix={<SearchOutlined />}
                   placeholder={'模糊检索表格内容,多个关键字用空格分隔'}
@@ -618,18 +621,54 @@ export default function () {
                     <Menu
                       style={{ width: '100px' }}
                       onClick={({ key }) => {
-                        setOperateType(key as OperateType);
+                        
+                        if (key == OperateType.AssetBatchExport){
+                          let names = new Array;
+                          names.push(queryCondition);
+                          setSelectedAssetsName(queryCondition);
+                          if (selectedAssets.length <= 0) {
+                            Modal.confirm({
+                              title: "确认导出所有设备资产吗",
+                              onOk: async () => {
+                                setOperateType(key as OperateType);
+                              },
+                              onCancel() { },
+                            });
+
+                          }else{
+                            setOperateType(key as OperateType);
+                          }
+                        }else if (key == OperateType.Delete) {
+                          if (selectedAssets.length <= 0) {
+                            message.warning("请选择要批量操作的设备")
+                            return
+                          } else {
+                            Modal.confirm({
+                              title: "确认要删除吗",
+                              onOk: async () => {
+                                let rows = selectedAssets?.map((item) => ""+item);
+                                deleteXhAssets({ids:rows}).then(res => {
+                                  message.success("删除成功！");
+                                  setRefreshKey(_.uniqueId('refreshKey_'));
+                                })
+                              },
+                              onCancel() { },
+                            });
+                          }
+                        }else{
+                          setOperateType(key as OperateType);
+                        }
+
                       }}
                       items={[
-                        { key: OperateType.AssetBatchImport, label: '导入' },
-                        { key: OperateType.AssetBatchExport, label: '导出' },
+                        { key: OperateType.AssetBatchImport, label: '导入设备' },
+                        { key: OperateType.AssetBatchExport, label: '导出设备' },
                         { key: OperateType.BindTag, label: '绑定标签' },
                         { key: OperateType.UnbindTag, label: '解绑标签' },
-                        { key: OperateType.UpdateBusi, label: '修改业务组' },
-                        { key: OperateType.RemoveBusi, label: '移出业务组' },
-                        { key: OperateType.UpdateNote, label: '修改备注' },
+                        // { key: OperateType.UpdateBusi, label: '修改业务组' },1 excle 2 xml 3 text
+                        // { key: OperateType.RemoveBusi, label: '移出业务组' },
+                        // { key: OperateType.UpdateNote, label: '修改备注' },
                         { key: OperateType.Delete, label: '批量删除' },
-                        { key: OperateType.ChangeOrganize, label: '变更组织树' },
                       ]}
                     ></Menu>
                   }
@@ -645,10 +684,19 @@ export default function () {
             <Table
               dataSource={list}
               className='table-view'
-              scroll={{ x: 810,}}
+              scroll={{ x: 810}}
+              onRow={(record) => {
+                return {
+                  onClick: (event) => {
+                    // debugger;
+                    setViewIndex(record.id)
+                    console.log(viewIndex);
+                  },
+                };
+              }}
               rowSelection={{
                 onChange: (_, rows) => {
-                  setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
+                  setSelectedAssets(rows ? rows.map(({ id }) => id) : []);                  
                   setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
                 },
               }}
@@ -666,16 +714,6 @@ export default function () {
               rowKey='id'
               size='small'
             ></Table>
-            <CommonModal
-              Modal={props.Modal}
-              Form={props.Form}
-              initial={initData}
-              defaultValue={formData}
-              FormOnChange={FormOnChange}
-              isInline={props.isInline}
-              operate={businessForm.operate}
-              isOpen={businessForm.isOpen} >
-            </CommonModal>
             <OperationModal
               operateType={operateType}
               setOperateType={setOperateType}

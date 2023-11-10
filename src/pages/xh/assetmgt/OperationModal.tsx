@@ -1,15 +1,15 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, Button, Form, Input, Modal, Select, Tag, Tooltip, TreeSelect, Upload } from 'antd';
+import { Alert, Button, Form, Input, Modal, Radio, Select, Tag, Tooltip, TreeSelect, Upload, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
 import { debounce } from 'lodash';
-import { bindTags, deleteAssets, getAssetsTags, moveTargetBusi, unbindTags, updateAssetNote, changeAssetOrganization } from '@/services/assets';
+import { bindTags, deleteXhAssets, getAssetsTags, moveTargetBusi, unbindTags, updateAssetNote, changeAssetOrganization } from '@/services/assets';
 import { getBusiGroups } from '@/services/common';
 import { OperateType } from './index';
 import { exportTemplet } from '@/services/assets/asset';
 import Icon from '@ant-design/icons';
 import moment from 'moment';
-import { getOrganizationTree,getOrganizationsByIds } from '@/services/assets';
+import { getOrganizationTree,importXhAssetSetData,exportXhAssetSetData } from '@/services/assets';
 
 export const OperationModal = ({ operateType, setOperateType, assets, names, reloadList }) => {
   const { t } = useTranslation('assets');
@@ -22,6 +22,8 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   const [fileList, setFileList] = useState<any>([]);
   const detailProp = operateType === OperateType.UnbindTag ? tagsList : busiGroups;
   const [treeData, setTreeData] = useState([]);
+  const [ids,setIds] =useState<string>();
+  const [ftype,setFtype] = useState<number>(1)
 
   const style ={
     style1:{
@@ -50,13 +52,19 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   };
 
   useEffect(() => {
-    // console.log("initData",initData)
+    console.log("initData",assets)
     if(operateType === OperateType.ChangeOrganize){
       getOrganizationTree({}).then(({ dat }) => {
         setTreeData(dat)
       });
+    }else if (operateType != OperateType.None) {
+          setAssetsList(assets);
+          setIds(assets.join('\n'));
+          form.setFieldsValue({
+            ids: assets.join('\n'),
+          });
     }
-  },[operateType]);
+  },[operateType,assets]);
   // 绑定标签弹窗内容
   const bindTagDetail = () => {
     // 校验单个标签格式是否正确
@@ -107,7 +115,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         return (
           <>
             <Form.Item name='ids' rules={[{ required: true }]} hidden>
-              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} />
+              <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} onBlur={formatValue} defaultValue={assets}/>
             </Form.Item>
             <Form.Item label={t('assets')} name='names' rules={[{ required: true }]}>
               <Input.TextArea autoSize={{ minRows: 3, maxRows: 10 }} placeholder={'关联资产信息'} onBlur={formatValue} readOnly />
@@ -170,6 +178,33 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
     };
   };
 
+  // 移出业务组弹窗内容
+  const assetBatchExportDetail = () => {
+    return {
+      operateTitle: "资产导出",
+      requestFunc: moveTargetBusi,
+      isFormItem: false,
+      render() {
+        return (
+        <>
+      
+         <Radio.Group  style={{width:'100%',display:"flex",justifyContent:'center'}} defaultValue={ftype}>
+               <Radio value={1} onChange={e=>{                  
+                  setFtype(parseInt(""+e.target.value))
+               }}>Excle</Radio>
+               <Radio value={2} onChange={e=>{
+                  setFtype(parseInt(""+e.target.value))
+               }}>XML</Radio>
+               <Radio value={3} onChange={e=>{
+                  setFtype(parseInt(""+e.target.value))
+               }}>TXT</Radio>
+          </Radio.Group>
+       
+        </>
+        )
+      },
+    };
+  };
   // 修改备注弹窗内容
   const updateNoteDetail = () => {
     return {
@@ -193,6 +228,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       },
     };
   };
+  
   const changeOrganizeDetail = () => {
     return {
       operateTitle: t('变更资产所属组织树'),
@@ -229,7 +265,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   const deleteDetail = () => {
     return {
       operateTitle: t('batch_delete.title'),
-      requestFunc: deleteAssets,
+      requestFunc: deleteXhAssets,
       isFormItem: false,
       render() {
         return <Alert message={t('batch_delete.msg')} type='error' />;
@@ -298,7 +334,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
               </Upload>
               <Button className='down_load_button'
                 onClick={async event => {
-                  let url = "/api/n9e/asset-basic/templet";
+                  let url = "/api/n9e/xh/asset/templet";
                   let params = {};
                   let exportTitle = "资产";
                   exportTemplet(url, params).then((res) => {
@@ -332,6 +368,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
     updateNoteDetail,
     changeOrganizeDetail,
     deleteDetail,
+    assetBatchExportDetail,
     noneDetail: () => ({
       operateTitle: '',
       requestFunc() {
@@ -361,8 +398,56 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
 
   // 提交表单
   function submitForm() {
-    form.validateFields().then((data) => {
-      setConfirmLoading(true);
+
+     
+    if(operateType === OperateType.AssetBatchImport){
+      
+      let formData = new FormData();
+      formData.append("file", fileList[0]);
+      let url = "/api/n9e/xh/asset/import-xls";
+      console.log("批量导入",url);
+      importXhAssetSetData(url, formData).then((res) => {
+        message.success('批量导入成功');
+        setFileName("")
+        reloadList(null,operateType);
+      })   
+    
+    }else if(operateType === OperateType.AssetBatchExport) {
+      console.log(assetsList,names);
+      let params:any = {};
+      // params.ftype = 1;
+      if(assetsList!=null && assetsList.length>0){
+          params.ids = assetsList;
+      }else{
+          delete names.limit;
+          delete names.page;
+          params = {...params,...names}         
+      }
+      let url = "/api/n9e/xh/asset/export-xls?ftype="+ftype;
+      let exportTitle = "资产";
+      exportTemplet(url, params).then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res],
+          // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
+          { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".xls"
+        if(ftype===1){
+           fileType = ".xls"
+        }else if(ftype===2){
+           fileType = ".xml"
+        }else if(ftype===3){
+          fileType = ".txt"
+        }
+        const fileName = exportTitle + "数据_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+      })
+      
+    }else{
+      form.validateFields().then((data) => {
+      // setConfirmLoading(true);
       data.ids = data.ids.split('\n');
       requestFunc(data)
         .then(() => {
@@ -373,6 +458,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
         })
         .catch(() => setConfirmLoading(false));
     });
+    }
   }
 
   // 初始化展示所有业务组
@@ -393,9 +479,11 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   useEffect(() => {
     if (operateType !== OperateType.None) {
       setAssetsList(assets);
-      form.setFieldsValue({
-        names: names.join('\n'),
-      });
+      if(operateType !== OperateType.AssetBatchExport){
+        form.setFieldsValue({
+          names: names.join('\n'),
+        });
+      }      
       form.setFieldsValue({
         ids: assets.join('\n'),
       });

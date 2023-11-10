@@ -799,6 +799,7 @@ const history = useHistory();
           </Form.Item>
         </React.Fragment>
       case "input":
+        debugger;
         return <Col span={span} >
           <Form.Item label={item.label}>
             <Form.Item
