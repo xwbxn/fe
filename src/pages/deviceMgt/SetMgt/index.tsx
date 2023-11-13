@@ -15,9 +15,7 @@ import { addDictDataBySingle, updateDictDataSingle} from '@/services/system/dict
 import { EditOutlined } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid'
 import { OperationModal } from '../Form/OperationModal';
-import { useAntdTable } from 'ahooks';
 import { OperateType } from '../Form/operate_type';
-import { render } from 'react-dom';
 
 
 export default function () {

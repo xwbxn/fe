@@ -1,4 +1,4 @@
-import React, { Fragment, createRef, useContext, useEffect, useState } from 'react';
+import React, {  createRef, useContext, useEffect, useState } from 'react';
 import { Button, Checkbox, Col, DatePicker, Form, FormInstance, Input, Radio, Row, Select, Space, Table, Tabs, TimePicker, TreeSelect, message } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,6 @@ import { GroupOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { CommonStateContext } from '@/App';
 import { v4 as uuidv4 } from 'uuid';
 import Accordion from './Accordion';
-import CustomForm from './Form';
 import './locale';
 import './style.less';
 import './Form/index.less'
@@ -54,7 +53,6 @@ export default function () {
   const [formRelations, setFormRelations] = useState<any>({});
   const [selectMap, setSelectMap] = useState({});
   const [hasEdit, setHasEdit] = useState<boolean>(true);
-  const [categoryData, setCategoryData] = useState({});
   //设备/资产信息
   const [assetInfo, setAssetInfo] = useState<any>({});
   //处理各个表单的字段和中文信息

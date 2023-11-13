@@ -16,9 +16,11 @@ export default function () {
   const [businessForm, setBusinessForm] = useState<any>({});
 
   const [refArr, setRefArr] = useState({});
+  const [checks, setChecks] = useState<any>({});
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
-
+     setChecks({...checks})
   }, []);
 
   const renderFields = (text, record, field, currentConfigId) => {
@@ -26,6 +28,13 @@ export default function () {
     let value = record[field];
     return value;
   }
+  const onChange = (e,id) => {
+    console.log('checked = ', e.target.checked);
+    // setChecked(e.target.checked);
+    checks[id] =e.target.checked?false:true;
+    setChecks(_.cloneDeep({...checks}))
+    console.log('checked = ', checks);
+  };
 
   const handleClick = (action: any, id: any) => {
       console.log('handleClick',action,id);
@@ -34,9 +43,10 @@ export default function () {
 
   return (
     <PageLayout icon={<GroupOutlined />} title={'接口访问设置'}>
-      <div className='body-list' style={{width:'94%',margin:'0 auto'}}>
+      <div className='body-list' >
         {InterfaceForms.map((modelFF, index) => {
           refArr[modelFF.id] = createRef<FormInstance>();
+          checks[modelFF.id] = true;
           return (
             <Card
               hoverable
@@ -45,24 +55,29 @@ export default function () {
               className='interface_set'
             >
               <Form
-                name="basic"
+                name={modelFF.id}
                 labelCol={{ span: 8 }}
                 // wrapperCol={{ span: 16 }}
                 className='interface_submit_form'
                 layout="inline"
-                initialValues={{ remember: true }}
+                initialValues={{}}
                 ref={refArr[modelFF.id]}
                 onFinish={e => {
-                  handleClick(e, modelFF.id);
+                  // handleClick(e, modelFF.id);
                 }}
-                autoComplete="off"
+                // autoComplete="off"
               >
-                <Form.Item name="ipv" key={'ipv-'+index}>
-                  <Checkbox value={1}>IP验证</Checkbox>
+                
+
+                <Form.Item name={'Q'+modelFF.id} key={'ipv-'+index}>
+                  <Checkbox onChange={e=>{
+                    onChange(e,modelFF.id)
+                  }} >IP验证</Checkbox>                 
                 </Form.Item>
-                <Form.Item label="访问IP白名单" name="white_ips" key={'white_ips-'+index}>
-                  <Input placeholder='填写IP地址，逗号隔开'></Input>
+                <Form.Item  label="访问IP白名单" name="white_ips" key={'white_ips-'+index} >
+                  <Input disabled={checks[modelFF.id]}  ></Input>
                 </Form.Item>
+
                 <Form.Item name="pdv"  key={'pdv-'+index}>
                   <Checkbox value={1}>密码验证</Checkbox>
                 </Form.Item>
@@ -93,3 +108,4 @@ export default function () {
     </PageLayout>
   );
 }
+

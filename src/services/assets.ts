@@ -115,6 +115,15 @@ export const getAssetsIdents = function () {
     })
 }
 
+export const getAssetsMonitor = function (start_at: number, end_at: number,monitorids:number[]) {
+    return request('/api/n9e/xh/monitoring/data?start='+start_at+"&end="+end_at, {
+        method: RequestMethod.Post,
+        data: {ids:monitorids}
+    })
+}
+
+
+
 //获取资产类型
 export const getAssetsStypes = function () {
     return request('/api/n9e/assets/types', {

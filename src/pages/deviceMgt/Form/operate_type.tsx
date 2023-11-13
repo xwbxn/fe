@@ -1,5 +1,3 @@
-import { Space } from 'antd';
-import React from 'react';
 
 export enum OperateType {
   SelectDeviceType = "selectDeviceType",

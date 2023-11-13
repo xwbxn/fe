@@ -17,20 +17,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
-import { Space, InputNumber, Radio, Button, Popover } from 'antd';
-import { LineChartOutlined, AreaChartOutlined, SettingOutlined, ShareAltOutlined, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
-import LineGraphStandardOptions from '@/components/PromGraphCpt/components/GraphStandardOptions';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { completeBreakpoints } from '@/pages/dashboard/Renderer/datasource/utils';
 import { CommonStateContext } from '@/App';
-import { getPromData, setTmpChartData } from '@/components/PromGraphCpt/services';
+import {getAssetsIdents,getAssetsMonitor } from '@/services/assets';
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
 
 interface IProps {
-  url?: string;
-  datasourceValue: number;
-  promql: string;
+  monitorId: number;
   title: string;
   setQueryStats?: (stats: QueryStats) => void;
   setErrorContent?: (content: string) => void;
@@ -38,7 +33,6 @@ interface IProps {
   range: IRawTimeRange;
   setRange: (range: IRawTimeRange) => void;
   step: number;
-  // setStep: (step?: number) => void;
   graphOperates: {
     enabled: boolean;
   };
@@ -63,7 +57,7 @@ const getSerieName = (metric: any) => {
 
 export default function Graph(props: IProps) {
   const { datasourceList } = useContext(CommonStateContext);
-  const { url, datasourceValue, promql, setQueryStats, setErrorContent,setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
+  const {  monitorId, setQueryStats, setErrorContent,setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
   const [ data, setData] = useState<any[]>([]);
   const [ step,setStep] = useState<number>(props.step);
   
@@ -102,34 +96,31 @@ export default function Graph(props: IProps) {
   };
 
   useEffect(() => {
-    if (datasourceValue && promql) {
+    if (monitorId>0) {
       const parsedRange = parseRange(range);
       const start = moment(parsedRange.start).unix();
       const end = moment(parsedRange.end).unix();
       let realStep = step;
       if (!step) realStep = Math.max(Math.floor((end - start) / 240), 1);
-      const queryStart = Date.now();
-      getPromData(`${url}/${datasourceValue}/api/v1/query_range`, {
-        query: promql,
-        start: moment(parsedRange.start).unix(),
-        end: moment(parsedRange.end).unix(),
-        step: realStep,
-      })
-        .then((res) => {
-          const series = _.map(res?.result, (item) => {
-            return {
-              id: _.uniqueId('series_'),
-              name: getSerieName(item.metric),
-              metric: item.metric,
-              data: completeBreakpoints(realStep, item.values),
-            };
-          });
-          // setQueryStats({
-          //   loadTime: Date.now() - queryStart,
-          //   resolution: step,
-          //   resultSeries: series.length,
-          // });
-
+      let ids = new Array<number>();
+      ids.push(monitorId);
+      getAssetsMonitor(
+        moment(parsedRange.start).unix(),
+        moment(parsedRange.end).unix(),
+        ids
+      ).then((res) => {
+          let values = res.dat["id="+monitorId];
+          let list:any =[];
+          for(var key in values) {
+             list.push([key, values[key]]);
+          }
+          const series = new Array;
+          series.push({
+            id: _.uniqueId('series_'),
+            name: "指标",
+            metric: "指标",
+            data: list,
+          })         
           setData(series);
         })
         .catch((err) => {
@@ -137,10 +128,10 @@ export default function Graph(props: IProps) {
           // setErrorContent(`Error executing query: ${msg}`);
         });
     }
-  }, [JSON.stringify(range), step, datasourceValue, promql, refreshFlag]);
+  }, [JSON.stringify(range), step, monitorId, refreshFlag]);
 
   return (
-    <div className='monitor-graph-container'>
+    <div className='monitor-graph-container' style={{width:'100%'}}>
       {/* <div className='prom-graph-graph-controls'>
         <Space>
           <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
@@ -219,10 +210,6 @@ export default function Graph(props: IProps) {
         </Space>
       </div> */}
       <Timeseries inDashboard={false} values={lineGraphProps as any} series={data} />
-
-
-
-
     </div>
   );
 }

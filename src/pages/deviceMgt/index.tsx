@@ -2,14 +2,13 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePicker, TreeSelect, Checkbox, Popover } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CaretDownOutlined, DownOutlined, DownloadOutlined, EditOutlined, GroupOutlined, OneToOneOutlined, SearchOutlined, TableOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {  DownOutlined, DownloadOutlined, EditOutlined, GroupOutlined, OneToOneOutlined, SearchOutlined, TableOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import { CommonStateContext } from '@/App';
 import Accordion from './Accordion';
 import './locale';
 import './style.less';
 import _, { set } from 'lodash';
-import {TableComponent} from 'dynamic-tablelist-colums';
 // import Add from './Add';
 import { getAssetsTree, getAssetsListByFilter, deleteDeviceOnline, getAssetById, exportTemplet } from '@/services/assets/asset'
 import { getDataCenterList } from '@/services/assets/data-center'

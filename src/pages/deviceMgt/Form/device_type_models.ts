@@ -1,8 +1,3 @@
-import { defaultValues } from "@/pages/alertRules/Form/constants";
-
-import { ColumnsType } from "antd/lib/table/Table";
-
-import { Input, Space} from 'antd';
 
 export const modelsAttributes = {
   type_1:
