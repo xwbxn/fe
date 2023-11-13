@@ -14,8 +14,7 @@ import { assetsType } from '@/store/assetsInterfaces';
 import { deleteAssets, getAssets, getOrganizationTree, updateOrganization, deleteOrganization, addOrganization } from '@/services/assets';
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
-import Meta from 'antd/lib/card/Meta';
-import TextArea from 'antd/lib/input/TextArea';
+const {TextArea} = Input
 
 interface DataType {
   key: React.ReactNode;

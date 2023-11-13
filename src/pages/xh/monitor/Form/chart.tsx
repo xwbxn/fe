@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import echarts from 'echarts/lib/echarts'
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
-import TextArea from 'antd/lib/input/TextArea';
 import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import Graph from '../Graph';
@@ -15,6 +14,8 @@ import { parse, describeTimeRange, valueAsString, isMathString } from '@/compone
 import moment from 'moment';
 import { setSelectedCompletion } from '@codemirror/autocomplete';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
+
+const {TextArea} = Input
 enum ChartType {
   Line = 'line',
   StackArea = 'stackArea',

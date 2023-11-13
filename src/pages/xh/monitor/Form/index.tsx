@@ -7,12 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createMonitor,} from '@/services/manage';
-import TextArea from 'antd/lib/input/TextArea';
-import { FileAddOutlined } from '@ant-design/icons';
-import { toml } from '@codemirror/legacy-modes/mode/toml';
-import CodeMirror from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/stream-parser';
-import { locale } from 'moment';
+
+const {TextArea} = Input
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');

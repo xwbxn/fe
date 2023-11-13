@@ -19,6 +19,7 @@ import { getAssetsTree } from '@/services/assets/asset';
 import { TreeNode } from 'antd/lib/tree-select';
 const CheckboxGroup = Checkbox.Group;
 import { getCabinetList } from '@/services/assets/device-cabinet';
+const {TextArea} = Input
 
 
 
