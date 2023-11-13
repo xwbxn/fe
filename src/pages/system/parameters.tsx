@@ -41,7 +41,7 @@ export default function () {
   return (
     <PageLayout icon={<GroupOutlined />} title={'系统参数设置'}>
       <div className='body-list' style={{ width: '94%', margin: '0 auto' }}>
-        {ParametersForms.map((modelFF, index) => {
+        {ParametersForms.map((modelFF:any, index) => {
           refArr[modelFF.id] = createRef<FormInstance>();
           return (
             <div className='parameters_set' key={"main_"+modelFF.id}>

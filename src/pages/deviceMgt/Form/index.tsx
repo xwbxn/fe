@@ -12,10 +12,10 @@ import {modelsAttributes as modelsAttributes} from './device_type_models';
 
 import CommonModal from '@/components/CustomForm/CommonModal';
 import moment from 'moment';
-import { ColumnsType } from 'antd/lib/table/Table';
 import { OperateType } from './operate_type';
 import _ from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { ColumnsType } from 'antd/lib/table/Table';
 
 interface Props {
   handleClick: (value, id, fields, category, recordId) => Promise<void>;  //回调函数
@@ -394,7 +394,7 @@ const history = useHistory();
         for (let i = 0; i < initOptions[currentForm].length; i++) {
           let item = initOptions[currentForm][i];
           if (item.source == 'dict') {
-            getDictValueEnum(item.refer).then((value) => {
+            getDictValueEnum(item.refer).then((value:any) => {
               let options = new Array();
               if (item.name == "service_config") {
                 value.forEach((item) => {
@@ -759,11 +759,11 @@ const history = useHistory();
         
         let service_config = new Array();
         selectedRows.forEach(row => {
-          let dom =document.getElementById('service_object:' + row.service_id);
+          let dom:any =document.getElementById('service_object:' + row.service_id);
           service_config.push({
             service_obj_key: row.service_id,
             service_option_code: "maintenance_service",
-            service_obj_value: dom?.value,
+            service_obj_value: dom.value,
             deadline: row.service_expire?row.service_expire:null
           })
         })

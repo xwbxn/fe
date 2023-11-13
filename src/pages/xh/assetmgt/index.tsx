@@ -21,7 +21,7 @@ import {deleteXhAssets, deleteAssets, insertXHAsset,updateXHAsset, getAssetsStyp
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { DataNode } from 'antd/lib/tree';
+import type { DataNode, TreeProps } from 'antd/es/tree';
 // export { Add, Edit };
 
 export enum OperateType {

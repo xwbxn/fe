@@ -14,7 +14,7 @@ export type DictTypeFormProps = {
   statusOptions: DictValueEnumObj;
 };
 
-const DictTypeForm: React.FC<DictTypeFormProps> = (props) => {
+const DictTypeForm: React.FC<DictTypeFormProps> = (props:any) => {
   const [form] = Form.useForm();
 
   const { statusOptions } = props;

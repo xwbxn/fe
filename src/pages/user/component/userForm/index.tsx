@@ -49,7 +49,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
     getTeamInfoList({ query: '' }).then(({ dat })=> {
       let contacts: Array<any> = [];
       dat.forEach((item,index) => {
-          let val: Contacts = {
+          let val: any = {
             value: item.id,
             label: item.name,
           };

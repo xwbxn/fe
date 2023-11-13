@@ -2,12 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleOutlined, CopyTwoTone, DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, PoweroffOutlined, ProfileTwoTone, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import {  DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, PoweroffOutlined, ProfileTwoTone, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
-import { SetConfigTables, SetConfigForms } from './catalog'
-import { CommonStateContext } from '@/App';
+
 import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
@@ -15,14 +14,11 @@ import _ from 'lodash';
 
 import Accordion from '../assetmgt/Accordion';
 import moment from 'moment';
-import { assetsType } from '@/store/assetsInterfaces';
 import { deleteAssets, insertXHAsset,updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 import { getMonitorInfoList,getMonitorInfo,getMonitorInfoListBasedOnSearch,createMonitor,deleteMonitor,updateMonitor,updateMonitorStatus} from '@/services/manage';
-import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
-import { DataNode } from 'antd/lib/tree';
-
+import type { DataNode, TreeProps } from 'antd/es/tree';
 
 export enum OperateType {
   BindTag = 'bindTag',

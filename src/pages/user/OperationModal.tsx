@@ -27,6 +27,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
   const [renderDataMap, setRenderDataMap] = useState({});  
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
 
+
   // let selectOptionData = new Map()
 
   const style ={
@@ -107,11 +108,11 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
   //选择树节点
   const onSelect = (selectedKeys: React.Key[], info:any) => {
     console.log("selectedKeys",selectedKeys);
-    if(info.node.type=="asset"){
-      setInfo(info.node);
-    }else{
-      setInfo(null);
-    }
+    // if(info.node.type=="asset"){
+    //   setInfo(info.node);
+    // }else{
+    //   setInfo(null);
+    // }
     
 };
 

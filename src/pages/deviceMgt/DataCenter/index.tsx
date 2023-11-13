@@ -48,7 +48,7 @@ export default function () {
   const [theme, setTheme] = useState({});
   const [dataCenterId, setDataCenterId] = useState<number>(0);
   const [dataCenterList, setDataCenterList] = React.useState<any[]>();
-  const [dataCenter, setDataCenter] = useState();
+  const [dataCenter, setDataCenter] = useState<any>();
   const [type, setType] = useState<string>("data_center")
   const [tabIndex, setTabIndex] = useState<string>("room_view");
   const [tabOperteIndex, setTabOperteIndex] = useState<string>("room_set");
@@ -315,12 +315,12 @@ export default function () {
                 businessForm.operate = "添加-";
                 businessForm.businessId = "data_center_set";
                 setBusinessForm(_.cloneDeep(businessForm));
-                let business = SetConfigForms["data_center_set"];
+                let business:any = SetConfigForms["data_center_set"];
                 business.Modal.width = 650;
-                business.Modal.cancel = () => {
+                business.Modal.cancel = new Promise((resolve)=>{
                   businessForm.isOpen = false;
                   setBusinessForm(_.cloneDeep(businessForm))
-                };
+                })
                 business.Modal.submit = (values) => {
                   formSubmit(values, businessForm, "add")
                 };
@@ -367,7 +367,7 @@ export default function () {
                         businessForm.isOpen = true;
                         businessForm.operate = "添加-";
                         setBusinessForm(_.cloneDeep(businessForm));
-                        let business = SetConfigForms["room_set"];
+                        let business:any = SetConfigForms["room_set"];
                         business.Modal.width = 800;
                         business.Modal.cancel = () => {
                           businessForm.isOpen = false;
@@ -408,7 +408,7 @@ export default function () {
                                 businessForm.operate = "添加-";
                                 businessForm.businessId = "data_center_set";
                                 setBusinessForm(_.cloneDeep(businessForm));
-                                let business = SetConfigForms["data_center_set"];
+                                let business:any = SetConfigForms["data_center_set"];
                                 business.Modal.width = 650;
                                 business.Modal.cancel = () => {
                                   businessForm.isOpen = false;
@@ -426,7 +426,7 @@ export default function () {
                                 businessForm.operate = "修改-";
                                 businessForm.businessId = "data_center_set";
                                 setBusinessForm(_.cloneDeep(businessForm));
-                                let business = SetConfigForms["data_center_set"];
+                                let business:any = SetConfigForms["data_center_set"];
                                 business.Modal.width = 650;
                                 business.Modal.cancel = () => {
                                   businessForm.isOpen = false;

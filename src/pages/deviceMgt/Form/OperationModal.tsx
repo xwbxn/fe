@@ -148,7 +148,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
       });
     } else if (operateType === OperateType.Offline) {
       console.log("OperateType.Offline")
-      getDictValueEnum('offline_release_status').then((data) => {        
+      getDictValueEnum('offline_release_status').then((data:[]) => {        
            setOfflineOptions(data);
       });
      
@@ -259,7 +259,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
                  renderAs="canvas"                 
                  style={{marginRight:"16px"}}
                  className="qrcode"
-                 name={item.device_name+"_"+item.id}
+                //  name={item.device_name+"_"+item.id}
                  value={JSON.stringify(item)}
                 ></Qrcode>
                 <span style={{width:"100%",textAlign:'center'}}>{item.device_name}</span>
@@ -1024,7 +1024,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
         setFileName("")
       })    
     } else if (operateType === OperateType.CreatedCode) {
-      const canvans = document.querySelectorAll(".qrcode");
+      const canvans:any = document.querySelectorAll(".qrcode");
       if (!canvans.length) {
         return alert("没有导出的二维码信息!");
       }

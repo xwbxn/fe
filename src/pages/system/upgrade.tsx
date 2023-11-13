@@ -9,12 +9,8 @@ import { CommonStateContext } from '@/App';
 import CommonModal from '@/components/CustomForm/CommonModal';
 import './style.less';
 import _ from 'lodash';
-import { assetsType } from '@/store/assetsInterfaces';
-import { deleteAssets, getAssets, getOrganizationTree, updateOrganization, deleteOrganization, addOrganization } from '@/services/assets';
-import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
-import Meta from 'antd/lib/card/Meta';
-import TextArea from 'antd/lib/input/TextArea';
+
 
 interface DataType {
   key: React.ReactNode;

@@ -138,7 +138,7 @@ function App() {
       window.localStorage.setItem('organizationId', String(id));
       setCommonState((state) => ({ ...state, organizationId: id }));
     },
-    queryCondition: window.localStorage.getItem('queryCondition')? window.localStorage.getItem('queryCondition') : '',
+    queryCondition: window.localStorage.getItem('queryCondition') as string,
     setQueryCondition:(condition: string) => {
       window.localStorage.setItem('queryCondition', condition);
       setCommonState((state) => ({ ...state, queryCondition: condition }));

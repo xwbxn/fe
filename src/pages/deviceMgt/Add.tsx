@@ -830,7 +830,7 @@ export default function () {
     for (let i = 0; i < initOptions[operateFormId]?.length; i++) {
       let item = initOptions[operateFormId][i];
       if (item.source == 'dict') {
-        getDictValueEnum(item.refer).then((value) => {
+        getDictValueEnum(item.refer).then((value:any) => {
           let options = new Array();
           if (item.name == "service_config") {
             value.forEach((item) => {
@@ -898,7 +898,7 @@ export default function () {
         
         let service_config = new Array();
         selectedRows.forEach(row => {
-          let dom =document.getElementById('service_object:' + row.service_id);
+          let dom:any =document.getElementById('service_object:' + row.service_id);
           service_config.push({
             service_obj_key: row.service_id,
             service_option_code: "maintenance_service",

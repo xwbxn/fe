@@ -895,9 +895,9 @@ export default function () {
                                 businessForm.operate = "添加-";
                                 businessForm.businessId = "scrap_set";
                                 setBusinessForm(_.cloneDeep(businessForm));
-                                let business = SetConfigForms["scrap_set"];
+                                let business:any = SetConfigForms["scrap_set"];
                                 business.Modal.width = 650;
-                                business.Modal.cancel = () => {
+                                business.Modal.cancel = ()=> {
                                   businessForm.isOpen = false;
                                   setBusinessForm(_.cloneDeep(businessForm))
                                 };
@@ -1009,7 +1009,7 @@ export default function () {
                     };
                   }}
                   rowSelection={rowSelection}
-                  columns={leftNavData.status < 4 ? selectColum : scrapTableColumns}
+                  columns={ scrapTableColumns}//leftNavData.status < 4 ? selectColum :
                   rowKey='id'
                   size='small'
 

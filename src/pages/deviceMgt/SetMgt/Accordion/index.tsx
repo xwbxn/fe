@@ -34,25 +34,28 @@ export default React.memo((props:Props) => {
     setSelectItem(item);    
     if (item?.source == 'dict') {
       treeData.splice(0, treeData.length);
-      getDictValueEnum(item.value).then((res) => {
+      getDictValueEnum(item.value).then((result:any[]) => {
         let selectIds = new Array<any>();
-        res.forEach((values) => {
-          if(index == 0) {
-            selectIds.push(values.value);
-          }
-          treeData.push({
-            key: "" + values.value,
-            title: values.label,
+        if(result!=null && result.length>0){
+          result.map((values) => {
+            if(index == 0) {
+              selectIds.push(values.value);
+            }
+            treeData.push({
+              key: "" + values.value,
+              title: values.label,
+            })
           })
-        })
-        setTreeData(_.cloneDeep(treeData));
-        setSelectedKeys(selectIds);
-        props.handleClick({
-          businessId:item.id,
-          type:item.type,
-          key:treeData[0].key,
-          title:treeData[0].title
-        })
+          setTreeData(_.cloneDeep(treeData));
+          setSelectedKeys(selectIds);
+          props.handleClick({
+            businessId:item.id,
+            type:item.type,
+            key:treeData[0].key,
+            title:treeData[0].title
+          })
+        }
+        
       })
 
     } else if (item?.source == 'table') {
