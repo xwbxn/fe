@@ -64,6 +64,7 @@ export const updateXhMonitor = function (data: object) {
     data,
   }).then((res) => res && res.dat);
 };
+
 //通过主键更新监控开关
 export const updateMonitorStatus = function (status,data,type) {
   return request(`/api/n9e/xh/monitoring/status?status=`+status+"&type="+type, {

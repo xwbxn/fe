@@ -303,48 +303,6 @@ export default function (props: { initialValues: object; initParams: object; mod
 
           </Card>
         </div>
-        {/* <Modal
-              visible={operateType.visual}
-              title={operateType.title}
-              confirmLoading={false}
-              width={window.innerWidth*0.8}
-              okButtonProps={{
-                // danger: operateType === OperateType.RemoveBusi || operateType === OperateType.Delete,
-              }}
-              // okText={operateType === OperateType.RemoveBusi ? t('remove_busi.btn') : operateType === OperateType.Delete ? t('batch_delete.btn') : t('common:btn.ok')}
-              // onOk={submitForm}
-              onCancel={() => {
-                operateType.visual = false;
-                setOperateType(_.cloneDeep(operateType));
-                form.resetFields();
-              }}
-            >
-
-              <Graph
-                  url={'/api/n9e/proxy'}
-                  datasourceValue={1}
-                  title={'CPU占用率'}
-                  promql={'cpu_usage_active'}
-                  contentMaxHeight={220}
-                  range={dialogRange}
-                  setRange={(erang) => {
-                    const newValue = {
-                      start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
-                      end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
-                    }
-                    setDialogRange(newValue);
-                  }}
-                  step={12}
-                  graphOperates={{
-                    enabled: true
-                  }}
-                  refreshFlag={""}
-                />
-
-
-
-              
-            </Modal> */}
       </div>
     </Form>
   );
