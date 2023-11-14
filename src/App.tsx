@@ -38,7 +38,8 @@ import useIsPlus from 'plus:/components/useIsPlus';
 
 import './App.less';
 import './global.variable.less';
-import TopMenu from './components/menu/topMenu';
+// import TopMenu from './components/menu/topMenu';
+import TopMenu from './components/menu/topMenuXH'; //西航版本
 
 interface IProfile {
   admin?: boolean;
