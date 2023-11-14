@@ -31,10 +31,8 @@ function isTagValid(tag) {
 }
 
 export default function Base({ type }) {
-  const { t } = useTranslation('alertRules');
- 
-  type = 1;
-
+  const { t } = useTranslation('alertRules'); 
+  // type = 1;
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [assetIp, setAssetIp] = useState<string>("");
@@ -55,6 +53,7 @@ export default function Base({ type }) {
         });
         setAssetOptions(options);
         setAssetList({...assetList});
+       
       })
     }
     

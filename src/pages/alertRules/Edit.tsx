@@ -31,9 +31,13 @@ export default function Edit() {
   const { mode } = queryString.parse(search);
 
   useEffect(() => {
-    if (alertRuleId) {
+    window.localStorage.removeItem('select_monitor_asset_id');
+    if (alertRuleId) {      
       getWarningStrategy(alertRuleId).then((res) => {
         setValues(res.dat || {});
+        if(res.dat && res.dat.asset_id){
+          window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);
+        }
       });
     }
   }, [alertRuleId]);
