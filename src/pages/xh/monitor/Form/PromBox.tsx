@@ -13,7 +13,6 @@ interface Props {
 
 export default ({ value, onChange, datasource }: Props) => {
   const [range, setRange] = useState<IRawTimeRange>({ start: 'now-1h', end: 'now' });
-  const [promql, setPromql] = useState(value);
   const promQLInputRef = useRef<any>(null);
   const url = '/api/n9e/proxy';
 
@@ -23,7 +22,6 @@ export default ({ value, onChange, datasource }: Props) => {
       datasourceValue: datasource,
       value: value,
       onChange: (v) => {
-        setPromql(v);
         onChange && onChange(v);
       },
     });
@@ -32,7 +30,7 @@ export default ({ value, onChange, datasource }: Props) => {
   return (
     <Input.Group compact>
       <div style={{ width: 'calc(100% - 55px)' }}>
-        <PromQLInput ref={promQLInputRef} url={url} value={promql} onChange={onChange} completeEnabled={true} datasourceValue={datasource} />
+        <PromQLInput ref={promQLInputRef} url={url} value={value} onChange={onChange} completeEnabled={true} datasourceValue={datasource} />
       </div>
       <Button type='primary' onClick={() => openModal()}>
         向导

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
-import { createXhMonitor,getXhMonitor,updateXhMonitor} from '@/services/manage';
+import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -34,24 +34,22 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   useEffect(() => {
-
-    if(action==null || "addeditview".indexOf(action+"")<0){
-      history.back()
+    if (action == null || 'addeditview'.indexOf(action + '') < 0) {
+      history.back();
     }
     const param = {
       page: 1,
       limit: 10000,
     };
     getAssetsStypes().then((res) => {
-      const items = res.dat
-        .map((v) => {
-          return {
-            value: v.name,
-            label: v.name,
-            ...v,
-          };
-        })
-        // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
+      const items = res.dat.map((v) => {
+        return {
+          value: v.name,
+          label: v.name,
+          ...v,
+        };
+      });
+      // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       setAssetTypes(items);
     });
 
@@ -74,41 +72,39 @@ export default function (props: { initialValues: object; initParams: object; mod
       });
       setAssetOptions(options);
       setAssetList(res.dat.list);
-      if(id!=null && id.length>0 && id!="null"){
-        getXhMonitor(id).then(({dat})=>{
-          if(dat!=null){
-            setMonitor(dat)
-            let config = dat["config"];
-            delete dat["config"];
-            if(config!=null && config.length>0){
+      if (id != null && id.length > 0 && id != 'null') {
+        getXhMonitor(id).then(({ dat }) => {
+          if (dat != null) {
+            setMonitor(dat);
+            let config = dat['config'];
+            delete dat['config'];
+            if (config != null && config.length > 0) {
               let configJson = JSON.parse(config);
-              dat = {...configJson,...dat};
-            }              
+              dat = { ...configJson, ...dat };
+            }
             form.setFieldsValue(dat);
             setMonitor(dat);
-              setTimeout(()=>{
-                genForm(res.dat.list,assetTypes);
-              },1000)           
+            setTimeout(() => {
+              genForm(res.dat.list, assetTypes);
+            }, 1000);
           }
-        })
+        });
       }
     });
   }, []);
 
-  const genForm = (assets,types) => {
-    console.log("genForm")
+  const genForm = (assets, types) => {
+    console.log('genForm');
     let formValue = form.getFieldsValue();
     console.log(formValue);
-    const asset:any = assets?assets.find((v:any) => v.id === formValue["asset_id"]):assetList.find((v:any) => v.id === formValue["asset_id"]);
+    const asset: any = assets ? assets.find((v: any) => v.id === formValue['asset_id']) : assetList.find((v: any) => v.id === formValue['asset_id']);
     if (asset) {
       form.setFieldsValue({ type: asset.type });
-      let typeList = types?types:assetTypes;
-      const assetType:any = typeList.find((v) => v.name === asset.type);
-      if(assetType)
-      setParams(assetType.form || []);
+      let typeList = types ? types : assetTypes;
+      const assetType: any = typeList.find((v) => v.name === asset.type);
+      if (assetType) setParams(assetType.form || []);
     }
   };
-  
 
   const renderForm = (v) => {
     if (v.items) {
@@ -128,30 +124,29 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const submitForm = async (values) => {
-    console.log("submitForm",values);
-    let config ={};
-    if(params!=null && params.length>0){      
-      for(let param in params){
+    console.log('submitForm', values);
+    let config = {};
+    if (params != null && params.length > 0) {
+      for (let param in params) {
         let group = params[param];
-        config[group.name]= values[group.name];
+        config[group.name] = values[group.name];
         delete values[group.name];
       }
-      
     }
-    if(id!=null && id.length>0 && id!="null"){
-      values.id = parseInt(""+id);
-      values["config"] = JSON.stringify(config);      
-      updateXhMonitor(values).then(res=>{
+    if (id != null && id.length > 0 && id != 'null') {
+      values.id = parseInt('' + id);
+      values['config'] = JSON.stringify(config);
+      updateXhMonitor(values).then((res) => {
         message.success('修改成功');
-        location.href = "/xh/monitor"
-      })
-    }else{
-      values["config"] = JSON.stringify(config);   
-      createXhMonitor(values).then(res=>{
+        location.href = '/xh/monitor';
+      });
+    } else {
+      values['config'] = JSON.stringify(config);
+      createXhMonitor(values).then((res) => {
         message.success('操作成功');
-        location.href = "/xh/monitor?assetId="+values["asset_id"]
-      })
-    } 
+        location.href = '/xh/monitor?assetId=' + values['asset_id'];
+      });
+    }
   };
 
   const genDefaultConfig = () => {
@@ -182,7 +177,7 @@ export default function (props: { initialValues: object; initParams: object; mod
       layout='vertical'
       onFinish={submitForm}
       onValuesChange={() => {
-        genForm(assetList,assetTypes);
+        genForm(assetList, assetTypes);
       }}
     >
       <Form.Item hidden name='id'>
@@ -221,34 +216,32 @@ export default function (props: { initialValues: object; initParams: object; mod
             </Col>
           </Row>
           <Row gutter={10}>
-            <Col span={12}>
+            <Col span={24}>
               <Form.Item label='监控脚本' name='monitoring_sql' rules={[{ required: false }]}>
                 <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Row gutter={10}>
-                <Col span={24}>
-                  <Form.Item label='状态' name='status'>
-                    <Select
-                      style={{ width: '100%' }}
-                      options={[
-                        { value: 0, label: '正常' },
-                        { value: 1, label: '失效' },
-                      ]}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={24}>
-                  <Form.Item label='采集器' name='target_id'>
-                    <Select style={{ width: '100%' }} options={identList} />
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Col>
           </Row>
           <Row gutter={10}>
             <Col span={12}>
+              <Form.Item label='状态' name='status'>
+                <Select
+                  style={{ width: '100%' }}
+                  options={[
+                    { value: 0, label: '正常' },
+                    { value: 1, label: '失效' },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label='采集器' name='target_id'>
+                <Select style={{ width: '100%' }} options={identList} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={10}>
+            <Col span={24}>
               <Form.Item label='描述' name='remark'>
                 <TextArea placeholder='填写描述' />
               </Form.Item>
@@ -301,7 +294,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Button>
               <Button
                 onClick={() => {
-                  window.location.href = '/xh/monitor';
+                  history.back();
                 }}
               >
                 取消

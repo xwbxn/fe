@@ -28,7 +28,7 @@ import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/ser
 import { CommonStateContext } from '@/App';
 import { priorityColor } from '@/utils/constant';
 import Tags from '@/components/Tags';
-import './style.less'
+import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
@@ -233,38 +233,39 @@ export default function List(props: ListProps) {
       render: (record: any) => {
         return (
           <Space>
-              <PoweroffOutlined  
-               title={record.disabled === AlertRuleStatus.Enable ?('已启动'):('未启动')}
-               style={{color:record.disabled === AlertRuleStatus.Enable ?('green'):('gray')}}
-               onClick={e=>{
+            <PoweroffOutlined
+              title={record.disabled === AlertRuleStatus.Enable ? '已启动' : '未启动'}
+              style={{ color: record.disabled === AlertRuleStatus.Enable ? 'green' : 'gray' }}
+              onClick={(e) => {
                 const { id, disabled } = record;
                 bgid &&
-                updateAlertRules(
-                  {
-                    ids: [id],
-                    fields: {
-                      disabled: !disabled ? 1 : 0,
+                  updateAlertRules(
+                    {
+                      ids: [id],
+                      fields: {
+                        disabled: !disabled ? 1 : 0,
+                      },
                     },
-                  },
-                  bgid,
-                ).then(() => {
-                  getAlertRules();
-                });
-
-              }}/> 
+                    bgid,
+                  ).then(() => {
+                    getAlertRules();
+                  });
+              }}
+            />
             <Link
               className='table-operator-area-normal'
               to={{
                 pathname: `/alert-rules/edit/${record.id}?mode=clone`,
               }}
-              target='_blank'
+              target="_blank"
             >
-              {/* {t('common:btn.clone')} */}
               <CopyTwoTone />
             </Link>
-            <ProfileTwoTone />
-
-            <EditOutlined />
+            <EditOutlined
+              onClick={() => {
+                history.push(`alert-rules/edit/${record.id}`);
+              }}
+            />
             <div
               className='table-operator-area-warning'
               onClick={() => {
@@ -282,8 +283,7 @@ export default function List(props: ListProps) {
                 });
               }}
             >
-               
-               <DeleteOutlined />
+              <DeleteOutlined />
             </div>
             {record.prod === 'anomaly' && (
               <div>
@@ -411,7 +411,7 @@ export default function List(props: ListProps) {
             <Button
               type='primary'
               onClick={() => {
-                history.push(`/alert-rules/xh/add/${bgid}`);
+                history.push(`/alert-rules/add/${bgid}`);
               }}
               className='strategy-table-search-right-create'
             >
