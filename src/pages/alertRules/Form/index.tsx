@@ -99,7 +99,8 @@ export default function index(props: IProps) {
     }
   };
   const genForm=(changeValue,values)=>{
-      console.log(changeValue,values);
+      form
+
   }
 
   useEffect(() => {

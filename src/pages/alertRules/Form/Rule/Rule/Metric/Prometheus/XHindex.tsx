@@ -15,7 +15,7 @@
  *
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Form, Row, Col, Card, Space, Input, Select, message } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -66,6 +66,10 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
     }
 
   }
+
+  useEffect(() => {
+    selectAsset(null)
+  }, []);
 
 
   return (
