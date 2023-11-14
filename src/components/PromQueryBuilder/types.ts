@@ -1,8 +1,8 @@
 export enum PromVisualQueryOperationCategory {
-  Aggregations = 'Aggregations',
-  BinaryOps = 'Binary operations',
-  Functions = 'Functions',
-  Trigonometric = 'Trigonometric',
+  Aggregations = '聚合',
+  BinaryOps = '数值计算',
+  Functions = '常用函数',
+  Trigonometric = '三角函数',
 }
 
 export interface PromVisualQueryBinary<T> {
