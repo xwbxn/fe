@@ -104,27 +104,62 @@
     .default_monitor {
         .ant-card-body {
             display: block;
-            .body_{
+            .monitor_body {
                 display: inline-flex;   
                 width: 100%;             
-                .monitor_ {
+                .monitor_title {
+                    margin-top: 10px;
                     // padding-right: 18px;
                     // width: 32%;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                    display: flex;
                     margin-left: 10px;
+                    position: relative;
+                    .icons {
+                         position: absolute;
+                         right: 10px;
+                         .anticon {
+                           margin-left: 8px; 
+                        }
+                    }
                 }
                 
 
             }
+            .group_monitor_body {
+                margin-top: 5px;
+                display: flex;   
+                width: 100%;
+                .every_graph {
+                    width: 32%;
+                    border: 0.5px solid #cecece;
+                    margin: 3px;
+                }                
+                .monitor_title {
+                    margin-top: 10px;
+                    // padding-right: 18px;
+                    // width: 32%;
+                    font-weight: 600;
+                    margin-bottom: 5px;
+                    display: flex;
+                    margin-left: 10px;
+                    position: relative;
+                    .icons {
+                         position: absolute;
+                         right: 10px;
+                         .anticon {
+                           margin-left: 8px; 
+                        }
+                    }
+                }
+                .table_list {
+                    display: none;
+                }
+
+            }
             
-        }
-        // .renderer-timeseries-container {
-        //     width: 400px !important;
-        // }
-        // .renderer-timeseries-graph {
-        //     width: 400px !important;
-        // }
-        .table_list {
-            display: none;
+            
         }
     }
 
