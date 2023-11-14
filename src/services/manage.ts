@@ -57,6 +57,11 @@ export const getXhMonitor = function (id:any) {
     method: RequestMethod.Get,
   });
 };
+export const getXhMonitorByAssetId = function (id:any) {
+  return request(`/api/n9e/xh/monitoring/asset?id=${id}`, {
+    method: RequestMethod.Get,
+  });
+};
 //更新监控
 export const updateXhMonitor = function (data: object) {
   return request(`/api/n9e/xh/monitoring`, {

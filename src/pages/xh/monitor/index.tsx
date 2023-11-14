@@ -70,7 +70,7 @@ export default function () {
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
-
+  const [optionColumns, setOptionColumns] = useState<any[]>([]);
   const [filterType, setFilterType] = useState<string>("");
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [current, setCurrent] = useState<number>(1);
@@ -79,18 +79,15 @@ export default function () {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total, setTotal] = useState<number>(0);
-  const [assetList, setAssetList] = useState<any[]>([]);
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [props, setProps] = useState<any>({});
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
   const [typeId, setTypeId] = useState<any>(null)
-
   const { search } = useLocation();
   const { assetId } = queryString.parse(search);
-
-
+  const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
 
   const history = useHistory();
@@ -152,7 +149,7 @@ export default function () {
       align: 'center',
       fixed: 'right',
       render: (val, record: any) => (
-        <Space>
+        <Space size={"middle"}>
           <PoweroffOutlined
             title={record.status == 1 ? '正常' : '失效'}
             style={{ color: record.status === 1 ? ('green') : ('gray') }}
@@ -163,7 +160,7 @@ export default function () {
                 Modal.confirm({
                   title: "确认要启用当前选择监控？",
                   onOk: async () => {
-                    updateMonitorStatus(1, key,1).then((res) => {
+                    updateMonitorStatus(1, key, 1).then((res) => {
                       message.success('修改成功');
                       setRefreshFlag(_.uniqueId('refreshFlag_'));
                     });
@@ -175,7 +172,7 @@ export default function () {
                 Modal.confirm({
                   title: "确认要禁止当前用户使用？",
                   onOk: async () => {
-                    updateMonitorStatus(0, key,1).then((res) => {
+                    updateMonitorStatus(0, key, 1).then((res) => {
                       message.success('修改成功');
                       setRefreshFlag(_.uniqueId('refreshFlag_'));
                     });
@@ -184,7 +181,7 @@ export default function () {
                 });
               }
             }} />
-          <Link
+          <Link title='设置告警规则'
             to={{
               pathname: `/alert-rules/edit/${record.id}?mode=clone`,
             }}
@@ -192,19 +189,18 @@ export default function () {
           >
             <FileProtectOutlined />
           </Link>
-          <FileSearchOutlined   onClick={() => {
-               showModal("asset", record.id,"view")
-            }}
-            />
-          <FundOutlined onClick={() => {
-               showModal("monitor", record.id,"view")
-            }}/>
-          <EditOutlined onClick={() => {
-                showModal("asset", record.id,"edit")
+          <FileSearchOutlined title='查看监控配置' onClick={() => {
+            showModal("asset", record.id, "view")
           }}
           />
-
-          <DeleteOutlined onClick={() => {
+          <FundOutlined title='监控指标信息' onClick={() => {
+            showModal("monitor", record.id, "view")
+          }} />
+          <EditOutlined title='编辑监控信息' onClick={() => {
+            showModal("asset", record.id, "edit")
+          }}
+          />
+          <DeleteOutlined title='删除监控信息' onClick={() => {
             Modal.confirm({
               title: t('common:confirm.delete'),
               onOk: async () => {
@@ -227,7 +223,7 @@ export default function () {
   function handelShowColumn(checkedValues) {
 
     let showColumns = new Array();
-    choooseColumns.forEach(item => {
+    optionColumns.forEach(item => {
       if (checkedValues.includes(item.title)) {
         showColumns.push(item)
       }
@@ -238,6 +234,7 @@ export default function () {
 
   useEffect(() => {
     setSecondAddButton(false)
+    setOptionColumns(choooseColumns.concat(baseColumns));
     getAssetsStypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
@@ -246,7 +243,7 @@ export default function () {
           ...v,
         };
       })
-        // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
+      // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       let treeData: any[] = [{
         id: 0,
         name: '全部监控',
@@ -264,7 +261,7 @@ export default function () {
       setTreeData(_.cloneDeep(treeData));
     });
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
-
+    
     getAssetsByCondition({}).then(({ dat }) => {
       dat.list.forEach(v => {
         assetInfo[v.id] = (v);
@@ -288,14 +285,14 @@ export default function () {
       limit: pageSize,
     };
 
-    if (assetId != null && assetId.length > 0) {
-      param["assetId"] = parseInt("" + assetId);
+    if (currentAssetId > 0) {
+      param["assetId"] = currentAssetId;
     }
 
     if (searchVal != null && searchVal.length > 0) {
       param["query"] = searchVal;
     }
-    if (typeId != null && typeId+""!="0") {
+    if (typeId != null && typeId + "" != "0") {
       param["assetType"] = typeId;
     }
     getMonitorInfoList(param
@@ -313,7 +310,7 @@ export default function () {
         onChange={handelShowColumn}
       >
         {
-          choooseColumns.map(item => (
+          optionColumns.map(item => (
             <Row key={item.title} style={{ marginBottom: '5px' }}>
               <Col span={24}>
                 <Checkbox value={item.title}>{item.title}</Checkbox>
@@ -380,18 +377,18 @@ export default function () {
       return null;
     }
   }
-  const showModal = (action: string, data: any,operate:string) => {
+  const showModal = (action: string, id: any, operate: string) => {
     if (action == "asset") {
-      let url = '/xh/monitor/add?type=asset&action='+operate;
-      if (data == 0) {
+      let url = '/xh/monitor/add?type=asset&action=' + operate;
+      if (id == 0) {
         history.push(url);
       } else {
-        history.push(url + "&id=" + data);
+        history.push(url + "&id=" + id);
       }
     } else if (action == "view") {
-        history.push('/xh/monitor/add?type=view&id=' + data);
+      history.push('/xh/monitor/add?type=view&id=' + id);
     } else if (action == "monitor") {
-      history.push('/xh/monitor/add?type=monitor&id=' + data);
+      history.push('/xh/monitor/add?type=monitor&id=' + id + "&action=monitor");
     }
   }
   const titleRender = (node) => {
@@ -450,6 +447,7 @@ export default function () {
   };
   const onSelect = (selectedKeys, info) => {
     setTypeId(selectedKeys);
+    setCurrentAssetId(0);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
@@ -458,15 +456,6 @@ export default function () {
         <div style={{ width: '250px', display: 'table', height: '100%' }}>
           <div className='asset_organize_cls'>资产类型
             <div style={{ margin: '0 10prx ' }}>
-              {/* <Switch
-                className='switch'
-                checkedChildren='切至目录'
-                disabled={!modifySwitch}
-                defaultChecked={modifyType}
-                unCheckedChildren='切至类型'
-                size="small"
-                onChange={(checked: boolean) => setModifyType(checked)}
-              /> */}
             </div>
 
           </div>
@@ -548,7 +537,7 @@ export default function () {
                 />
                 &nbsp; &nbsp; &nbsp;
 
-                
+
                 <Select
                   // defaultValue="lucy"
                   placeholder="数据源类型"
@@ -586,7 +575,7 @@ export default function () {
                 <Button className='tool_rightbtn'
 
                   onClick={() => {
-                    showModal("asset", 0,"add")
+                    showModal("asset", 0, "add")
                   }}
 
                   type='primary'
@@ -638,7 +627,7 @@ export default function () {
                           Modal.confirm({
                             title: "确认要启用当前选择监控？",
                             onOk: async () => {
-                              updateMonitorStatus(1, selectedAssets,1).then((res) => {
+                              updateMonitorStatus(1, selectedAssets, 1).then((res) => {
                                 message.success('修改成功');
                                 setOperateType(OperateType.None);
                                 setRefreshFlag(_.uniqueId('refreshFlag_'));
@@ -652,7 +641,7 @@ export default function () {
                           Modal.confirm({
                             title: "确认要禁止当前用户使用？",
                             onOk: async () => {
-                              updateMonitorStatus(0, selectedAssets,1).then((res) => {
+                              updateMonitorStatus(0, selectedAssets, 1).then((res) => {
                                 message.success('修改成功');
                                 setOperateType(OperateType.None);
                                 setRefreshFlag(_.uniqueId('refreshFlag_'));
@@ -684,10 +673,8 @@ export default function () {
           <div className='monitor-list' style={{ width: '100%' }}>
             <Table
               dataSource={list}
-
               className='table-view'
               scroll={{ x: 810, }}
-
               rowSelection={{
                 onChange: (_, rows) => {
                   setSelectedAssets(rows ? rows.map(({ id }) => id) : []);

@@ -25,13 +25,14 @@ import IntervalAndDuration from '@/pages/alertRules/Form/components/IntervalAndD
 import { DatasourceCateSelect } from '@/components/DatasourceSelect';
 import { getDefaultValuesByCate } from '../../../utils';
 import Prometheus from './Prometheus';
+import XhPrometheus from './Prometheus/XHindex';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
 
-export default function index({ form }) {
+export default function index({ form,type }) {
   const { t } = useTranslation('alertRules');
   const { groupedDatasourceList } = useContext(CommonStateContext);
-
+  const forms = form;
   return (
     <div>
       <Row gutter={16}>
@@ -69,8 +70,12 @@ export default function index({ form }) {
           {(form) => {
             const cate = form.getFieldValue('cate');
             const datasourceValue = form.getFieldValue('datasource_ids');
-            if (cate === 'prometheus') {
-              return <Prometheus datasourceCate={cate} datasourceValue={datasourceValue} />;
+            const asset_id = form.getFieldValue("asset_id");;
+            if (cate === 'prometheus' && type==0) {
+               return <Prometheus datasourceCate={cate} datasourceValue={datasourceValue}/>;
+            }
+            if (cate === 'prometheus' && type===1) {
+              return <XhPrometheus datasourceCate={cate} datasourceValue={datasourceValue} />;
             }
             return <PlusAlertRule cate={cate} form={form} datasourceValue={datasourceValue} />;
           }}
