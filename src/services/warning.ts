@@ -142,6 +142,13 @@ export const addStrategy = function (data: any[], busiId: number) {
   });
 };
 
+export const getStrategiesByRuleIds = function (data: any[]) {
+  return request(`/api/n9e/alert-rule/arid`, {
+    method: 'POST',
+    data: {ids:data},
+  });
+};
+
 export const importStrategy = function (data: any[], busiId: number) {
   return request(`/api/n9e/busi-group/${busiId}/alert-rules/import`, {
     method: 'POST',

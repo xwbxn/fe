@@ -37,14 +37,16 @@ export default function Edit() {
         setValues(res.dat || {});
         if(res.dat && res.dat.asset_id){
           window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);
+          window.localStorage.setItem('select_monitor_asset_ip',res.dat.asset_ip);
         }
+
       });
     }
   }, [alertRuleId]);
 
   return (
     <PageLayout title={t('title')} showBack backPath='/alert-rules'>
-      <Form type={mode === 'clone' ? 2 : 1} initialValues={values} />
+      <Form type={mode==="view"?3:(mode=== 'clone' ? 2 : 1)} initialValues={values} />
     </PageLayout>
   );
 }

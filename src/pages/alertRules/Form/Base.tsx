@@ -41,6 +41,7 @@ export default function Base({ type }) {
   useEffect(() => {
     let param = {};
     window.localStorage.removeItem('select_monitor_asset_id');
+   
     if(type==1){
       getAssetsByCondition(param).then((res) => {
         let options = new Array();
@@ -56,7 +57,8 @@ export default function Base({ type }) {
        
       })
     }
-    
+    let ip = window.localStorage.getItem('select_monitor_asset_ip');
+    setAssetIp(ip?ip:"");
   }, []);
 
   // 渲染标签
@@ -113,9 +115,7 @@ export default function Base({ type }) {
           </Form.Item>
         </Col>
         <Col span={8}>
-          {/* <Form.Item label={t('资产IP')} name='asset_id'> */}
-            <div className='ip_show'><div className='title'>资产IP:</div><span className='content'>{assetIp}</span></div>
-          {/* </Form.Item> */}
+            <div className='ip_show'><div className='title'>资产IP:</div><span className='content' id="asset_ip">{assetIp}</span></div>
         </Col>
 
       </Row>

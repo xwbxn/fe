@@ -37,7 +37,7 @@ import PlusLogsDetail from 'plus:/parcels/Event/LogsDetail';
 import PrometheusDetail from './Detail/Prometheus';
 import Host from './Detail/Host';
 import './detail.less';
-
+import { getStrategiesByRuleIds } from '@/services/warning';
 const { Paragraph } = Typography;
 const EventDetailPage: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
@@ -121,6 +121,20 @@ const EventDetailPage: React.FC = () => {
       key: 'severity',
       render: (severity) => {
         return <Tag color={priorityColor[severity - 1]}>S{severity}</Tag>;
+      },
+    },
+    {
+      label: '资产名称/IP',
+      key: 'asset_name',
+      render: (asset_name,{ asset_ip }) => {
+        return <div style={{fontSize:"15px"}}>{asset_name} &nbsp;/ &nbsp; {asset_ip} </div>;
+      },
+    },
+    {
+      label: '告警规则',
+      key: 'rule_config_cn',
+      render: (rule_config_cn) => {
+        return <div>{rule_config_cn}</div>;
       },
     },
     {
@@ -258,8 +272,20 @@ const EventDetailPage: React.FC = () => {
 
   useEffect(() => {
     const requestPromise = isHistory ? getHistoryEventsById(eventId) : getAlertEventsById(eventId);
-    requestPromise.then((res) => {
-      setEventDetail(res.dat);
+    requestPromise.then(async (res) => {
+        let detailInfo = res.dat;
+        let ruleIds = new Array<number>();
+        ruleIds.push(detailInfo.rule_id)
+        await getStrategiesByRuleIds(ruleIds).then((result)=>{
+           let rules = {};
+           result.dat.forEach(rule => {
+              return rules[rule.id]=rule;
+           });
+          if(rules[detailInfo.rule_id]){
+            detailInfo["rule_config_cn"] = rules[detailInfo.rule_id].rule_config_cn;
+          }
+        });
+        setEventDetail(detailInfo);
     });
   }, [busiId, eventId]);
 

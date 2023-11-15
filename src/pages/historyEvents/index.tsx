@@ -15,12 +15,12 @@
  *
  */
 import React, { useContext, useState } from 'react';
-import { AlertOutlined, SearchOutlined } from '@ant-design/icons';
+import { AlertOutlined, CopyTwoTone, DeleteOutlined, DownloadOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import _ from 'lodash';
 import { useAntdTable } from 'ahooks';
-import { Input, Tag, Button, Space, Table, Select, message } from 'antd';
+import { Input, Tag, Button, Space, Table, Select, message, Modal, DatePickerProps } from 'antd';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
@@ -29,11 +29,14 @@ import { CommonStateContext } from '@/App';
 import { getProdOptions } from '@/pages/alertRules/Form/components/ProdSelect';
 import DatasourceSelect from '@/components/DatasourceSelect/DatasourceSelect';
 import exportEvents, { downloadFile } from './exportEvents';
-import { getEvents } from './services';
+import { getStrategiesByRuleIds } from '@/services/warning';
+import { getEvents, deleteHistoryEvents} from './services';
 import { SeverityColor } from '../event';
 import '../event/index.less';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
-
+import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
+const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
   const locale = window.localStorage.getItem('alert_events_hours');
   if (locale) {
@@ -50,115 +53,147 @@ const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
   const { groupedDatasourceList, busiGroups, feats } = useContext(CommonStateContext);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
+  const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
+  const [start,setStart] = useState<number>(0);
+  const [end,setEnd] = useState<number>(0);
   const [filter, setFilter] = useState<{
     hours: number;
     datasourceIds: number[];
     bgid?: number;
     severity?: number;
     eventType?: number;
-    queryContent: string;
-    rule_prods: string[];
+    query: string;
+    // rule_prods: string[];
+    type:any|number;
   }>({
     hours: getDefaultHours(),
     datasourceIds: [],
-    queryContent: '',
-    rule_prods: [],
+    query: '',
+    type:null
   });
   const columns = [
     {
-      title: t('prod'),
-      dataIndex: 'rule_prod',
-      width: 100,
-      render: (value) => {
-        return t(`rule_prod.${value}`);
-      },
-    },
-    {
-      title: t('common:datasource.id'),
-      dataIndex: 'datasource_id',
-      width: 100,
-      render: (value, record) => {
-        return _.find(groupedDatasourceList?.[record.cate], { id: value })?.name || '-';
-      },
-    },
-    {
-      title: t('rule_name'),
+      title: '规则名称',
       dataIndex: 'rule_name',
+      width: 150,
       render(title, { id, tags }) {
-        const content =
-          tags &&
-          tags.map((item) => (
-            <Tag
-              color='purple'
-              key={item}
-              onClick={(e) => {
-                if (!filter.queryContent.includes(item)) {
-                  setFilter({
-                    ...filter,
-                    queryContent: filter.queryContent ? `${filter.queryContent.trim()} ${item}` : item,
-                  });
-                }
-              }}
-            >
-              {item}
-            </Tag>
-          ));
         return (
           <>
-            <div>
-              <Link
-                to={{
-                  pathname: `/alert-his-events/${id}`,
-                }}
-                target='_blank'
-              >
-                {title}
-              </Link>
-            </div>
-            <div>
-              <span className='event-tags'>{content}</span>
-            </div>
+            {title}
           </>
         );
       },
     },
-
     {
-      title: t('last_eval_time'),
+      title: '资产名称',
+      dataIndex: 'asset_name',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '告警规则',
+      dataIndex: 'rule_config_cn',
+      width: 180,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '触发时间',
       dataIndex: 'last_eval_time',
-      width: 120,
+      fixed: 'right',
+      width: 100,
       render(value) {
         return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
       },
     },
+    {
+      title: '操作',
+      width: '120px',
+      align: 'center',
+      fixed: 'right',
+      render: (record: any) => {
+        return (
+          <Space>
+            <Link
+              title='查看'
+              to={{
+                pathname: `/alert-his-events/${record.id}`,
+              }}
+              target='_blank'
+            >
+              <FileSearchOutlined />
+            </Link>
+            <DownloadOutlined className='down_icon' title='导出'
+              onClick={() => {
+              }}
+            />
+            <DeleteOutlined onClick={() => {
+              Modal.confirm({
+                title: '确认要强制删除历史告警信息？',
+                onOk: () => {
+                  let ids = new Array<number>();
+                  ids.push(record.id);
+                  deleteHistoryEvents(ids).then((res)=>{
+                     message.success("删除成功");
+                     setRefreshFlag(_.uniqueId('refresh_'));
+                  })
+                },
+
+                onCancel() { },
+              });
+            }} />
+
+          </Space>
+        );
+      },
+    },
   ];
   const [exportBtnLoadding, setExportBtnLoadding] = useState(false);
+
+const onChange = (
+  value: DatePickerProps['value'] | RangePickerProps['value'],
+  dateString: [string, string] | string,
+) => {
+  console.log('Selected Time: ', value);
+  console.log('Formatted Selected Time: ', dateString);
+};
+
+const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any ) => {
+  console.log('onOk: ', value);
+  value?.forEach((element,index) => {
+      if(index==0 && element!=null){
+        setStart(moment(element).unix())
+      }
+      if(index==1 && element!=null){
+        setEnd(moment(element).unix())
+      }
+  });
+  setRefreshFlag(_.uniqueId('refresh_'));
+};
+
   const filterObj = Object.assign(
     { hours: filter.hours },
-    filter.datasourceIds.length ? { datasource_ids: _.join(filter.datasourceIds, ',') } : {},
-    filter.severity !== undefined ? { severity: filter.severity } : {},
-    filter.queryContent ? { query: filter.queryContent } : {},
+    // filter.datasourceIds.length ? { datasource_ids: _.join(filter.datasourceIds, ',') } : {},
+    // filter.severity !== undefined ? { severity: filter.severity } : {},
+    filter.query ? { query: filter.query } : {},
+
     filter.eventType !== undefined ? { is_recovered: filter.eventType } : {},
     { bgid: filter.bgid },
-    filter.rule_prods.length ? { rule_prods: _.join(filter.rule_prods, ',') } : {},
+    filter.type>0 ? { type:filter.type} : {},
   );
 
   let prodOptions = getProdOptions(feats);
-  if (import.meta.env.VITE_IS_ENT === 'true') {
-    prodOptions = [
-      ...prodOptions,
-      {
-        label: t('rule_prod.firemap'),
-        value: 'firemap',
-        pro: false,
-      },
-      {
-        label: t('rule_prod.northstar'),
-        value: 'northstar',
-        pro: false,
-      },
-    ];
-  }
 
   function renderLeftHeader() {
     return (
@@ -170,34 +205,20 @@ const Event: React.FC = () => {
             }}
           />
           <Select
-            style={{ minWidth: 80 }}
-            value={filter.hours}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                hours: val,
-              });
-              setDefaultHours(val);
-            }}
-          >
-            {hoursOptions.map((item) => {
-              return <Select.Option value={item.value} key={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
-            })}
-          </Select>
-          <Select
             allowClear
-            placeholder={t('prod')}
+            placeholder={'查询类型'}
             style={{ minWidth: 80 }}
-            value={filter.rule_prods}
-            mode='multiple'
+            value={filter.type}
+            // mode='multiple'
             onChange={(val) => {
               setFilter({
                 ...filter,
-                rule_prods: val,
+                type: val,
               });
             }}
             dropdownMatchSelectWidth={false}
           >
+
             {prodOptions.map((item) => {
               return (
                 <Select.Option value={item.value} key={item.value}>
@@ -206,6 +227,14 @@ const Event: React.FC = () => {
               );
             })}
           </Select>
+          
+          <RangePicker
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm"
+            onChange={onChange}
+            locale={locale}
+            onOk={onOk}
+          />
           <DatasourceSelect
             style={{ width: 100 }}
             filterKey='alertRule'
@@ -217,62 +246,17 @@ const Event: React.FC = () => {
               });
             }}
           />
-          <Select
-            style={{ minWidth: 120 }}
-            placeholder={t('common:business_group')}
-            allowClear
-            value={filter.bgid}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                bgid: val,
-              });
-            }}
-          >
-            {_.map(busiGroups, (item) => {
-              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
-            })}
-          </Select>
-          <Select
-            style={{ minWidth: 60 }}
-            placeholder={t('severity')}
-            allowClear
-            value={filter.severity}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                severity: val,
-              });
-            }}
-          >
-            <Select.Option value={1}>S1</Select.Option>
-            <Select.Option value={2}>S2</Select.Option>
-            <Select.Option value={3}>S3</Select.Option>
-          </Select>
-          <Select
-            style={{ minWidth: 60 }}
-            placeholder={t('eventType')}
-            allowClear
-            value={filter.eventType}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                eventType: val,
-              });
-            }}
-          >
-            <Select.Option value={0}>Triggered</Select.Option>
-            <Select.Option value={1}>Recovered</Select.Option>
-          </Select>
+         
+          
           <Input
             className='search-input'
             prefix={<SearchOutlined />}
             placeholder={t('search_placeholder')}
-            value={filter.queryContent}
+            value={filter.query}
             onChange={(e) => {
               setFilter({
                 ...filter,
-                queryContent: e.target.value,
+                query: e.target.value,
               });
             }}
             onPressEnter={(e) => {
@@ -301,15 +285,38 @@ const Event: React.FC = () => {
   }
 
   const fetchData = ({ current, pageSize }) => {
+    if(start>0){
+      filterObj["start"] = start
+    }
+    if(end>0){
+      filterObj["end"] = end
+    }
     return getEvents({
-      p: current,
+      page: current,
       limit: pageSize,
       ...filterObj,
-    }).then((res) => {
+    }).then(async (res) => {
+      let list = res.dat.list;
+      if (list != null) {
+        let ruleIds = Array.from(new Set(list.map(obj => obj.rule_id)))
+        await getStrategiesByRuleIds(ruleIds).then((res) => {
+          let rules = {};
+          res.dat.forEach(rule => {
+            return rules[rule.id] = rule;
+          });
+          list.forEach(item => {
+            if (rules[item.rule_id]) {
+              item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
+              return item
+            }
+          });
+        })
+      }
       return {
         total: res.dat.total,
-        list: res.dat.list,
+        list: list,
       };
+
     });
   };
 
@@ -326,6 +333,16 @@ const Event: React.FC = () => {
           {renderLeftHeader()}
           <Table
             size='small'
+            className='history_events_list'
+            rowKey='id'
+            rowSelection={{
+              onChange: (_, rows) => {
+                setSelectRowKeys(rows ? rows.map(({ id }) => id) : []);
+                console.log(selectRowKeys);
+              },
+              selectedRowKeys: selectRowKeys
+            }}
+
             columns={columns}
             {...tableProps}
             rowClassName={(record: { severity: number; is_recovered: number }) => {

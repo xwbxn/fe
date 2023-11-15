@@ -32,7 +32,7 @@ import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
-import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
+import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, FileSearchOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
 
 interface ListProps {
   bgid?: number;
@@ -229,7 +229,9 @@ export default function List(props: ListProps) {
     // },
     {
       title: '操作',
-      width: 160,
+      width: 120,
+      align: 'center',
+      fixed: 'right',
       render: (record: any) => {
         return (
           <Space>
@@ -252,7 +254,7 @@ export default function List(props: ListProps) {
                   });
               }}
             />
-            <Link
+            <Link title='克隆' 
               className='table-operator-area-normal'
               to={{
                 pathname: `/alert-rules/edit/${record.id}?mode=clone`,
@@ -261,12 +263,16 @@ export default function List(props: ListProps) {
             >
               <CopyTwoTone />
             </Link>
-            <EditOutlined
+            <FileSearchOutlined title='查看' onClick={() => {
+                history.push(`alert-rules/edit/${record.id}?mode=view`);
+              }}/>
+            <EditOutlined title='编辑' 
               onClick={() => {
                 history.push(`alert-rules/edit/${record.id}`);
               }}
             />
             <div
+              title='删除'
               className='table-operator-area-warning'
               onClick={() => {
                 Modal.confirm({
@@ -274,7 +280,7 @@ export default function List(props: ListProps) {
                   onOk: () => {
                     bgid &&
                       deleteStrategy([record.id], bgid).then(() => {
-                        message.success(t('common:success.delete'));
+                        message.success('删除成功');
                         getAlertRules();
                       });
                   },
@@ -411,6 +417,7 @@ export default function List(props: ListProps) {
             <Button
               type='primary'
               onClick={() => {
+                window.localStorage.removeItem('select_monitor_asset_ip');
                 history.push(`/alert-rules/add/${bgid}`);
               }}
               className='strategy-table-search-right-create'

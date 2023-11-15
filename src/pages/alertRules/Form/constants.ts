@@ -91,3 +91,16 @@ export const ruleTypeOptions = [
     pro: false,
   },
 ];
+
+export const selectTypeOptions = [
+  {
+    label: '告警级别',
+    value: 1,
+    pro: false,
+  },
+  {
+    label: '资产类型',
+    value: 2,
+    pro: false,
+  },
+];

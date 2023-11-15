@@ -189,7 +189,6 @@ export default function () {
 
 
     } else if (action == "delete") {//删除操作
-      // debugger;
       let rowsKey = localStorage.getItem(businessForm.businessId + "-select-rows")?.split(",");
       if (rowsKey != null && rowsKey.length > 0) {
         Modal.confirm({
