@@ -71,7 +71,7 @@ const Event: React.FC = () => {
     query: '',
     type:null
   });
-  const columns = [
+  const columns:any= [
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -111,7 +111,7 @@ const Event: React.FC = () => {
     {
       title: '触发时间',
       dataIndex: 'last_eval_time',
-      fixed: 'right',
+      // fixed:  'right',
       width: 100,
       render(value) {
         return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');

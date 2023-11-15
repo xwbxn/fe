@@ -90,7 +90,7 @@ function Card(props: Props, ref) {
     setVisible(false);
   };
 
-  const columns = [
+  const columns:any = [
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -354,7 +354,7 @@ function Card(props: Props, ref) {
           size='small'
           rowKey={'id'}
           className='card-event-drawer'
-          rowClassName={(record: { severity: number }, index) => {
+          rowClassName={(record: { severity: number }) => {
             return SeverityColor[record.severity - 1] + '-left-border';
           }}
           rowSelection={{
