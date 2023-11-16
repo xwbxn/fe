@@ -15,7 +15,7 @@
  *
  */
 import React, { useContext, useRef, useState } from 'react';
-import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu } from 'antd';
+import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu, DatePickerProps } from 'antd';
 import { AlertOutlined, ExclamationCircleOutlined, SearchOutlined, AppstoreOutlined, UnorderedListOutlined, DownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
@@ -23,17 +23,20 @@ import PageLayout from '@/components/pageLayout';
 import { deleteAlertEvents } from '@/services/warning';
 import { AutoRefresh } from '@/components/TimeRangePicker';
 import { CommonStateContext } from '@/App';
-import { getDefaultHours, setDefaultHours } from '@/pages/historyEvents';
 import { getProdOptions } from '@/pages/alertRules/Form/components/ProdSelect';
 import DatasourceSelect from '@/components/DatasourceSelect/DatasourceSelect';
 import Card from './card';
 import Table from './Table';
 import { hoursOptions } from './constants';
+import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
+import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
+const { RangePicker } = DatePicker;
 import './index.less';
 
 // @ts-ignore
 import BatchAckBtn from 'plus:/parcels/Event/Acknowledge/BatchAckBtn';
+import moment from 'moment';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
@@ -59,75 +62,68 @@ const Event: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
   const [view, setView] = useState<'card' | 'list'>('card');
   const { busiGroups, feats } = useContext(CommonStateContext);
+  const [start,setStart] = useState<number>(0);
+  const [end,setEnd] = useState<number>(0);
   const [filter, setFilter] = useState<{
     hours: number;
     cate?: string;
     datasourceIds: number[];
     bgid?: number;
     severity?: number;
-    queryContent: string;
-    rule_prods: string[];
+    query: string;
+    type: any|number;
   }>({
     // hours: getDefaultHours(),
     hours: 6,
     datasourceIds: [],
-    queryContent: '',
-    rule_prods: [],
+    query: '',
+    type:null,
   });
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   let prodOptions = getProdOptions(feats);
-  if (import.meta.env.VITE_IS_ENT === 'true') {
-    prodOptions = [
-      ...prodOptions,
-      {
-        label: t('AlertHisEvents:rule_prod.firemap'),
-        value: 'firemap',
-        pro: false,
-      },
-      {
-        label: t('AlertHisEvents:rule_prod.northstar'),
-        value: 'northstar',
-        pro: false,
-      },
-    ];
-  }
 
+  const onChange = (
+    value: DatePickerProps['value'] | RangePickerProps['value'],
+    dateString: [string, string] | string,
+  ) => {
+    console.log('Selected Time: ', value);
+    console.log('Formatted Selected Time: ', dateString);
+  };
+  
+  const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any) => {
+    console.log('onOk: ', value);
+    value?.forEach((element,index) => {
+        if(index==0 && element!=null){
+          setStart(moment(element).unix())
+        }
+        if(index==1 && element!=null){
+          setEnd(moment(element).unix())
+        }
+    });
+    setRefreshFlag(_.uniqueId('refresh_'));
+  };
   function renderLeftHeader() {
     return (
       <Row justify='space-between' style={{ width: '100%' }}>
         <Space>
           <Button icon={<AppstoreOutlined />} onClick={() => setView('card')} />
           <Button icon={<UnorderedListOutlined />} onClick={() => setView('list')} />
-          {/* <Select
-            style={{ minWidth: 80 }}
-            value={filter.hours}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                hours: val,
-              });
-              setDefaultHours(val);
-            }}
-          >
-            {hoursOptions.map((item) => {
-              return <Select.Option value={item.value}>{t(`hours.${item.value}`)}</Select.Option>;
-            })}
-          </Select> */}
           <Select
             allowClear
-            placeholder={t('prod')}
+            placeholder={'查询类型'}
             style={{ minWidth: 80 }}
-            value={filter.rule_prods}
-            mode='multiple'
+            value={filter.type}
+            // mode='multiple'
             onChange={(val) => {
               setFilter({
                 ...filter,
-                rule_prods: val,
+                type: val,
               });
             }}
             dropdownMatchSelectWidth={false}
           >
+
             {prodOptions.map((item) => {
               return (
                 <Select.Option value={item.value} key={item.value}>
@@ -136,63 +132,23 @@ const Event: React.FC = () => {
               );
             })}
           </Select>
-          <DatasourceSelect
-            style={{ width: 100 }}
-            filterKey='alertRule'
-            value={filter.datasourceIds}
-            onChange={(val: number[]) => {
-              setFilter({
-                ...filter,
-                datasourceIds: val,
-              });
-            }}
+          <RangePicker
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm"
+            onChange={onChange}
+            locale={locale}
+            onOk={onOk}
           />
-          <Select
-            allowClear
-            placeholder={t('common:business_group')}
-            style={{ minWidth: 80 }}
-            value={filter.bgid}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                bgid: val,
-              });
-            }}
-            dropdownMatchSelectWidth={false}
-          >
-            {_.map(busiGroups, (item) => {
-              return (
-                <Select.Option value={item.id} key={item.id}>
-                  {item.name}
-                </Select.Option>
-              );
-            })}
-          </Select>
-          <Select
-            allowClear
-            style={{ minWidth: 80 }}
-            placeholder={t('severity')}
-            value={filter.severity}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                severity: val,
-              });
-            }}
-          >
-            <Select.Option value={1}>S1</Select.Option>
-            <Select.Option value={2}>S2</Select.Option>
-            <Select.Option value={3}>S3</Select.Option>
-          </Select>
+          
           <Input
             className='search-input'
             prefix={<SearchOutlined />}
             placeholder={t('search_placeholder')}
-            value={filter.queryContent}
+            value={filter.query}
             onChange={(e) => {
               setFilter({
                 ...filter,
-                queryContent: e.target.value,
+                query: e.target.value,
               });
             }}
           />
@@ -251,9 +207,9 @@ const Event: React.FC = () => {
     { hours: filter.hours },
     filter.datasourceIds.length ? { datasource_ids: filter.datasourceIds } : {},
     filter.severity ? { severity: filter.severity } : {},
-    filter.queryContent ? { query: filter.queryContent } : {},
+    filter.query ? { query: filter.query } : {},
     { bgid: filter.bgid },
-    filter.rule_prods.length ? { rule_prods: _.join(filter.rule_prods, ',') } : {},
+    filter.type ? { type:filter.type } : {},
   );
 
   return (

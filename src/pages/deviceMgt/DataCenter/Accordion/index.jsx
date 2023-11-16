@@ -1,9 +1,6 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
 import './index.less';
 import { AppstoreAddOutlined, CheckOutlined, CloseOutlined, DownOutlined, InsertRowBelowOutlined, PlusOutlined, RightOutlined } from '@ant-design/icons';
-import { Input, Menu, Modal, Tree, message } from 'antd';
-import { getAssetsTree } from '@/services/assets/asset';
-import { getDataCenterList } from '@/services/assets/data-center';
 import { getRoomListByDatacenterId } from '@/services/assets/computer-room';
 
 

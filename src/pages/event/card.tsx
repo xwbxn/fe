@@ -12,6 +12,7 @@ import { CommonStateContext } from '@/App';
 import { SeverityColor, deleteAlertEventsModal } from './index';
 import CardLeft from './cardLeft';
 import './index.less';
+import { getStrategiesByRuleIds } from '@/services/warning';
 
 // @ts-ignore
 import BatchAckBtn from 'plus:/parcels/Event/Acknowledge/BatchAckBtn';
@@ -89,67 +90,103 @@ function Card(props: Props, ref) {
     setVisible(false);
   };
 
-  const columns = [
+  const columns:any = [
     {
-      title: t('prod'),
-      dataIndex: 'rule_prod',
-      width: 100,
-      render: (value) => {
-        return t(`AlertHisEvents:rule_prod.${value}`);
-      },
-    },
-    {
-      title: t('common:datasource.name'),
-      dataIndex: 'datasource_id',
-      render: (value, record) => {
-        if (value === 0) {
-          return (
-            <Tag color='purple' key={value}>
-              $all
-            </Tag>
-          );
-        }
-        const name = _.find(groupedDatasourceList[record.cate], { id: value })?.name;
-        if (!name) return null;
-        return (
-          <Tag color='purple' key={value}>
-            {_.find(groupedDatasourceList[record.cate], { id: value })?.name}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: t('rule_name'),
+      title: '规则名称',
       dataIndex: 'rule_name',
+      width: 150,
       render(title, { id, tags }) {
         return (
           <>
-            <div>
-              <Link to={`/alert-cur-events/${id}`}>{title}</Link>
-            </div>
-            <div>
-              {_.map(tags, (item) => {
-                return (
-                  <Tooltip key={item} title={item}>
-                    <Tag color='purple' style={{ maxWidth: '100%' }}>
-                      <div
-                        style={{
-                          maxWidth: 'max-content',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {item}
-                      </div>
-                    </Tag>
-                  </Tooltip>
-                );
-              })}
-            </div>
+          <Link to={`/alert-cur-events/${id}`} >{title}</Link>
           </>
         );
       },
     },
+    {
+      title: '资产名称',
+      dataIndex: 'asset_name',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '告警规则',
+      dataIndex: 'rule_config_cn',
+      width: 180,
+      render: (value) => {
+        return value;
+      },
+    },
+    // {
+    //   title: t('prod'),
+    //   dataIndex: 'rule_prod',
+    //   width: 100,
+    //   render: (value) => {
+    //     return t(`AlertHisEvents:rule_prod.${value}`);
+    //   },
+    // },
+    // {
+    //   title: t('common:datasource.name'),
+    //   dataIndex: 'datasource_id',
+    //   render: (value, record) => {
+    //     if (value === 0) {
+    //       return (
+    //         <Tag color='purple' key={value}>
+    //           $all
+    //         </Tag>
+    //       );
+    //     }
+    //     const name = _.find(groupedDatasourceList[record.cate], { id: value })?.name;
+    //     if (!name) return null;
+    //     return (
+    //       <Tag color='purple' key={value}>
+    //         {_.find(groupedDatasourceList[record.cate], { id: value })?.name}
+    //       </Tag>
+    //     );
+    //   },
+    // },
+    // {
+    //   title: t('rule_name'),
+    //   dataIndex: 'rule_name',
+    //   render(title, { id, tags }) {
+    //     return (
+    //       <>
+    //         <div>
+    //           <Link to={`/alert-cur-events/${id}`}>{title}</Link>
+    //         </div>
+    //         <div>
+    //           {_.map(tags, (item) => {
+    //             return (
+    //               <Tooltip key={item} title={item}>
+    //                 <Tag color='purple' style={{ maxWidth: '100%' }}>
+    //                   <div
+    //                     style={{
+    //                       maxWidth: 'max-content',
+    //                       overflow: 'hidden',
+    //                       textOverflow: 'ellipsis',
+    //                     }}
+    //                   >
+    //                     {item}
+    //                   </div>
+    //                 </Tag>
+    //               </Tooltip>
+    //             );
+    //           })}
+    //         </div>
+    //       </>
+    //     );
+    //   },
+    // },
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',
@@ -226,8 +263,26 @@ function Card(props: Props, ref) {
   const fetchCardDetail = (card: CardType) => {
     setVisible(true);
     setOpenedCard(card);
-    getCardDetail(card.event_ids).then((res) => {
-      setDrawerList(res.dat);
+    getCardDetail(card.event_ids).then( async (res) => {
+
+      let list = res.dat;
+      if(list!=null){
+        let ruleIds  =Array.from(new Set(list.map(obj => obj.rule_id)))
+        await getStrategiesByRuleIds(ruleIds).then((res)=>{
+           let rules = {};
+           res.dat.forEach(rule => {
+              return rules[rule.id]=rule;
+           });
+           list.forEach(item => {
+                if(rules[item.rule_id]){
+                  item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
+                   return item
+                }
+           });
+        })
+      }
+
+      setDrawerList(list);
     });
   };
 
@@ -299,7 +354,7 @@ function Card(props: Props, ref) {
           size='small'
           rowKey={'id'}
           className='card-event-drawer'
-          rowClassName={(record: { severity: number }, index) => {
+          rowClassName={(record: { severity: number }) => {
             return SeverityColor[record.severity - 1] + '-left-border';
           }}
           rowSelection={{

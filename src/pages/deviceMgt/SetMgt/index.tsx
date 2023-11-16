@@ -15,9 +15,7 @@ import { addDictDataBySingle, updateDictDataSingle} from '@/services/system/dict
 import { EditOutlined } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid'
 import { OperationModal } from '../Form/OperationModal';
-import { useAntdTable } from 'ahooks';
 import { OperateType } from '../Form/operate_type';
-import { render } from 'react-dom';
 
 
 export default function () {
@@ -191,7 +189,6 @@ export default function () {
 
 
     } else if (action == "delete") {//删除操作
-      // debugger;
       let rowsKey = localStorage.getItem(businessForm.businessId + "-select-rows")?.split(",");
       if (rowsKey != null && rowsKey.length > 0) {
         Modal.confirm({

@@ -15,10 +15,11 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Form, Input, Select, Card, Row, Col, Tag, Tooltip } from 'antd';
 import { panelBaseProps } from '../constants';
+import { getAssetsByCondition } from '@/services/assets';
 
 // 校验单个标签格式是否正确
 function isTagValid(tag) {
@@ -29,8 +30,37 @@ function isTagValid(tag) {
   };
 }
 
-export default function Base() {
-  const { t } = useTranslation('alertRules');
+export default function Base({ type }) {
+  const { t } = useTranslation('alertRules'); 
+  // type = 1;
+  const [assetList, setAssetList] = useState<any>({});
+  const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  const [assetIp, setAssetIp] = useState<string>("");
+
+
+  useEffect(() => {
+    let param = {};
+    window.localStorage.removeItem('select_monitor_asset_id');
+   
+    if(type==1){
+      getAssetsByCondition(param).then((res) => {
+        let options = new Array();
+        res.dat.list.map((v) => {
+          assetList[v.id] = v;
+          options.push({
+            value: v.id,
+            label: v.name + ' [' + v.type + ']',
+          });
+        });
+        setAssetOptions(options);
+        setAssetList({...assetList});
+       
+      })
+    }
+    let ip = window.localStorage.getItem('select_monitor_asset_ip');
+    setAssetIp(ip?ip:"");
+  }, []);
+
   // 渲染标签
   function tagRender(content) {
     const { isCorrectFormat, isLengthAllowed } = isTagValid(content.value);
@@ -64,24 +94,51 @@ export default function Base() {
     };
   }
   return (
-    <Card {...panelBaseProps} title={t('basic_configs')}>
-      <Row gutter={10}>
-        <Col span={12}>
-          <Form.Item label={t('name')} name='name' rules={[{ required: true }]}>
+    <Card {...panelBaseProps} title={t('basic_configs')}>      
+      {type == 1 && (
+        <Row gutter={10}>
+        <Col span={8}>
+          <Form.Item label={'告警名称'} name='name' rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         </Col>
-        <Col span={12}>
-          <Form.Item label={t('append_tags')} name='append_tags' rules={[isValidFormat]}>
-            <Select mode='tags' tokenSeparators={[' ']} open={false} placeholder={t('append_tags_placeholder')} tagRender={tagRender} />
+        <Col span={8}>
+          <Form.Item label={t('资产名称')} name='asset_id' rules={[{ required: true }]}>
+            <Select 
+            onChange={(value)=>{               
+              let ip = assetList[value].ip
+              window.localStorage.setItem('select_monitor_asset_id',value);
+              setAssetIp(ip)
+           }}
+            options={assetOptions}
+          />
           </Form.Item>
         </Col>
-        <Col span={24}>
-          <Form.Item label={t('note')} name='note'>
-            <Input.TextArea />
-          </Form.Item>
+        <Col span={8}>
+            <div className='ip_show'><div className='title'>资产IP:</div><span className='content' id="asset_ip">{assetIp}</span></div>
         </Col>
+
       </Row>
+      )}
+      {type == 0 && (
+        <Row gutter={10}>
+          <Col span={12}>
+            <Form.Item label={t('name')} name='name' rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label={t('append_tags')} name='append_tags' rules={[isValidFormat]}>
+              <Select mode='tags' tokenSeparators={[' ']} open={false} placeholder={t('append_tags_placeholder')} tagRender={tagRender} />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item label={t('note')} name='note'>
+              <Input.TextArea />
+            </Form.Item>
+          </Col>
+        </Row>
+      )}
     </Card>
   );
 }

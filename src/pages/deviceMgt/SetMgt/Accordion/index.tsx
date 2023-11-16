@@ -3,10 +3,11 @@ import './index.less';
 import { AppstoreAddOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Tree } from 'antd';
 import { queryAboutTable } from '@/services/assets/asset';
-import { DataNode } from 'antd/lib/tree';
+
 import { SetConfigCatelog } from './catalog'
 import { getDictValueEnum } from '@/services/system/dict';
 import _ from 'lodash';
+import { DataNode } from 'antd/es/tree';
 
 
 

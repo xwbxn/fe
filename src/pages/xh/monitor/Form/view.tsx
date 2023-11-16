@@ -1,22 +1,27 @@
 import './style.less';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, {  useContext, useEffect, useState } from 'react';
 
 import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
-
+import queryString from 'query-string';
 import { CommonStateContext } from '@/App';
-import { addAsset, getAssetDefaultConfig, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
-import TextArea from 'antd/lib/input/TextArea';
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons/lib/icons';
+import { useLocation } from 'react-router-dom';
+import { getXhMonitor} from '@/services/manage';
+import { getXhAsset } from '@/services/assets';
+
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [assetList, setAssetList] = useState<{ name: string; id: any }[]>([]);
-  const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
+  const { search } = useLocation();
+  const { id } = queryString.parse(search);
+  const [monitor, setMonitor] = useState<any>(null);
+  const [assetInfo,setAssetInfo] = useState<any>(null);
 
   const panelBaseProps: any = {
     size: 'small',
@@ -25,36 +30,71 @@ export default function (props: { initialValues: object; initParams: object; mod
 
 
   useEffect(() => {
-    const param = {
-      page: 1,
-      limit: 10000,
-    };
-    getAssetsStypes().then((res) => {
-      const items = res.dat
-        .map((v) => {
-          return {
-            value: v.name,
-            label: v.name,
-            ...v,
-          };
-        })
-        .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
-      setAssetTypes(items);
-    });
-
-    getAssetsByCondition(param).then((res) => {
-      // const items = res.dat.list.map((v) => {
-      const items = res.dat.map((v) => {
-        return {
-          value: v.id,
-          label: v.name + "[" + v.type + "]",
-          ...v,
-        };
+    if(id!=null && id.length>0 && id!="null"){
+      getXhMonitor(id).then(({dat})=>{
+        if(dat!=null){
+          setMonitor(dat);
+          console.log("监控数据",dat);
+          let config = dat["config"];
+          delete dat["config"];
+          if(config!=null && config.length>0){
+            let configJson = JSON.parse(config);
+            dat = {...configJson,...dat};
+          }
+          loadAssetInfo(dat.asset_id);
+        }
       })
-      setAssetList(items);
-    });
+    }
 
   }, []);
+
+
+  const loadAssetInfo =(id) => {
+    if (id != null) {
+      getXhAsset("" + id).then(({ dat }) => {
+        console.log(dat);          
+        let expands = dat.exps;
+        if (expands != null && expands.length > 0) {
+          const map = new Map()
+          expands.forEach((item, index, arr) => {
+            if (!map.has(item.config_category)) {
+              map.set(
+                item.config_category,
+                arr.filter(a => a.config_category == item.config_category)
+              )
+            }
+          })
+          //以上分组加载数据
+          let mapValues = {};
+          map.forEach(function (value, key) {
+            const formDataMap = new Map()
+            value.forEach((item, index, arr) => {
+              if (!formDataMap.has(item.group_id)) {
+                formDataMap.set(
+                  item.group_id,
+                  arr.filter(a => a.group_id == item.group_id)
+                )
+              }
+            })
+            let group: any = [];
+            formDataMap.forEach(function (value, i) {
+              let itemsChars = ""
+              value.forEach((item, index, arr) => {
+                itemsChars += "\"" + item.name + "\":\"" + item.value + "\",";
+              })
+              itemsChars = "{" + itemsChars.substring(0, itemsChars.length - 1) + "}";
+              group.push(JSON.parse(itemsChars));
+            })
+            mapValues[key] = group;
+            dat[key] = group;
+          })
+          delete dat.exps; 
+          setAssetInfo(dat); 
+          console.log("资产数据",dat);
+        }
+      });
+    }
+  }
 
   const genForm = () => {
     const asset: any = assetList.find((v) => v.id === form.getFieldValue('asset_id'));
@@ -85,7 +125,6 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const submitForm = async (values) => {
     // values.group_id = curBusiId;
-    debugger;
     values.params = JSON.stringify(values);
 
     console.log("submitForm", values);
@@ -102,21 +141,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const genDefaultConfig = () => {
     const name = form.getFieldValue('type');
     const data = form.getFieldsValue();
-    // if (data.configs) {
-    //   Modal.confirm({
-    //     title: '将会覆盖原有配置,是否继续?',
-    //     onOk: () => {
-    //       delete data.configs;
-    getAssetDefaultConfig(name, data).then((res) => {
-      form.setFieldsValue({ configs: res.dat.content });
-    });
-    // },
-    // });
-    // } else {
-    //   getAssetDefaultConfig(name, data).then((res) => {
-    //     form.setFieldsValue({ configs: res.dat.content });
-    //   });
-    // }
+
   };
 
   return (

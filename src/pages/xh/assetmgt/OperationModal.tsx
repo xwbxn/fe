@@ -9,7 +9,7 @@ import { OperateType } from './index';
 import { exportTemplet } from '@/services/assets/asset';
 import Icon from '@ant-design/icons';
 import moment from 'moment';
-import { getOrganizationTree,importXhAssetSetData,exportXhAssetSetData } from '@/services/assets';
+import { getOrganizationTree,importXhAssetSetData } from '@/services/assets';
 
 export const OperationModal = ({ operateType, setOperateType, assets, names, reloadList }) => {
   const { t } = useTranslation('assets');

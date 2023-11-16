@@ -19,6 +19,7 @@ export default function () {
   const [businessForm, setBusinessForm] = useState<any>({});
 
   const [refArr, setRefArr] = useState({});
+<<<<<<< HEAD
   const [ipchecks, setIpChecks] = useState<any>({});
   const [pwchecks, setPwChecks] = useState<any>({});
   const [inputIpVal, setInputIpVal] = useState<any>({});
@@ -44,6 +45,13 @@ export default function () {
       clipboard.destroy();
     };
 
+=======
+  const [checks, setChecks] = useState<any>({});
+  const [disabled, setDisabled] = useState(false);
+
+  useEffect(() => {
+     setChecks({...checks})
+>>>>>>> 4cd47361917fa5a10c78493015fc1794082a25cf
   }, []);
 
   const renderFields = (text, record, field, currentConfigId) => {
@@ -51,6 +59,7 @@ export default function () {
     let value = record[field];
     return value;
   }
+<<<<<<< HEAD
   const onIpChange = (e: CheckboxChangeEvent,id) => {
     //console.log('checked = ', e.target.checked);
     // setChecked(e.target.checked);
@@ -83,6 +92,15 @@ export default function () {
     setIsModalVisible(false);
   };
   
+=======
+  const onChange = (e,id) => {
+    console.log('checked = ', e.target.checked);
+    // setChecked(e.target.checked);
+    checks[id] =e.target.checked?false:true;
+    setChecks(_.cloneDeep({...checks}))
+    console.log('checked = ', checks);
+  };
+>>>>>>> 4cd47361917fa5a10c78493015fc1794082a25cf
 
   const handleClick = (action: any, id: any) => {
       console.log('handleClick',action,id);
@@ -94,7 +112,11 @@ export default function () {
       <div className='body-list' >
         {InterfaceForms.map((modelFF, index) => {
           refArr[modelFF.id] = createRef<FormInstance>();
+<<<<<<< HEAD
           //pwchecks[modelFF.id] = false;
+=======
+          checks[modelFF.id] = true;
+>>>>>>> 4cd47361917fa5a10c78493015fc1794082a25cf
           return (
             <Card
               hoverable
@@ -103,18 +125,19 @@ export default function () {
               className='interface_set'
             >
               <Form
-                name="basic"
+                name={modelFF.id}
                 labelCol={{ span: 8 }}
                 // wrapperCol={{ span: 16 }}
                 className='interface_submit_form'
                 layout="inline"
-                initialValues={{ remember: true }}
+                initialValues={{}}
                 ref={refArr[modelFF.id]}
                 onFinish={e => {
                   // handleClick(e, modelFF.id);
                 }}
-                autoComplete="off"
+                // autoComplete="off"
               >
+<<<<<<< HEAD
                 {/* <Form.Item name="ipv" key={'ipv-'+index}>
                   <Checkbox value={1}>IP验证</Checkbox>                 
                 </Form.Item>
@@ -137,6 +160,17 @@ export default function () {
                   //onChange={(e) => setInputIpVal(e.target.value)}
                   onChange={e=>{onInputIpChange(e,modelFF.id)}}
                   ></Input>
+=======
+                
+
+                <Form.Item name={'Q'+modelFF.id} key={'ipv-'+index}>
+                  <Checkbox onChange={e=>{
+                    onChange(e,modelFF.id)
+                  }} >IP验证</Checkbox>                 
+                </Form.Item>
+                <Form.Item  label="访问IP白名单" name="white_ips" key={'white_ips-'+index} >
+                  <Input disabled={checks[modelFF.id]}  ></Input>
+>>>>>>> 4cd47361917fa5a10c78493015fc1794082a25cf
                 </Form.Item>
 
                 <Form.Item name="pdv"  key={'pdv-'+index}>
@@ -210,9 +244,12 @@ export default function () {
   );
 }
 
+<<<<<<< HEAD
 
 
 function save(inputIpVal: any, inputPwVal: any) {
   saveIpAndPw(inputIpVal,inputPwVal);
 }
 
+=======
+>>>>>>> 4cd47361917fa5a10c78493015fc1794082a25cf

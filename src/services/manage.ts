@@ -40,28 +40,39 @@ export const getMonitorInfoListBasedOnSearch = function (params?: { query: strin
   });
 };
 //创建监控
-export const createMonitor = function (data: object) {
+export const createXhMonitor = function (data: object) {
   return request(`/api/n9e/xh/monitoring`, {
     method: RequestMethod.Post,
     data,
-  }).then((res) => res && res.dat);
+  });
 };
 //删除监控
-export const deleteMonitor = function (id: string) {
+export const deleteXhMonitor = function (id: string) {
   return request(`/api/n9e/xh/monitoring/${id}`, {
     method: RequestMethod.Delete,
-  }).then((res) => res && res.dat);
+  });
+};
+export const getXhMonitor = function (id:any) {
+  return request(`/api/n9e/xh/monitoring/${id}`, {
+    method: RequestMethod.Get,
+  });
+};
+export const getXhMonitorByAssetId = function (id:any) {
+  return request(`/api/n9e/xh/monitoring/asset?id=${id}`, {
+    method: RequestMethod.Get,
+  });
 };
 //更新监控
-export const updateMonitor = function (data: object) {
+export const updateXhMonitor = function (data: object) {
   return request(`/api/n9e/xh/monitoring`, {
     method: RequestMethod.Put,
     data,
   }).then((res) => res && res.dat);
 };
+
 //通过主键更新监控开关
-export const updateMonitorStatus = function (status,data) {
-  return request(`/api/n9e/xh/monitoring/status?status=`+status, {
+export const updateMonitorStatus = function (status,data,type) {
+  return request(`/api/n9e/xh/monitoring/status?status=`+status+"&type="+type, {
     method: RequestMethod.Post,
     data
   });

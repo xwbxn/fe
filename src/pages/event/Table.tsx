@@ -26,6 +26,7 @@ import { CommonStateContext } from '@/App';
 import { getEvents } from './services';
 import { deleteAlertEventsModal } from './index';
 import { SeverityColor } from './index';
+import { getStrategiesByRuleIds } from '@/services/warning';
 
 // @ts-ignore
 import AckBtn from 'plus:/parcels/Event/Acknowledge/AckBtn';
@@ -48,64 +49,100 @@ export default function TableCpt(props: IProps) {
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const columns = [
     {
-      title: t('prod'),
-      dataIndex: 'rule_prod',
-      width: 100,
-      render: (value) => {
-        return t(`AlertHisEvents:rule_prod.${value}`);
-      },
-    },
-    {
-      title: t('common:datasource.id'),
-      dataIndex: 'datasource_id',
-      width: 100,
-      render: (value, record) => {
-        return _.find(groupedDatasourceList?.[record.cate], { id: value })?.name || '-';
-      },
-    },
-    {
-      title: t('rule_name'),
+      title: '规则名称',
       dataIndex: 'rule_name',
+      width: 150,
       render(title, { id, tags }) {
         return (
           <>
-            <div>
-              <Link to={`/alert-cur-events/${id}`}>{title}</Link>
-            </div>
-            <div>
-              {_.map(tags, (item) => {
-                return (
-                  <Tooltip key={item} title={item}>
-                    <Tag
-                      color='purple'
-                      style={{ maxWidth: '100%' }}
-                      onClick={() => {
-                        if (!filter.queryContent.includes(item)) {
-                          setFilter({
-                            ...filter,
-                            queryContent: filter.queryContent ? `${filter.queryContent.trim()} ${item}` : item,
-                          });
-                        }
-                      }}
-                    >
-                      <div
-                        style={{
-                          maxWidth: 'max-content',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {item}
-                      </div>
-                    </Tag>
-                  </Tooltip>
-                );
-              })}
-            </div>
+          <Link to={`/alert-cur-events/${id}`} target='_blank'>{title}</Link>
           </>
         );
       },
     },
+    {
+      title: '资产名称',
+      dataIndex: 'asset_name',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      width: 100,
+      render: (value) => {
+        return value;
+      },
+    },
+    {
+      title: '告警规则',
+      dataIndex: 'rule_config_cn',
+      width: 180,
+      render: (value) => {
+        return value;
+      },
+    },
+    // {
+    //   title: t('prod'),
+    //   dataIndex: 'rule_prod',
+    //   width: 100,
+    //   render: (value) => {
+    //     return t(`AlertHisEvents:rule_prod.${value}`);
+    //   },
+    // },
+    // {
+    //   title: t('common:datasource.id'),
+    //   dataIndex: 'datasource_id',
+    //   width: 100,
+    //   render: (value, record) => {
+    //     return _.find(groupedDatasourceList?.[record.cate], { id: value })?.name || '-';
+    //   },
+    // },
+    // {
+    //   title: t('rule_name'),
+    //   dataIndex: 'rule_name',
+    //   render(title, { id, tags }) {
+    //     return (
+    //       <>
+    //         <div>
+    //           <Link to={`/alert-cur-events/${id}`}>{title}</Link>
+    //         </div>
+    //         <div>
+    //           {_.map(tags, (item) => {
+    //             return (
+    //               <Tooltip key={item} title={item}>
+    //                 <Tag
+    //                   color='purple'
+    //                   style={{ maxWidth: '100%' }}
+    //                   onClick={() => {
+    //                     if (!filter.queryContent.includes(item)) {
+    //                       setFilter({
+    //                         ...filter,
+    //                         queryContent: filter.queryContent ? `${filter.queryContent.trim()} ${item}` : item,
+    //                       });
+    //                     }
+    //                   }}
+    //                 >
+    //                   <div
+    //                     style={{
+    //                       maxWidth: 'max-content',
+    //                       overflow: 'hidden',
+    //                       textOverflow: 'ellipsis',
+    //                     }}
+    //                   >
+    //                     {item}
+    //                   </div>
+    //                 </Tag>
+    //               </Tooltip>
+    //             );
+    //           })}
+    //         </div>
+    //       </>
+    //     );
+    //   },
+    // },
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',
@@ -179,13 +216,30 @@ export default function TableCpt(props: IProps) {
   }
   const fetchData = ({ current, pageSize }) => {
     return getEvents({
-      p: current,
+      page: current,
       limit: pageSize,
       ...filterObj,
-    }).then((res) => {
+    }).then(async (res) => {
+
+      let list = res.dat.list;
+      if(list!=null){
+        let ruleIds  =Array.from(new Set(list.map(obj => obj.rule_id)))
+        await getStrategiesByRuleIds(ruleIds).then((res)=>{
+           let rules = {};
+           res.dat.forEach(rule => {
+              return rules[rule.id]=rule;
+           });
+           list.forEach(item => {
+                if(rules[item.rule_id]){
+                  item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
+                   return item
+                }
+           });
+        })
+      }
       return {
         total: res.dat.total,
-        list: res.dat.list,
+        list: list,
       };
     });
   };

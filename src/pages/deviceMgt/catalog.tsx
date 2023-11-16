@@ -1,6 +1,3 @@
-import { DictValueEnumObj } from '@/components/DictTag';
-import { Space } from 'antd';
-import React from 'react';
 
 export const SetConfigTables = {
   device_model_set: {

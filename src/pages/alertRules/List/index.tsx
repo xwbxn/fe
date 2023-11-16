@@ -28,11 +28,11 @@ import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/ser
 import { CommonStateContext } from '@/App';
 import { priorityColor } from '@/utils/constant';
 import Tags from '@/components/Tags';
-import './style.less'
+import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
-import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
+import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, FileSearchOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
 
 interface ListProps {
   bgid?: number;
@@ -59,102 +59,122 @@ export default function List(props: ListProps) {
   const [loading, setLoading] = useState(false);
   const columns: ColumnType<AlertRuleType<any>>[] = [
     {
-      title: t('common:datasource.type'),
-      dataIndex: 'cate',
-      width: 100,
-    },
-    {
-      title: t('common:datasource.name'),
-      dataIndex: 'datasource_ids',
-      width: 100,
-      ellipsis: {
-        showTitle: false,
-      },
-      render(value) {
-        if (!value) return '-';
-        return (
-          <Tags
-            width={70}
-            data={_.compact(
-              _.map(value, (item) => {
-                if (item === 0) return '$all';
-                const name = _.find(datasourceList, { id: item })?.name;
-                if (!name) return '';
-                return name;
-              }),
-            )}
-          />
-        );
-      },
-    },
-    {
-      title: t('name_severities_appendtags'),
+      title: '告警名称',
       dataIndex: 'name',
-      render: (data, record) => {
-        return (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <div>
-              <Link
-                className='table-text'
-                to={{
-                  pathname: `/alert-rules/edit/${record.id}`,
-                }}
-              >
-                {data}
-              </Link>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 4,
-              }}
-            >
-              {_.map(record.severities, (severity) => {
-                return (
-                  <Tag
-                    key={severity}
-                    color={priorityColor[severity - 1]}
-                    style={{
-                      marginRight: 0,
-                    }}
-                  >
-                    S{severity}
-                  </Tag>
-                );
-              })}
-            </div>
-            <div>
-              {_.map(record.append_tags, (item) => {
-                return (
-                  <Tooltip key={item} title={item}>
-                    <Tag color='purple' style={{ maxWidth: '100%' }}>
-                      <div
-                        style={{
-                          maxWidth: 'max-content',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {item}
-                      </div>
-                    </Tag>
-                  </Tooltip>
-                );
-              })}
-            </div>
-          </div>
-        );
-      },
+      width: 100,
     },
     {
-      title: t('notify_groups'),
+      title: '资产名称',
+      dataIndex: 'asset_name',
+      width: 100,
+    },
+    {
+      title: '资产IP',
+      dataIndex: 'asset_ip',
+      width: 100,
+    },
+    {
+      title: '告警规则',
+      dataIndex: 'rule_config_cn',
+      width: 100,
+    },
+    // {
+    //   title: '数据源类型',
+    //   dataIndex: 'cate',
+    //   width: 100,
+    // },
+    // {
+    //   title: '数据源',
+    //   dataIndex: 'datasource_ids',
+    //   width: 100,
+    //   ellipsis: {
+    //     showTitle: false,
+    //   },
+    //   render(value) {
+    //     if (!value) return '-';
+    //     return (
+    //       <Tags
+    //         width={70}
+    //         data={_.compact(
+    //           _.map(value, (item) => {
+    //             if (item === 0) return '$all';
+    //             const name = _.find(datasourceList, { id: item })?.name;
+    //             if (!name) return '';
+    //             return name;
+    //           }),
+    //         )}
+    //       />
+    //     );
+    //   },
+    // },
+    // {
+    //   title: '名称 & 级别 & 附加标签',
+    //   dataIndex: 'name',
+    //   render: (data, record) => {
+    //     return (
+    //       <div
+    //         style={{
+    //           display: 'flex',
+    //           flexDirection: 'column',
+    //           gap: 2,
+    //         }}
+    //       >
+    //         <div>
+    //           <Link
+    //             className='table-text'
+    //             to={{
+    //               pathname: `/alert-rules/edit/${record.id}`,
+    //             }}
+    //           >
+    //             {data}
+    //           </Link>
+    //         </div>
+    //         <div
+    //           style={{
+    //             display: 'flex',
+    //             flexWrap: 'wrap',
+    //             gap: 4,
+    //           }}
+    //         >
+    //           {_.map(record.severities, (severity) => {
+    //             return (
+    //               <Tag
+    //                 key={severity}
+    //                 color={priorityColor[severity - 1]}
+    //                 style={{
+    //                   marginRight: 0,
+    //                 }}
+    //               >
+    //                 S{severity}
+    //               </Tag>
+    //             );
+    //           })}
+    //         </div>
+    //         <div>
+    //           {_.map(record.append_tags, (item) => {
+    //             return (
+    //               <Tooltip key={item} title={item}>
+    //                 <Tag color='purple' style={{ maxWidth: '100%' }}>
+    //                   <div
+    //                     style={{
+    //                       maxWidth: 'max-content',
+    //                       overflow: 'hidden',
+    //                       textOverflow: 'ellipsis',
+    //                     }}
+    //                   >
+    //                     {item}
+    //                   </div>
+    //                 </Tag>
+    //               </Tooltip>
+    //             );
+    //           })}
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
+    {
+      title: '告警接收组',
       dataIndex: 'notify_groups_obj',
       width: 140,
       render: (data) => {
@@ -169,7 +189,7 @@ export default function List(props: ListProps) {
       },
     },
     {
-      title: t('common:table.update_at'),
+      title: '更新时间',
       dataIndex: 'update_at',
       width: 90,
       render: (text: string) => {
@@ -177,7 +197,7 @@ export default function List(props: ListProps) {
       },
     },
     {
-      title: t('common:table.update_by'),
+      title: '更新人',
       dataIndex: 'update_by',
       width: 65,
     },
@@ -208,44 +228,51 @@ export default function List(props: ListProps) {
     //   ),
     // },
     {
-      title: t('common:table.operations'),
-      width: 160,
+      title: '操作',
+      width: 120,
+      align: 'center',
+      fixed: 'right',
       render: (record: any) => {
         return (
           <Space>
-              <PoweroffOutlined  
-               title={record.disabled === AlertRuleStatus.Enable ?('已启动'):('未启动')}
-               style={{color:record.disabled === AlertRuleStatus.Enable ?('green'):('gray')}}
-               onClick={e=>{
+            <PoweroffOutlined
+              title={record.disabled === AlertRuleStatus.Enable ? '已启动' : '未启动'}
+              style={{ color: record.disabled === AlertRuleStatus.Enable ? 'green' : 'gray' }}
+              onClick={(e) => {
                 const { id, disabled } = record;
                 bgid &&
-                updateAlertRules(
-                  {
-                    ids: [id],
-                    fields: {
-                      disabled: !disabled ? 1 : 0,
+                  updateAlertRules(
+                    {
+                      ids: [id],
+                      fields: {
+                        disabled: !disabled ? 1 : 0,
+                      },
                     },
-                  },
-                  bgid,
-                ).then(() => {
-                  getAlertRules();
-                });
-
-              }}/> 
-            <Link
+                    bgid,
+                  ).then(() => {
+                    getAlertRules();
+                  });
+              }}
+            />
+            <Link title='克隆' 
               className='table-operator-area-normal'
               to={{
                 pathname: `/alert-rules/edit/${record.id}?mode=clone`,
               }}
-              target='_blank'
+              target="_blank"
             >
-              {/* {t('common:btn.clone')} */}
               <CopyTwoTone />
             </Link>
-            <ProfileTwoTone />
-
-            <EditOutlined />
+            <FileSearchOutlined title='查看' onClick={() => {
+                history.push(`alert-rules/edit/${record.id}?mode=view`);
+              }}/>
+            <EditOutlined title='编辑' 
+              onClick={() => {
+                history.push(`alert-rules/edit/${record.id}`);
+              }}
+            />
             <div
+              title='删除'
               className='table-operator-area-warning'
               onClick={() => {
                 Modal.confirm({
@@ -253,7 +280,7 @@ export default function List(props: ListProps) {
                   onOk: () => {
                     bgid &&
                       deleteStrategy([record.id], bgid).then(() => {
-                        message.success(t('common:success.delete'));
+                        message.success('删除成功');
                         getAlertRules();
                       });
                   },
@@ -262,8 +289,7 @@ export default function List(props: ListProps) {
                 });
               }}
             >
-               
-               <DeleteOutlined />
+              <DeleteOutlined />
             </div>
             {record.prod === 'anomaly' && (
               <div>
@@ -391,6 +417,7 @@ export default function List(props: ListProps) {
             <Button
               type='primary'
               onClick={() => {
+                window.localStorage.removeItem('select_monitor_asset_ip');
                 history.push(`/alert-rules/add/${bgid}`);
               }}
               className='strategy-table-search-right-create'

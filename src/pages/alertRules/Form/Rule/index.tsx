@@ -26,7 +26,7 @@ import ProdSelect from '../components/ProdSelect';
 // @ts-ignore
 import PlusAlertRule from 'plus:/parcels/AlertRule';
 
-export default function Rule({ form }) {
+export default function Rule({ form,type }) {
   const { t } = useTranslation('alertRules');
 
   return (
@@ -54,7 +54,7 @@ export default function Rule({ form }) {
             return <Host />;
           }
           if (prod === 'metric') {
-            return <Metric form={form} />;
+            return <Metric form={form} type={type} />;
           }
           return <PlusAlertRule prod={prod} form={form} />;
         }}

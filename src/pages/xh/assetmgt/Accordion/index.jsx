@@ -1,9 +1,9 @@
-import React, { Component, Fragment, useEffect, useRef, useState } from 'react';
+import React, { Component, Fragment,} from 'react';
 import './index.less';
-import { AppstoreAddOutlined, CheckOutlined, CloseOutlined, PlusOutlined, DownOutlined, ClusterOutlined, FontColorsOutlined } from '@ant-design/icons';
+import {  CheckOutlined, CloseOutlined, PlusOutlined,  ClusterOutlined } from '@ant-design/icons';
 import { Input, Menu, Modal, Tree, message } from 'antd';
-import { getAssetsTree } from '@/services/assets/asset';
-import { addAssetTree, updateAssetTree, deleteAssetTree } from '@/services/assets/asset-tree';
+// import { getAssetsTree } from '@/services/assets/asset';
+// import { addAssetTree, updateAssetTree, deleteAssetTree } from '@/services/assets/asset-tree';
 import queryString from 'query-string';
 
 const status = queryString.parse(location.search).status === undefined ? 0 : parseInt("" + queryString.parse(location.search).status);

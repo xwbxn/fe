@@ -17,12 +17,10 @@ import { updateAssetCategoryInAsset ,getAssetTreeBelongId} from '@/services/asse
 
 import { getAssetsTree } from '@/services/assets/asset';
 import { TreeNode } from 'antd/lib/tree-select';
-import TextArea from 'antd/lib/input/TextArea';
 const CheckboxGroup = Checkbox.Group;
 import { getCabinetList } from '@/services/assets/device-cabinet';
-import { convertPinyinStyle } from 'pinyin/lib/util';
+const {TextArea} = Input
 
-const plainOptions = ['Apple', 'Pear', 'Orange'];
 
 
 //请求的参数 【页面宽度，操作，操作类型，初始化数据，刷新页面动作，主题】
@@ -808,7 +806,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
               <Table style={{ width: '100%' }} pagination={false} rowKey={"id"} dataSource={initData} columns={columns} />
             </Form.Item>
             <Form.Item label="上线说明" name={'description'} labelCol={{ span: 2 }}>
-               <TextArea></TextArea>
+               <Input.TextArea></Input.TextArea>
             </Form.Item>
 
           </>

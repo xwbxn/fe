@@ -9,18 +9,15 @@ import './index.less';
 import { getDataCenterList } from '@/services/assets/data-center';
 import Accordion from './Accordion';
 import CommonForm from "@/components/CustomForm/CommonForm";
-import { exportTemplet } from '@/services/assets/asset';
 import { SetConfigTables, SetConfigForms } from './Accordion/catalog'
 import moment from 'moment';
 import _, { deburr, set } from 'lodash';
-import { getDictValueEnum, getDictDataExpByType, deleteDictDatas } from '@/services/system/dict';
 import { DeleteOutlined, DownOutlined, DownloadOutlined, EditOutlined, OrderedListOutlined } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid'
 import { OperationModal } from '../Form/OperationModal';
 import { OperateType } from '../Form/operate_type';
 // import echarts from 'echarts/lib/echarts';
 import * as echarts from 'echarts/lib/echarts.js'
-import { PieChart } from 'echarts/charts';
 import { GridComponent } from 'echarts/components';
 // import 'echarts/lib/component/tooltip';
 // import 'echarts/lib/component/title';

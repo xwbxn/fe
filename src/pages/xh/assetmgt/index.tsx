@@ -170,11 +170,15 @@ export default function () {
       fixed: 'right',
       render: (text: string, record: assetsType) => (
         <Space>
-          <VideoCameraOutlined />
+          <VideoCameraOutlined title='设置监控' onClick={(e)=>{
+              location.href="/xh/monitor?assetId="+record.id;  
+          }}/>
           <FileSearchOutlined title='资产详情' />
-          <FundOutlined  title='监控图表'  />
+          <FundOutlined  title='监控图表' onClick={(e)=>{
+               location.href='/xh/monitor/add?type=monitor&id=' + record.id+"&action=asset";
+          }}  />
           <EditOutlined  title='编辑' onClick={(e)=>{
-              showModal("update",record)
+               showModal("update",record)
           }}/>
           <DeleteOutlined
               onClick={async () => {
@@ -259,7 +263,6 @@ export default function () {
 
   const getTableData = () =>{
   
-    console.log("------",typeId);
     const param = {
       page: current,
       limit: pageSize,

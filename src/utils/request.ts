@@ -53,10 +53,7 @@ request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
   };
-  //grafana，使用authproxy
-  if (!url.startsWith("/grafana")) {
-    headers['Authorization'] = `Bearer ${localStorage.getItem('access_token') || ''}`;
-  }
+  headers['Authorization'] = `Bearer ${localStorage.getItem('access_token') || ''}`;
   headers['X-Language'] = localStorage.getItem('language') === 'en_US' ? 'en' : 'zh';
   return {
     url,
@@ -71,20 +68,6 @@ request
 request.interceptors.response.use(
   async (response, options) => {
     const { status } = response;
-    //来自grafana的响应在这里集中处理
-    if (response.url.includes('/grafana/api')) {
-      
-      if (status == 200) {
-        
-        return response.clone().json().then(data => {
-          return { dat: data, success: true }
-        })
-      } else {
-        return new Promise<any>((resolve, reject) => {
-          resolve({ dat: response, success: false })
-        })
-      }
-    }
     if (status === 200) {
       if(options.responseType=="blob"){
         return response       

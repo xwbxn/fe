@@ -31,16 +31,22 @@ export default function Edit() {
   const { mode } = queryString.parse(search);
 
   useEffect(() => {
-    if (alertRuleId) {
+    window.localStorage.removeItem('select_monitor_asset_id');
+    if (alertRuleId) {      
       getWarningStrategy(alertRuleId).then((res) => {
         setValues(res.dat || {});
+        if(res.dat && res.dat.asset_id){
+          window.localStorage.setItem('select_monitor_asset_id',res.dat.asset_id);
+          window.localStorage.setItem('select_monitor_asset_ip',res.dat.asset_ip);
+        }
+
       });
     }
   }, [alertRuleId]);
 
   return (
     <PageLayout title={t('title')} showBack backPath='/alert-rules'>
-      <Form type={mode === 'clone' ? 2 : 1} initialValues={values} />
+      <Form type={mode==="view"?3:(mode=== 'clone' ? 2 : 1)} initialValues={values} />
     </PageLayout>
   );
 }
