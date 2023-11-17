@@ -15,12 +15,12 @@
  *
  */
 import React, { useContext, useState } from 'react';
-import { AlertOutlined, CopyTwoTone, DeleteOutlined, DownloadOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
+import { AlertOutlined, CopyTwoTone, DeleteOutlined, DownOutlined, DownloadOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import _ from 'lodash';
 import { useAntdTable } from 'ahooks';
-import { Input, Tag, Button, Space, Table, Select, message, Modal, DatePickerProps } from 'antd';
+import { Input, Tag, Button, Space, Table, Select, message, Modal, DatePickerProps, Menu, Dropdown, Radio } from 'antd';
 import { Link } from 'react-router-dom';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
@@ -30,7 +30,7 @@ import { getProdOptions } from '@/pages/alertRules/Form/components/ProdSelect';
 import DatasourceSelect from '@/components/DatasourceSelect/DatasourceSelect';
 import exportEvents, { downloadFile } from './exportEvents';
 import { getStrategiesByRuleIds } from '@/services/warning';
-import { getEvents, deleteHistoryEvents} from './services';
+import { getEvents, deleteHistoryEvents, exportTemplet } from './services';
 import { SeverityColor } from '../event';
 import '../event/index.less';
 import locale from 'antd/es/date-picker/locale/zh_CN';
@@ -54,24 +54,25 @@ const Event: React.FC = () => {
   const { groupedDatasourceList, busiGroups, feats } = useContext(CommonStateContext);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
-  const [start,setStart] = useState<number>(0);
-  const [end,setEnd] = useState<number>(0);
+  const [start, setStart] = useState<number>(0);
+  const [end, setEnd] = useState<number>(0);
+
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [ftype, setFtype] = useState<number>(1);
   const [filter, setFilter] = useState<{
-    hours: number;
     datasourceIds: number[];
     bgid?: number;
     severity?: number;
     eventType?: number;
     query: string;
     // rule_prods: string[];
-    type:any|number;
+    type: any | number;
   }>({
-    hours: getDefaultHours(),
     datasourceIds: [],
     query: '',
-    type:null
+    type: null
   });
-  const columns:any= [
+  const columns: any = [
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -144,9 +145,9 @@ const Event: React.FC = () => {
                 onOk: () => {
                   let ids = new Array<number>();
                   ids.push(record.id);
-                  deleteHistoryEvents(ids).then((res)=>{
-                     message.success("删除成功");
-                     setRefreshFlag(_.uniqueId('refresh_'));
+                  deleteHistoryEvents(ids).then((res) => {
+                    message.success("删除成功");
+                    setRefreshFlag(_.uniqueId('refresh_'));
                   })
                 },
 
@@ -161,39 +162,36 @@ const Event: React.FC = () => {
   ];
   const [exportBtnLoadding, setExportBtnLoadding] = useState(false);
 
-const onChange = (
-  value: DatePickerProps['value'] | RangePickerProps['value'],
-  dateString: [string, string] | string,
-) => {
-  console.log('Selected Time: ', value);
-  console.log('Formatted Selected Time: ', dateString);
-};
+  const onChange = (
+    value: DatePickerProps['value'] | RangePickerProps['value'],
+    dateString: [string, string] | string,
+  ) => {
+    console.log('Selected Time: ', value);
+    console.log('Formatted Selected Time: ', dateString);
+  };
 
-const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any ) => {
-  console.log('onOk: ', value);
-  value?.forEach((element,index) => {
-      if(index==0 && element!=null){
+  const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
+    console.log('onOk: ', value);
+    value?.forEach((element, index) => {
+      if (index == 0 && element != null) {
         setStart(moment(element).unix())
       }
-      if(index==1 && element!=null){
+      if (index == 1 && element != null) {
         setEnd(moment(element).unix())
       }
-  });
-  setRefreshFlag(_.uniqueId('refresh_'));
-};
+    });
+    setRefreshFlag(_.uniqueId('refresh_'));
+  };
 
   const filterObj = Object.assign(
-    { hours: filter.hours },
     // filter.datasourceIds.length ? { datasource_ids: _.join(filter.datasourceIds, ',') } : {},
-    // filter.severity !== undefined ? { severity: filter.severity } : {},
+    filter.severity !== undefined ? { severity: filter.severity } : {},
     filter.query ? { query: filter.query } : {},
-
-    filter.eventType !== undefined ? { is_recovered: filter.eventType } : {},
-    { bgid: filter.bgid },
-    filter.type>0 ? { type:filter.type} : {},
+    { group: filter.bgid },
+    { alert_type: 2 },
   );
 
-  let prodOptions = getProdOptions(feats);
+
 
   function renderLeftHeader() {
     return (
@@ -204,7 +202,7 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
               setRefreshFlag(_.uniqueId('refresh_'));
             }}
           />
-          <Select
+          {/* <Select
             allowClear
             placeholder={'查询类型'}
             style={{ minWidth: 80 }}
@@ -226,8 +224,8 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
                 </Select.Option>
               );
             })}
-          </Select>
-          
+          </Select> */}
+
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
@@ -235,19 +233,40 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
             locale={locale}
             onOk={onOk}
           />
-          <DatasourceSelect
-            style={{ width: 100 }}
-            filterKey='alertRule'
-            value={filter.datasourceIds}
-            onChange={(val: number[]) => {
+          <Select
+            style={{ minWidth: 60 }}
+            placeholder={t('severity')}
+            allowClear
+            value={filter.severity}
+            onChange={(val) => {
               setFilter({
                 ...filter,
-                datasourceIds: val,
+                severity: val,
               });
             }}
-          />
-         
-          
+          >
+            <Select.Option value={1}>S1</Select.Option>
+            <Select.Option value={2}>S2</Select.Option>
+            <Select.Option value={3}>S3</Select.Option>
+          </Select>
+          <Select
+            style={{ minWidth: 120 }}
+            placeholder={t('common:business_group')}
+            allowClear
+            value={filter.bgid}
+            onChange={(val) => {
+              setFilter({
+                ...filter,
+                bgid: val,
+              });
+            }}
+          >
+            {_.map(busiGroups, (item) => {
+              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
+            })}
+          </Select>
+
+
           <Input
             className='search-input'
             prefix={<SearchOutlined />}
@@ -263,32 +282,67 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
               setRefreshFlag(_.uniqueId('refresh_'));
             }}
           />
-          <Button
-            loading={exportBtnLoadding}
-            onClick={() => {
-              setExportBtnLoadding(true);
-              exportEvents({ ...filterObj, limit: 1000000, p: 1 }, (err, csv) => {
-                if (err) {
-                  message.error(t('export_failed'));
-                } else {
-                  downloadFile(csv, `events_${moment().format('YYYY-MM-DD_HH-mm-ss')}.csv`);
-                }
-                setExportBtnLoadding(false);
-              });
-            }}
-          >
-            {t('export')}
-          </Button>
+
+          <div>
+            <Dropdown
+              trigger={['click']}
+              overlay={
+                <Menu
+                  style={{ width: '100px' }}
+                  onClick={({ key }) => {
+                    if (key == "export") {
+                      if (selectRowKeys.length <= 0) {
+                        Modal.confirm({
+                          title: "确认导出所有告警信息吗",
+                          onOk: async () => {
+                            setModalOpen(true);
+                          },
+                          onCancel() { },
+                        });
+                      }else{
+                        setModalOpen(true);
+                      }                      
+                    } else if (key == "delete") {
+                      if (selectRowKeys.length <= 0) {
+                        message.warning("请选择要批量记录")
+                        return
+                      } else {
+                        Modal.confirm({
+                          title: "确认要删除吗",
+                          onOk: async () => {
+                            deleteHistoryEvents(selectRowKeys).then((res) => {
+                              message.success("删除成功");
+                              setRefreshFlag(_.uniqueId('refresh_'));
+                            })
+                          },
+                          onCancel() { },
+                        });
+                      }
+                    }
+
+                  }}
+                  items={[
+                    { key: "export", label: '导出' },
+                    { key: "delete", label: '批量删除' },
+                  ]}
+                ></Menu>
+              }
+            >
+              <Button>
+                {t('common:btn.batch_operations')} <DownOutlined />
+              </Button>
+            </Dropdown>
+          </div>
         </Space>
       </div>
     );
   }
 
   const fetchData = ({ current, pageSize }) => {
-    if(start>0){
+    if (start > 0) {
       filterObj["start"] = start
     }
-    if(end>0){
+    if (end > 0) {
       filterObj["end"] = end
     }
     return getEvents({
@@ -326,6 +380,41 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
     debounceWait: 500,
   });
 
+  const handleModal = (action: string) => {
+    if (action == "open") {
+      let params: any = {};
+      if (selectRowKeys != null && selectRowKeys.length > 0) {
+        params.ids = selectRowKeys;
+      }
+      filter["ftype"] = ftype;      
+      filter["alert_type"] = 2;
+      let url = "/api/n9e/alert-events/export-xls";
+      let exportTitle = "告警信息";
+      exportTemplet(url, filter, params).then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res],
+          // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
+          { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".xls"
+        if (ftype === 1) {
+          fileType = ".xls"
+        } else if (ftype === 2) {
+          fileType = ".xml"
+        } else if (ftype === 3) {
+          fileType = ".txt"
+        }
+        const fileName = exportTitle + "数据_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        setModalOpen(false)
+      })
+    } else {
+      setModalOpen(false)
+    }
+  }
+
   return (
     <PageLayout icon={<AlertOutlined />} title={t('title')}>
       <div className='event-content'>
@@ -355,6 +444,22 @@ const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any 
           />
         </div>
       </div>
+
+      <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open") }} onCancel={e => { handleModal("close") }} >
+        <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
+          <Radio value={1} onChange={e => {
+            setFtype(parseInt("" + e.target.value))
+          }}>Excle</Radio>
+          <Radio value={2} onChange={e => {
+            setFtype(parseInt("" + e.target.value))
+          }}>XML</Radio>
+          <Radio value={3} onChange={e => {
+            setFtype(parseInt("" + e.target.value))
+          }}>TXT</Radio>
+        </Radio.Group>
+      </Modal>
+
+
     </PageLayout>
   );
 };

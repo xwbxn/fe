@@ -3,9 +3,17 @@ import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
 export function getEvents(params) {
-  return request('/api/n9e/alert-his-events/list/xh', {
+  return request('/api/n9e/alert-events/list/xh', {
     method: RequestMethod.Get,
     params,
+  });
+}
+export const exportTemplet = function (url,params,body) {
+  return request(url, {
+    method: RequestMethod.Post,
+    params,
+    data:body || {},
+    responseType:"blob"
   });
 }
 export function deleteHistoryEvents(data: any) {

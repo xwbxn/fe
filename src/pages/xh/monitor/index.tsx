@@ -228,13 +228,16 @@ export default function () {
         showColumns.push(item)
       }
     });
-    setSelectColum(baseColumns.concat(showColumns).concat(fixColumns));
+    
+    setSelectColum(showColumns.concat(fixColumns));
   }
 
 
   useEffect(() => {
     setSecondAddButton(false)
     setOptionColumns(choooseColumns.concat(baseColumns));
+    let modelIds = Array.from(new Set(choooseColumns.concat(baseColumns).map(obj => obj.title)))
+    setDefaultValues(modelIds);
     getAssetsStypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
@@ -261,6 +264,7 @@ export default function () {
       setTreeData(_.cloneDeep(treeData));
     });
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
+
     
     getAssetsByCondition({}).then(({ dat }) => {
       dat.list.forEach(v => {
@@ -451,7 +455,7 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'}>
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <div style={{ width: '250px', display: 'table', height: '100%' }}>
           <div className='asset_organize_cls'>资产类型
@@ -607,7 +611,6 @@ export default function () {
 
               <div>
                 <Popover placement="bottom" content={pupupContent} trigger="click" className='filter_columns' >
-                  {/* <Button  icon={<UnorderedListOutlined />}>显示列</Button> */}
                   <Button className='show_columns' >显示列</Button>
                   &nbsp; &nbsp; &nbsp;
                 </Popover>

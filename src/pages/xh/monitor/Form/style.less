@@ -102,8 +102,27 @@
     }
     
     .default_monitor {
+
         .ant-card-body {
-            display: block;
+            // display: block;
+            // position: relative;
+            .header_ {
+                display: inline-flex;
+                position: relative;
+                width: 100%;
+                .ant-space-align-center {
+                   align-items: baseline;
+                }
+                .auto-refresh-container {
+                    background-color: re;
+                    position: absolute;
+                    right: 0px;
+                    float: right;
+                }
+                .flashcat-timeRangePicker-target {
+                    display: none;
+                }
+            }
             .monitor_body {
                 display: inline-flex;   
                 width: 100%;             
@@ -135,7 +154,12 @@
                     width: 32%;
                     border: 0.5px solid #cecece;
                     margin: 3px;
-                }                
+                }
+                .every_graph :hover {
+                    .icons {
+                      display: block;
+                    }
+                }               
                 .monitor_title {
                     margin-top: 10px;
                     // padding-right: 18px;
@@ -151,6 +175,8 @@
                          .anticon {
                            margin-left: 8px; 
                         }
+                        display: none;
+
                     }
                 }
                 .table_list {

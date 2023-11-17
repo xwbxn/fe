@@ -66,7 +66,7 @@ export default function index(props: IProps) {
         message.error(res.error);
       } else {
         message.success(t('common:success.modify'));
-        history.push('/alert-rules');
+        history.push('/alert-rules?'+Math.random());
       }
     } else {
       const { dat } = res;
@@ -79,12 +79,12 @@ export default function index(props: IProps) {
   
         if (!errorNum) {
           message.success(`${type === 2 ? t('common:success.clone') : t('common:success.add')}`);
-          history.push('/alert-rules');
+          history.push('/alert-rules?'+Math.random().toString);
         } else {
           message.error(t(msg));
         }
       }else{
-        history.push('/alert-rules');
+        history.push('/alert-rules?'+Math.random());
       }
      
     }
