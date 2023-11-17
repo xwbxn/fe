@@ -1,13 +1,14 @@
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent } from 'antd';
+import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
-import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CopyOutlined, DeleteOutlined, DragOutlined, FullscreenOutlined, MoreOutlined, PlusOutlined, SettingOutlined, ShareAltOutlined, SyncOutlined } from '@ant-design/icons';
 import Graph from '../Graph';
-import _ from 'lodash';
+import _, { values } from 'lodash';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
+import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import moment from 'moment';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 enum ChartType {
@@ -19,6 +20,7 @@ import { getXhMonitor, getXhMonitorByAssetId } from '@/services/manage';
 import { getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
 import { getAssetsIdents, getAssetsMonitor } from '@/services/assets';
+import { time } from 'echarts';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
@@ -34,6 +36,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const { id } = queryString.parse(search);
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
+  const [selectMonitor, setSelectMonitor] = useState<any>({});
   const [monitors, setMonitors] = useState<any[]>([]);
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [assetItems, setAssetItems] = useState<any[]>([]);
@@ -47,11 +50,11 @@ export default function (props: { initialValues: object; initParams: object; mod
   });
 
   const [dialogRange, setDialogRange] = useState<any>({
-    start: parse('now-3h'),//"2023-11-02 01:00:00",
+    start: parse('now-1h'),//"2023-11-02 01:00:00",
     end: parse('now')//moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
   });
 
-  const [size, setSize] = useState<SizeType>('middle');
+  const [size, setSize] = useState<any>('now-1h');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
 
   const panelBaseProps: any = {
@@ -62,6 +65,8 @@ export default function (props: { initialValues: object; initParams: object; mod
   const handleSizeChange = (e: RadioChangeEvent) => {
     range.start = parse(e.target.value);
     setRange(range);
+    console.log('handleSizeChange',e.target.value)
+    setSize(e.target.value)
     console.log('handleSizeChange', range);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
@@ -271,6 +276,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'配置信息'} className='default_monitor'>
             <div className='header_'>
+              
               <Radio.Group value={size} onChange={handleSizeChange}>
                 <Radio.Button value="now-1h" >近1小时</Radio.Button>
                 <Radio.Button value="now-3h">近3小时</Radio.Button>
@@ -279,6 +285,22 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <Radio.Button value="now-7d">近7天</Radio.Button>
                 <Radio.Button value="now-30d">近30天</Radio.Button>
               </Radio.Group>
+              <TimeRangePickerWithRefresh
+                  // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+                  onChange={value=>{
+                    console.log(value)
+                    const newValue = {
+                      start: isMathString(value.start) ? parse(value.start) : moment(value.start),
+                      end: isMathString(value.end) ? parse(value.end) : moment(value.end),
+                    }
+                    setRefreshKey(_.uniqueId('refreshKey_'));
+                    setRange(newValue);                    
+                  }}
+                  value={range}
+                  localKey = 'monitor-timeRangePicker-value'
+             />
+
+
             </div>
             {action === "monitor" && (//当前监控展示
               <div className='monitor_body'>
@@ -287,6 +309,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     <div className='title'>{monitor.monitoring_name}</div>
                     <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
                       operateType.visual = true;
+                      setSelectMonitor(monitor);
                       setOperateType(_.cloneDeep(operateType));
                     }} /> </div>
                   </div>
@@ -294,6 +317,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     title={monitor.monitoring_name}
                     monitorId={parseInt(id + "")}
                     contentMaxHeight={200}
+                    toolVisible={false}
                     range={range}
                     setRange={(erang) => {
                       const newValue = {
@@ -306,7 +330,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     graphOperates={{
                       enabled: true
                     }}
-                    refreshFlag={""}
+                    refreshFlag={refreshKey}
                   />
                 </div>
 
@@ -318,9 +342,10 @@ export default function (props: { initialValues: object; initParams: object; mod
                   {monitors.map((item, index) => (
                     <div className='every_graph'>
                       <div className='monitor_title'>
-                        <div className='title'>{'内存占用率'}</div>
+                        <div className='title'>{item.monitoring_name}</div>
                         <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
                           operateType.visual = true;
+                          setSelectMonitor(item);
                           setOperateType(_.cloneDeep(operateType));
                         }} /> </div>
                       </div>
@@ -328,6 +353,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                         title={item.monitoring_name}
                         monitorId={parseInt(item.id + "")}
                         contentMaxHeight={200}
+                        toolVisible={false}
                         range={range}
                         setRange={(erang) => {
                           const newValue = {
@@ -340,7 +366,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                         graphOperates={{
                           enabled: true
                         }}
-                        refreshFlag={""}
+                        refreshFlag={refreshKey}
                       />
 
                     </div>
@@ -352,7 +378,45 @@ export default function (props: { initialValues: object; initParams: object; mod
             )}
           </Card>
         </div>
+        <Modal
+              visible={operateType.visual}
+              title={selectMonitor.monitoring_name}
+              confirmLoading={false}
+              width={window.innerWidth*0.8}
+              okButtonProps={{
+                // danger: operateType === OperateType.RemoveBusi || operateType === OperateType.Delete,
+              }}
+              // okText={operateType === OperateType.RemoveBusi ? t('remove_busi.btn') : operateType === OperateType.Delete ? t('batch_delete.btn') : t('common:btn.ok')}
+              
+              onCancel={() => {
+                operateType.visual = false;
+                setOperateType(_.cloneDeep(operateType));
+                form.resetFields();
+              }}
+            >
+
+              <Graph                  
+                  title={selectMonitor.monitoring_name}
+                  monitorId={parseInt(selectMonitor.id + "")}
+                  contentMaxHeight={200}
+                  range={dialogRange}
+                  toolVisible={true}
+                  setRange={(erang) => {
+                    const newValue = {
+                      start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
+                      end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
+                    }
+                    setDialogRange(newValue);
+                  }}
+                  step={12}
+                  graphOperates={{
+                    enabled: true
+                  }}
+                  refreshFlag={refreshKey}
+                />
+            </Modal>
       </div>
     </Form>
+    
   );
 }

@@ -17,20 +17,22 @@
 import React, { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
-import TimeRangePicker, { IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
+import TimeRangePicker, {TimeRangePickerWithRefresh,IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
-import { completeBreakpoints } from '@/pages/dashboard/Renderer/datasource/utils';
+import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { CommonStateContext } from '@/App';
-import {getAssetsIdents,getAssetsMonitor } from '@/services/assets';
+import { getAssetsMonitor } from '@/services/assets';
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
+import { Button, InputNumber, Popover, Radio, Space, RadioChangeEvent } from 'antd';
 
 interface IProps {
   monitorId: number;
   title: string;
+  toolVisible: boolean;
   setQueryStats?: (stats: QueryStats) => void;
   setErrorContent?: (content: string) => void;
   contentMaxHeight?: number;
-  range: IRawTimeRange;
+  range: IRawTimeRange | any;
   setRange: (range: IRawTimeRange) => void;
   step: number;
   graphOperates: {
@@ -57,11 +59,12 @@ const getSerieName = (metric: any) => {
 
 export default function Graph(props: IProps) {
   const { datasourceList } = useContext(CommonStateContext);
-  const {  monitorId, setQueryStats, setErrorContent,setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
-  const [ data, setData] = useState<any[]>([]);
-  const [ step,setStep] = useState<number>(props.step);
-  
-  
+  const { monitorId, setQueryStats, setErrorContent, setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
+  const [data, setData] = useState<any[]>([]);
+  const [step, setStep] = useState<number>(props.step);
+  const [size, setSize] = useState<any>('now-1h');
+  const [toolVisible, setToolVisible] = useState(props.toolVisible);
+
 
   const [highLevelConfig, setHighLevelConfig] = useState({
     shared: true,
@@ -95,8 +98,16 @@ export default function Graph(props: IProps) {
     },
   };
 
+  const handleSizeChange = (e: RadioChangeEvent) => {
+    range.start = parse(e.target.value);
+    setRange(range);
+    console.log('handleSizeChange', e.target.value)
+    setSize(e.target.value)
+    console.log('handleSizeChange', range);
+  };
+
   useEffect(() => {
-    if (monitorId>0) {
+    if (monitorId > 0) {
       const parsedRange = parseRange(range);
       const start = moment(parsedRange.start).unix();
       const end = moment(parsedRange.end).unix();
@@ -109,20 +120,38 @@ export default function Graph(props: IProps) {
         moment(parsedRange.end).unix(),
         ids
       ).then((res) => {
-          let values = res.dat["id="+monitorId];
-          let list:any =[];
-          for(var key in values) {
-             list.push([key, values[key]]);
-          }
-          const series = new Array;
+        let series = new Array();
+        console.log("指标数据查看");
+        _.map(res?.dat[0], (item) => {
+          // debugger
           series.push({
             id: _.uniqueId('series_'),
-            name: "指标",
-            metric: "指标",
-            data: list,
-          })         
-          setData(series);
-        })
+            name: getSerieName(item.metric),
+            metric: item.metric["__name__"],
+            data: item.values,
+          });
+        });
+        //  debugger; 
+        setData(series);
+
+        /**
+         let values = res.dat["id="+monitorId];
+         let list:any =[];
+         for(var key in values) {
+            list.push([key, values[key]]);
+         }
+         const series = new Array;
+         series.push({
+           id: _.uniqueId('series_'),
+           name: "指标",
+           metric: "指标",
+           data: list,
+         })         
+         setData(series);
+         */
+
+
+      })
         .catch((err) => {
           const msg = _.get(err, 'message');
           // setErrorContent(`Error executing query: ${msg}`);
@@ -131,84 +160,42 @@ export default function Graph(props: IProps) {
   }, [JSON.stringify(range), step, monitorId, refreshFlag]);
 
   return (
-    <div className='monitor-graph-container' style={{width:'100%'}}>
-      {/* <div className='prom-graph-graph-controls'>
-        <Space>
-          <TimeRangePicker value={range} onChange={setRange} dateFormat='YYYY-MM-DD HH:mm:ss' />
-          <InputNumber
-            placeholder='Res. (s)'
-            value={step}
-            onKeyDown={(e: any) => {
-              if (e.code === 'Enter') {
-                setStep(_.toNumber(e.target.value));
-              }
-            }}
-            onBlur={(e) => {
-                 setStep(_.toNumber(e.target.value));
-            }}
-          />
-          <Radio.Group
-            options={[
-              { label: <LineChartOutlined />, value: ChartType.Line },
-              { label: <AreaChartOutlined />, value: ChartType.StackArea },
-            ]}
-            onChange={(e) => {
-              e.preventDefault();
-              setChartType(e.target.value);
-            }}
-            value={chartType}
-            optionType='button'
-            buttonStyle='solid'
-          />
-          {graphOperates.enabled && (
-            <>
-              <Popover
-                placement='left'
-                content={<LineGraphStandardOptions highLevelConfig={highLevelConfig} setHighLevelConfig={setHighLevelConfig} />}
-                trigger='click'
-                autoAdjustOverflow={false}
-                getPopupContainer={() => document.body}
-              >
-                <Button icon={<SettingOutlined />} />
-              </Popover>
-              <Button
-                icon={
-                  <ShareAltOutlined
-                    onClick={() => {
-                      const dataProps = {
-                        type: 'timeseries',
-                        version: '3.0.0',
-                        name: promql,
-                        step,
-                        range,
-                        ...lineGraphProps,
-                        targets: [
-                          {
-                            expr: promql,
-                          },
-                        ],
-                        datasourceCate: 'prometheus',
-                        datasourceName: _.find(datasourceList, { id: datasourceValue })?.name,
-                        datasourceValue,
-                      };
-                      setTmpChartData([
-                        {
-                          configs: JSON.stringify({
-                            dataProps,
-                          }),
-                        },
-                      ]).then((res) => {
-                        const ids = res.dat;
-                        window.open('/chart/' + ids);
-                      });
-                    }}
-                  />
-                }
-              />
-            </>
-          )}
-        </Space>
-      </div> */}
+    <div className='monitor-graph-container' style={{ width: '100%' }}>
+      {toolVisible && (
+        <div className='prom-graph-graph-controls'>
+          <Space>
+            <div className='header_'>
+              <Radio.Group value={size} onChange={handleSizeChange}>
+                <Radio.Button value="now-1h" >近1小时</Radio.Button>
+                <Radio.Button value="now-3h">近3小时</Radio.Button>
+                <Radio.Button value="now-12h">近12小时</Radio.Button>
+                <Radio.Button value="now-24h">近24小时</Radio.Button>
+                <Radio.Button value="now-7d">近7天</Radio.Button>
+                <Radio.Button value="now-30d">近30天</Radio.Button>
+              </Radio.Group>
+              <div>
+              <TimeRangePickerWithRefresh
+                  // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+                  onChange={value=>{
+                    console.log(value)
+                    range.start = isMathString(value.start) ? parse(value.start) : moment(value.start);
+                    range.end = isMathString(value.end) ? parse(value.end) : moment(value.end);
+                    setRange(range);
+                                      
+                  }}
+                  value={range}
+                  localKey = 'monitor-timeRangePicker-value'
+             />
+
+
+
+              </div>
+            </div>
+          </Space>
+        </div>
+
+      )}
+
       <Timeseries inDashboard={false} values={lineGraphProps as any} series={data} />
     </div>
   );

@@ -65,6 +65,16 @@ function Card(props: Props, ref) {
   const { run: reloadCard } = useDebounceFn(
     () => {
       if (!rule) return;
+      if(filter.query==null || filter.query.length==0){
+          delete filter.query;          
+      }
+      if(filter.start<=0){
+        delete filter.start;          
+      }
+      if(filter.end<=0){
+        delete filter.end;          
+      }
+
       getAlertCards({ ...filter, rule: rule.trim() }).then((res) => {
         setCardList(res.dat);
       });

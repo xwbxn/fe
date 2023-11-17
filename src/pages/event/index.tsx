@@ -15,7 +15,7 @@
  *
  */
 import React, { useContext, useRef, useState } from 'react';
-import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu, DatePickerProps } from 'antd';
+import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu, DatePickerProps, Radio } from 'antd';
 import { AlertOutlined, ExclamationCircleOutlined, SearchOutlined, AppstoreOutlined, UnorderedListOutlined, DownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
@@ -24,7 +24,6 @@ import { deleteAlertEvents } from '@/services/warning';
 import { AutoRefresh } from '@/components/TimeRangePicker';
 import { CommonStateContext } from '@/App';
 import { getProdOptions } from '@/pages/alertRules/Form/components/ProdSelect';
-import DatasourceSelect from '@/components/DatasourceSelect/DatasourceSelect';
 import Card from './card';
 import Table from './Table';
 import { hoursOptions } from './constants';
@@ -33,14 +32,14 @@ import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 const { RangePicker } = DatePicker;
 import './index.less';
-
+import { exportTemplet } from '../historyEvents/services';
 // @ts-ignore
 import BatchAckBtn from 'plus:/parcels/Event/Acknowledge/BatchAckBtn';
 import moment from 'moment';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
-export function deleteAlertEventsModal(ids: number[], onSuccess = () => {}, t) {
+export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) {
   confirm({
     title: t('delete_confirm.title'),
     icon: <ExclamationCircleOutlined />,
@@ -54,7 +53,7 @@ export function deleteAlertEventsModal(ids: number[], onSuccess = () => {}, t) {
         onSuccess();
       });
     },
-    onCancel() {},
+    onCancel() { },
   });
 }
 
@@ -62,22 +61,21 @@ const Event: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
   const [view, setView] = useState<'card' | 'list'>('card');
   const { busiGroups, feats } = useContext(CommonStateContext);
-  const [start,setStart] = useState<number>(0);
-  const [end,setEnd] = useState<number>(0);
-  const [filter, setFilter] = useState<{
-    hours: number;
-    cate?: string;
-    datasourceIds: number[];
-    bgid?: number;
+  const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
+  const [ftype, setFtype] = useState<number>(1);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [filter, setFilter] = useState<any | {
+    group?: number;
     severity?: number;
     query: string;
-    type: any|number;
+    start: number;
+    end: number;
+    type: any | number;
   }>({
-    // hours: getDefaultHours(),
-    hours: 6,
-    datasourceIds: [],
     query: '',
-    type:null,
+    type: null,
+    start: 0,
+    end: 0,
   });
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
@@ -90,16 +88,17 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
   };
-  
-  const onOk = (value: DatePickerProps['value']  | RangePickerProps['value'] |any) => {
-    console.log('onOk: ', value);
-    value?.forEach((element,index) => {
-        if(index==0 && element!=null){
-          setStart(moment(element).unix())
-        }
-        if(index==1 && element!=null){
-          setEnd(moment(element).unix())
-        }
+
+  const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
+    value?.forEach((element, index) => {
+      if (index == 0 && element != null) {
+        filter["start"] = moment(element).unix()
+        setFilter({ ...filter });
+      }
+      if (index == 1 && element != null) {
+        filter["end"] = moment(element).unix()
+        setFilter({ ...filter });
+      }
     });
     setRefreshFlag(_.uniqueId('refresh_'));
   };
@@ -109,29 +108,6 @@ const Event: React.FC = () => {
         <Space>
           <Button icon={<AppstoreOutlined />} onClick={() => setView('card')} />
           <Button icon={<UnorderedListOutlined />} onClick={() => setView('list')} />
-          <Select
-            allowClear
-            placeholder={'查询类型'}
-            style={{ minWidth: 80 }}
-            value={filter.type}
-            // mode='multiple'
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                type: val,
-              });
-            }}
-            dropdownMatchSelectWidth={false}
-          >
-
-            {prodOptions.map((item) => {
-              return (
-                <Select.Option value={item.value} key={item.value}>
-                  {item.label}
-                </Select.Option>
-              );
-            })}
-          </Select>
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
@@ -139,7 +115,38 @@ const Event: React.FC = () => {
             locale={locale}
             onOk={onOk}
           />
-          
+          <Select
+            style={{ minWidth: 60 }}
+            placeholder={t('severity')}
+            allowClear
+            value={filter.severity}
+            onChange={(val) => {
+              setFilter({
+                ...filter,
+                severity: val,
+              });
+            }}
+          >
+            <Select.Option value={1}>S1</Select.Option>
+            <Select.Option value={2}>S2</Select.Option>
+            <Select.Option value={3}>S3</Select.Option>
+          </Select>
+          <Select
+            style={{ minWidth: 120 }}
+            placeholder={t('common:business_group')}
+            allowClear
+            value={filter.group}
+            onChange={(val) => {
+              setFilter({
+                ...filter,
+                group: val,
+              });
+            }}
+          >
+            {_.map(busiGroups, (item) => {
+              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
+            })}
+          </Select>
           <Input
             className='search-input'
             prefix={<SearchOutlined />}
@@ -161,37 +168,59 @@ const Event: React.FC = () => {
           }}
         >
           {view === 'list' && (
-            <Dropdown
-              overlay={
-                <Menu>
-                  <Menu.Item
-                    disabled={selectedRowKeys.length === 0}
-                    onClick={() =>
-                      deleteAlertEventsModal(
-                        selectedRowKeys,
-                        () => {
-                          setSelectedRowKeys([]);
-                          setRefreshFlag(_.uniqueId('refresh_'));
-                        },
-                        t,
-                      )
-                    }
-                  >
-                    {t('common:btn.batch_delete')}{' '}
-                  </Menu.Item>
-                  <BatchAckBtn
-                    selectedIds={selectedRowKeys}
-                    onOk={() => {
-                      setSelectedRowKeys([]);
-                      setRefreshFlag(_.uniqueId('refresh_'));
-                    }}
-                  />
-                </Menu>
-              }
-              trigger={['click']}
-            >
-              <Button style={{ marginRight: 8 }}>{t('batch_btn')}</Button>
-            </Dropdown>
+            <>
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item
+                      disabled={selectedRowKeys.length === 0}
+                      onClick={() =>
+                        deleteAlertEventsModal(
+                          selectedRowKeys,
+                          () => {
+                            setSelectedRowKeys([]);
+                            setRefreshFlag(_.uniqueId('refresh_'));
+                          },
+                          t,
+                        )
+                      }
+                    >
+                      {t('common:btn.batch_delete')}{' '}
+                    </Menu.Item>
+                    <Menu.Item
+                      onClick={() => {
+
+                        if (selectRowKeys.length <= 0) {
+                          Modal.confirm({
+                            title: "确认导出所有告警信息吗",
+                            onOk: async () => {
+                              setModalOpen(true);
+                            },
+                            onCancel() { },
+                          });
+                        } else {
+                          setModalOpen(true);
+                        }
+
+
+
+                      }}>导出</Menu.Item>
+
+                    <BatchAckBtn
+                      selectedIds={selectedRowKeys}
+                      onOk={() => {
+                        setSelectedRowKeys([]);
+                        setRefreshFlag(_.uniqueId('refresh_'));
+                      }}
+                    />
+                  </Menu>
+                }
+                trigger={['click']}
+              >
+                <Button style={{ marginRight: 8 }}>{t('batch_btn')}</Button>
+              </Dropdown>
+            </>
+
           )}
           <AutoRefresh
             onRefresh={() => {
@@ -204,28 +233,89 @@ const Event: React.FC = () => {
   }
 
   const filterObj = Object.assign(
-    { hours: filter.hours },
-    filter.datasourceIds.length ? { datasource_ids: filter.datasourceIds } : {},
     filter.severity ? { severity: filter.severity } : {},
     filter.query ? { query: filter.query } : {},
-    { bgid: filter.bgid },
-    filter.type ? { type:filter.type } : {},
+    { group: filter.group },
+    filter.start > 0 ? { start: filter.start } : {},
+    filter.end > 0 ? { end: filter.end } : {},
+    { alert_type: 1 },
   );
 
+  const handleModal = (action: string) => {
+    if (action == "open") {
+      let params: any = {};
+      if (selectRowKeys != null && selectRowKeys.length > 0) {
+        params.ids = selectRowKeys;
+      }
+      filter["ftype"] = ftype;
+      filter["alert_type"] = 1;
+      if (filter.query == null || filter.query.length == 0) {
+        delete filter["query"];
+      }
+      if (filter.start <= 0) {
+        delete filter["start"];
+      }
+      if (filter.end <= 0) {
+        delete filter["end"];
+      }
+
+
+      let url = "/api/n9e/alert-events/export-xls";
+      let exportTitle = "活跃告警告警信息";
+      exportTemplet(url, filter, params).then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res],
+          // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
+          { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".xls"
+        if (ftype === 1) {
+          fileType = ".xls"
+        } else if (ftype === 2) {
+          fileType = ".xml"
+        } else if (ftype === 3) {
+          fileType = ".txt"
+        }
+        const fileName = exportTitle + "数据_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        setModalOpen(false)
+      })
+    } else {
+      setModalOpen(false)
+    }
+  }
   return (
     <PageLayout icon={<AlertOutlined />} title={t('title')}>
       {view === 'card' ? (
         <Card header={renderLeftHeader()} filter={filterObj} refreshFlag={refreshFlag} />
       ) : (
-        <Table
-          header={renderLeftHeader()}
-          filter={filter}
-          filterObj={filterObj}
-          setFilter={setFilter}
-          refreshFlag={refreshFlag}
-          selectedRowKeys={selectedRowKeys}
-          setSelectedRowKeys={setSelectedRowKeys}
-        />
+        <>
+
+          <Table
+            header={renderLeftHeader()}
+            filter={filter}
+            filterObj={filterObj}
+            setFilter={setFilter}
+            refreshFlag={refreshFlag}
+            selectedRowKeys={selectedRowKeys}
+            setSelectedRowKeys={setSelectedRowKeys}
+          />
+          <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open") }} onCancel={e => { handleModal("close") }} >
+            <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
+              <Radio value={1} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>Excle</Radio>
+              <Radio value={2} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>XML</Radio>
+              <Radio value={3} onChange={e => {
+                setFtype(parseInt("" + e.target.value))
+              }}>TXT</Radio>
+            </Radio.Group>
+          </Modal>
+        </>
       )}
     </PageLayout>
   );
