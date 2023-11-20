@@ -23,14 +23,14 @@ const zh_CN = {
     title: '业务组管理',
     list: '业务组列表',
     search_placeholder: '业务名',
-    team_search_placeholder: '搜索团队名称',
+    team_search_placeholder: '支持模糊搜索表格内容',
     create: '创建业务组',
     edit: '编辑业务组',
     add_team: '添加团队',
     perm_flag: '权限',
     note_content: '告警规则，告警事件，监控对象，自愈脚本等都归属业务组，是一个在系统里可以自闭环的组织',
     empty: '业务组（监控对象、监控仪表盘、告警规则、自愈脚本都要归属某个业务组）为空，请先',
-    name: '业务组名称',
+    name: '团队名称',
     name_tip: `
       通过中划线分隔后会渲染成树结构，目前只支持两层 <1 />
       如：redis-监控 和 redis-登录 将显示成如下  <1 />

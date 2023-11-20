@@ -3,8 +3,8 @@ export const InterfaceForms = [
   { id: 'asset_interface', title: '资产信息接口' },
   { id: 'monitor_interface', title: '监测数据接口' },
   { id: 'alter_interface', title: '告警管理接口' },
-  { id: 'energy_consumption_interface', title: '能耗数据接口' },
-  { id: 'oaop_asset_interface', title: 'OAOP资产同步接口' },
+  // { id: 'energy_consumption_interface', title: '能耗数据接口' },
+  // { id: 'oaop_asset_interface', title: 'OAOP资产同步接口' },
 ]
 
 export const ParametersForms = [
