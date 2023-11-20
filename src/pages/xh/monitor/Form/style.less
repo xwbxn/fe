@@ -24,7 +24,15 @@
         }
     }
 }
-
+.monitor_management_button_zone {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    .ant-btn-default {
+        width: 100px;
+        letter-spacing: 5px;
+    }
+}
 
 
 .view-form {
@@ -39,8 +47,14 @@
         .images {
             justify-content: center;
             vertical-align: middle;
-            line-height: 78px;
+            line-height: 60px;
             margin-left: 10px;
+            width: 120px;
+            background: linear-gradient(#e66465, #9198e5);
+            margin: 10px;
+            display: flex;
+            color: #efefef;
+            font-size: 20px;
         }
         .info {
             margin-left: 10px;
@@ -148,12 +162,14 @@
             }
             .group_monitor_body {
                 margin-top: 5px;
-                display: flex;   
+                display: inline-flex;
+                flex-wrap: wrap;
                 width: 100%;
+                padding-left: 3px;
                 .every_graph {
                     width: 32%;
                     border: 0.5px solid #cecece;
-                    margin: 3px;
+                    margin: 8px;
                 }
                 .every_graph :hover {
                     .icons {

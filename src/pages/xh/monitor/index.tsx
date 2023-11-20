@@ -180,24 +180,21 @@ export default function () {
                   onCancel() { },
                 });
               }
-            }} />
-          <Link title='设置告警规则'
-            to={{
-              pathname: `/alert-rules/edit/${record.id}?mode=clone`,
-            }}
-            target='_blank'
-          >
-            <FileProtectOutlined />
-          </Link>
+            }} />          
+
+          <FileProtectOutlined title='查看资产告警规则' onClick={() => {
+                showModal("rules", record.asset_id, "view")
+          }} />
+          
           <FileSearchOutlined title='查看监控配置' onClick={() => {
-            showModal("asset", record.id, "view")
+                showModal("asset", record.id, "view")
           }}
           />
           <FundOutlined title='监控指标信息' onClick={() => {
-            showModal("monitor", record.id, "view")
+                showModal("monitor", record.id, "view")
           }} />
           <EditOutlined title='编辑监控信息' onClick={() => {
-            showModal("asset", record.id, "edit")
+                showModal("asset", record.id, "edit")
           }}
           />
           <DeleteOutlined title='删除监控信息' onClick={() => {
@@ -221,14 +218,12 @@ export default function () {
 
   const [selectColum, setSelectColum] = useState<any[]>()
   function handelShowColumn(checkedValues) {
-
     let showColumns = new Array();
     optionColumns.forEach(item => {
       if (checkedValues.includes(item.title)) {
         showColumns.push(item)
       }
-    });
-    
+    });    
     setSelectColum(showColumns.concat(fixColumns));
   }
 
@@ -270,7 +265,6 @@ export default function () {
       dat.list.forEach(v => {
         assetInfo[v.id] = (v);
       })
-      console.log(assetInfo)
       setAssetInfo({ ...assetInfo });
       getTableData(assetInfo);
     });
@@ -385,18 +379,18 @@ export default function () {
     if (action == "asset") {
       let url = '/xh/monitor/add?type=asset&action=' + operate;
       if (id == 0) {
-        history.push(url);
+            history.push(url);
       } else {
-        history.push(url + "&id=" + id);
+            history.push(url + "&id=" + id);
       }
-    } else if (action == "view") {
-      history.push('/xh/monitor/add?type=view&id=' + id);
-    } else if (action == "monitor") {
-      history.push('/xh/monitor/add?type=monitor&id=' + id + "&action=monitor");
+    }else if (action == "monitor") {
+       history.push('/xh/monitor/add?type=monitor&id=' + id + "&action=monitor");
+    }else if(action == "rules"){
+        let asset = assetInfo[id];
+        history.push(`/alert-rules?id=${asset.group_id}&&asset_id=${id}`);
     }
   }
   const titleRender = (node) => {
-    // console.log("titleRender: ",node)
 
     return (
       <div style={{ position: 'relative', width: '100%' }}>
@@ -417,7 +411,6 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
   const formSubmit = (values, businessForm, action, businessZip) => {
-
     let fields = dealFieldsToForm(businessZip);
     console.log("_Submit", values, businessForm);
     let submitFieldMap = new Map();
@@ -477,49 +470,7 @@ export default function () {
             fieldNames={{ key: 'id', title: 'name' }}
             onSelect={onSelect}
           />
-          {/* <Accordion
-            isAutoInitialized={false}
-            refreshLeft={refreshLeft}
-            treeData={treeData}
-            expandAll={true}
-            addButton={secondAddButton}
-            addMenu={true}
-            handleClick={async (key: any, node: any, type) => {
-              console.log("点击的事件参数为", key, node, type)
-              if (type == "query") {
-                  setTypeId(key);
-                  setRefreshKey(_.uniqueId('refreshKey_'));
-              }
-              if (key < 0) {
-                let params = {
-                  name: "新目录",
-                  parent_id: node
-                }
-                insertAssetDirectoryTree(params).then((res) => {
-                  loadDataCenter();
-                })
-              } else {
-                if (type == "delete") {
-                  deleteAssetDirectoryTree(key).then((res) => {
-                    message.success("删除成功！")
-                    loadDataCenter();
-                  })
-                } else if (type == 'update') {
-                  updateAssetDirectoryTree(node).then((res) => {
-                    message.success("修改成功！")
-                    loadDataCenter();
-                  })
-                } else if (type == 'move') {
-                  moveAssetDirectoryTree(node).then((res) => {
-                    message.success("修改成功！")
-                    loadDataCenter();
-                  })
-                }
-              }
-
-
-            }}
-          /> */}
+         
         </div>
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
@@ -556,28 +507,12 @@ export default function () {
 
                   ]}
                 />
-                {/* <Select
-                  // defaultValue="lucy"
-                  placeholder="选择过滤器"
-                  style={{ width: 120 }}
-                  allowClear
-                  onChange={(value)=>{
-                    setFilterType(value);
-                  }}
-                  options={[
-                     { value: "1", label: '数据源名称' },
-                     { value: "2", label: 'IP地址解析器' },
-                     { value: "3", label: '数据源类型' },
-                     { value: "4", label: '解析器' }
-                  ]}
-                /> */}
 
               </div>
             </Space>
             <div className='tool_right'>
               <div>
                 <Button className='tool_rightbtn'
-
                   onClick={() => {
                     showModal("asset", 0, "add")
                   }}
@@ -587,26 +522,6 @@ export default function () {
                   {t('新增')}
                 </Button>
                 &nbsp; &nbsp; &nbsp;
-              </div>
-              <div>
-                {/* <Button
-                  onClick={() => {
-                    showModal("view",1)
-                  }}
-                  type='primary'
-                >
-                  {t('查看配置')}
-                </Button> */}
-              </div>
-              <div>
-                {/* <Button
-                  onClick={() => {
-                    showModal("monitor",1)
-                  }}
-                  type='primary'
-                >
-                  {t('查看监控')}
-                </Button> */}
               </div>
 
               <div>

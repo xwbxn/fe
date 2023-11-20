@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 const { TextArea } = Input;
 
-export default function (props: { initialValues: object; initParams: object; mode?: string }) {
+export default function (props: { initialValues: object; initParams: object; mode?: string, disabled: boolean }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
@@ -171,102 +171,104 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   return (
-    <Form
-      name='asset'
-      form={form}
-      layout='vertical'
-      onFinish={submitForm}
-      onValuesChange={() => {
-        genForm(assetList, assetTypes);
-      }}
-    >
-      <Form.Item hidden name='id'>
-        <Input></Input>
-      </Form.Item>
-      <Form.Item hidden name='type'>
-        <Input></Input>
-      </Form.Item>
-      <div className='card-wrapper'>
-        <Card {...panelBaseProps} title={t('basic')}>
-          <Row gutter={10}>
-            <Col span={8}>
-              <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
-                <Select style={{ width: '100%' }} showSearch options={assetOptions} placeholder='请选择资产' disabled={props.mode === 'edit'} />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
-                <Input placeholder='请输入资产名称' />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
-                <Select
-                  onChange={(v) => {
-                    setDatasource(v);
-                  }}
-                  options={[
-                    {
-                      value: 1,
-                      label: '普罗米修斯',
-                    },
-                  ]}
-                ></Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={10}>
-            <Col span={24}>
-              <Form.Item label='监控脚本' name='monitoring_sql' rules={[{ required: false }]}>
-                <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={10}>
-            <Col span={12}>
-              <Form.Item label='状态' name='status'>
-                <Select
-                  style={{ width: '100%' }}
-                  options={[
-                    { value: 0, label: '正常' },
-                    { value: 1, label: '失效' },
-                  ]}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label='采集器' name='target_id'>
-                <Select style={{ width: '100%' }} options={identList} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={10}>
-            <Col span={24}>
-              <Form.Item label='描述' name='remark'>
-                <TextArea placeholder='填写描述' />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Card>
-      </div>
-      <div className='card-wrapper'>
-        <Card {...panelBaseProps} title={'配置信息'}>
-          <Row gutter={10}>
-            {params.map((v) => {
-              return (
-                <Col key={`col=${v.name}`} span={12}>
-                  <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
-                    {renderForm(v)}
-                  </Form.Item>
-                </Col>
-              );
-            })}
-            {/* <Col span={12}>
+    <>
+      <Form
+        name='asset'
+        form={form}
+        layout='vertical'
+        onFinish={submitForm}
+        disabled={props.disabled}
+        onValuesChange={() => {
+          genForm(assetList, assetTypes);
+        }}
+      >
+        <Form.Item hidden name='id'>
+          <Input></Input>
+        </Form.Item>
+        <Form.Item hidden name='type'>
+          <Input></Input>
+        </Form.Item>
+        <div className='card-wrapper'>
+          <Card {...panelBaseProps} title={t('basic')}>
+            <Row gutter={10}>
+              <Col span={8}>
+                <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
+                  <Select style={{ width: '100%' }} showSearch options={assetOptions} placeholder='请选择资产' disabled={props.mode === 'edit'} />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
+                  <Input placeholder='请输入资产名称' />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
+                  <Select
+                    onChange={(v) => {
+                      setDatasource(v);
+                    }}
+                    options={[
+                      {
+                        value: 1,
+                        label: '普罗米修斯',
+                      },
+                    ]}
+                  ></Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={10}>
+              <Col span={24}>
+                <Form.Item label='监控脚本' name='monitoring_sql' rules={[{ required: false }]}>
+                  <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={10}>
+              <Col span={12}>
+                <Form.Item label='状态' name='status'>
+                  <Select
+                    style={{ width: '100%' }}
+                    options={[
+                      { value: 0, label: '正常' },
+                      { value: 1, label: '失效' },
+                    ]}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label='采集器' name='target_id'>
+                  <Select style={{ width: '100%' }} options={identList} />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={10}>
+              <Col span={24}>
+                <Form.Item label='描述' name='remark'>
+                  <TextArea placeholder='填写描述' />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+        </div>
+        <div className='card-wrapper'>
+          <Card {...panelBaseProps} title={'配置信息'}>
+            <Row gutter={10}>
+              {params.map((v) => {
+                return (
+                  <Col key={`col=${v.name}`} span={12}>
+                    <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name} initialValue={props.initParams[v.name]}>
+                      {renderForm(v)}
+                    </Form.Item>
+                  </Col>
+                );
+              })}
+              {/* <Col span={12}>
               <Form.Item label='探针' name='ident'>
                 <Select style={{ width: '100%' }} options={identList} />
               </Form.Item>
             </Col> */}
-            {/* <Col span={24}>
+              {/* <Col span={24}>
               <Form.Item
                 label={
                   <Space>
@@ -282,27 +284,45 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <CodeMirror height='200px' extensions={[StreamLanguage.define(toml)]}></CodeMirror>
               </Form.Item>
             </Col> */}
-          </Row>
-        </Card>
-      </div>
-      <div className='card-wrapper'>
-        <Form.Item>
-          <div className='bottom_button'>
-            <Space>
-              <Button type='primary' htmlType='submit'>
-                保存
-              </Button>
-              <Button
-                onClick={() => {
-                  history.back();
-                }}
-              >
-                取消
-              </Button>
-            </Space>
+            </Row>
+          </Card>
+        </div>
+        {props.disabled == false && (
+          <div className='card-wrapper'>
+            <Form.Item>
+              <div className='bottom_button'>
+                <Space>
+                  <Button type='primary' htmlType='submit'>
+                    保存
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      history.back();
+                    }}
+                  >
+                    取消
+                  </Button>
+                </Space>
+              </div>
+            </Form.Item>
           </div>
-        </Form.Item>
+        )}
+
+      </Form>
+      {props.disabled == true && (
+      <div className='monitor_management_button_zone'>
+        <Button
+          onClick={() => {
+            history.back();
+          }}
+        >
+          取消
+        </Button>
+
+
       </div>
-    </Form>
+      )}
+    </>
+
   );
 }
