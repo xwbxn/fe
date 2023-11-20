@@ -97,6 +97,9 @@ import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 import plusLoader from 'plus:/utils/loader';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
+import Designer from '@/pages/bigScreen/Designer';
+import Preview from '@/pages/bigScreen/Preview';
+import Topo from '@/pages/topoGraph/Designer';
 
 
 const Packages = dynamicPackages();
@@ -238,6 +241,10 @@ export default function Content() {
         <Route exact path='/permissions' component={Permissions} />
         <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
+
+        <Route exact path='/bigscreen/designer' component={Designer} />
+        <Route exact path='/bigscreen/preview' component={Preview} />
+        <Route exact path='/bigscreen/topo' component={Topo} />
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

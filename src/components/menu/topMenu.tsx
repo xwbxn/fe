@@ -1,6 +1,6 @@
 import { CommonStateContext } from '@/App';
 import { getMenuPerm } from '@/services/common';
-import Icon, { DownOutlined } from '@ant-design/icons';
+import Icon, { DownOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
 import { Dropdown, Menu, Space } from 'antd';
 import _ from 'lodash';
@@ -124,7 +124,7 @@ const getMenuList = (t) => {
               key: '/alert-subscribes',
               label: t('订阅规则'),
             },
-            
+
             {
               key: '/alert-mutes',
               label: t('屏蔽规则'),
@@ -137,9 +137,9 @@ const getMenuList = (t) => {
               key: '/help/notification-tpls',
               label: t('通知模板'),
             },
-          ]
-        },        
-       
+          ],
+        },
+
         {
           key: '/alert-cur-events',
           label: t('当前告警'),
@@ -212,7 +212,17 @@ const getMenuList = (t) => {
         },
       ],
     },
-   
+    {
+      key: 'bigscreen',
+      icon: <ProjectOutlined />,
+      label: t('大屏管理'),
+      children: [
+        {
+          key: '/bigscreen/designer',
+          label: t('大屏设计'),
+        },
+      ],
+    },
     {
       key: 'report',
       icon: <IconFont type='icon-Menu_PersonnelOrganization' />,
@@ -234,7 +244,7 @@ const getMenuList = (t) => {
               key: '/report/explorer2',
               label: t('告警报表'),
             },
-          ]
+          ],
         },
         {
           key: '/report-group2',
@@ -248,8 +258,8 @@ const getMenuList = (t) => {
               key: '/report/explorer4',
               label: t('告警报表'),
             },
-          ]
-        }
+          ],
+        },
       ],
     },
     {
@@ -283,18 +293,18 @@ const getMenuList = (t) => {
               label: t('组织管理'),
             },
           ],
-        },              
+        },
         {
           key: '/help/sso',
           label: t('单点登录'),
-        }, 
+        },
         {
           key: '/help/version',
           label: t('系统版本'),
         },
         {
           key: '/target/version',
-          label: t('客户端版本')
+          label: t('客户端版本'),
         },
         {
           key: '/help/other',
@@ -420,7 +430,8 @@ export default function () {
       location.pathname.startsWith('/chart/') ||
       location.pathname.startsWith('/dashboards/share/') ||
       location.pathname === '/callback' ||
-      location.pathname.indexOf('/polaris/screen') === 0
+      location.pathname.indexOf('/polaris/screen') === 0 ||
+      location.pathname.startsWith('/bigscreen/preview')
     ) {
       return true;
     }
@@ -436,8 +447,8 @@ export default function () {
   };
 
   const handleClick = (item) => {
-    if((item.key as string) === "home") {
-      window.location.href = '/prod-api/'
+    if ((item.key as string) === 'home') {
+      window.location.href = '/prod-api/';
     }
     if ((item.key as string).startsWith('/')) {
       history.push(item.key as string);

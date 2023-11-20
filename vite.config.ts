@@ -76,6 +76,17 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    exclude: [
+      '@antv/x6',
+      '@antv/x6-plugin-dnd',
+      '@antv/x6-plugin-history',
+      '@antv/x6-plugin-selection',
+      '@antv/x6-plugin-snapline',
+      '@antv/x6-plugin-clipboard',
+      '@antv/x6-plugin-transform',
+    ],
+  },
   build: {
     target: 'chrome58',
     outDir: 'pub',
