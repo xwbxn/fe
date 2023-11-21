@@ -622,6 +622,7 @@ export default function () {
               </div>
             </Space>
             <div className='tool_right'>
+            <Space>
               <div>
                 <Button
                   onClick={() => {
@@ -701,6 +702,8 @@ export default function () {
                   </Button>
                 </Dropdown>
               </div>
+            </Space>
+
             </div>
           </div>
           <div className='assets-list' style={{ width:'100%' }}>
