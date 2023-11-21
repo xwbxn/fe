@@ -26,6 +26,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
   const [optionMap, setOptionMap] = useState({});  
   const [renderDataMap, setRenderDataMap] = useState({});  
   const [confirmLoading, setConfirmLoading] = useState<boolean>(false);
+  const [fileList, setFileList] = useState<any>([]);
 
 
   // let selectOptionData = new Map()
@@ -38,32 +39,6 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
 
   useEffect(() => {
     console.log("initData",initData)
-      
-    // }else if (operateType === OperateType.AssetBatchImport) {
-    //   let title = "数据导入";
-    //   setButtonTitle(title)
-    // } else if (operateType === OperateType.CreatedCode) {
-    //   setButtonTitle("批量下载")
-    // } else if (operateType === OperateType.ChangeResponsible) {
-    //   getUsers().then(({ dat }) => {
-    //     var userList = new Array()
-    //     dat.forEach((item) => {
-    //       userList.push({
-    //         value: item.nickname,
-    //         label: item.nickname
-    //       })
-    //     })
-    //     optionMap["system_users"] = userList;
-    //     setOptionMap({ ...optionMap })
-    //   });
-    // } else
-    if (operateType === OperateType.ChangeOrganize) {
-      getOrganizationTree({}).then(({ dat }) => {
-        optionMap["organs"] = dat;
-        setOptionMap({ ...optionMap })
-      });
-     }
-
   }, [operateType])
 
 
@@ -115,104 +90,67 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
     // }
     
 };
+const props = {
+  showUploadList: false,
+  onRemove: file => {
+    setFileList([])
+  },
+  beforeUpload: file => {
+    // console.log(file)
+    let { name } = file;
+    var fileExtension = name.substring(name.lastIndexOf('.') + 1);//截取文件后缀名
+    setFileName(name);
+    let newList = new Array();
+    newList.push(file)
+    fileList.concat(...newList);
+    setFileList(newList)
+    return false;
+  },
+  fileList,
+};
 
-  // //批量导入设备页面
-  // const assetBatchImportDetail = () => {
-  //   return {
-  //     isFormItem: true,
-  //     operateTitle: t('数据导入'),
-  //     render() {
-  //       return (
+  //批量导入设备页面
+  const batchImportDetail = () => {
+    return {
+      isFormItem: true,
+      operateTitle: t('用户导入'),
+      render() {
+        return (
 
-  //         <Form.Item label="选择文件" name="file" rules={[{ required: true }]}>
-  //           <div key={Math.random()} style={{ display: 'inline-flex', gap: '8px' }}>
-  //             <Input value={fileName} style={style.style1}></Input>
-  //             <Upload {...props}>
-  //               <Button type="primary">
-  //                 <Icon type="upload" />浏览
-  //               </Button>
-  //             </Upload>
-  //             <Button className='down_load_button'
-  //               onClick={async event => {
-  //                 console.log(theme, "updating    update...");
-  //                 let url = "/api/n9e/asset-basic/templet";
-  //                 let params = {};
-  //                 let exportTitle = "资产";
-  //                 exportTemplet(url, params).then((res) => {
-  //                   const url = window.URL.createObjectURL(new Blob([res],
-  //                     // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
-  //                     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-  //                   const link = document.createElement('a');
-  //                   link.href = url;
-  //                   const fileName = exportTitle + "导入模板_" + moment().format('MMDDHHmmss') + ".xls" //decodeURI(res.headers['filename']);
-  //                   link.setAttribute('download', fileName);
-  //                   document.body.appendChild(link);
-  //                   link.click();
-  //                 });
-  //               }}
-  //               style={{ border: '0px solid #fff', fontSize: '14px', color: "#40A2EC" }}>下载模板</Button>
+          <Form.Item label="选择文件" name="file" rules={[{ required: true }]}>
+            <div key={Math.random()} style={{ display: 'inline-flex', gap: '8px' }}>
+              <Input value={fileName}  style={style.style1}></Input>
+              <Upload {...props}>
+                <Button type="primary">
+                  <Icon type="upload" />浏览
+                </Button>
+              </Upload>
+              <Button className='down_load_button'
+                onClick={async event => {
+                  let url = "/api/n9e/xh/users/templet";
+                  let params = {};
+                  let exportTitle = "用户";                  
+                  exportTemplet(url, params).then((res) => {
+                    const url = window.URL.createObjectURL(new Blob([res],
+                      // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
+                      { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    const fileName = exportTitle + "导入模板_" + moment().format('MMDDHHmmss') + ".xls" //decodeURI(res.headers['filename']);
+                    link.setAttribute('download', fileName);
+                    document.body.appendChild(link);
+                    link.click();
+                  });
+                }}
+                style={{ border: '0px solid #fff', fontSize: '14px', color: "#40A2EC" }}>下载模板</Button>
 
-  //           </div>
-  //         </Form.Item>
-  //       );
-  //     },
-  //   };
+            </div>
+          </Form.Item>
+        );
+      },
+    };
 
-  // }
-  // //批量导入设备页面
-  // const assetSetBatchImportDetail = () => {
-  //   return {
-  //     isFormItem: true,
-  //     operateTitle: t('数据导入'),
-  //     render() {
-  //       return (
-
-  //         <Form.Item label="选择文件" name="file" rules={[{ required: true }]}>
-  //           <div key={Math.random()} style={{ display: 'inline-flex', gap: '8px' }}>
-  //             <Input value={fileName}  style={style.style1}></Input>
-  //             <Upload {...props}>
-  //               <Button type="primary">
-  //                 <Icon type="upload" />浏览
-  //               </Button>
-  //             </Upload>
-  //             <Button className='down_load_button'
-  //               onClick={async event => {
-  //                 console.log(theme, "updating    update...");
-  //                 let url = "/api/n9e/asset-basic/templet";
-  //                 let params = {};
-  //                 let exportTitle = "资产";
-  //                 if (theme.businessId == "device_model_set") {
-  //                   url = "/api/n9e/device-model/templet";
-  //                   exportTitle = "设备型号"
-  //                 } else if (theme.businessId == "producer_set") {
-  //                   url = "/api/n9e/device-producer/templet";
-  //                   exportTitle = theme.title;
-  //                   params["type"] = theme.key;
-  //                 } else if (theme.businessId == "device-cabinet") {
-  //                   url = "/api/n9e/device-cabinet/templet";
-  //                   exportTitle = theme.title;
-  //                 }
-  //                 exportTemplet(url, params).then((res) => {
-  //                   const url = window.URL.createObjectURL(new Blob([res],
-  //                     // 设置该文件的mime类型，这里对应的mime类型对应为.xlsx格式                          
-  //                     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-  //                   const link = document.createElement('a');
-  //                   link.href = url;
-  //                   const fileName = exportTitle + "导入模板_" + moment().format('MMDDHHmmss') + ".xls" //decodeURI(res.headers['filename']);
-  //                   link.setAttribute('download', fileName);
-  //                   document.body.appendChild(link);
-  //                   link.click();
-  //                 });
-  //               }}
-  //               style={{ border: '0px solid #fff', fontSize: '14px', color: "#40A2EC" }}>下载模板</Button>
-
-  //           </div>
-  //         </Form.Item>
-  //       );
-  //     },
-  //   };
-
-  // }
+  }
 
  
   //修改所属组织
@@ -303,9 +241,7 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
  
 
   const operateDetail = {  
-    // addScrapDetail, 
-    // assetBatchImportDetail,
-    // assetSetBatchImportDetail,
+    batchImportDetail,
     changeOrganizeDetail,
     noneDetail: () => ({
       operateTitle: '',
@@ -343,27 +279,19 @@ export const OperationModal = ({ width,operateType, setOperateType, initData, re
           reloadList(null,operateType);
       });
     }
-    // else if(operateType === OperateType.AssetSetBatchImport){
+    if(operateType === OperateType.BatchImport){
       
-    //   let formData = new FormData();
-    //   formData.append("file", fileList[0]);
-    //   let url = "/api/n9e/device-model/import-xls";      
-    //   if (theme.businessId == "device_model_set") {
-    //     url = "/api/n9e/device-model/import-xls";
-    //   } else if (theme.businessId == "producer_set") {
-    //     url = "api/n9e/device-producer/import-xls";   
-    //     formData.append("type",theme.key);    
-    //   } else if (theme.businessId == "device-cabinet") {
-    //       url = "/api/n9e/device-cabinet/import-xls";
-    //   }
-    //   console.log("批量导入",url);
-    //   importAssetSetData(url, formData).then((res) => {
-    //     message.success('批量导入成功');
-    //     setFileName("")
-    //     reloadList(null,operateType);
-    //   })   
+      let formData = new FormData();
+      formData.append("file", fileList[0]);
+      let url = "/api/n9e/xh/users/import-xls";
+      console.log("批量导入",url);
+      importAssetSetData(url, formData).then((res) => {
+        message.success('批量导入成功');
+        setFileName("")
+        reloadList(null,operateType);
+      })   
     
-    // }
+    }
 
   }
 

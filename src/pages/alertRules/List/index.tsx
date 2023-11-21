@@ -51,7 +51,6 @@ export default function List(props: ListProps) {
   const { bgid,assetid } = props;
   const { t } = useTranslation('alertRules');
   const history = useHistory();
-  const { datasourceList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
   const [filter, setFilter] = useState<Filter>({});  
   const [params, setParams] = useState<any>({
@@ -251,16 +250,20 @@ export default function List(props: ListProps) {
 
   useEffect(() => {
     if (bgid) {
-      
-      if(filter.query!=null && filter.query.length>0){
+      if(assetid!=null && assetid>0){
+        params["filter"] =3;
+        params["query"] = ""+assetid;
+      }else if(filter.query!=null && filter.query.length>0){
         params["query"] = filter.query;
         if(type=="alert_levels" ){
           params["filter"] =1;
         }else if(type=="asset_types"){
           params["filter"] =2;
         }
-      }
-      
+      }else{
+        delete params["filter"];
+        delete params["query"];
+      }    
       getAlertRules(params);
     }
   }, [bgid,filter.query]);
