@@ -120,7 +120,7 @@ const getMenuList = (t) => {
             },
             {
               key: '/permissions',
-              label: t('权限管理'),
+              label: t('角色管理'),
             },
           ],
         },
