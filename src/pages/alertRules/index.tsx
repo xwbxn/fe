@@ -36,8 +36,9 @@ export default function index() {
   const { t } = useTranslation('alertRules');
   const { search } = useLocation();
   const history = useHistory();
-  const { id } = queryString.parse(search);
-  const bgid = id ? Number(id) : commonState.curBusiId;
+  const { id,asset_id } = queryString.parse(search);
+  const bgid = id ? Number(id) : commonState.curBusiId;  
+  const assetid = asset_id ? Number(asset_id) : 0;
 
   return (
     <PageLayout title={t('title')} icon={<SettingOutlined />}>
@@ -49,7 +50,7 @@ export default function index() {
             commonState.setCurBusiId(id);
           }}
         />
-        {bgid ? <List bgid={bgid} /> : <BlankBusinessPlaceholder text='告警规则' />}
+        {bgid ? <List bgid={bgid}  assetid={assetid}/> : <BlankBusinessPlaceholder text='告警规则' />}
       </div>
     </PageLayout>
   );

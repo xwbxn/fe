@@ -26,36 +26,50 @@ import SearchInput from '@/components/BaseSearchInput';
 import usePagination from '@/components/usePagination';
 import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/services/warning';
 import { CommonStateContext } from '@/App';
-import { priorityColor } from '@/utils/constant';
+import { getAssetsStypes } from '@/services/assets';
 import Tags from '@/components/Tags';
 import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
-import { CopyTwoTone, DeleteOutlined, DiffTwoTone, EditOutlined, FileSearchOutlined, PoweroffOutlined, ProfileTwoTone } from '@ant-design/icons';
+import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, PoweroffOutlined } from '@ant-design/icons';
+import parameters from '@/pages/system/parameters';
 
 interface ListProps {
   bgid?: number;
+  assetid?:number;
 }
 
 interface Filter {
   cate?: string;
   datasourceIds?: number[];
   search?: string;
-  prod?: string;
-  severities?: number[];
+  query?: any;
 }
 
 export default function List(props: ListProps) {
-  const { bgid } = props;
+  const { bgid,assetid } = props;
   const { t } = useTranslation('alertRules');
   const history = useHistory();
-  const { datasourceList } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
-  const [filter, setFilter] = useState<Filter>({});
+  const [filter, setFilter] = useState<Filter>({});  
+  const [params, setParams] = useState<any>({
+       limit:10,page:1
+  });
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
+  const [type,setType] = useState<string>("");
+  const [typeOptions, setTypeOptions] = useState<any[]>([
+    //  {
+    //   label: '告警级别',
+    //   options: [
+    //     { label: 'S1', value: 1 },
+    //     { label: 'S2', value: 2 },
+    //     { label: 'S3', value: 3 },
+    //   ]
+    //  }
+    ]);
   const [loading, setLoading] = useState(false);
   const columns: ColumnType<AlertRuleType<any>>[] = [
     {
@@ -78,101 +92,6 @@ export default function List(props: ListProps) {
       dataIndex: 'rule_config_cn',
       width: 100,
     },
-    // {
-    //   title: '数据源类型',
-    //   dataIndex: 'cate',
-    //   width: 100,
-    // },
-    // {
-    //   title: '数据源',
-    //   dataIndex: 'datasource_ids',
-    //   width: 100,
-    //   ellipsis: {
-    //     showTitle: false,
-    //   },
-    //   render(value) {
-    //     if (!value) return '-';
-    //     return (
-    //       <Tags
-    //         width={70}
-    //         data={_.compact(
-    //           _.map(value, (item) => {
-    //             if (item === 0) return '$all';
-    //             const name = _.find(datasourceList, { id: item })?.name;
-    //             if (!name) return '';
-    //             return name;
-    //           }),
-    //         )}
-    //       />
-    //     );
-    //   },
-    // },
-    // {
-    //   title: '名称 & 级别 & 附加标签',
-    //   dataIndex: 'name',
-    //   render: (data, record) => {
-    //     return (
-    //       <div
-    //         style={{
-    //           display: 'flex',
-    //           flexDirection: 'column',
-    //           gap: 2,
-    //         }}
-    //       >
-    //         <div>
-    //           <Link
-    //             className='table-text'
-    //             to={{
-    //               pathname: `/alert-rules/edit/${record.id}`,
-    //             }}
-    //           >
-    //             {data}
-    //           </Link>
-    //         </div>
-    //         <div
-    //           style={{
-    //             display: 'flex',
-    //             flexWrap: 'wrap',
-    //             gap: 4,
-    //           }}
-    //         >
-    //           {_.map(record.severities, (severity) => {
-    //             return (
-    //               <Tag
-    //                 key={severity}
-    //                 color={priorityColor[severity - 1]}
-    //                 style={{
-    //                   marginRight: 0,
-    //                 }}
-    //               >
-    //                 S{severity}
-    //               </Tag>
-    //             );
-    //           })}
-    //         </div>
-    //         <div>
-    //           {_.map(record.append_tags, (item) => {
-    //             return (
-    //               <Tooltip key={item} title={item}>
-    //                 <Tag color='purple' style={{ maxWidth: '100%' }}>
-    //                   <div
-    //                     style={{
-    //                       maxWidth: 'max-content',
-    //                       overflow: 'hidden',
-    //                       textOverflow: 'ellipsis',
-    //                     }}
-    //                   >
-    //                     {item}
-    //                   </div>
-    //                 </Tag>
-    //               </Tooltip>
-    //             );
-    //           })}
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: '告警接收组',
       dataIndex: 'notify_groups_obj',
@@ -201,32 +120,6 @@ export default function List(props: ListProps) {
       dataIndex: 'update_by',
       width: 65,
     },
-    // {
-    //   title: t('common:table.enabled'),
-    //   dataIndex: 'disabled',
-    //   width: 65,
-    //   render: (disabled, record) => (
-    //     <Switch
-    //       checked={disabled === AlertRuleStatus.Enable}
-    //       size='small'
-    //       onChange={() => {
-    //         const { id, disabled } = record;
-    //         bgid &&
-    //           updateAlertRules(
-    //             {
-    //               ids: [id],
-    //               fields: {
-    //                 disabled: !disabled ? 1 : 0,
-    //               },
-    //             },
-    //             bgid,
-    //           ).then(() => {
-    //             getAlertRules();
-    //           });
-    //       }}
-    //     />
-    //   ),
-    // },
     {
       title: '操作',
       width: 120,
@@ -250,7 +143,7 @@ export default function List(props: ListProps) {
                     },
                     bgid,
                   ).then(() => {
-                    getAlertRules();
+                    getAlertRules(params);
                   });
               }}
             />
@@ -281,7 +174,7 @@ export default function List(props: ListProps) {
                     bgid &&
                       deleteStrategy([record.id], bgid).then(() => {
                         message.success('删除成功');
-                        getAlertRules();
+                        getAlertRules(params);
                       });
                   },
 
@@ -301,53 +194,79 @@ export default function List(props: ListProps) {
       },
     },
   ];
-  const includesProm = (ids?: number[]) => {
-    return _.some(ids, (id) => {
-      return _.some(datasourceList, (item) => {
-        if (item.id === id) return item.plugin_type === 'prometheus';
-      });
-    });
-  };
 
   const filterData = () => {
-    return data.filter((item) => {
-      const { cate, datasourceIds, search, prod, severities } = filter;
-      const lowerCaseQuery = search?.toLowerCase() || '';
-      return (
-        (item.name.toLowerCase().indexOf(lowerCaseQuery) > -1 || item.append_tags.join(' ').toLowerCase().indexOf(lowerCaseQuery) > -1) &&
-        ((prod && prod === item.prod) || !prod) &&
-        ((item.severities &&
-          _.some(item.severities, (severity) => {
-            if (_.isEmpty(severities)) return true;
-            return _.includes(severities, severity);
-          })) ||
-          !item.severities) &&
-        (_.some(item.datasource_ids, (id) => {
-          if (includesProm(datasourceIds) && id === 0) return true;
-          return _.includes(datasourceIds, id);
-        }) ||
-          datasourceIds?.length === 0 ||
-          !datasourceIds)
-      );
-    });
+    // return data.filter((item) => {
+    //   const { cate, datasourceIds, search, prod, severities } = filter;
+    //   const lowerCaseQuery = search?.toLowerCase() || '';
+    //   return (
+    //     (item.name.toLowerCase().indexOf(lowerCaseQuery) > -1 || item.append_tags.join(' ').toLowerCase().indexOf(lowerCaseQuery) > -1) &&
+    //     ((prod && prod === item.prod) || !prod) &&
+    //     ((item.severities &&
+    //       _.some(item.severities, (severity) => {
+    //         if (_.isEmpty(severities)) return true;
+    //         return _.includes(severities, severity);
+    //       })) ||
+    //       !item.severities) &&
+    //     (_.some(item.datasource_ids, (id) => {
+    //       if (includesProm(datasourceIds) && id === 0) return true;
+    //       return _.includes(datasourceIds, id);
+    //     }) ||
+    //       datasourceIds?.length === 0 ||
+    //       !datasourceIds)
+    //   );
+    // });
+    return data["list"];
   };
-  const getAlertRules = async () => {
+  const getAlertRules = async (params) => {
     if (!bgid) {
       return;
     }
     setLoading(true);
-    const { success, dat } = await getStrategyGroupSubList({ id: bgid });
+    params["id"] = bgid;
+    const { success, dat } = await getStrategyGroupSubList(params);
     if (success) {
       setData(dat || []);
       setLoading(false);
     }
   };
+  useEffect(() => {
+      getAssetsStypes().then((res) => {
+        const items = res.dat.map((v) => {
+          return {
+            value: v.name,
+            label: v.name,
+            ...v,
+          };
+        });
+        typeOptions.push({
+          label: '资产类型',
+          options:items
+        })
+        setTypeOptions(_.cloneDeep(typeOptions));
+      });      
+      
+  }, []);
 
   useEffect(() => {
     if (bgid) {
-      getAlertRules();
+      if(assetid!=null && assetid>0){
+        params["filter"] =3;
+        params["query"] = ""+assetid;
+      }else if(filter.query!=null && filter.query.length>0){
+        params["query"] = filter.query;
+        if(type=="alert_levels" ){
+          params["filter"] =1;
+        }else if(type=="asset_types"){
+          params["filter"] =2;
+        }
+      }else{
+        delete params["filter"];
+        delete params["query"];
+      }    
+      getAlertRules(params);
     }
-  }, [bgid]);
+  }, [bgid,filter.query]);
 
   if (!bgid) return null;
   const filteredData = filterData();
@@ -359,48 +278,64 @@ export default function List(props: ListProps) {
           <Space>
             <RefreshIcon
               onClick={() => {
-                getAlertRules();
-              }}
-            />
-            <ProdSelect
-              style={{ width: 90 }}
-              value={filter.prod}
-              onChange={(val) => {
-                setFilter({
-                  ...filter,
-                  prod: val,
-                });
-              }}
-            />
-            <DatasourceSelect
-              style={{ width: 100 }}
-              filterKey='alertRule'
-              value={filter.datasourceIds}
-              onChange={(val) => {
-                setFilter({
-                  ...filter,
-                  datasourceIds: val,
-                });
+                getAlertRules(params);
               }}
             />
             <Select
-              mode='multiple'
-              placeholder={t('severity')}
-              style={{ width: 120 }}
-              maxTagCount='responsive'
-              value={filter.severities}
+              style={{ width: 150 }}
+              allowClear
+              placeholder="请选择筛选类型"
+              options={[
+                 {label:'告警级别',value:'alert_levels'},
+                 {label:'资产类型',value:'asset_types'}
+              ]}            
               onChange={(val) => {
-                setFilter({
+                  setFilter({
                   ...filter,
-                  severities: val,
-                });
+                  query: "",
+                 });
+                 setType(val);
+                 
               }}
-            >
-              <Select.Option value={1}>S1</Select.Option>
-              <Select.Option value={2}>S2</Select.Option>
-              <Select.Option value={3}>S3</Select.Option>
-            </Select>
-            <SearchInput
+            />
+            {type=="alert_levels" && (
+              <Select
+                // mode='multiple'
+                placeholder={t('severity')}
+                style={{ width:"200px"}}
+                maxTagCount='responsive'
+                onChange={(val) => {
+                  console.log(val);
+                  setFilter({
+                    ...filter,
+                    query: val,
+                  });
+                }}
+              >
+                <Select.Option value={1}>S1</Select.Option>
+                <Select.Option value={2}>S2</Select.Option>
+                <Select.Option value={3}>S3</Select.Option>
+              </Select>
+            )}
+            {type=="asset_types" && (
+              <Select
+                // mode='multiple'
+                placeholder={'请选择资产类型'}
+                style={{ width:"300px"}}
+                maxTagCount='responsive'
+                options={typeOptions}
+                onChange={(val) => {
+                  setFilter({
+                    ...filter,
+                    query: val,
+                  });
+                }}
+              >
+              </Select>
+            )}
+            
+            
+            {/* <SearchInput
               placeholder={t('search_placeholder')}
               onSearch={(val) => {
                 setFilter({
@@ -409,7 +344,7 @@ export default function List(props: ListProps) {
                 });
               }}
               allowClear
-            />
+            /> */}
           </Space>
         </Col>
         <Col>
@@ -426,7 +361,7 @@ export default function List(props: ListProps) {
             </Button>
             <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} getAlertRules={getAlertRules} />
           </Space>
-        </Col>
+        </Col> 
       </Row>
       <Table
         tableLayout='fixed'

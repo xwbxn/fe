@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import PageLayout from '@/components/pageLayout';
 import { Button, Table, Input, message, List, Row, Col, Modal, Space } from 'antd';
-import { EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, InfoCircleOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import UserInfoModal from './component/createModal';
 import { getTeamInfoList, getTeamInfo, deleteTeam, deleteMember } from '@/services/manage';
 import { User, Team, UserType, ActionType, TeamInfo } from '@/store/manageInterface';
@@ -73,28 +73,29 @@ const Resource: React.FC = () => {
       title: t('common:table.operations'),
       width: '100px',
       render: (text: string, record) => (
-        <a
-          style={{
-            color: 'red',
-          }}
-          onClick={() => {
-            let params = {
-              ids: [record.id],
-            };
-            confirm({
-              title: t('common:confirm.delete'),
-              onOk: () => {
-                deleteMember(teamId, params).then((_) => {
-                  message.success(t('common:success.delete'));
-                  handleClose('updateMember');
-                });
-              },
-              onCancel: () => {},
-            });
-          }}
-        >
-          {t('common:btn.delete')}
-        </a>
+        <DeleteOutlined 
+                    style={{
+                      color: '#4095E5',
+                      marginLeft: '8px',
+                      fontSize: '16px',
+                    }}
+                    onClick={() => {
+                      let params = {
+                        ids: [record.id],
+                      };
+                      confirm({
+                        title: t('common:confirm.delete'),
+                        onOk: () => {
+                          deleteMember(teamId, params).then((_) => {
+                            message.success(t('common:success.delete'));
+                            handleClose('updateMember');
+                          });
+                        },
+                        onCancel: () => {},
+                      });
+                    }}
+                  >
+                    </DeleteOutlined> 
       ),
     },
   ];
@@ -196,22 +197,21 @@ const Resource: React.FC = () => {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('team.list')}
-              <Button
-                style={{
+              <PlusSquareOutlined  style={{
                   height: '30px',
+                  lineHeight:'35px',
+                  color: '#4095E5',
                 }}
-                size='small'
                 type='link'
                 onClick={() => {
                   handleClick(ActionType.CreateTeam);
                 }}
-              >
-                {t('common:btn.add')}
-              </Button>
+                >
+                </PlusSquareOutlined>
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
-                prefix={<SearchOutlined />}
+                suffix={<SearchOutlined />}
                 value={searchValue}
                 onChange={(e) => {
                   setSearchValue(e.target.value);
@@ -303,7 +303,7 @@ const Resource: React.FC = () => {
               <Row justify='space-between' align='middle'>
                 <Col span='12'>
                   <Input
-                    prefix={<SearchOutlined />}
+                    suffix={<SearchOutlined />}
                     value={searchMemberValue}
                     className={'searchInput'}
                     onChange={(e) => setSearchMemberValue(e.target.value)}

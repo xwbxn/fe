@@ -10,22 +10,21 @@ import { ControlOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import { getFavoritesResourceGroups } from '@/services';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [organizationId] = useState<number>(commonState.organizationId);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
-
+  const { busiGroups } = useContext(CommonStateContext);
   const [formItems, setFormItems] = useState<any[]>([]);
   const [tabIndex, setTabIndex] = useState<string>('base_set');
-  const [mode, setMode] = useState<string>('insert');
+  const [editType, setEditType] = useState<string>('insert');
 
   const [hasSave, setHasSave] = useState<boolean>(true);
 
   const { search } = useLocation();
+  const { mode } = queryString.parse(search);
   const [id, setId] = useState(queryString.parse(search)['id']);
 
   const [properties, setProperties] = useState({});
@@ -79,7 +78,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const loadAssetInfo = (id, isTabLoading, assetTypes) => {
     if (!!id) {
-      setMode('edit');
+      setEditType('edit');
       getXhAsset('' + id).then(({ dat }) => {
         console.log(dat);
         let expands = dat.exps;
@@ -170,7 +169,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const submitForm = async (values) => {
     console.log('提交数据');
     if (tabIndex == 'base_set') {
-      if (mode === 'edit' && id != null) {
+      if (editType === 'edit' && id != null) {
         values.id = parseInt('' + id);
         await updateXHAsset(values).then(() => {
           message.success('修改成功');
@@ -180,7 +179,7 @@ export default function (props: { initialValues: object; initParams: object; mod
           message.success('添加成功');
           console.log(res);
           setId(res.dat); //添加后从后端获取id，state更新id，保存按钮变为修改行为
-          setMode('edit');
+          setEditType('edit');
         });
       }
     } else {
@@ -251,6 +250,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         name='asset'
         form={form}
         layout='horizontal'
+        disabled={mode == "view" ? true : false}
         {...formItemLayout}
         onFinish={submitForm}
         ref={refForm}
@@ -278,7 +278,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </Col>
                 <Col span={12}>
                   <Form.Item label='类型' name='type' rules={[{ required: true }]}>
-                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={mode === 'edit'} />
+                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={id!=null}  />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -291,11 +291,14 @@ export default function (props: { initialValues: object; initParams: object; mod
                     <Input placeholder='请输入位置' />
                   </Form.Item>
                 </Col>
-                {/* <Col span={12}>
-                  <Form.Item label='状态' name='status' rules={[{ required: true }]}>
-                    <Select style={{ width: '100%' }} options={[{ value: 1, label: '正常' }, { value: 0, label: '下线' }]} placeholder='请选择状态' disabled={props.mode === 'edit'} />
+                <Col span={12}>
+                  <Form.Item label='业务组' name='group_id' rules={[{ required: true }]} >
+                    <Select style={{ width: '100%' }} options={busiGroups.map(({ id, name }) => ({
+                      label: name,
+                      value: id,
+                    }))} placeholder='请选择业务组' />
                   </Form.Item>
-                </Col> */}
+                </Col>
                 <Col span={12}>
                   <Form.Item label='备注' name='memo'>
                     <Input placeholder='填写备注' />
@@ -337,16 +340,19 @@ export default function (props: { initialValues: object; initParams: object; mod
                               className='card_group'
                               extra={
                                 <>
-                                  <Button
-                                    type='primary'
-                                    className='form_add'
-                                    onClick={() => {
-                                      add();
-                                    }}
-                                  >
-                                    {' '}
-                                    ＋添加
-                                  </Button>
+                                  {mode == "edit" && (
+                                    <Button
+                                      type='primary'
+                                      className='form_add'
+                                      onClick={() => {
+                                        add();
+                                      }}
+                                    >
+                                      {' '}
+                                      ＋添加
+                                    </Button>
+                                  )}
+
                                 </>
                               }
                             >
@@ -356,13 +362,13 @@ export default function (props: { initialValues: object; initParams: object; mod
                                     <span style={{ marginLeft: '3px' }}>
                                       {'项'}-{_suoyi + 1}
                                     </span>
-                                    {/* {_suoyi > 0 ? ( */}
-                                    <MinusCircleOutlined
-                                      className='dynamic-delete-button'
-                                      style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
-                                      onClick={() => remove(_suoyi)}
-                                    />
-                                    {/* ) : null} */}
+                                    {mode == "edit" && (
+                                      <MinusCircleOutlined
+                                        className='dynamic-delete-button'
+                                        style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
+                                        onClick={() => remove(_suoyi)}
+                                      />
+                                    )}
                                   </div>
 
                                   <Row gutter={10}>
@@ -390,24 +396,40 @@ export default function (props: { initialValues: object; initParams: object; mod
             })}
           </div>
         )}
-        <div className='button-wrapper'>
-          <Form.Item>
-            <Space>
-              <Button type='primary' htmlType='submit' disabled={!hasSave}>
-                保存
-              </Button>
-              <Button
-                onClick={() => {
-                  // window.location.href = '/xh/assetmgt';
-                  history.back();
-                }}
-              >
-                关闭
-              </Button>
-            </Space>
-          </Form.Item>
-        </div>
+        {mode == "edit" && (
+          <div className='button-wrapper'>
+            <Form.Item>
+              <Space>
+                <Button type='primary' htmlType='submit' disabled={!hasSave}>
+                  保存
+                </Button>
+                <Button
+                  onClick={() => {
+                    // window.location.href = '/xh/assetmgt';
+                    history.back();
+                  }}
+                >
+                  关闭
+                </Button>
+              </Space>
+            </Form.Item>
+          </div>
+        )}
       </Form>
+      {mode == "view" && (
+        <div className='asset_manage_button_zone'>
+          <Button
+          onClick={() => {
+            // window.location.href = '/xh/assetmgt';
+            history.back();
+          }}
+        >
+          关闭
+        </Button>
+        </div>
+        
+      )}
+
     </Fragment>
   );
 }

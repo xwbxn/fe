@@ -13,14 +13,11 @@ export default function () {
   return (
     <PageLayout title={'监控管理'} showBack>
       {params.get('type')=="asset" && (
-          <Form initialValues={{}} initParams={{}}></Form>
+          <Form initialValues={{}}  initParams={{}} disabled={params.get('action') == "view" ? true : false}></Form>
       )}
-      {params.get('type')=="view" && (
-          <View initialValues={{}} initParams={{}}></View>
-      )} 
       {params.get('type')=="monitor" && (
           <Monitor initialValues={{}} initParams={{}}></Monitor>
-      )}     
+      )} 
     </PageLayout>
   );
 }

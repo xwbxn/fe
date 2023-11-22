@@ -4,13 +4,12 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
-import { CheckCircleFilled, CopyOutlined, DeleteOutlined, DragOutlined, FullscreenOutlined, MoreOutlined, PlusOutlined, SettingOutlined, ShareAltOutlined, SyncOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import Graph from '../Graph';
 import _, { values } from 'lodash';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import moment from 'moment';
-import { SizeType } from 'antd/lib/config-provider/SizeContext';
 enum ChartType {
   Line = 'line',
   StackArea = 'stackArea',
@@ -25,8 +24,6 @@ import { time } from 'echarts';
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
-  const [assetList, setAssetList] = useState<{ name: string; id: any }[]>([]);
   const [identList, setIdentList] = useState([]);
   const [operateType, setOperateType] = useState<any>({
     visual: false,
@@ -210,12 +207,8 @@ export default function (props: { initialValues: object; initParams: object; mod
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'基本信息'}>
             <div className='asset_info'>
-              <div className='images'>
-                <Image
-                  width={120}
-                  height={60}
-                  src="error"
-                />
+              <div className='images' >
+                {assetInfo.type}
               </div>
               <div className='info'>
                 <Row gutter={10} className='row'>

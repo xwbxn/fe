@@ -81,7 +81,7 @@ export const updateMonitorStatus = function (status,data,type) {
 
 // 修改个人信息
 export const getUserInfoList = function (params = {}) {
-  return request(`/api/n9e/users`, {
+  return request(`/api/n9e/users/xh`, {
     method: RequestMethod.Get,
     params,
   });

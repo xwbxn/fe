@@ -17,11 +17,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import moment from 'moment';
 import _ from 'lodash';
-import TimeRangePicker, {TimeRangePickerWithRefresh,IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
+import TimeRangePicker, { TimeRangePickerWithRefresh, IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { CommonStateContext } from '@/App';
 import { getAssetsMonitor } from '@/services/assets';
+import './graph.less'
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
 import { Button, InputNumber, Popover, Radio, Space, RadioChangeEvent } from 'antd';
 
@@ -160,11 +161,10 @@ export default function Graph(props: IProps) {
   }, [JSON.stringify(range), step, monitorId, refreshFlag]);
 
   return (
-    <div className='monitor-graph-container' style={{ width: '100%' }}>
+    <div className='monitor-graph-container graph-xh' style={{ width: '100%' }}>
       {toolVisible && (
-        <div className='prom-graph-graph-controls'>
-          <Space>
-            <div className='header_'>
+        <div className='prom-graph-graph-controls graph-head'>
+            <div className='graph_header_'>
               <Radio.Group value={size} onChange={handleSizeChange}>
                 <Radio.Button value="now-1h" >近1小时</Radio.Button>
                 <Radio.Button value="now-3h">近3小时</Radio.Button>
@@ -174,28 +174,23 @@ export default function Graph(props: IProps) {
                 <Radio.Button value="now-30d">近30天</Radio.Button>
               </Radio.Group>
               <div>
-              <TimeRangePickerWithRefresh
+                <TimeRangePickerWithRefresh
                   // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
-                  onChange={value=>{
+                  onChange={value => {
                     console.log(value)
                     range.start = isMathString(value.start) ? parse(value.start) : moment(value.start);
                     range.end = isMathString(value.end) ? parse(value.end) : moment(value.end);
                     setRange(range);
-                                      
+
                   }}
                   value={range}
-                  localKey = 'monitor-timeRangePicker-value'
-             />
-
-
-
+                  localKey='monitor-timeRangePicker-value'
+                />
               </div>
             </div>
-          </Space>
         </div>
 
       )}
-
       <Timeseries inDashboard={false} values={lineGraphProps as any} series={data} />
     </div>
   );

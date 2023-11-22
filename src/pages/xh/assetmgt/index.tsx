@@ -14,8 +14,7 @@ import _ from 'lodash';
 import Accordion from './Accordion';
 import moment from 'moment';
 import { assetsType } from '@/store/assetsInterfaces';
-import { getDeviceType } from '@/services/assets/deviceType';
-import { getDictValueEnum } from '@/services/system/dict';
+import { CommonStateContext } from '@/App';
 import {deleteXhAssets, deleteAssets, insertXHAsset,updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
@@ -85,11 +84,9 @@ export default function () {
   const [assetTypeItems, setAssetTypeItems] = useState<any[]>([]);
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
-  const [formData, setFormData] = useState<any>({});
-  const [businessForm, setBusinessForm] = useState<any>({});
-  const [typeId, setTypeId] = useState<any>(null)
+  const { busiGroups } = useContext(CommonStateContext);
 
-  const [dictDatas, setDictDatas] = useState({});
+  const [typeId, setTypeId] = useState<any>(null);
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
   const [modifySwitch, setModifySwitch] = useState(true);  
   const [viewIndex, setViewIndex] = useState<number>(-1);  
@@ -146,6 +143,24 @@ export default function () {
       },
     },
     {
+      title: "所属业务组",
+      dataIndex: 'group_id',
+      width: "130px",
+      ellipsis:true,
+      render(value, record, index) {
+        if(value >0){
+          let groupName = ""
+          busiGroups.forEach(group =>{
+             if(group.id ===value){
+              groupName= group.name;
+             }
+          });
+          return groupName;
+        }
+        
+      }
+    },
+    {
       title: "状态",
       width: "105px",
       dataIndex: 'status',
@@ -153,7 +168,7 @@ export default function () {
       render(value, record, index) {
         let label = "-";
         if(value==0){
-           label = "下线";
+           label = "离线";
         }else if(value==1){
            label = "正常"
         }
@@ -171,11 +186,13 @@ export default function () {
       render: (text: string, record: assetsType) => (
         <Space>
           <VideoCameraOutlined title='设置监控' onClick={(e)=>{
-              location.href="/xh/monitor?assetId="+record.id;  
+              location.href="/xh/monitor?mode=view&assetId="+record.id;  
           }}/>
-          <FileSearchOutlined title='资产详情' />
+          <FileSearchOutlined title='资产详情' onClick={(e)=>{
+               showModal("view",record)
+          }} />
           <FundOutlined  title='监控图表' onClick={(e)=>{
-               location.href='/xh/monitor/add?type=monitor&id=' + record.id+"&action=asset";
+               location.href="/xh/monitor/add?type=monitor&id="+record.id+"&action=asset";  
           }}  />
           <EditOutlined  title='编辑' onClick={(e)=>{
                showModal("update",record)
@@ -484,9 +501,11 @@ export default function () {
   const showModal = (action:string,formData:any) => {
 
     if(action=="add"){
-      history.push('/xh/assetmgt/add');    
+      history.push('/xh/assetmgt/add?mode=edit');    
     }else if(action=="update"){
-      history.push('/xh/assetmgt/add?id='+formData.id);    
+      history.push('/xh/assetmgt/add?mode=edit&id='+formData.id);    
+    }else if(action=="view"){
+      history.push('/xh/assetmgt/add?mode=view&id='+formData.id);    
     }
 
   }
@@ -585,10 +604,11 @@ export default function () {
                     setFilterType(value);
                   }}
                   options={[
-                     { value: "1", label: '数据源名称' },
-                     { value: "2", label: 'IP地址解析器' },
-                     { value: "3", label: '数据源类型' },
-                     { value: "4", label: '解析器' }
+                    //  { value: "1", label: '数据源名称' },
+                    //  { value: "2", label: 'IP地址解析器' },
+                    //  { value: "3", label: '数据源类型' },
+                    //  { value: "4", label: '解析器' },
+                     { value: "group", label: '业务组' }
                   ]}
                 />
                 <Input
@@ -597,11 +617,12 @@ export default function () {
                   allowClear
                   onChange={(e) => setSearchVal(e.target.value)}
                   prefix={<SearchOutlined />}
-                  placeholder={'模糊检索表格内容,多个关键字用空格分隔'}
+                  placeholder={'模糊检索资产名称/IP等多个关键字'}
                 />
               </div>
             </Space>
             <div className='tool_right'>
+            <Space>
               <div>
                 <Button
                   onClick={() => {
@@ -681,6 +702,8 @@ export default function () {
                   </Button>
                 </Dropdown>
               </div>
+            </Space>
+
             </div>
           </div>
           <div className='assets-list' style={{ width:'100%' }}>

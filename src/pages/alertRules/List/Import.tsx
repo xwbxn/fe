@@ -34,7 +34,7 @@ function Import(props: IProps & ModalWrapProps) {
   const { t } = useTranslation('alertRules');
   const { visible, destroy, busiId, refreshList, groupedDatasourceList, datasourceCateOptions } = props;
   const [importResult, setImportResult] = useState<{ name: string; msg: string }[]>();
-  const datasourceCates = _.filter(datasourceCateOptions, (item) => !!item.alertRule);
+  const datasourceCates = _.filter(datasourceCateOptions, (item) => !!item.alertRule);  
 
   return (
     <Modal

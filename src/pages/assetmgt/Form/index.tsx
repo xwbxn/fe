@@ -14,6 +14,7 @@ import CodeMirror from '@uiw/react-codemirror';
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
+  const { busiGroups } = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [identList, setIdentList] = useState([]);
@@ -84,7 +85,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   }, [props]);
 
   const submitForm = async (values) => {
-    // values.group_id = curBusiId;
+
     values.params = JSON.stringify(values);
     values.organization_id = organizationId;
     if (props.mode === 'edit') {

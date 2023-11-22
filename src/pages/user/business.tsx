@@ -19,8 +19,8 @@ import moment from 'moment';
 import _ from 'lodash';
 import classNames from 'classnames';
 import PageLayout from '@/components/pageLayout';
-import { Button, Table, Input, message, Row, Col, Modal, Space } from 'antd';
-import { EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, InfoCircleOutlined, DownOutlined, RightOutlined } from '@ant-design/icons';
+import { Button, Table, Input, message, Row, Col, Modal, Space, Select } from 'antd';
+import { EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, InfoCircleOutlined, DownOutlined, RightOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import UserInfoModal from './component/createModal';
 import { deleteBusinessTeamMember, getBusinessTeamList, getBusinessTeamInfo, deleteBusinessTeam } from '@/services/manage';
 import { Team, ActionType } from '@/store/manageInterface';
@@ -51,9 +51,17 @@ const Resource: React.FC = () => {
   const [collapsedNodes, setCollapsedNodes] = useState<string[]>(getLocaleCollapsedNodes());
   const teamMemberColumns: ColumnsType<any> = [
     {
-      title: t('team.name'),
+      title: t('business.name'),
       dataIndex: ['user_group', 'name'],
       ellipsis: true,
+    },
+    // {
+    //   title: t('business.superior'),
+    //   dataIndex: ['user_group', 'superior'], 
+    // },
+    {
+      title: t('business.perm_flag'),
+      dataIndex: 'perm_flag',
     },
     {
       title: t('common:table.note'),
@@ -61,41 +69,50 @@ const Resource: React.FC = () => {
       ellipsis: true,
       render: (text: string, record) => record['user_group'].note || '-',
     },
-    {
-      title: t('business.perm_flag'),
-      dataIndex: 'perm_flag',
-    },
+    
     {
       title: t('common:table.operations'),
       width: '100px',
       render: (text: string, record) => (
-        <a
-          style={{
-            color: memberList.length > 1 ? 'red' : '#00000040',
-          }}
-          onClick={() => {
-            if (memberList.length <= 1) return;
-
-            let params = [
-              {
-                user_group_id: record['user_group'].id,
-                busi_group_id: teamId,
-              },
-            ];
-            confirm({
-              title: t('common:confirm.delete'),
-              onOk: () => {
-                deleteBusinessTeamMember(teamId, params).then((_) => {
-                  message.success(t('common:success.delete'));
-                  handleClose('deleteMember');
-                });
-              },
-              onCancel: () => {},
-            });
-          }}
-        >
-          {t('common:btn.delete')}
-        </a>
+        <>
+          <EditOutlined 
+                    style={{
+                      color: '#4095E5',
+                      marginLeft: '8px',
+                      fontSize: '16px',
+                    }} 
+                    onClick={() => handleClick(ActionType.EditBusiness)}
+                  ></EditOutlined>
+          <DeleteOutlined 
+                    style={{
+                      color: '#4095E5',
+                      marginLeft: '8px',
+                      fontSize: '16px',
+                    }}
+                    onClick={() => {
+                      if (memberList.length <= 1) return;
+        
+                      let params = [
+                        {
+                          user_group_id: record['user_group'].id,
+                          busi_group_id: teamId,
+                        },
+                      ];
+                      confirm({
+                        title: t('common:confirm.delete'),
+                        onOk: () => {
+                          deleteBusinessTeamMember(teamId, params).then((_) => {
+                            message.success(t('common:success.delete'));
+                            handleClose('deleteMember');
+                          });
+                        },
+                        onCancel: () => {},
+                      });
+                    }}
+                  />
+        
+        </>
+        
       ),
     },
   ];
@@ -152,7 +169,10 @@ const Resource: React.FC = () => {
       getTeamInfoDetail(teamId);
     }
   };
-
+  //下拉框处理
+  const handleChange = (value: string) => {
+    console.log(`selected ${value}`);
+  };
   return (
     <PageLayout title={t('business.title')} icon={<UserOutlined />}>
       <div className='user-manage-content'>
@@ -160,18 +180,16 @@ const Resource: React.FC = () => {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('business.list')}
-              <Button
-                style={{
+              <PlusSquareOutlined  style={{
                   height: '30px',
+                  lineHeight:'35px',
+                  color: '#4095E5',
                 }}
-                size='small'
+                //size='small'
                 type='link'
                 onClick={() => {
                   handleClick(ActionType.CreateBusiness);
-                }}
-              >
-                {t('common:btn.add')}
-              </Button>
+                }}/>
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
@@ -319,21 +337,33 @@ const Resource: React.FC = () => {
               <Row justify='space-between' align='middle'>
                 <Col span='12'>
                   <Input
-                    prefix={<SearchOutlined />}
+                    suffix={<SearchOutlined />}
                     value={searchMemberValue}
                     className={'searchInput'}
                     onChange={(e) => setSearchMemberValue(e.target.value)}
                     placeholder={t('business.team_search_placeholder')}
                   />
                 </Col>
-                <Button
-                  type='primary'
-                  onClick={() => {
-                    handleClick(ActionType.AddBusinessMember);
-                  }}
-                >
-                  {t('business.add_team')}
-                </Button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <Col>
+                  <Button
+                    type='primary'
+                    style={{ marginLeft:'10px',marginRight:'20px'}}
+                    onClick={() => {
+                      handleClick(ActionType.AddBusinessMember);
+                    }}
+                  >
+                    {t('business.add_team')}
+                  </Button>
+                  <Select defaultValue={"批量操作"}
+                  style={{ width: '125px',marginLeft:'3px'}}
+                  onChange={handleChange}
+                  options={[
+                    { value: '0', label: '删除' },
+                  ]}
+                  ></Select>
+                </Col>
+                               
               </Row>
 
               <Table

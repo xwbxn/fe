@@ -4,6 +4,7 @@ import React from 'react';
 export enum OperateType { 
   ChangeOrganize = 'changeOrganize', 
   UnbindTag = 'unbindTag',
+  BatchImport = 'batchImport', 
   None = 'none',
 }
 // export const SetOperateTypes = {
