@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 const { TextArea } = Input;
 
-export default function (props: { initialValues: object; initParams: object; mode?: string, disabled: boolean }) {
+export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);

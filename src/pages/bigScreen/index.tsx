@@ -123,4 +123,3 @@ const Bigscreen = () => {
 };
 
 export default Bigscreen;
-export { Add, Edit, Detail };

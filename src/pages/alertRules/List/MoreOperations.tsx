@@ -28,7 +28,7 @@ interface MoreOperationsProps {
   bgid: number;
   selectRowKeys: React.Key[];
   selectedRows: any[];
-  getAlertRules: () => void;
+  getAlertRules: (object?) => void;
 }
 
 const exportIgnoreAttrsObj = {
