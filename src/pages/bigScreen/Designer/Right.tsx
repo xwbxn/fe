@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import './index.less';
-import { Tabs, Form, Input, InputNumber, FormInstance, Row, Col, Select, Collapse, Switch, Slider, Button } from 'antd';
+import { Tabs, Form, Input, InputNumber, FormInstance, Row, Col, Select, Collapse, Switch, Slider, Button, Space } from 'antd';
 import { ChromePicker } from 'react-color';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 // 配置文件
 // JSON编辑器
-import { IScreen, IWidget, IWidgetConfiguration } from '../type';
+import { IScreen, IWidget } from '../type';
 import { widgetConfigure } from '../configuration';
 import page from '../configuration/page';
 import _ from 'lodash';
@@ -27,9 +27,10 @@ interface IRightProps {
   setRightFlag: Function;
   rightFlag: boolean;
   onChange: ({ screen, widget }) => void;
+  onSave: () => void;
 }
 
-const Right = ({ screen, currentWidget, setRightFlag, rightFlag, onChange }: IRightProps) => {
+const Right = ({ screen, currentWidget, setRightFlag, rightFlag, onChange, onSave }: IRightProps) => {
   const [key, setKey] = useState('1');
   // 配置
   const [configureForm] = Form.useForm();
@@ -55,6 +56,29 @@ const Right = ({ screen, currentWidget, setRightFlag, rightFlag, onChange }: IRi
       dataForm.setFieldsValue(currentWidget.dataValue);
     }
     if (currentWidget?.code) {
+      const dataConf: any[] = widgetConfigure[currentWidget.code].configuration?.dataConfigure || [];
+      const resolves: any[] = []; // 配置项中异步更新options的
+      for (const item of dataConf) {
+        if (item.list) {
+          for (const subItem of item.list) {
+            if (subItem.componentName == 'Select' && _.isFunction(subItem.options)) {
+              resolves.push([subItem, subItem.options()]);
+            }
+          }
+        } else {
+          if (item.componentName == 'Select' && _.isFunction(item.options)) {
+            resolves.push([item, item.options()]);
+          }
+        }
+      }
+      // 同步所有的option异步方法，最后统一更新state，再渲染页面
+      Promise.all(resolves.map(v => v[1])).then(res => {
+        console.log('res', res)
+        for (let index = 0; index < res.length; index++) {
+          const element = res[index];
+          resolves[index][0].options = element.dat          
+        }
+      })
       setConfiguration(widgetConfigure[currentWidget.code].configuration);
     }
   }, [currentWidget, configureForm, dataForm, dynamicForm]);
@@ -167,13 +191,14 @@ const Right = ({ screen, currentWidget, setRightFlag, rightFlag, onChange }: IRi
         )}
         {item.componentName === 'Select' && (
           <Form.Item label={item.label} name={item.name} tooltip={item.tooltip} rules={[{ required: item.require }]}>
-            <Select allowClear disabled={item.disabled} onChange={(value: string) => isUpdate && onChangeHandler(callback, item.name, value, field)} placeholder={item.placeholder}>
-              {item.options.map((item: any) => (
-                <Option key={item.code} value={item.code}>
-                  {item.name}
-                </Option>
-              ))}
-            </Select>
+            <Select
+              allowClear
+              disabled={item.disabled}
+              onChange={(value: string) => isUpdate && onChangeHandler(callback, item.name, value, field)}
+              placeholder={item.placeholder}
+              fieldNames={{ label: 'name', value: 'code' }}
+              options={item.options}
+            ></Select>
           </Form.Item>
         )}
         {item.componentName === 'SketchPicker' && (
@@ -376,6 +401,22 @@ const Right = ({ screen, currentWidget, setRightFlag, rightFlag, onChange }: IRi
           </Tabs.TabPane>
         )}
       </Tabs>
+      <div className='designer-right-toolbar'>
+        <Space>
+          <Button ghost size='small' href='/bigscreen/preview' target='_blank'>
+            预览
+          </Button>
+          <Button
+            ghost
+            size='small'
+            onClick={() => {
+              onSave();
+            }}
+          >
+            保存
+          </Button>
+        </Space>
+      </div>
     </div>
   );
 };

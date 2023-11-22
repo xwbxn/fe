@@ -4,6 +4,7 @@ const page: IConfigurationBase = {
   type: 'page',
   label: '页面配置',
   configureValue: {
+    title: '',
     gridSize: 10,
     gridBorderColor: '#090548',
     showAuxiliary: true,
@@ -20,10 +21,17 @@ const page: IConfigurationBase = {
   configure: [
     {
       componentName: 'Input',
-      label: '项目名称',
-      name: 'projectName',
+      label: '标题',
+      name: 'title',
       required: false,
-      placeholder: '请输入项目名称',
+      placeholder: '请输入标题',
+    },
+    {
+      componentName: 'TextArea',
+      label: '大屏简介',
+      name: 'description',
+      required: false,
+      placeholder: '请输入大屏简介',
     },
     {
       componentName: 'InputNumber',
@@ -88,20 +96,6 @@ const page: IConfigurationBase = {
       name: 'interval',
       required: false,
       placeholder: '请输入全局刷新时间',
-    },
-    {
-      componentName: 'Input',
-      label: '标题',
-      name: 'title',
-      required: false,
-      placeholder: '请输入标题',
-    },
-    {
-      componentName: 'TextArea',
-      label: '大屏简介',
-      name: 'description',
-      required: false,
-      placeholder: '请输入大屏简介',
     },
     [
       {

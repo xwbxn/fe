@@ -10,18 +10,21 @@ import { useLocalStorageState } from 'ahooks';
 import { Rnd } from 'react-rnd';
 import _ from 'lodash';
 import Left from './Left';
-import { Button, Modal, Slider, Space } from 'antd';
+import { Button, message, Modal, Slider, Space } from 'antd';
 import { widgetConfigure } from '../configuration';
 import Right from './Right';
 import ContextMenu from './ContextMenu';
 import Data from './Data';
 import page from '../configuration/page';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { BigscreenType } from '..';
+import { createBigscreen, getBigscreen, updateBigscreen } from '@/services/bigscreen';
 
-const defaultScreen = page.configureValue;
+export const defaultScreen = page.configureValue;
 
 const Design = () => {
   const history = useHistory();
+  const { id } = useParams<{ id: string }>();
   // 获取放大缩小比例
   const [cale, setCale] = useState(0);
   // 是否显示左边
@@ -112,12 +115,41 @@ const Design = () => {
     setCtxMenuOption({ ...ctxMenuOption, visible: false });
   };
 
+  const saveData = () => {
+    const data: BigscreenType = {
+      id: parseInt(id),
+      title: screen.title || '未命名',
+      desc: screen.description || '未描述',
+      config: JSON.stringify(screen),
+    };
+    if (id === undefined || id === '') {
+      createBigscreen(data).then((res) => {
+        message.success({ content: '操作成功' });
+        history.goBack();
+      });
+    } else {
+      updateBigscreen(data).then((res) => {
+        message.success({ content: '操作成功' });
+        history.goBack();
+      });
+    }
+  };
+
   // 这里主要设置默认的缩放比例
   useEffect(() => {
     if (screen.width) {
       setCale(Number(((Number(screen.width) - 800 - 132) / Number(screen.width)).toFixed(4)));
     }
   }, [screen.width]);
+
+  useEffect(() => {
+    if (id !== undefined && id !== '') {
+      getBigscreen(id).then((res) => {
+        const config = JSON.parse(res.dat.config);
+        setScreen(config);
+      });
+    }
+  }, [id]);
 
   return (
     <>
@@ -261,15 +293,6 @@ const Design = () => {
                 onChange={(value) => setCale(value / 100)}
                 value={cale * 100}
               />
-              <Button
-                size='small'
-                ghost
-                onClick={() => {
-                  history.push('/bigscreen/preview');
-                }}
-              >
-                预览
-              </Button>
             </Space>
           </div>
         </div>
@@ -281,6 +304,9 @@ const Design = () => {
           onChange={({ screen, widget }) => {
             setScreen(screen);
             setCurrentWidget(widget);
+          }}
+          onSave={() => {
+            saveData();
           }}
         ></Right>
       </div>

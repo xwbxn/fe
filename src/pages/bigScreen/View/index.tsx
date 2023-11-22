@@ -1,19 +1,28 @@
-import { useLocalStorageState, useSessionStorageState } from 'ahooks';
-import React from 'react';
+import { getBigscreen } from '@/services/bigscreen';
+import React, { useEffect, useState } from 'react';
 import { Rnd } from 'react-rnd';
+import { useParams } from 'react-router-dom';
 import { widgetConfigure } from '../configuration';
 import page from '../configuration/page';
 import Data from '../Designer/Data';
 
 const defaultScreen = page.configureValue;
 
-const Preview = () => {
+const View = () => {
   const cale = 1;
+  const { id } = useParams<{ id: string }>();
 
   // 大屏配置数据
-  const [screen, setScreen] = useLocalStorageState('CURRENT_SCREEN', {
-    defaultValue: defaultScreen,
-  });
+  const [screen, setScreen] = useState(defaultScreen);
+
+  useEffect(() => {
+    if (id !== undefined && id !== '') {
+      getBigscreen(id).then((res) => {
+        const config = JSON.parse(res.dat.config);
+        setScreen(config);
+      });
+    }
+  }, [id]);
 
   return (
     <>
@@ -72,4 +81,4 @@ const Preview = () => {
   );
 };
 
-export default Preview;
+export default View;

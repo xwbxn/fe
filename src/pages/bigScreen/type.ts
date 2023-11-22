@@ -19,7 +19,7 @@ interface IFormControlSelect {
   options?: {
     code: any;
     name: string;
-  }[];
+  }[] | CallableFunction;
 }
 
 export type IFormControl = IFormControlBase & IFormControlSlider & IFormControlSelect;

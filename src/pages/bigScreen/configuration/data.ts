@@ -1,3 +1,4 @@
+import { getApiServiceOptions } from '@/services/api_service';
 import { IConfigurationBase } from '../type';
 
 const data: IConfigurationBase = {
@@ -17,14 +18,6 @@ const data: IConfigurationBase = {
   // 数据项配置
   configure: [
     {
-      componentName: 'Switch',
-      label: '使用组数据',
-      name: 'useInterface',
-      required: false,
-      placeholder: '',
-      tooltip: '该组件使用组的接口数据',
-    },
-    {
       componentName: 'Select',
       label: '请求类型',
       name: 'dataType',
@@ -35,6 +28,7 @@ const data: IConfigurationBase = {
       options: [
         { code: 'mock', name: 'mock数据' },
         { code: 'dynamic', name: '接口数据' },
+        { code: 'api', name: '接口服务' },
       ],
     },
     {
@@ -54,6 +48,16 @@ const data: IConfigurationBase = {
       placeholder: '请输入接口地址',
       relationFields: 'dataType,useInterface',
       relationValues: 'dynamic,false',
+    },
+    {
+      componentName: 'Select',
+      label: '接口服务',
+      name: 'url',
+      options: getApiServiceOptions,
+      required: false,
+      placeholder: '请选择接口地址',
+      relationFields: 'dataType,useInterface',
+      relationValues: 'api,false',
     },
     {
       componentName: 'Select',

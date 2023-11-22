@@ -18,7 +18,6 @@ const Echarts = memo(
       notMerge = true,
       lazyUpdate = false,
     } = props;
-    console.log('options', options);
     // 设置echarts主题
     useEffect(() => {
       echarts.registerTheme(theme, themes[theme]);

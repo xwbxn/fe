@@ -1,6 +1,6 @@
 import { CommonStateContext } from '@/App';
 import { getMenuPerm } from '@/services/common';
-import Icon, { DownOutlined } from '@ant-design/icons';
+import Icon, { DownOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
 import { Dropdown, Menu, Space } from 'antd';
 import _ from 'lodash';
@@ -93,6 +93,21 @@ const getMenuList = (t) => {
         {
           key: '/log/syslog',
           label: t('系统日志'),
+        },
+      ],
+    },
+    {
+      key: 'bigscreen',
+      icon: <ProjectOutlined />,
+      label: t('大屏管理'),
+      children: [
+        {
+          key: '/bigscreen',
+          label: t('大屏设计'),
+        },
+        {
+          key: '/bigscreen/api-service',
+          label: t('接口管理'),
         },
       ],
     },
