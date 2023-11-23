@@ -97,6 +97,12 @@ import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 import plusLoader from 'plus:/utils/loader';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
+import Designer from '@/pages/bigScreen/Designer';
+import Preview from '@/pages/bigScreen/Preview';
+import Topo from '@/pages/topoGraph/Designer';
+import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
+import Bigscreen from '@/pages/bigScreen';
+import View from '@/pages/bigScreen/View';
 
 
 const Packages = dynamicPackages();
@@ -238,6 +244,19 @@ export default function Content() {
         <Route exact path='/permissions' component={Permissions} />
         <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
+
+        <Route exact path='/bigscreen/designer' component={Designer} />
+        <Route exact path='/bigscreen/designer/:id' component={Designer} />
+        <Route exact path='/bigscreen/preview' component={Preview} />
+        <Route exact path='/bigscreen/view/:id' component={View} />
+        <Route exact path='/bigscreen/topo' component={Topo} />
+        <Route exact path='/bigscreen' component={Bigscreen} />
+
+        <Route exact path='/bigScreen/api-service' component={Apiservice}/>
+        <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>
+        <Route exact path='/bigScreen/api-service/:id/edit' component={ApiServiceEdit}/>
+        <Route exact path='/bigScreen/api-service/:id' component={ApiServiceDetail}/>
+
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

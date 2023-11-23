@@ -10,6 +10,7 @@ import { PromQLInputWithBuilder } from '@/components/PromQLInput';
 import Collapse, { Panel } from '../Components/Collapse';
 import getFirstUnusedLetter from '../../Renderer/utils/getFirstUnusedLetter';
 import { replaceExpressionVars } from '../../VariableConfig/constant';
+import { PromQLInputWithSelect } from '@/components/PromQLInput/PromQLInputWithSelect';
 
 const alphabet = 'ABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('');
 
@@ -67,7 +68,7 @@ export default function Prometheus({ chartForm, variableConfig, dashboardId }) {
                               ]}
                               style={{ flex: 1 }}
                             >
-                              <PromQLInputWithBuilder validateTrigger={['onBlur']} datasourceValue={datasourceValue} />
+                              <PromQLInputWithSelect validateTrigger={['onBlur']} datasourceValue={datasourceValue} />
                             </Form.Item>
                           );
                         }}

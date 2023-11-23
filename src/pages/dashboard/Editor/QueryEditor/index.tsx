@@ -3,11 +3,11 @@ import { Space, Form, Radio } from 'antd';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 // @ts-ignore
-import PlusQueryBuilder from 'plus:/parcels/Dashboard/QueryBuilder';
 import OrganizeFields from '../TransformationsEditor/OrganizeFields';
 import DatasourceSelect from './components/DatasourceSelect';
 import Prometheus from './Prometheus';
 import Elasticsearch from './Elasticsearch';
+import Monitoring from './Monitoring';
 
 export default function index({ chartForm, type, variableConfig, dashboardId }) {
   const { t } = useTranslation('dashboard');
@@ -44,7 +44,7 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
             if (cate === 'elasticsearch') {
               return <Elasticsearch chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
             }
-            return <PlusQueryBuilder cate={cate} form={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
+            return <Monitoring chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
           }}
         </Form.Item>
       </div>

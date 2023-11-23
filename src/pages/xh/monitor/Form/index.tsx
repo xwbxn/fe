@@ -13,7 +13,7 @@ import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 const { TextArea } = Input;
 
-export default function (props: { initialValues: object; initParams: object; mode?: string, disabled: boolean }) {
+export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
