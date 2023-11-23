@@ -9,16 +9,15 @@ import './locale';
 export function PromQLInputWithBuilder(props: CMExpressionInputProps & { datasourceValue: number }) {
   const { t } = useTranslation('promQLInput');
   let inputProps: any = {...props};
-
   // @ts-ignore
   if (props.id) {
     // @ts-ignore
     inputProps.key = props.id; // TODO 在 Form.List 中修改 list 后重置组件，解决状态更新 field.name 错误问题
     // inputProps = { key: props.id, ...inputProps };
   }
-
   return (
     <Row gutter={8}>
+       
       <Col flex='auto'>
         <PromQLInput {...inputProps} />
       </Col>
@@ -34,6 +33,7 @@ export function PromQLInputWithBuilder(props: CMExpressionInputProps & { datasou
               datasourceValue: props.datasourceValue,
               value: props.value,
               onChange: (val) => {
+                debugger;
                 props.onChange && props.onChange(val);
               },
             });

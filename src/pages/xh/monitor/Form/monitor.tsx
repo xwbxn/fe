@@ -24,7 +24,7 @@ import { time } from 'echarts';
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [identList, setIdentList] = useState([]);
+  const [identList, setIdentList] = useState<any>({});
   const [operateType, setOperateType] = useState<any>({
     visual: false,
     title: "指标名称"
@@ -38,9 +38,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [assetItems, setAssetItems] = useState<any[]>([]);
 
-  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
-  const [data, setData] = useState<any[]>([]);
   const [range, setRange] = useState<any>({
     start: parse('now-1h'),//"2023-11-02 01:00:00",
     end: parse('now')//moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
@@ -52,6 +50,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   });
 
   const [size, setSize] = useState<any>('now-1h');
+  const [identName, setIdentName] = useState<any>('');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
 
   const panelBaseProps: any = {
@@ -82,13 +81,10 @@ export default function (props: { initialValues: object; initParams: object; mod
     if (action == "monitor" && id != null && id.length > 0 && id != "null") {
       //探针信息
       getAssetsIdents().then((res) => {
-        const items = res.dat.map((v) => {
-          return {
-            value: v.id,
-            label: v.ident,
-          };
+        res.dat.map((v) => {
+          identList[v.id]= v.ident          
         });
-        setIdentList(items);
+        setIdentList({...identList});
       });
       //获取当前监控信息
       getXhMonitor(id).then(({ dat }) => {
@@ -212,14 +208,14 @@ export default function (props: { initialValues: object; initParams: object; mod
               </div>
               <div className='info'>
                 <Row gutter={10} className='row'>
-                  <Col>资产名称：{assetInfo.name}</Col>
-                  <Col>资产类型：{assetInfo.type}</Col>
-                  <Col>IP地址：{assetInfo.ip}</Col>
-                  <Col>厂商：{assetInfo.manufacturers}</Col>
+                  <Col className='theme'><div>资产名称:</div>{assetInfo.name}</Col>
+                  <Col className='theme'><div>资产类型：</div>{assetInfo.type}</Col>
+                  <Col className='theme'><div>IP地址：</div>{assetInfo.ip}</Col>
+                  <Col className='theme'><div>厂商：</div>{assetInfo.manufacturers}</Col>
                 </Row>
                 <Row gutter={10} className='row'>
-                  <Col>资产位置：{assetInfo.position}</Col>
-                  <Col>状态：{assetInfo.status == 1 ? '正常' : "下线"}</Col>
+                  <Col className='theme'><div>资产位置：</div>{assetInfo.position}</Col>
+                  <Col className='theme'><div>状态：</div>{assetInfo.status == 1 ? '正常' : "下线"}</Col>
                   <Col></Col>
                 </Row>
               </div>
@@ -228,13 +224,13 @@ export default function (props: { initialValues: object; initParams: object; mod
               <div className='monitor_info'>
                 <div className='base'>
                   <Row gutter={10} className='row'>
-                    <Col>监控名称：{monitor.monitoring_name}</Col>
+                    <Col className='theme'><div>监控名称：</div>{monitor.monitoring_name}</Col>
                   </Row>
                   <Row gutter={10} className='row'>
-                    <Col>采集器:{monitor.target_id}</Col>
+                    <Col  className='theme'><div>采集器:</div>{identList[monitor.target_id]}</Col>
                   </Row>
                   <Row gutter={10} className='row'>
-                    <Col>描述:{monitor.remark}<CheckCircleFilled /></Col>
+                    <Col  className='theme'><div>描述:{monitor.remark}</div>{monitor.remark}</Col>
                   </Row>
                 </div>
                 <div className='script'>

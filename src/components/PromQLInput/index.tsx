@@ -61,7 +61,7 @@ const ExpressionInput = (
     completeEnabled = true,
     trigger = ['onBlur', 'onEnter'],
     datasourceValue,
-    placeholder = '输入promql进行查询。按Shift+Enter键输入换行符',
+    placeholder = '输入Promql进行查询。按Shift+Enter键输入换行符',
   }: CMExpressionInputProps,
   ref,
 ) => {
@@ -72,6 +72,7 @@ const ExpressionInput = (
   const defaultHeaders = {
     Authorization: `Bearer ${localStorage.getItem('access_token') || ''}`,
   };
+  
 
   useEffect(() => {
     executeQueryCallback.current = executeQuery;
@@ -96,7 +97,7 @@ const ExpressionInput = (
                           }
                         : defaultHeaders,
                     ),
-                  });
+                  })
                 },
               },
             }
@@ -106,11 +107,12 @@ const ExpressionInput = (
     // Create or reconfigure the editor.
     const view = viewRef.current;
     if (view === null) {
+       console.log("No editor")
       // If the editor does not exist yet, create it.
       if (!containerRef.current) {
         throw new Error('expected CodeMirror container element to exist');
       }
-
+      
       const startState = EditorState.create({
         doc: value,
         extensions: [
@@ -171,15 +173,17 @@ const ExpressionInput = (
           }),
         ],
       });
-
       const view = new EditorView({
         state: startState,
         parent: containerRef.current,
       });
+   
+      console.log("view,view",view);
 
       viewRef.current = view;
 
       if (ref) {
+        
         ref.current = view;
       }
 
@@ -195,15 +199,18 @@ const ExpressionInput = (
       if (view === null) {
         return;
       }
+      console.log('进行的view',view);
       view.dispatch(
         view.state.update({
           changes: { from: 0, to: oldValue?.length || 0, insert: value },
         }),
       );
     }
+    console.log('进行的方法',value);
   }, [value]);
 
   return (
+   
     <div
       className={classNames({ 'ant-input': true, readonly: readonly, 'promql-input': true })}
       onBlur={() => {

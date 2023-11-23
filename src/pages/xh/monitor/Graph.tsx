@@ -23,6 +23,7 @@ import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { CommonStateContext } from '@/App';
 import { getAssetsMonitor } from '@/services/assets';
 import './graph.less'
+import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
 import { Button, InputNumber, Popover, Radio, Space, RadioChangeEvent } from 'antd';
 
@@ -54,8 +55,12 @@ const getSerieName = (metric: any) => {
     .map((label) => {
       return `${label}="${metric[label]}"`;
     });
-
-  return `${metricName}{${_.join(labels, ',')}}`;
+    if (cn_name[metricName]) {
+      return `${metricName} / ${cn_name[metricName]}`;     
+    } else if (en_name[metricName]) {
+      return `${metricName} / ${en_name[metricName]}`; 
+    }
+  return `${metricName}`;
 };
 
 export default function Graph(props: IProps) {
@@ -124,7 +129,6 @@ export default function Graph(props: IProps) {
         let series = new Array();
         console.log("指标数据查看");
         _.map(res?.dat[0], (item) => {
-          // debugger
           series.push({
             id: _.uniqueId('series_'),
             name: getSerieName(item.metric),
@@ -132,7 +136,6 @@ export default function Graph(props: IProps) {
             data: item.values,
           });
         });
-        //  debugger; 
         setData(series);
 
         /**
@@ -155,7 +158,6 @@ export default function Graph(props: IProps) {
       })
         .catch((err) => {
           const msg = _.get(err, 'message');
-          // setErrorContent(`Error executing query: ${msg}`);
         });
     }
   }, [JSON.stringify(range), step, monitorId, refreshFlag]);

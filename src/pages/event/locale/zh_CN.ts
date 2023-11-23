@@ -1,5 +1,5 @@
 const zh_CN = {
-  title: '活跃告警',
+  title: '当前告警',
   search_placeholder: '模糊搜索规则和标签(多个关键词请用空格分隔)',
   hours: {
     6: '最近 6 小时',

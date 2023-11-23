@@ -3,6 +3,7 @@ import { AutoComplete } from 'antd';
 import _ from 'lodash';
 import { getMetric } from '@/services/dashboardV2';
 import FormItem from '../components/FormItem';
+import {cn_name,en_name} from "../components/metrics_translation"
 
 interface IProps {
   datasourceValue: number;
@@ -21,6 +22,7 @@ export default function index(props: IProps) {
 
   useEffect(() => {
     getMetric(params, datasourceValue).then((res) => {
+      
       setMetricData(res.data);
     });
   }, []);
@@ -38,9 +40,24 @@ export default function index(props: IProps) {
     >
       <AutoComplete
         style={{ width: '100%' }}
-        options={_.map(metricData, (item) => {
+        showSearch
+        options={_.map(metricData, (item) => { 
+          let label :any = item;;
+          if (cn_name[item]) {
+            label =<div>
+                <div>{item}</div>
+                <div style={{ color: '#8c8c8c' }}>{cn_name[item]}</div>
+            </div> ;
+          } else if (en_name[item]) {
+            label =item+" "+en_name[item];
+            label =<div>
+                <div>{item}</div>
+                <div style={{ color: '#8c8c8c' }}>{en_name[item]}</div>
+            </div> ;
+          }
           return {
-            value: item,
+            value:item,
+            label:label,
           };
         })}
         value={searchValue}

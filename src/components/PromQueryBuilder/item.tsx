@@ -38,7 +38,6 @@ export default function index(props: IProps) {
   function newMetric() {
     let queryContext = buildPromVisualQueryFromPromQL('');
     const query = normalizeDefaultValue(queryContext.query);
-
     metrics.push({
       metric: '',
       name: '',

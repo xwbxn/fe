@@ -44,6 +44,14 @@ export const getDefaultHours = () => {
   }
   return 6;
 };
+let queryFilter = [
+  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'status', label: '告警级别', type: 'select' },
+  { name: 'group_id', label: '业务组', type: 'select' },
+  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'asset_name', label: '资产名称', type: 'input' },
+  { name: 'manufacturers', label: '告警规则', type: 'input' },
+]
 
 export const setDefaultHours = (hours: number) => {
   window.localStorage.setItem('alert_events_hours', `${hours}`);
@@ -52,11 +60,14 @@ export const setDefaultHours = (hours: number) => {
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
   const { groupedDatasourceList, busiGroups, feats } = useContext(CommonStateContext);
+  const [filterType, setFilterType] = useState<string>("");
+  const [searchVal, setSearchVal] = useState('');
+  const [filterParam, setFilterParam] = useState<string>("");
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [start, setStart] = useState<number>(0);
   const [end, setEnd] = useState<number>(0);
-
+  
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [ftype, setFtype] = useState<number>(1);
   const [filter, setFilter] = useState<{
@@ -202,30 +213,26 @@ const Event: React.FC = () => {
               setRefreshFlag(_.uniqueId('refresh_'));
             }}
           />
-          {/* <Select
+
+          <Select
+            // defaultValue="lucy"
+            placeholder="选择过滤器"
+            style={{ width: 120 }}
             allowClear
-            placeholder={'查询类型'}
-            style={{ minWidth: 80 }}
-            value={filter.type}
-            // mode='multiple'
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                type: val,
-              });
-            }}
-            dropdownMatchSelectWidth={false}
-          >
-
-            {prodOptions.map((item) => {
-              return (
-                <Select.Option value={item.value} key={item.value}>
-                  {item.label}
-                </Select.Option>
-              );
-            })}
-          </Select> */}
-
+            onChange={(value) => {
+              queryFilter.forEach((item) => {
+                if (item.name == value) {
+                  setFilterType(item.type);
+                }
+              })
+              setFilterParam(value);
+              setSearchVal("")
+            }}>
+            {queryFilter.map((item, index) => (
+              <option value={item.name} key={index}>{item.label}</option>
+            ))
+            }
+          </Select>
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
@@ -233,7 +240,31 @@ const Event: React.FC = () => {
             locale={locale}
             onOk={onOk}
           />
-          <Select
+
+
+
+          {filterType == "input" && (
+            <Input
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              onChange={(e) => setSearchVal(e.target.value)}
+              suffix={<SearchOutlined />}
+              placeholder={'输入模糊检索关键字'}
+            />
+          )}
+          {filterType == "select" && (
+            <Select
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              // options={}
+              onChange={(val) => setSearchVal(val)}
+              placeholder={'选择要查询的条件'}
+            />
+          )}
+
+          {/* <Select
             style={{ minWidth: 60 }}
             placeholder={t('severity')}
             allowClear
@@ -264,10 +295,10 @@ const Event: React.FC = () => {
             {_.map(busiGroups, (item) => {
               return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
             })}
-          </Select>
+          </Select> */}
 
 
-          <Input
+          {/* <Input
             className='search-input'
             prefix={<SearchOutlined />}
             placeholder={t('search_placeholder')}
@@ -281,9 +312,11 @@ const Event: React.FC = () => {
             onPressEnter={(e) => {
               setRefreshFlag(_.uniqueId('refresh_'));
             }}
-          />
+          /> */}
 
-          <div>
+          
+        </Space>
+        <div>
             <Dropdown
               trigger={['click']}
               overlay={
@@ -299,9 +332,9 @@ const Event: React.FC = () => {
                           },
                           onCancel() { },
                         });
-                      }else{
+                      } else {
                         setModalOpen(true);
-                      }                      
+                      }
                     } else if (key == "delete") {
                       if (selectRowKeys.length <= 0) {
                         message.warning("请选择要批量记录")
@@ -333,7 +366,6 @@ const Event: React.FC = () => {
               </Button>
             </Dropdown>
           </div>
-        </Space>
       </div>
     );
   }
@@ -386,7 +418,7 @@ const Event: React.FC = () => {
       if (selectRowKeys != null && selectRowKeys.length > 0) {
         params.ids = selectRowKeys;
       }
-      filter["ftype"] = ftype;      
+      filter["ftype"] = ftype;
       filter["alert_type"] = 2;
       let url = "/api/n9e/alert-events/export-xls";
       let exportTitle = "告警信息";

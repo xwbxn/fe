@@ -19,6 +19,7 @@ import { getMonitorInfoList, getMonitorInfo, getMonitorInfoListBasedOnSearch, de
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
+import RefreshIcon from '@/components/RefreshIcon';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -34,7 +35,12 @@ export enum OperateType {
   TurnOnMonitoring = 'turnOnMonitoring',  //启用监控
   DisableMonitoring = 'disableMonitoring',  //禁止监控
 }
-
+let queryFilter =[
+  {name:'monitoring_name',label:'监控名称',type:'input'},
+  {name:'asset_name',label:'资产名称',type:'input'},
+  {name:'asset_type',label:'监控状态',type:'select'},
+  {name:'status',label:'是否启用告警',type:'select'},
+]
 export interface OrgType {
   name: string;
   id: number;
@@ -89,7 +95,7 @@ export default function () {
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
-
+  const [filterParam,setFilterParam] = useState<string>("");
   const history = useHistory();
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const onSelectNone = () => {
@@ -274,8 +280,7 @@ export default function () {
 
   useEffect(() => {
     getTableData(assetInfo);
-
-  }, [searchVal, refreshFlag, typeId, filterType, refreshKey]);
+  }, [searchVal, refreshFlag, typeId, refreshKey]);
 
   const getTableData = (assets) => {
     const param = {
@@ -475,38 +480,54 @@ export default function () {
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
             <Space>
-              {/* <RefreshIcon
+             <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
-              /> */}
+              />
               <div className='table-handle-search'>
-                <Input
-                  className={'searchInput'}
-                  value={searchVal}
-
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  suffix={<SearchOutlined />}
-                  // onPressEnter={onSearchQuery}
-                  placeholder={'支持模糊检索表格内容'}
-                />
-                &nbsp; &nbsp; &nbsp;
-
-
-                <Select
+              <Select
                   // defaultValue="lucy"
-                  placeholder="数据源类型"
+                  placeholder="选择过滤器"
                   style={{ width: 120 }}
                   allowClear
-                  onChange={(value) => {
-                    setFilterType(value);
-                  }}
-                  options={[
-                    { value: "1", label: 'prometheus' }
+                  onChange={(value)=>{
+                       queryFilter.forEach((item)=>{
+                          if(item.name==value){
+                            setFilterType(item.type);                            
+                          }
+                       })
+                       setFilterParam(value);
+                       setSearchVal("")
+                  }}>
+                  {queryFilter.map((item,index)=>(
+                      <option value={item.name} key={index}>{item.label}</option>
+                  ))
+                  }
+                  </Select>
+                  {filterType=="input" && (
+                     <Input
+                     className={'searchInput'}
+                     value={searchVal}
+                     allowClear
+                     onChange={(e) => setSearchVal(e.target.value)}
+                     suffix={<SearchOutlined />}
+                     placeholder={'输入模糊检索关键字'}
+                   />
+                  )}
+                  {filterType=="select" && (
+                     <Select
+                        className={'searchInput'}
+                        value={searchVal}
+                        allowClear
+                        // options={}
+                        onChange={(val) => setSearchVal(val)}
+                        placeholder={'选择要查询的条件'}
+                   />
+                  )}
 
 
-                  ]}
-                />
+                
 
               </div>
             </Space>

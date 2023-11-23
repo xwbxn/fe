@@ -35,7 +35,16 @@ export enum OperateType {
   ChangeOrganize = 'changeOrganize',
   None = 'none',
 }
-
+let queryFilter =[
+  {name:'ip',label:'IP地址',type:'input'},
+  {name:'asset_name',label:'资产名称',type:'input'},
+  {name:'asset_type',label:'资产类型',type:'select'},
+  {name:'manufacturers',label:'厂商',type:'input'},
+  {name:'os',label:'操作系统',type:'input'},
+  {name:'status',label:'状态',type:'select'},
+  {name:'group_id',label:'业务组',type:'select'},
+  {name:'position',label:'资产位置',type:'input'},
+]
 export interface OrgType {
   name: string;
   id: number;
@@ -78,6 +87,7 @@ export default function () {
   const [current,setCurrent] = useState<number>(1);
   const [pageSize,setPageSize] = useState<number>(10);  
   const [searchVal, setSearchVal] = useState('');
+  const [filterParam,setFilterParam] = useState<string>("");
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total,setTotal] = useState<number>(0);
@@ -85,10 +95,10 @@ export default function () {
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
+ 
 
   const [typeId, setTypeId] = useState<any>(null);
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
-  const [modifySwitch, setModifySwitch] = useState(true);  
   const [viewIndex, setViewIndex] = useState<number>(-1);  
   
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
@@ -170,7 +180,7 @@ export default function () {
         if(value==0){
            label = "离线";
         }else if(value==1){
-           label = "正常"
+           label = "在线"
         }
         return label;
       },
@@ -276,7 +286,7 @@ export default function () {
 
   useEffect(() => {
     getTableData();
-  }, [searchVal,typeId,filterType,refreshKey]);
+  }, [searchVal,typeId,refreshKey]);
 
   const getTableData = () =>{
   
@@ -291,8 +301,8 @@ export default function () {
     if(typeId!=null && typeId!="0" && modifyType){
       param["type"] = typeId;
     }
-    if(filterType!=null && filterType.length > 0 && searchVal!=null && searchVal.length > 0)  {
-      param["filter"] = filterType;
+    if(filterParam!=null && filterParam.length > 0 && searchVal!=null && searchVal.length > 0)  {
+      param["filter"] = filterParam;
     }
     setQueryCondition(param);
 
@@ -595,30 +605,46 @@ export default function () {
                 }}
               />
               <div className='table-handle-search'>
-               <Select
+                <Select
                   // defaultValue="lucy"
                   placeholder="选择过滤器"
                   style={{ width: 120 }}
                   allowClear
                   onChange={(value)=>{
-                    setFilterType(value);
-                  }}
-                  options={[
-                    //  { value: "1", label: '数据源名称' },
-                    //  { value: "2", label: 'IP地址解析器' },
-                    //  { value: "3", label: '数据源类型' },
-                    //  { value: "4", label: '解析器' },
-                     { value: "group", label: '业务组' }
-                  ]}
-                />
-                <Input
-                  className={'searchInput'}
-                  value={searchVal}
-                  allowClear
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  prefix={<SearchOutlined />}
-                  placeholder={'模糊检索资产名称/IP等多个关键字'}
-                />
+                       queryFilter.forEach((item)=>{
+                          if(item.name==value){
+                            setFilterType(item.type);                            
+                          }
+                       })
+                       setFilterParam(value);
+                       setSearchVal("")
+                  }}>
+                  {queryFilter.map((item,index)=>(
+                      <option value={item.name} key={index}>{item.label}</option>
+                  ))
+                  }
+                  </Select>
+                  {filterType=="input" && (
+                     <Input
+                     className={'searchInput'}
+                     value={searchVal}
+                     allowClear
+                     onChange={(e) => setSearchVal(e.target.value)}
+                     suffix={<SearchOutlined />}
+                     placeholder={'输入模糊检索关键字'}
+                   />
+                  )}
+                  {filterType=="select" && (
+                     <Select
+                        className={'searchInput'}
+                        value={searchVal}
+                        allowClear
+                        // options={}
+                        onChange={(val) => setSearchVal(val)}
+                        placeholder={'选择要查询的条件'}
+                   />
+                  )}
+                
               </div>
             </Space>
             <div className='tool_right'>

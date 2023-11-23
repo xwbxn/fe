@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, Link } from 'react-router-dom';
 import _ from 'lodash';
 import moment from 'moment';
-import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip } from 'antd';
+import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
 import { ColumnType } from 'antd/lib/table';
 import RefreshIcon from '@/components/RefreshIcon';
 import SearchInput from '@/components/BaseSearchInput';
@@ -32,13 +32,24 @@ import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
-import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, PoweroffOutlined } from '@ant-design/icons';
+import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, PoweroffOutlined, SearchOutlined } from '@ant-design/icons';
 import parameters from '@/pages/system/parameters';
 
 interface ListProps {
   bgid?: number;
-  assetid?:number;
+  assetid?: number;
 }
+
+let queryFilter = [
+  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'status', label: '告警级别', type: 'select' },
+  { name: 'group_id', label: '业务组', type: 'select' },
+  { name: 'group_id', label: '资产类型', type: 'select' },
+  { name: 'asset_name', label: '资产名称', type: 'input' },
+  { name: 'manufacturers', label: '告警规则', type: 'input' },
+  { name: 'alert_group_id', label: '告警接收组', type: 'input' },
+]
 
 interface Filter {
   cate?: string;
@@ -48,18 +59,21 @@ interface Filter {
 }
 
 export default function List(props: ListProps) {
-  const { bgid,assetid } = props;
+  const { bgid, assetid } = props;
   const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
-  const [filter, setFilter] = useState<Filter>({});  
+  const [filter, setFilter] = useState<Filter>({});
   const [params, setParams] = useState<any>({
-       limit:10,page:1
+    limit: 10, page: 1
   });
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
-  const [type,setType] = useState<string>("");
+  const [type, setType] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("");
+  const [searchVal, setSearchVal] = useState('');
+  const [filterParam, setFilterParam] = useState<string>("");
   const [typeOptions, setTypeOptions] = useState<any[]>([
     //  {
     //   label: '告警级别',
@@ -69,7 +83,7 @@ export default function List(props: ListProps) {
     //     { label: 'S3', value: 3 },
     //   ]
     //  }
-    ]);
+  ]);
   const [loading, setLoading] = useState(false);
   const columns: ColumnType<AlertRuleType<any>>[] = [
     {
@@ -147,7 +161,7 @@ export default function List(props: ListProps) {
                   });
               }}
             />
-            <Link title='克隆' 
+            <Link title='克隆'
               className='table-operator-area-normal'
               to={{
                 pathname: `/alert-rules/edit/${record.id}?mode=clone`,
@@ -157,9 +171,9 @@ export default function List(props: ListProps) {
               <CopyTwoTone />
             </Link>
             <FileSearchOutlined title='查看' onClick={() => {
-                history.push(`alert-rules/edit/${record.id}?mode=view`);
-              }}/>
-            <EditOutlined title='编辑' 
+              history.push(`alert-rules/edit/${record.id}?mode=view`);
+            }} />
+            <EditOutlined title='编辑'
               onClick={() => {
                 history.push(`alert-rules/edit/${record.id}`);
               }}
@@ -178,7 +192,7 @@ export default function List(props: ListProps) {
                       });
                   },
 
-                  onCancel() {},
+                  onCancel() { },
                 });
               }}
             >
@@ -231,42 +245,42 @@ export default function List(props: ListProps) {
     }
   };
   useEffect(() => {
-      getAssetsStypes().then((res) => {
-        const items = res.dat.map((v) => {
-          return {
-            value: v.name,
-            label: v.name,
-            ...v,
-          };
-        });
-        typeOptions.push({
-          label: '资产类型',
-          options:items
-        })
-        setTypeOptions(_.cloneDeep(typeOptions));
-      });      
-      
+    getAssetsStypes().then((res) => {
+      const items = res.dat.map((v) => {
+        return {
+          value: v.name,
+          label: v.name,
+          ...v,
+        };
+      });
+      typeOptions.push({
+        label: '资产类型',
+        options: items
+      })
+      setTypeOptions(_.cloneDeep(typeOptions));
+    });
+
   }, []);
 
   useEffect(() => {
     if (bgid) {
-      if(assetid!=null && assetid>0){
-        params["filter"] =3;
-        params["query"] = ""+assetid;
-      }else if(filter.query!=null && filter.query.length>0){
+      if (assetid != null && assetid > 0) {
+        params["filter"] = 3;
+        params["query"] = "" + assetid;
+      } else if (filter.query != null && filter.query.length > 0) {
         params["query"] = filter.query;
-        if(type=="alert_levels" ){
-          params["filter"] =1;
-        }else if(type=="asset_types"){
-          params["filter"] =2;
+        if (type == "alert_levels") {
+          params["filter"] = 1;
+        } else if (type == "asset_types") {
+          params["filter"] = 2;
         }
-      }else{
+      } else {
         delete params["filter"];
         delete params["query"];
-      }    
+      }
       getAlertRules(params);
     }
-  }, [bgid,filter.query]);
+  }, [bgid, filter.query]);
 
   if (!bgid) return null;
   const filteredData = filterData();
@@ -282,6 +296,45 @@ export default function List(props: ListProps) {
               }}
             />
             <Select
+              // defaultValue="lucy"
+              placeholder="选择过滤器"
+              style={{ width: 120 }}
+              allowClear
+              onChange={(value) => {
+                queryFilter.forEach((item) => {
+                  if (item.name == value) {
+                    setFilterType(item.type);
+                  }
+                })
+                setFilterParam(value);
+                setSearchVal("")
+              }}>
+              {queryFilter.map((item, index) => (
+                <option value={item.name} key={index}>{item.label}</option>
+              ))
+              }
+            </Select>
+            {filterType == "input" && (
+              <Input
+                className={'searchInput'}
+                value={searchVal}
+                allowClear
+                onChange={(e) => setSearchVal(e.target.value)}
+                suffix={<SearchOutlined />}
+                placeholder={'输入模糊检索关键字'}
+              />
+            )}
+            {filterType == "select" && (
+              <Select
+                className={'searchInput'}
+                value={searchVal}
+                allowClear
+                // options={}
+                onChange={(val) => setSearchVal(val)}
+                placeholder={'选择要查询的条件'}
+              />
+            )}
+            {/* <Select
               style={{ width: 150 }}
               allowClear
               placeholder="请选择筛选类型"
@@ -332,9 +385,9 @@ export default function List(props: ListProps) {
                 }}
               >
               </Select>
-            )}
-            
-            
+            )} */}
+
+
             {/* <SearchInput
               placeholder={t('search_placeholder')}
               onSearch={(val) => {
@@ -361,7 +414,7 @@ export default function List(props: ListProps) {
             </Button>
             <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} getAlertRules={getAlertRules} />
           </Space>
-        </Col> 
+        </Col>
       </Row>
       <Table
         tableLayout='fixed'

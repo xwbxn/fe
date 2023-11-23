@@ -233,6 +233,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   return (
     <Fragment>
+      <div className='assetmgt_header_select'>
       <Tabs
         className='assetmgt_list_2'
         activeKey={tabIndex}
@@ -245,7 +246,7 @@ export default function (props: { initialValues: object; initParams: object; mod
           return <Tabs.TabPane tab={groupItem.label} key={groupItem.name}></Tabs.TabPane>;
         })}
       </Tabs>
-
+      </div>
       <Form
         name='asset'
         form={form}

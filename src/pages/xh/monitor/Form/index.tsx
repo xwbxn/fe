@@ -10,6 +10,7 @@ import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manag
 import PromBox from './PromBox';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
+import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 const { TextArea } = Input;
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled: boolean }) {
@@ -19,6 +20,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  const [sqlCN, setSqlCN] = useState<string>("")
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
@@ -94,6 +96,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   }, []);
 
   const genForm = (assets, types) => {
+
     console.log('genForm');
     let formValue = form.getFieldsValue();
     console.log(formValue);
@@ -103,6 +106,18 @@ export default function (props: { initialValues: object; initParams: object; mod
       let typeList = types ? types : assetTypes;
       const assetType: any = typeList.find((v) => v.name === asset.type);
       if (assetType) setParams(assetType.form || []);
+    }
+    if (formValue['monitoring_sql'] != null) {
+      let sql = formValue['monitoring_sql'];;
+      if (cn_name[sql]) {
+        setSqlCN(sql + ":" + cn_name[sql])
+        console.log("中文", sql + ":" + cn_name[sql])
+      } else if (en_name[sql]) {
+        setSqlCN(sql + ":" + en_name[sql])
+        console.log("英文", setSqlCN(cn_name[sql]))
+      } else {
+        setSqlCN("")
+      }
     }
   };
 
@@ -219,9 +234,16 @@ export default function (props: { initialValues: object; initParams: object; mod
             </Row>
             <Row gutter={10}>
               <Col span={24}>
-                <Form.Item label='监控脚本' name='monitoring_sql' rules={[{ required: false }]}>
-                  <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
+                <Form.Item label='监控脚本' rules={[{ required: false }]}>
+                  <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
+                    <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
+                  </Form.Item>
+                  {sqlCN != null && sqlCN.length>0 && (
+                    <div className='chinese_remark'><span className='title' style={{color:'#0A4B9D',fontSize:"14px"}}>指标关键词说明：</span>{sqlCN}</div>
+                  )}
+
                 </Form.Item>
+
               </Col>
             </Row>
             <Row gutter={10}>
@@ -310,17 +332,17 @@ export default function (props: { initialValues: object; initParams: object; mod
 
       </Form>
       {props.disabled == true && (
-      <div className='monitor_management_button_zone'>
-        <Button
-          onClick={() => {
-            history.back();
-          }}
-        >
-          取消
-        </Button>
+        <div className='monitor_management_button_zone'>
+          <Button
+            onClick={() => {
+              history.back();
+            }}
+          >
+            取消
+          </Button>
 
 
-      </div>
+        </div>
       )}
     </>
 

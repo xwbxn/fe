@@ -277,8 +277,9 @@ export default function index(props: IProps) {
 
   let tableColumn: ColumnProps<DataItem>[] = [
     {
-      title: `Series (${series.length})`,
+      title: `序列 (${series.length})`,
       dataIndex: 'name',
+      width:'30%',
       ellipsis: {
         showTitle: false,
       },
@@ -390,7 +391,6 @@ export default function index(props: IProps) {
                   return {
                     onClick: () => {
                       setActiveLegend(activeLegend !== record.id ? record.id : '');
-                      debugger;
                       setSeriesData(
                         _.map(seriesData, (subItem) => {
                           return {
