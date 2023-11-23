@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePicker, TreeSelect, Checkbox, Popover } from 'antd';
+import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Tabs, Select, Form, Row, Col, DatePickerProps, TreeSelect, Checkbox, Popover } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { CaretDownOutlined, DownOutlined, DownloadOutlined, EditOutlined, GroupOutlined, OneToOneOutlined, SearchOutlined, TableOutlined, UnorderedListOutlined } from '@ant-design/icons';
@@ -12,158 +12,128 @@ import { getAssetsTree, getAssetsListByFilter, deleteDeviceOnline, getAssetById,
 import { Link, useHistory } from 'react-router-dom';
 import { useAntdTable, useToggle } from 'ahooks';
 import { getScrapList ,addScrap} from '@/services/assets/device-scrap';
-
-
+import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
+import { getLogListBasedOnSearch } from '@/services/operlog';
+import { file } from 'jszip';
+const { RangePicker } = DatePicker;
 export default function () {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [refreshFlag, setRefreshFlag] = useState<string>("");
+  const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const [query, setQuery] = useState({})
-  //全部设备、已上线设备、待上线设备、已下线设备
+  const [searchVal, setSearchVal] = useState<any>('');
+  const [logInfo, setLogInfo] = useState<any>({});
+  const [status, setStatus] = useState<number>();
+  const [filterType, setFilterType] = useState<string>("");
+  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterName, setFilterName] = useState<string>("");
+  // const statusOptions =[
+  //   {label:"类型",value:1},{label:"对象",value:2},
+  //   {label:"用户",value:4},{label:"描述",value:3}]; 
+  const [filter, setFilter] = useState<any | {
+    group?: number;
+    severity?: number;
+    query: string;
+    start: number;
+    end: number;
+    type: any | number;
+  }>({
+    query: '',
+    type: null,
+    start: 0,
+    end: -1,
+  });  
+  let queryFilter = [
+    { name: 'id', label: '日志编号', type: 'input' },
+    { name: 'object', label: '系统模块', type: 'select' },
+    { name: 'type', label: '操作类型', type: 'input' },
+    { name: 'user', label: '操作人员', type: 'input' },
+  ]
   const tableColumns =[
     {
-      title: '日志编号',
-      dataIndex: 'management_ip',
-    },
-    {
-      title: '系统模块',
-      dataIndex: 'device_name',
-    },
-    {
-      title: '操作类型',
-      dataIndex: 'serial_number',
-    },
-    {
-      title: '操作人员',
-      dataIndex: 'device_model',
-      render(val) {
-       
-      }
-    },
-    {
-      title: '操作地址',
-      dataIndex: 'device_type',
-      render(val) {      
-        return val;
-      }
-    },
-    {
-      title: '操作地点',
-      dataIndex: 'managed_state',
-      render(val) {
-        return '未定义来源';
-      },
-    },
-    {
-      title: '操作状态',
-      width: '180px',
+      title: '类型',
       align: 'center',
-      render: (val, record: any) => {
-        return val;
-      }
+      dataIndex: 'type',
+      ellipsis: true,
     },
     {
-      title: '操作时间',
-      width: '180px',
+      title: '对象',
       align: 'center',
-      render: (val, record: any) => {
-        return val;
-      }
+      dataIndex: 'object',
+      ellipsis: true,
+    },
+    {
+      title: '描述',
+      align: 'center',
+      dataIndex: 'description',
+      ellipsis: true,
+    },
+    {
+      title: '用户',
+      align: 'center',
+      dataIndex: 'user',
+      ellipsis: true,
+    },
+    {
+      title: '时间',
+      align: 'center',
+      dataIndex: 'oper_time',
+      ellipsis: true,
     },
     {
       title: '操作',
       width: '180px',
       align: 'center',
       render: (val, record: any) => {
-        return val;
+        return (
+          <a onClick={() => {}}  target='_blank'>
+            导出
+          </a>
+        );
       }
     },
    ];
 
 
   const [selectColum,setSelectColum]=useState<any>(tableColumns)
-
-
-  const [deviceStatusOptions, setDeviceStatusOptions] = useState<any>([]);
-  const [scrapStatusOptions, setScrapStatusOptions] = useState<any>([]);
-
-  const initialColumn = [
-    {name: '管理IP', checked: true, value: 0},{name: '设备名称', checked: true, value: 1},
-    {name: '序列号', checked: true, value: 2},{name: '型号', checked: true, value: 3},
-    {name: '设备类型', checked: true, value: 4},{name: '纳管状态', checked: true, value: 5},
-    {name: '操作', checked: true, value: 6}
-  ];
-
-  const [showColumn, setShowColumn] = useState(initialColumn);
-  function handelShowColumn(checkedValues) {
-    let res = initialColumn;
-    res.forEach(item => {
-        item.checked = checkedValues.includes(item.value);
-    });
-    setShowColumn([...res]);  
-    loadingChoosedColumn(tableColumns,[...res]);  
-  }
-  
-  const loadingChoosedColumn =(tableColumns,showColumns)=>{
-    let showColumnMap = new Map();
-    showColumns.forEach((item)=>{
-        if(item.checked){
-          showColumnMap.set(item.name,item.value);
-        }
-    });
-    console.log("showColumnMap",showColumnMap);
-    let showColumn = new Array();
-    tableColumns.forEach((column)=>{
-      if(showColumnMap.has(column.title)){
-        showColumn.push(column);
-      }
-    });
-    setSelectColum(showColumn);
-  };
-
-
-
-  const pupupContent = (
-    <div>
-        <Checkbox.Group
-            defaultValue={[0,1,2,3,4,5,6]}
-            style={{ width: '100%' }}
-            onChange={handelShowColumn}
-        >
-        {
-            showColumn.map(item => (
-                <Row key={item.value} style={{ marginBottom: '5px' }}>
-                    <Col span={24}>
-                        <Checkbox value={item.value}>{item.name}</Checkbox>
-                    </Col>
-                </Row>
-            ))
-        }
-        </Checkbox.Group>
-    </div>
-);
-
- 
-
-  const onChange = (value: string) => {
-    console.log(`selected ${value}`);
-  };
   const getTableData = ({ current, pageSize }): Promise<any> => {
     // debugger
     const params = {
       page: current,
       limit: pageSize,
     };
-    console.log('getTableData', params);
-      return getScrapList({
-        ...params
-      }).then((res) => {
-        // let modelIds  =Array.from(new Set(res.dat.list.map(obj => obj.device_model)))
-        return {
-          total: res.dat.total,
-          list: res.dat.list,
-        };
-      });
+    if (searchVal != null && searchVal.length > 0) {
+      //console.log("searchVal",searchVal)
+      params["query"] = searchVal;
+      //console.log("query",searchVal)
+    }
+    //console.log("FFFFFFFFFF",filterName)
+    if(filterName!=null&&filterName.length>0){
+      params["filterType"]=filterName;
+      //console.log("FFFFFFFFFF",filterName)
+    }
+    // if(status!=undefined&&status>0){
+    //   //console.log("status",status)
+    //   params["filterType"] = status;
+    // }
+    if(filter!=undefined&&filter!=null){
+      //console.log("filter",filter)
+      params["start"]=filter["start"];
+      params["end"]=filter["end"];
+
+    }
+
+    //console.log('getTableData', params);
+    return getLogListBasedOnSearch({
+      ...params
+    }).then((res) => {
+      // let modelIds  =Array.from(new Set(res.dat.list.map(obj => obj.device_model)))
+      //console.log("AAAAAAAAAAAAAAAAA",res)
+      return {
+        total: res.dat.total,
+        list: res.dat.list,
+      };
+    });
   };
 
   
@@ -174,50 +144,130 @@ export default function () {
 
   useEffect(() => {    
       setRefreshFlag(_.uniqueId('refresh_flag'))
-  }, []);
+  }, [searchVal]);
 
-
+  const onStatusChange = (e) => {
+    let val = e;
+    setStatus(val!=null?val:null);
+    //console.log("SSSSSSSSSSSS",status)
+    setRefreshFlag(_.uniqueId('refresh_flag'));
+  };
+  //时间选择框使用
+  const onTimeChange = (
+    value: DatePickerProps['value'] | RangePickerProps['value'],
+    dateString: [string, string] | string,
+  ) => {
+    //console.log('Selected Time: ', value);
+    if(value==null){
+      filter["start"] =0;
+      filter["end"] =-1;
+      setFilter({ ...filter });
+      setRefreshFlag(_.uniqueId('refresh_'));
+    }
+    //console.log('Formatted Selected Time: ', dateString);
+  };
+  //时间选择框使用
+  const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
+    //console.log('onOk: ', value);
+    value?.forEach((element, index) => {
+      if (index == 0 && element != null) {
+        filter["start"] = moment(element).unix()
+        setFilter({ ...filter });
+      }
+      if (index == 1 && element != null) {
+        filter["end"] = moment(element).unix()
+        setFilter({ ...filter });
+      }
+    });
+    setRefreshFlag(_.uniqueId('refresh_'));
+  };
 
   return (
     <PageLayout icon={<GroupOutlined />} title={'操作日志'} >
       
             <div className='table-content'>
-
-
               <div className='table-header'>
-                <Form  layout="inline" labelAlign="left" className='query_form'>
+                
                   <Row className='row-spe'>
-                    <Col span={4} >
-                      <Form.Item label="过滤器" name="filter" className='input_query'>
-                        <Select
-                          showSearch
-                          style={{ width: '125px' }}
-                          placeholder="请选择过滤条件"
-                          allowClear={true}
-                          optionFilterProp="children"
-                          onChange={onChange}
-                          options={deviceStatusOptions}
-
-                        />
-                      </Form.Item>
+                    <Col span={3}>
+                      <Select
+                      // defaultValue="lucy"
+                      placeholder="选择过滤器"
+                      style={{ width: 120 }}
+                      allowClear
+                      onChange={(value) => {
+                        queryFilter.forEach((item) => {
+                          if (item.name == value) {
+                            setFilterType(item.type);
+                            setFilterName(item.name);
+                            // console.log("type",item.type);
+                            // console.log("name",item.name);
+                            // console.log("value",value);
+                          }
+                        })
+                        setFilterParam(value);
+                        setSearchVal("")
+                      }}>
+                      {queryFilter.map((item, index) => (
+                        <option value={item.name} key={index}>{item.label}</option>
+                      ))
+                      }
+                    </Select>
                     </Col>
+                    {/* <Col span={5} >
+                      <Input
+                          className={'searchInput'}
+                          value={searchVal}
+                          onChange={(e) => setSearchVal(e.target.value)}
+                          suffix={<SearchOutlined />}
+                          // onPressEnter={onSearchQuery}
+                          placeholder={'请输入类型/用户/对象/描述'}
+                        />
+                        </Col>  */}
+                    <Col span={7}>
+                      <RangePicker
+                        showTime={{ format: 'HH:mm:ss' }}
+                        format="YYYY-MM-DD HH:mm"
+                        onChange={onTimeChange}
+                        onOk={onOk}
+                      /> 
+                    </Col>  
+                    <Col>
+                    {filterType == "input" && (
+                      <Input
+                          className={'searchInput'}
+                          value={searchVal}
+                          allowClear
+                          onChange={(e) => setSearchVal(e.target.value)}
+                          suffix={<SearchOutlined />}
+                          placeholder={'输入模糊检索关键字'}
+                        />
+                      )}
+                      {filterType == "select" && (
+                        <Select
+                          className={'searchInput'}
+                          value={searchVal}
+                          allowClear
+                          // options={}
+                          onChange={(val) => setSearchVal(val)}
+                          placeholder={'选择要查询的条件'}
+                        />
+                      )}
+                    </Col>     
+                    {/* <Col span={11} >
+                    <Select
+                      style={{ width: '125px',marginLeft:'10px' }}
+                      placeholder="筛选条件"
+                      allowClear={true}
+                      onChange={onStatusChange}
+                      options={statusOptions}
+                    />
+                    </Col>   */}
                     
-                    <Col span={4} >
-                      <Form.Item label="过滤器" name="filter" className='input_query'>
-                        <Select
-                          showSearch
-                          style={{ width: '125px' }}
-                          placeholder="请选择过滤条件"
-                          allowClear={true}
-                          optionFilterProp="children"
-                          onChange={onChange}
-                          options={scrapStatusOptions}
-
-                        />
-                      </Form.Item>
-                    </Col>
+                    <Button className='btn' type="primary" style={{right:'0',position:'absolute',marginRight:'16px'}}   onClick={()=>{}}>批量导出
+                    </Button>
+                                   
                   </Row>
-                </Form>
               </div>
               <div className='assets-list_1'>               
                 
