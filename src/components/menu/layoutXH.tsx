@@ -15,7 +15,7 @@
  *
  */
 import React, { useEffect, useState, createContext, useRef } from 'react';
-import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 
 import TopMenu from './topMenuXH'; //西航版本
 import { Header, Footer } from 'antd/lib/layout/layout';
@@ -28,7 +28,9 @@ function layoutXH() {
   const [leftMenuItems, setLeftMenuItems] = useState<any>();
   const [leftMenuKey, setLeftMenuKey] = useState<any>("");
   const [mainMenu, setMainMenu] = useState<any>({});
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
+  const { pathname } = location;
 
   useEffect(() => {
     try {
@@ -56,27 +58,33 @@ function layoutXH() {
 
   return (
     <Layout>
-      <Header className='yth_app_header'>
-        <TopMenu
-          selectMenu={(mainMenu: any, items) => {
-            setMainMenu(mainMenu);
-            setLeftMenuItems(items)
-          }}
-        ></TopMenu>
-      </Header>
-      <Layout hasSider>
-        <Sider collapsible trigger={null} collapsed={collapsed}>
-          <Menu
-            mode="inline"
-            defaultSelectedKeys={leftMenuKey}
-            defaultOpenKeys={['sub1']}
-            onClick={handleClick}
-            style={{ height: '100%', borderRight: 0 }}
-            items={leftMenuItems}
-          /></Sider>
+      {pathname != "/login" ? (
+        <>
+          <Header className='yth_app_header'>
+            <TopMenu
+              selectMenu={(mainMenu: any, items) => {
+                setMainMenu(mainMenu);
+                setLeftMenuItems(items)
+              }}
+            ></TopMenu>
+          </Header>
+          <Layout hasSider>
+            <Sider collapsible trigger={null} collapsed={collapsed}>
+              <Menu
+                mode="inline"
+                defaultSelectedKeys={leftMenuKey}
+                defaultOpenKeys={['sub1']}
+                onClick={handleClick}
+                style={{ height: '100%', borderRight: 0 }}
+                items={leftMenuItems}
+              /></Sider>
+            <Content />
+          </Layout>
+          {/* <Footer>Footer</Footer> */}
+        </>
+      ):(
         <Content />
-      </Layout>
-      {/* <Footer>Footer</Footer> */}
+      )}
     </Layout>
 
   );
