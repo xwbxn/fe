@@ -48,7 +48,7 @@ export default function index() {
               >
                 {t('common:btn.add')}
               </Button>
-            </div>
+            </div> 
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
                 prefix={<SearchOutlined />}
@@ -57,9 +57,8 @@ export default function index() {
                   setSearch(e.target.value);
                 }}
               />
-            </div>
-
-            <List
+            </div> 
+           <List
               style={{
                 marginBottom: '12px',
                 flex: 1,
@@ -74,8 +73,9 @@ export default function index() {
                   {item.name}
                 </List.Item>
               )}
-            />
-          </div>
+            /> 
+
+            </div>
           <div className='resource-table-content'>
             <div className='team-info'>
               <Space
@@ -146,7 +146,7 @@ export default function index() {
                 )
               )}
             </div>
-            <Button
+            <Button style={{right:'0px', position: 'fixed', bottom: '0', margin: '16px'}}
               type='primary'
               onClick={() => {
                 if (active) {

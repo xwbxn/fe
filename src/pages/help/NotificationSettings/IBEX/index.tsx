@@ -22,6 +22,7 @@ export default function index() {
   return (
     <PageLayout title={t('ibex.title')}>
       <div>
+      {/* <div style={{ position: 'relative' }}> */}
         <div
           style={{
             padding: 10,
@@ -50,6 +51,7 @@ export default function index() {
                 ]}
               />
             </Form.Item>
+            {/* <div style={{ position: 'absolute', bottom: 0, right: 0, margin: '16px' }}> */}
             <div>
               <Button
                 type='primary'

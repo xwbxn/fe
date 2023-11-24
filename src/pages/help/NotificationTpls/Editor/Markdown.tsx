@@ -27,7 +27,7 @@ export default function Dingtalk(props: IProps) {
         return <ReactMarkdown>{newValue || ''}</ReactMarkdown>;
       }}
       limitSize={LIMIT_SIZE}
-      titleExtra='Markdown'
+      titleExtra='SMTP设置'
     />
   );
 }

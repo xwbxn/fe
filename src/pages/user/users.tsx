@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useAntdTable } from 'ahooks';
 import PageLayout from '@/components/pageLayout';
 import UserInfoModal from './component/createModal';
-import { getUserInfoList, deleteUser, updateProperty, deleteTeam, getTeamInfoList, deleteUsers, getRoles } from '@/services/manage';
+import { getUserInfoList, deleteUser, updateProperty, deleteTeam, getTeamInfoList, deleteUsers, getRoles, getUserList } from '@/services/manage';
 import { User, Team, UserType, ActionType, TeamInfo } from '@/store/manageInterface';
 import { CommonStateContext } from '@/App';
 import usePagination from '@/components/usePagination';
@@ -33,6 +33,17 @@ import './index.less';
 import { OperateType } from './operate_type';
 import './locale';
 // import { getOrganizationTree,getOrganizationsByIds } from '@/services/assets';
+
+
+let queryFilter = [
+  { name: 'username', label: '用户名', type: 'input'},
+  { name: 'nickname', label: '显示名', type: 'input'},
+  { name: 'email', label: '邮箱', type: 'input'},
+  { name: 'phone', label: '手机号', type: 'input'},
+  { name: 'statu', label: '状态', type: 'select'},
+  { name: 'role', label: '角色', type: 'select'},
+]
+
 const { confirm } = Modal;
 
 
@@ -56,7 +67,27 @@ const Resource: React.FC = () => {
   const [roleList, setRoleList] = useState<any[]>([]);
   const [teamInfo, setTeamInfo] = useState<Team>();
   const [actionType, setActionType] = useState<string>("");
+  const { Option } = Select;
 
+  const [searchVal, setSearchVal] = useState<any>(null);
+  const [filterType, setFilterType] = useState<string>("");
+  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterName, setFilterName] = useState<string>("");
+  const [filterOptions, setFilterOptions] = useState<any>({});
+  // const statusOptions =[
+  const [filter, setFilter] = useState<{
+    datasourceIds: number[];
+    bgid?: number;
+    severity?: number;
+    eventType?: number;
+    query: string;
+    // rule_prods: string[];
+    type: any | number;
+  }>({
+    datasourceIds: [],
+    query: '',
+    type: null
+  });
 
   const [treeData, setTreeData] = useState<any[]>([
     { id: 0, name: '全部', parent_id: 0, children: [] },
@@ -102,22 +133,30 @@ const Resource: React.FC = () => {
       setTreeData(treeData.slice());
     });
   };
+  useEffect(() => {    
+    setRefreshFlag(_.uniqueId('refresh_flag'))
+}, [searchVal]);
 
-  useEffect(() => {
-    setExpandedKeys([0]);
-    setSelectedKeys([0]);
-    loadingTree();
-    getRoles().then((res) =>{
-       let rows  = new Array<any>();
-       res.forEach(element => {
-        rows.push({
-          value:element.name,
-          label:element.name,
-        }); 
-       });
-       setRoleList(rows);
-    })
+
+ useEffect(() => {    
+    console.log("初始化页面和参数");    
+    filterOptions["statu"]=[{value:'0',label:'禁用'},{value:'1',label:'启用'}]  
+    setFilterOptions({...filterOptions}) 
+    getRoles().then((res) => {      
+        let items = res.map(role => {
+          return {
+            value: ""+role.id,
+            label: role.name,
+          }
+        })
+        debugger;
+        filterOptions["role"]=items;
+        setFilterOptions({...filterOptions})      
+    });
+    
   }, []);
+
+
 
   const userColumn: ColumnsType<User> = [
     {
@@ -204,6 +243,7 @@ const Resource: React.FC = () => {
                   deleteUser(record.id).then((_) => {
                     message.success(t('common:success.delete'));
                     handleClose(true);
+                    setRefreshFlag(_.uniqueId('refreshFlag_'));
                   });
                 },
                 onCancel: () => { },
@@ -330,19 +370,27 @@ const Resource: React.FC = () => {
       page: current,
       limit: pageSize,
     };
+    console.log("----------")
+    if(filterName!=null && searchVal != null && searchVal.length > 0){
+      params["type"]=filterName;
+      console.log("FFFFFFFFFF",filterName)
+      params["query"] = searchVal;
+      console.log("query",searchVal)
+    }
     if (teamId > 0) {
       params["user_group_id"] = teamId;
-    }
-    if (status != null) {
-      params["status"] = status;
+      console.log("user_group_id",teamId)
     }
     if (role != null) {
       params["role"] = role;
+      console.log("role",role)
     }
-    return getUserInfoList({
-      ...params,
-      query,
-    }).then((res) => {
+    if (status != null) {
+      params["status"] = status;
+      console.log("status",status)
+    }
+    
+    return getUserList(params).then((res) => {
       // let orgIds  =Array.from(new Set(res.dat.list.map(obj => obj.organization_id)))
       // getOrganizationsByIds(orgIds).then(({dat}) => {
       //    dat.forEach(item => {
@@ -365,6 +413,24 @@ const Resource: React.FC = () => {
     setSelectedRowKeys([]);
     setSelectedRows([]);
   };
+
+
+  const handleDeleteUser = (userId) => {
+    deleteUser(userId).then(() => {
+      // 处理成功或显示消息
+      message.success('用户删除成功');
+      // 重新加载数据或执行其他操作
+      setRefreshFlag(_.uniqueId('refreshFlag_'));
+    }).catch((error) => {
+      // 处理错误
+      console.error('删除用户出错', error);
+    });
+  }
+  
+
+
+
+
 
   return (
     <PageLayout title={t('user.title')} icon={<UserOutlined />}>
@@ -471,35 +537,54 @@ const Resource: React.FC = () => {
               </Row>
 
             )}
-
-
-
-            <Row className='event-table-search'>
+            <div className='layer_2'>
               <div className='event-table-search-left'>
-                <Input className={'searchInput_1'} suffix={<SearchOutlined />} onPressEnter={onSearchQuery} placeholder={t('输入用户名/角色/名称/邮箱/电话/手机等内容')} />
+
                 <Select
-                  style={{ width: '125px', marginLeft: '10px' }}
-                  placeholder="请选择用户状态"
-                  allowClear={true}
-                  onChange={onStatusChange}
-                  options={statusOptions}
-                />
-                <Select
-                  style={{ width: '125px', marginLeft: '10px' }}
-                  placeholder="请选择所属角色"
-                  allowClear={true}
-                  options={roleList}
-                  onChange={onRowChange}>
-                 
+                  placeholder="选择过滤器"
+                  style={{ width: 300 }}
+                  allowClear
+                  onChange={(value) => {
+                    queryFilter.forEach((item) => {
+                      if (item.name == value) {
+                        setFilterType(item.type);
+                        setFilterName(item.name);
+                        
+                   } })
+                    setFilterParam(value);
+                    setSearchVal(null)
+                  }}>
+                  {queryFilter.map((item, index) => (
+                    <option value={item.name} key={index}>{item.label}</option>
+                  ))
+                  }
                 </Select>
               </div>
 
-              <div className='event-table-search-rightbutton'>
-                <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
-                </Button>
+              {filterType == "input" && (
+            <Input
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              onChange={(e) => setSearchVal(e.target.value)}
+              suffix={<SearchOutlined />}
+              placeholder={'输入模糊检索关键字'}
+            />
+          )}
+          {filterType == "select" && (
+            <Select
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
+              onChange={(val) => setSearchVal(val)}
+              placeholder={'选择要查询的条件'}
+            />
+          )}
 
-              </div>
               <div className='event-table-search-right'>
+              <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
+                </Button>
                 {profile.roles?.includes('Admin') && (
                   <div className='user-manage-operate'>
                     <Dropdown
@@ -510,7 +595,7 @@ const Resource: React.FC = () => {
                         }} items={menu.items} />
 
                       }>
-                      <Select style={{ width: '125px', marginLeft: '10px' }}
+                      <Select style={{ width: '100px', marginLeft: '10px' }}
                         placeholder="操作"
                         allowClear={true}
                         onChange={onStatusChange}
@@ -520,7 +605,7 @@ const Resource: React.FC = () => {
                   </div>
                 )}
               </div>
-            </Row>
+            </div>
             <Table
               size='small'
               rowKey='id'

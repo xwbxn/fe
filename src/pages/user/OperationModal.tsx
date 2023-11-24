@@ -14,6 +14,7 @@ import { CommonStateContext } from '@/App';
 
 
 
+
 //请求的参数 【页面宽度，操作，操作类型，初始化数据，刷新页面动作，主题】
 export const OperationModal = ({ width,operateType, setOperateType, initData, reloadList,theme }) => {
   const { t } = useTranslation('assets');
