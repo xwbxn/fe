@@ -37,13 +37,14 @@ export enum OperateType {
 }
 let queryFilter =[
   {name:'ip',label:'IP地址',type:'input'},
-  {name:'asset_name',label:'资产名称',type:'input'},
-  {name:'asset_type',label:'资产类型',type:'select'},
+  {name:'name',label:'资产名称',type:'input'},
+  {name:'type',label:'资产类型',type:'select'},
   {name:'manufacturers',label:'厂商',type:'input'},
   {name:'os',label:'操作系统',type:'input'},
   {name:'status',label:'状态',type:'select'},
   {name:'group_id',label:'业务组',type:'select'},
   {name:'position',label:'资产位置',type:'input'},
+ 
 ]
 export interface OrgType {
   name: string;
@@ -89,6 +90,7 @@ export default function () {
   const [searchVal, setSearchVal] = useState('');
   const [filterParam,setFilterParam] = useState<string>("");
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+  const [filterOptions, setFilterOptions] = useState<any>({});
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total,setTotal] = useState<number>(0);
   const [assetTypeItems, setAssetTypeItems] = useState<any[]>([]);
@@ -245,32 +247,12 @@ export default function () {
         setSecondAddButton(true)
     }else{
       setSecondAddButton(false)
-      getAssetsStypes().then((res) => {
-        let arr = ["0"];
-        const items = res.dat.map((v) => {
-            return {
-              id: v.name,
-              name: v.name,
-              ...v,
-            };
-          })
-          // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
-          let treeData: any[] = [{
-            id: "0",
-            name: '全部资产',
-            count: 0,
-            children: items
-          }];
-          items.map((item, index) => {
-             arr.push(item.id);
-          })
-          setExpandedKeys(arr);
-          setAassetTypes(items);
-          setTreeData(_.cloneDeep(treeData));
-      });
+      
 
     }
     setTypeId(null);
+     
+
 
   },[modifyType]);
 
@@ -282,6 +264,25 @@ export default function () {
     setOptionColumns(baseColumns);
     setSelectColum((baseColumns.concat(fixColumns)));
     //来源数据字典
+    getAssetsStypes().then((res) => {
+       filterOptions["type"]= res.dat.map((v) => {
+          return {
+            value: v.name,
+            label: v.name,
+          };
+        });
+        setFilterOptions({...filterOptions})
+        setTreeData(_.cloneDeep(treeData));
+    });
+    filterOptions["status"]=[{value:'1',label:'在线'},{value:'0',label:'离线'}]    
+    filterOptions["group_id"]=busiGroups.map(group => {
+      return {
+        value: ""+group.id,
+        label: group.name,
+      }
+    })
+    setFilterOptions({...filterOptions})
+    
   }, []);
 
   useEffect(() => {
@@ -605,6 +606,7 @@ export default function () {
                 }}
               />
               <div className='table-handle-search'>
+                <Space>
                 <Select
                   // defaultValue="lucy"
                   placeholder="选择过滤器"
@@ -620,7 +622,7 @@ export default function () {
                        setSearchVal("")
                   }}>
                   {queryFilter.map((item,index)=>(
-                      <option value={item.name} key={index}>{item.label}</option>
+                      <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
                   ))
                   }
                   </Select>
@@ -637,14 +639,15 @@ export default function () {
                   {filterType=="select" && (
                      <Select
                         className={'searchInput'}
+                        placeholder={'选择要查询的条件'}
                         value={searchVal}
                         allowClear
-                        // options={}
+                        options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
                         onChange={(val) => setSearchVal(val)}
-                        placeholder={'选择要查询的条件'}
+                        
                    />
                   )}
-                
+                </Space>
               </div>
             </Space>
             <div className='tool_right'>

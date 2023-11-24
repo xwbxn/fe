@@ -15,9 +15,9 @@
  *
  */
 import React, { useEffect, useState, createContext, useRef } from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
-import { ConfigProvider, Modal } from 'antd';
+import { ConfigProvider, Layout, Menu, MenuProps, Modal } from 'antd';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
 import 'antd/dist/antd.less';
@@ -40,6 +40,10 @@ import './App.less';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
+import LayoutXH from './components/menu/layoutXH'; //西航版本
+import { Header, Footer } from 'antd/lib/layout/layout';
+import Sider from 'antd/lib/layout/Sider';
+import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 
 interface IProfile {
   admin?: boolean;
@@ -74,11 +78,11 @@ export interface ICommonState {
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
-  organizationId:number;
+  organizationId: number;
   queryCondition: string;
   setCurBusiId: (id: number) => void;
-  setOrganizationId:(id: number) => void;
-  setQueryCondition: (queryCondition:string) => void;
+  setOrganizationId: (id: number) => void;
+  setQueryCondition: (queryCondition: string) => void;
   profile: IProfile;
   setProfile: (profile: IProfile) => void;
   licenseRulesRemaining?: number;
@@ -107,6 +111,11 @@ function App() {
   const { t, i18n } = useTranslation();
   const isPlus = useIsPlus();
   const initialized = useRef(false);
+  const history = useHistory();
+  const [leftMenuItems, setLeftMenuItems] = useState<any>();
+  const [leftMenuKey, setLeftMenuKey] = useState<any>("");
+  const [mainMenu, setMainMenu] = useState<any>({});
+  const [collapsed, setCollapsed] = useState(false)
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -132,15 +141,15 @@ function App() {
       window.localStorage.setItem('curBusiId', String(id));
       setCommonState((state) => ({ ...state, curBusiId: id }));
     },
-    organizationId:window.localStorage.getItem('organizationId') ? Number(window.localStorage.getItem('organizationId')) : 0,
-    
+    organizationId: window.localStorage.getItem('organizationId') ? Number(window.localStorage.getItem('organizationId')) : 0,
 
-    setOrganizationId:(id: number) => {
+
+    setOrganizationId: (id: number) => {
       window.localStorage.setItem('organizationId', String(id));
       setCommonState((state) => ({ ...state, organizationId: id }));
     },
     queryCondition: window.localStorage.getItem('queryCondition') as string,
-    setQueryCondition:(condition: string) => {
+    setQueryCondition: (condition: string) => {
       window.localStorage.setItem('queryCondition', condition);
       setCommonState((state) => ({ ...state, queryCondition: condition }));
     },
@@ -172,7 +181,7 @@ function App() {
           }
           const defaultBusiId = commonState.curBusiId || busiGroups?.[0]?.id;
           const defaultOrganizationId = commonState.organizationId || 0;
-          const queryCondition = commonState.queryCondition|| '';
+          const queryCondition = commonState.queryCondition || '';
           window.localStorage.setItem('curBusiId', String(defaultBusiId));
           window.localStorage.setItem('organizationId', String(defaultOrganizationId));
           window.localStorage.setItem('queryCondition', queryCondition);
@@ -186,7 +195,7 @@ function App() {
               groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type'),
               datasourceList: datasourceList,
               curBusiId: defaultBusiId,
-              organizationId:defaultOrganizationId,
+              organizationId: defaultOrganizationId,
               queryCondition: queryCondition,
               licenseRulesRemaining,
               licenseExpireDays,
@@ -201,7 +210,7 @@ function App() {
               okText: _.includes(profile.roles, 'Admin') ? t('common:datasource.empty_modal.btn1') : t('common:datasource.empty_modal.btn2'),
               onOk: () => {
                 if (_.includes(profile.roles, 'Admin')) {
-                  history.pushState(null, '', '/help/source');
+                  // history.pushState(null, '', '/help/source');
                   window.location.reload();
                 }
               },
@@ -219,6 +228,10 @@ function App() {
           });
         }
       })();
+      if (window.localStorage.getItem('leftMenuItems')) {
+        let leftMenus = window.localStorage.getItem('leftMenuItems') as string;
+        setLeftMenuKey([leftMenus]);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -229,6 +242,19 @@ function App() {
     return null;
   }
 
+  const handleClick = (item) => {
+    if ((item.key as string) === 'home') {
+      // window.location.href = '/prod-api/';
+      history.push('/prod-api/')
+    }
+    if ((item.key as string).startsWith('/')) {
+      // window.location.href = item.key;
+      history.push(item.key)
+      window.localStorage.setItem("mainMenuKey", mainMenu.key);
+      window.localStorage.setItem("leftMenuItems", item.key);
+    }
+  };
+
   return (
     <div className='App'>
       <CommonStateContext.Provider value={commonState}>
@@ -238,9 +264,16 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
-                {/* <HeaderMenu /> */}
-                <TopMenu></TopMenu>
-                <Content />
+                <LayoutXH />
+
+                
+
+
+                {/* <TopMenu></TopMenu>
+                <div style={{display:'-webkit-flex'}}>
+                    <Content />
+                </div> */}
+
               </>
             </Switch>
           </Router>

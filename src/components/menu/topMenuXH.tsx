@@ -27,10 +27,12 @@ const getMenuList = (t) => {
       children: [
         {
           key: '/xh/assetmgt',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('资产清单'),
         },
         {
           key: '/targets',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('探针管理'),
         },
       ],
@@ -42,14 +44,17 @@ const getMenuList = (t) => {
       children: [
         {
           key: '/xh/monitor',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('监控指标'),
         },
         {
           key: '/dashboards-built-in',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('仪表盘'),
         },
         {
           key: '/metric/explorer',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('即时查询'),
         },
       ],
@@ -61,18 +66,22 @@ const getMenuList = (t) => {
       children: [
         {
           key: '/alert-rules',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('告警规则'),
         },
         {
           key: '/alert-cur-events',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('当前告警'),
         },
         {
           key: '/alert-his-events',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('历史告警'),
         },
         {
           key: '/help/notification-tpls',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
         },
       ],
@@ -84,14 +93,17 @@ const getMenuList = (t) => {
       children: [
         {
           key: '/log/debug/switch',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: '日志调试启动开关',
         },
         {
           key: '/log/operlog',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('操作日志'),
         },
         {
           key: '/log/syslog',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('系统日志'),
         },
       ],
@@ -103,10 +115,12 @@ const getMenuList = (t) => {
       children: [
         {
           key: '/bigscreen',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('大屏设计'),
         },
         {
           key: '/bigscreen/api-service',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('接口管理'),
         },
       ],
@@ -141,42 +155,52 @@ const getMenuList = (t) => {
         },
         {
           key: '/help/version',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('系统版本'),
         },
         {
           key: '/target/version',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('客户端版本'),
         },
         {
           key: '/help/other',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('其它设置'),
           children: [
             {
               key: '/help/source',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('数据源'),
             },
             {
               key: '/help/servers',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('告警引擎'),
             },
             {
               key: '/system/logo',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('LOGO设置'),
             },
             {
               key: '/system/parameters',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: '系统参数设置',
             },
             {
               key: '/system/interface',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: '接口访问设置',
             },
             {
               key: '/types/dictype',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('数据字典'),
             },
             {
               key: '/system/upgrade',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('系统升级'),
             },
           ],
@@ -199,7 +223,7 @@ const getMenuList = (t) => {
     },
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
-    const targets = _.find(menuList, (item) => item.key === 'targets');
+    const targets:any = _.find(menuList, (item) => item.key === 'targets');
     if (targets) {
       targets.children?.push({
         key: '/collects',
@@ -209,13 +233,20 @@ const getMenuList = (t) => {
   }
   return menuList;
 };
+interface IProps {
+  url?: string;
+  
+}
 
-export default function () {
+export default function ({ selectMenu }) {
   const { t, i18n } = useTranslation('menu');
 
   const menuList = getMenuList(t);
   const [menus, setMenus] = useState(menuList);
   const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
+  
+  const [mainMenuKey, setMainMenuKey] = useState<string[]>([]);
+  const [mainMenuItems,setMainMenuItems] = useState<any>({});
   const location = useLocation();
   const history = useHistory();
   const { pathname } = location;
@@ -223,19 +254,21 @@ export default function () {
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
-    for (const item of menuList) {
-      if (item && item.key.startsWith('/') && pathname.includes(item.key)) {
-        setDefaultSelectedKeys([item?.key]);
-        break;
-      } else if (item?.children && item.children.length > 0) {
-        for (const i of item.children) {
-          if (i && (pathname === i.key || pathname.startsWith(i.key + '/'))) {
-            setDefaultSelectedKeys([item?.key, i.key!]);
-            break;
-          }
-        }
-      }
-    }
+    
+
+    // for (const item of menuList) {
+    //   if (item && item.key.startsWith('/') && pathname.includes(item.key)) {
+    //     setDefaultSelectedKeys([item?.key]);
+    //     break;
+    //   } else if (item?.children && item.children.length > 0) {
+    //     for (const i of item.children) {
+    //       if (i && (pathname === i.key || pathname.startsWith(i.key + '/'))) {
+    //         setDefaultSelectedKeys([item?.key, i.key!]);
+    //         break;
+    //       }
+    //     }
+    //   }
+    // }
   }, [pathname]);
 
   useEffect(() => {
@@ -258,7 +291,25 @@ export default function () {
           setMenus(newMenus);
         });
       } else {
-        setMenus(menuList);
+        let mainMenus = menuList.map((item,index) => {
+          mainMenuItems[item.key] = item.children?item.children:[];
+          delete item.children;
+          return item
+        })
+        setMenus(mainMenus);
+        setMainMenuItems({...mainMenuItems});
+        if(window.localStorage.getItem('mainMenuKey')){
+          let mainKey = window.localStorage.getItem('mainMenuKey') as string;
+          setMainMenuKey([mainKey]);
+          for(let item of mainMenus){
+              if(item.key==mainKey){
+                handleClick(item);
+              }
+          }
+          
+
+        }
+        // setMenus(menuList);
       }
     }
   }, [profile?.roles, i18n.language]);
@@ -287,9 +338,9 @@ export default function () {
   const handleClick = (item) => {
     if ((item.key as string) === 'home') {
       window.location.href = '/prod-api/';
-    }
-    if ((item.key as string).startsWith('/')) {
-      history.push(item.key as string);
+    }else{
+       selectMenu(item,mainMenuItems[item.key]?mainMenuItems[item.key]:[])
+       setMainMenuKey(item.key);
     }
   };
 
@@ -318,9 +369,10 @@ export default function () {
   );
 
   return hideSideMenu() ? null : (
-    <div className='top-menu'>
-      <Menu mode='horizontal' onClick={handleClick} items={menus} />
-      <div>
+    <div className='top-menu1'>
+      <div className='logoImg'></div>
+      <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
+      <div className='top_right'>
         <span
           className='language'
           onClick={() => {

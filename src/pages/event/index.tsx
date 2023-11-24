@@ -56,6 +56,13 @@ export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) 
     onCancel() { },
   });
 }
+let cardQueryFilter = [
+  { name: 'severity', label: '告警级别', type: 'select' },
+  { name: 'group_id', label: '业务组', type: 'select' },
+  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
+  { name: 'alert_rule', label: '告警规则', type: 'input' },
+]
 
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertCurEvents');
@@ -108,6 +115,11 @@ const Event: React.FC = () => {
         <Space>
           <Button icon={<AppstoreOutlined />} onClick={() => setView('card')} />
           <Button icon={<UnorderedListOutlined />} onClick={() => setView('list')} />
+
+           
+
+
+
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"

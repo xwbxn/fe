@@ -17,7 +17,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, Link } from 'react-router-dom';
-import _ from 'lodash';
+import _, { concat } from 'lodash';
 import moment from 'moment';
 import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
 import { ColumnType } from 'antd/lib/table';
@@ -42,13 +42,11 @@ interface ListProps {
 
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
-  { name: 'rule_name', label: '告警名称', type: 'input' },
-  { name: 'status', label: '告警级别', type: 'select' },
-  { name: 'group_id', label: '业务组', type: 'select' },
-  { name: 'group_id', label: '资产类型', type: 'select' },
-  { name: 'asset_name', label: '资产名称', type: 'input' },
-  { name: 'manufacturers', label: '告警规则', type: 'input' },
-  { name: 'alert_group_id', label: '告警接收组', type: 'input' },
+  { name: 'rule_name', label: '规则名称', type: 'input' },
+  { name: 'severity', label: '告警级别', type: 'select' },
+  { name: 'type', label: '资产类型', type: 'select' },
+  { name: 'name', label: '资产名称', type: 'input' },
+  { name: 'alert_rule', label: '告警规则', type: 'input' }
 ]
 
 interface Filter {
@@ -72,8 +70,10 @@ export default function List(props: ListProps) {
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
   const [type, setType] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("");
-  const [searchVal, setSearchVal] = useState('');
+  const [searchVal, setSearchVal] = useState<any>(null);
   const [filterParam, setFilterParam] = useState<string>("");
+  const [filterOptions, setFilterOptions] = useState<any>({});
+  const { busiGroups } = useContext(CommonStateContext);
   const [typeOptions, setTypeOptions] = useState<any[]>([
     //  {
     //   label: '告警级别',
@@ -87,7 +87,7 @@ export default function List(props: ListProps) {
   const [loading, setLoading] = useState(false);
   const columns: ColumnType<AlertRuleType<any>>[] = [
     {
-      title: '告警名称',
+      title: '告警规则名称',
       dataIndex: 'name',
       width: 100,
     },
@@ -246,6 +246,13 @@ export default function List(props: ListProps) {
   };
   useEffect(() => {
     getAssetsStypes().then((res) => {
+      filterOptions["type"]= res.dat.map((v) => {
+        return {
+          value: v.name,
+          label: v.name,
+        };
+      });
+      setFilterOptions({...filterOptions})
       const items = res.dat.map((v) => {
         return {
           value: v.name,
@@ -259,28 +266,30 @@ export default function List(props: ListProps) {
       })
       setTypeOptions(_.cloneDeep(typeOptions));
     });
-
+    filterOptions["severity"]=[
+          { label: 'S1', value: '1' },
+          { label: 'S2', value: '2' },
+          { label: 'S3', value: '3' },
+    ];
+    setFilterOptions({...filterOptions})
   }, []);
 
   useEffect(() => {
+    console.log('------------');
     if (bgid) {
       if (assetid != null && assetid > 0) {
-        params["filter"] = 3;
-        params["query"] = "" + assetid;
-      } else if (filter.query != null && filter.query.length > 0) {
-        params["query"] = filter.query;
-        if (type == "alert_levels") {
-          params["filter"] = 1;
-        } else if (type == "asset_types") {
-          params["filter"] = 2;
-        }
+           params["filter"] = 3;
+           params["query"] = "" + assetid;
+      } else if (searchVal != null && searchVal.length > 0) {
+           params["query"] = searchVal;
+           params["filter"] = filterParam;       
       } else {
         delete params["filter"];
         delete params["query"];
       }
       getAlertRules(params);
     }
-  }, [bgid, filter.query]);
+  }, [bgid, searchVal]);
 
   if (!bgid) return null;
   const filteredData = filterData();
@@ -296,7 +305,6 @@ export default function List(props: ListProps) {
               }}
             />
             <Select
-              // defaultValue="lucy"
               placeholder="选择过滤器"
               style={{ width: 120 }}
               allowClear
@@ -307,10 +315,10 @@ export default function List(props: ListProps) {
                   }
                 })
                 setFilterParam(value);
-                setSearchVal("")
+                setSearchVal(null)
               }}>
               {queryFilter.map((item, index) => (
-                <option value={item.name} key={index}>{item.label}</option>
+                <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
               ))
               }
             </Select>
@@ -329,75 +337,11 @@ export default function List(props: ListProps) {
                 className={'searchInput'}
                 value={searchVal}
                 allowClear
-                // options={}
+                options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
                 onChange={(val) => setSearchVal(val)}
                 placeholder={'选择要查询的条件'}
               />
-            )}
-            {/* <Select
-              style={{ width: 150 }}
-              allowClear
-              placeholder="请选择筛选类型"
-              options={[
-                 {label:'告警级别',value:'alert_levels'},
-                 {label:'资产类型',value:'asset_types'}
-              ]}            
-              onChange={(val) => {
-                  setFilter({
-                  ...filter,
-                  query: "",
-                 });
-                 setType(val);
-                 
-              }}
-            />
-            {type=="alert_levels" && (
-              <Select
-                // mode='multiple'
-                placeholder={t('severity')}
-                style={{ width:"200px"}}
-                maxTagCount='responsive'
-                onChange={(val) => {
-                  console.log(val);
-                  setFilter({
-                    ...filter,
-                    query: val,
-                  });
-                }}
-              >
-                <Select.Option value={1}>S1</Select.Option>
-                <Select.Option value={2}>S2</Select.Option>
-                <Select.Option value={3}>S3</Select.Option>
-              </Select>
-            )}
-            {type=="asset_types" && (
-              <Select
-                // mode='multiple'
-                placeholder={'请选择资产类型'}
-                style={{ width:"300px"}}
-                maxTagCount='responsive'
-                options={typeOptions}
-                onChange={(val) => {
-                  setFilter({
-                    ...filter,
-                    query: val,
-                  });
-                }}
-              >
-              </Select>
-            )} */}
-
-
-            {/* <SearchInput
-              placeholder={t('search_placeholder')}
-              onSearch={(val) => {
-                setFilter({
-                  ...filter,
-                  search: val,
-                });
-              }}
-              allowClear
-            /> */}
+            )}           
           </Space>
         </Col>
         <Col>

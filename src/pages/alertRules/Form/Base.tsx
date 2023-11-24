@@ -94,7 +94,7 @@ export default function Base({ type }) {
     };
   }
   return (
-    <Card {...panelBaseProps} title={t('basic_configs')}>      
+    <Card {...panelBaseProps} className='rule-card' title={t('basic_configs')}>      
       {type == 1 && (
         <Row gutter={10}>
         <Col span={8}>
@@ -115,7 +115,7 @@ export default function Base({ type }) {
           </Form.Item>
         </Col>
         <Col span={8}>
-            <div className='ip_show'><div className='title'>资产IP:</div><span className='content' id="asset_ip">{assetIp}</span></div>
+            <div className='ip_show'><div className='title'>资产IP:</div><span className='ip_content' id="asset_ip">{assetIp}</span></div>
         </Col>
 
       </Row>

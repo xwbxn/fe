@@ -12,25 +12,6 @@ interface IProps {
 
 export const getProdOptions = (feats) => {
   const prodOptions = _.cloneDeep(selectTypeOptions);
-
-  // if (feats?.fcBrain) {
-  //   prodOptions.push({
-  //     label: 'Anomaly',
-  //     value: 'anomaly',
-  //     pro: true,
-  //   });
-  // }
-  // if (
-  //   _.some(feats?.plugins, (plugin) => {
-  //     return _.includes(plugin.type, 'logging');
-  //   })
-  // ) {
-  //   prodOptions.push({
-  //     label: 'Log',
-  //     value: 'logging',
-  //     pro: true,
-  //   });
-  // }
   return prodOptions;
 };
 

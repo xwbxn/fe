@@ -23,7 +23,7 @@ import { panelBaseProps, daysOfWeek } from '../../constants';
 export default function index() {
   const { t } = useTranslation('alertRules');
   return (
-    <Card {...panelBaseProps} title={t('effective_configs')}>
+    <Card {...panelBaseProps} className='rule-card' title={t('effective_configs')}>
       <div style={{ marginBottom: 10 }}>
         <Space>
           <span>{t('enable_status')}</span>

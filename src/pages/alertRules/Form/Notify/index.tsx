@@ -47,7 +47,7 @@ export default function index({ disabled }) {
 
   return (
     <>
-      <Card {...panelBaseProps} title={t('notify_configs')}>
+      <Card {...panelBaseProps} className='rule-card' title={t('notify_configs')}>
         <Form.Item label={t('notify_channels')} name='notify_channels'>
           <Checkbox.Group disabled={disabled}>
             {contactList.map((item) => {

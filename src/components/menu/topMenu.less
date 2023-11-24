@@ -1,14 +1,37 @@
-.top-menu {
+.top-menu1 {
   display: flex;
-  justify-content: space-between;
-  background-color: @primary-color;
-  align-items: center;
-
-  .ant-menu {
-    background-color: @primary-color;
-    color: @primary-background;
-    border-bottom-width: 0;
+  position: relative;
+  // justify-content: space-between;
+  .logoImg {
+       background: url('/public/image/topmenu/logo.png') no-repeat;
+       background-position: center;
+       width: 297px;
+       height: 60px;
   }
+  .layer_1_menu {
+      background-color: #2979DE;
+      left: 10px;
+      height: 65px;
+  }
+  .top_right {
+    position: absolute;
+    right: 0px;
+  }
+  
+  align-items: center;
+  
+  .ant-menu-item-selected {
+    background-color: #fff;
+  }
+  // .ant-menu {
+  //   background: #f5f5f5;
+  // }
+
+  // .ant-menu {
+  //   background-color: @primary-color !important;
+  //   color: @primary-background;
+  //   border-bottom-width: 0;
+  // }
 
   .ant-menu-item-active {
     background-color: @primary-background;

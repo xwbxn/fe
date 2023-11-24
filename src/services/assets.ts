@@ -10,10 +10,10 @@ export const getAssets = function (bgid, query, organization_id) {
         }
     })
 }
-export const getAssetsByCondition = function (data) {
+export const getAssetsByCondition = function (params) {
     return request("/api/n9e/xh/assets/filter", {
-        method: RequestMethod.Post,
-        data
+        method: RequestMethod.Get,
+        params
     })
     // return request("/api/n9e/assets", {
     //     method: RequestMethod.Get,

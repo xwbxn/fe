@@ -38,36 +38,9 @@ export enum OperateType {
 let queryFilter =[
   {name:'monitoring_name',label:'监控名称',type:'input'},
   {name:'asset_name',label:'资产名称',type:'input'},
-  {name:'asset_type',label:'监控状态',type:'select'},
-  {name:'status',label:'是否启用告警',type:'select'},
+  {name:'status',label:'监控状态',type:'select'},
+  {name:'is_alarm',label:'是否启用告警',type:'select'},
 ]
-export interface OrgType {
-  name: string;
-  id: number;
-  parent_id: number;
-  children: OrgType[];
-  isEditable?: boolean;
-}
-
-interface IProps {
-  url?: string;
-  datasourceValue: number;
-  contentMaxHeight?: number;
-  type?: 'table' | 'graph';
-  onTypeChange?: (type: 'table' | 'graph') => void;
-  defaultTime?: IRawTimeRange | number;
-  onTimeChange?: (time: IRawTimeRange) => void; // 用于外部控制时间范围
-  promQL?: string;
-  graphOperates?: {
-    enabled: boolean;
-  };
-  globalOperates?: {
-    enabled: boolean;
-  };
-  headerExtra?: HTMLDivElement | null;
-  executeQuery?: (promQL?: string) => void;
-}
-
 export default function () {
   const { t } = useTranslation('assets');
   const [list, setList] = useState<any[]>([]);
@@ -81,8 +54,9 @@ export default function () {
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [searchVal, setSearchVal] = useState('');
+  const [searchVal, setSearchVal] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+  const [filterOptions, setFilterOptions] = useState<any>({});
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total, setTotal] = useState<number>(0);
   const [assetInfo, setAssetInfo] = useState<any>({});
@@ -275,6 +249,9 @@ export default function () {
       getTableData(assetInfo);
     });
 
+    filterOptions["status"]=[{value:'0',label:'关闭'},{value:'1',label:'正常'}]    
+    filterOptions["is_alarm"]=[{value:'1',label:'已启用'},{value:'0',label:'未启用'}] 
+    setFilterOptions({...filterOptions})
   }, []);
 
 
@@ -291,9 +268,11 @@ export default function () {
     if (currentAssetId > 0) {
       param["assetId"] = currentAssetId;
     }
-
-    if (searchVal != null && searchVal.length > 0) {
+    if(searchVal!=null && searchVal.length > 0) {
       param["query"] = searchVal;
+    }
+    if(filterParam!=null && filterParam.length > 0 && searchVal!=null && searchVal.length > 0)  {
+      param["filter"] = filterParam;
     }
     if (typeId != null && typeId + "" != "0") {
       param["assetType"] = typeId;
@@ -498,10 +477,10 @@ export default function () {
                           }
                        })
                        setFilterParam(value);
-                       setSearchVal("")
+                       setSearchVal(null)
                   }}>
                   {queryFilter.map((item,index)=>(
-                      <option value={item.name} key={index}>{item.label}</option>
+                      <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
                   ))
                   }
                   </Select>
@@ -509,7 +488,7 @@ export default function () {
                      <Input
                      className={'searchInput'}
                      value={searchVal}
-                     allowClear
+                     allowClear                     
                      onChange={(e) => setSearchVal(e.target.value)}
                      suffix={<SearchOutlined />}
                      placeholder={'输入模糊检索关键字'}
@@ -520,7 +499,7 @@ export default function () {
                         className={'searchInput'}
                         value={searchVal}
                         allowClear
-                        // options={}
+                        options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
                         onChange={(val) => setSearchVal(val)}
                         placeholder={'选择要查询的条件'}
                    />

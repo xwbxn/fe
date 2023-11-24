@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AlertOutlined, CopyTwoTone, DeleteOutlined, DownOutlined, DownloadOutlined, EditOutlined, FileSearchOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
@@ -46,11 +46,11 @@ export const getDefaultHours = () => {
 };
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
-  { name: 'status', label: '告警级别', type: 'select' },
+  { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'rule_name', label: '告警名称', type: 'input' },
-  { name: 'asset_name', label: '资产名称', type: 'input' },
-  { name: 'manufacturers', label: '告警规则', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
+  { name: 'alert_rule', label: '告警规则', type: 'input' },
 ]
 
 export const setDefaultHours = (hours: number) => {
@@ -59,10 +59,11 @@ export const setDefaultHours = (hours: number) => {
 
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
-  const { groupedDatasourceList, busiGroups, feats } = useContext(CommonStateContext);
+  const { busiGroups } = useContext(CommonStateContext);
   const [filterType, setFilterType] = useState<string>("");
-  const [searchVal, setSearchVal] = useState('');
+  const [searchVal, setSearchVal] = useState<any>(null);
   const [filterParam, setFilterParam] = useState<string>("");
+  const [filterOptions, setFilterOptions] = useState<any>({});
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [start, setStart] = useState<number>(0);
@@ -83,6 +84,21 @@ const Event: React.FC = () => {
     query: '',
     type: null
   });
+
+  useEffect(() => {  
+    filterOptions["group_id"]=busiGroups.map(group => {
+      return {
+        value: ""+group.id,
+        label: group.name,
+      }
+    })  
+    filterOptions["severity"]=[
+          { label: 'S1', value: '1' },
+          { label: 'S2', value: '2' },
+          { label: 'S3', value: '3' },
+    ];
+    setFilterOptions({...filterOptions})
+  }, []);
   const columns: any = [
     {
       title: '规则名称',
@@ -195,9 +211,8 @@ const Event: React.FC = () => {
   };
 
   const filterObj = Object.assign(
-    // filter.datasourceIds.length ? { datasource_ids: _.join(filter.datasourceIds, ',') } : {},
-    filter.severity !== undefined ? { severity: filter.severity } : {},
-    filter.query ? { query: filter.query } : {},
+    (filterParam!=null && searchVal!=null && searchVal.length>0)?{ filter: filterParam } : {},
+    (searchVal!=null && searchVal.length>0) ? { query: searchVal } : {},
     { group: filter.bgid },
     { alert_type: 2 },
   );
@@ -226,7 +241,7 @@ const Event: React.FC = () => {
                 }
               })
               setFilterParam(value);
-              setSearchVal("")
+              setSearchVal(null)
             }}>
             {queryFilter.map((item, index) => (
               <option value={item.name} key={index}>{item.label}</option>
@@ -258,8 +273,8 @@ const Event: React.FC = () => {
               className={'searchInput'}
               value={searchVal}
               allowClear
-              // options={}
-              onChange={(val) => setSearchVal(val)}
+              options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
+               onChange={(val) => setSearchVal(val)}
               placeholder={'选择要查询的条件'}
             />
           )}

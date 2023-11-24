@@ -94,13 +94,13 @@ export const ruleTypeOptions = [
 
 export const selectTypeOptions = [
   {
-    label: '告警级别',
+    label: 'Metric',
     value: 1,
     pro: false,
-  },
-  {
-    label: '资产类型',
-    value: 2,
-    pro: false,
-  },
+  }
+  // {
+  //   label: '资产类型',
+  //   value: 2,
+  //   pro: false,
+  // },
 ];

@@ -1,4 +1,4 @@
-import Preview from '@/pages/topoGraph/Preview';
+// import Preview from '@/pages/topoGraph/Preview';
 import React from 'react';
 import { getStyles } from '../../utils';
 
@@ -11,7 +11,7 @@ interface ITopoProps {
 const Topology = ({ data, field, options }: ITopoProps) => {
   return (
     <div style={getStyles(options)}>
-      <Preview height={options.height} width={options.width} json={options.graph}></Preview>
+      {/* <Preview height={options.height} width={options.width} json={options.graph}></Preview> */}
     </div>
   );
 };
