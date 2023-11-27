@@ -238,7 +238,7 @@ interface IProps {
   
 }
 
-export default function ({ selectMenu }) {
+export default function () {//{ selectMenu?:any }
   const { t, i18n } = useTranslation('menu');
 
   const menuList = getMenuList(t);
@@ -291,25 +291,25 @@ export default function ({ selectMenu }) {
           setMenus(newMenus);
         });
       } else {
-        let mainMenus = menuList.map((item,index) => {
-          mainMenuItems[item.key] = item.children?item.children:[];
-          delete item.children;
-          return item
-        })
-        setMenus(mainMenus);
-        setMainMenuItems({...mainMenuItems});
-        if(window.localStorage.getItem('mainMenuKey')){
-          let mainKey = window.localStorage.getItem('mainMenuKey') as string;
-          setMainMenuKey([mainKey]);
-          for(let item of mainMenus){
-              if(item.key==mainKey){
-                handleClick(item);
-              }
-          }
+        // let mainMenus = menuList.map((item,index) => {
+        //   mainMenuItems[item.key] = item.children?item.children:[];
+        //   delete item.children;
+        //   return item
+        // })
+        // setMenus(mainMenus);
+        // setMainMenuItems({...mainMenuItems});
+        // if(window.localStorage.getItem('mainMenuKey')){
+        //   let mainKey = window.localStorage.getItem('mainMenuKey') as string;
+        //   setMainMenuKey([mainKey]);
+        //   for(let item of mainMenus){
+        //       if(item.key==mainKey){
+        //         handleClick(item);
+        //       }
+        //   }
           
 
-        }
-        // setMenus(menuList);
+        // }
+        setMenus(menuList);
       }
     }
   }, [profile?.roles, i18n.language]);
@@ -336,12 +336,19 @@ export default function ({ selectMenu }) {
   };
 
   const handleClick = (item) => {
-    if ((item.key as string) === 'home') {
-      window.location.href = '/prod-api/';
-    }else{
-       selectMenu(item,mainMenuItems[item.key]?mainMenuItems[item.key]:[])
-       setMainMenuKey(item.key);
+
+    if((item.key as string) === "home") {
+      window.location.href = '/prod-api/'
     }
+    if ((item.key as string).startsWith('/')) {
+      history.push(item.key as string);
+    }
+    // if ((item.key as string) === 'home') {
+    //   window.location.href = '/prod-api/';
+    // }else{
+    //    selectMenu(item,mainMenuItems[item.key]?mainMenuItems[item.key]:[])
+    //    setMainMenuKey(item.key);
+    // }
   };
 
   const topRightMenu = (

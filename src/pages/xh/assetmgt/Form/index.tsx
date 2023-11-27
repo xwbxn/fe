@@ -241,9 +241,9 @@ export default function (props: { initialValues: object; initParams: object; mod
           TabOperteClick(key);
         }}
       >
-        <Tabs.TabPane tab={'基本信息'} key='base_set'></Tabs.TabPane>
+        <Tabs.TabPane tab={'基本信息'} key='base_set' className='tab_header'></Tabs.TabPane>
         {formItems.map((groupItem, index) => {
-          return <Tabs.TabPane tab={groupItem.label} key={groupItem.name}></Tabs.TabPane>;
+          return <Tabs.TabPane tab={groupItem.label} key={groupItem.name} className='tab_header'></Tabs.TabPane>;
         })}
       </Tabs>
       </div>

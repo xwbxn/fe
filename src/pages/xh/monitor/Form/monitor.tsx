@@ -18,7 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { getXhMonitor, getXhMonitorByAssetId } from '@/services/manage';
 import { getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
-import { getAssetsIdents, getAssetsMonitor } from '@/services/assets';
+import { getAssetsIdents, getAssetsStypes } from '@/services/assets';
 import { time } from 'echarts';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
@@ -29,6 +29,15 @@ export default function (props: { initialValues: object; initParams: object; mod
     visual: false,
     title: "指标名称"
   });
+  const [accessories, setAccessories] = useState<any>({
+    visual: false,
+    title: "其他信息名称",
+    label:"",
+    name:"",
+    items: [],
+    properties: []
+  });
+  const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const { search } = useLocation();
   const { id } = queryString.parse(search);
   const { action } = queryString.parse(search);
@@ -61,30 +70,73 @@ export default function (props: { initialValues: object; initParams: object; mod
   const handleSizeChange = (e: RadioChangeEvent) => {
     range.start = parse(e.target.value);
     setRange(range);
-    console.log('handleSizeChange',e.target.value)
+    console.log('handleSizeChange', e.target.value)
     setSize(e.target.value)
     console.log('handleSizeChange', range);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
 
 
+  const genForm = (type: string, theme: string) => {
+    const assetType: any = assetTypes.find((v) => v.name === type);
+    let items = {};
+    if (assetType) {
+      //TODO：处理分组属性      
+      let extra_props = assetType.extra_props;
+      for (let groupKey in extra_props) {
+        let group = extra_props[groupKey];
+        if (group != null && theme == groupKey && group.props) {
+          let baseItems = new Array();
+          let listItems = new Array();
+          group.props.map((item, index) => {
+            if (item.type === 'list') {
+              item.items.forEach((element) => {
+                listItems.push(element);
+              });
+            } else {
+              baseItems.push(item);
+            }
+          });
+          items = {
+            name: groupKey,
+            label: group.label,
+            base: baseItems,
+            list: listItems,
+          };
+        }
+      }
+    }
+    return items;
+  };
+
   useEffect(() => {
 
     if (action == "asset" && id != null && id.length > 0 && id != "null") {
       //资产信息
       loadAssetInfo(id);
+      getAssetsStypes().then((res) => {
+        const items = res.dat.map((v) => {
+          return {
+            value: v.name,
+            label: v.name,
+            ...v,
+          };
+        });
+        setAssetTypes(items);
+      });
       //获取资产所有监控信息
       getXhMonitorByAssetId(id).then(({ dat }) => {
         setMonitors(dat)
       })
     }
     if (action == "monitor" && id != null && id.length > 0 && id != "null") {
+
       //探针信息
       getAssetsIdents().then((res) => {
         res.dat.map((v) => {
-          identList[v.id]= v.ident          
+          identList[v.id] = v.ident
         });
-        setIdentList({...identList});
+        setIdentList({ ...identList });
       });
       //获取当前监控信息
       getXhMonitor(id).then(({ dat }) => {
@@ -207,35 +259,36 @@ export default function (props: { initialValues: object; initParams: object; mod
                 {assetInfo.type}
               </div>
               <div className='info'>
-                <Row gutter={10} className='row'>
-                  <Col className='theme'><div>资产名称:</div>{assetInfo.name}</Col>
-                  <Col className='theme'><div>资产类型：</div>{assetInfo.type}</Col>
-                  <Col className='theme'><div>IP地址：</div>{assetInfo.ip}</Col>
-                  <Col className='theme'><div>厂商：</div>{assetInfo.manufacturers}</Col>
-                </Row>
-                <Row gutter={10} className='row'>
-                  <Col className='theme'><div>资产位置：</div>{assetInfo.position}</Col>
-                  <Col className='theme'><div>状态：</div>{assetInfo.status == 1 ? '正常' : "下线"}</Col>
-                  <Col></Col>
-                </Row>
+                <div className='row'>
+                  <div className='theme1'><div>资产名称:</div>{assetInfo.name}</div>
+                  <div className='theme1'><div>资产类型：</div>{assetInfo.type}</div>
+                  <div className='theme1'><div>IP地址：</div>{assetInfo.ip}</div>
+                  <div className='theme1'><div>厂商：</div>{assetInfo.manufacturers}</div>
+                </div>
+                <div  className='row'>
+                  <div className='theme1'><div>资产位置：</div>{assetInfo.position}</div>
+                  <div className='theme1'><div>状态：</div>{assetInfo.status == 1 ? '正常' : "下线"}</div>
+                  <div className='theme1'></div>
+                  <div className='theme1'></div>
+                </div>
               </div>
             </div>
             {action === "monitor" && (
               <div className='monitor_info'>
                 <div className='base'>
                   <Row gutter={10} className='row'>
-                    <Col className='theme'><div>监控名称：</div>{monitor.monitoring_name}</Col>
+                    <Col className='theme1'><div>监控名称：</div>{monitor.monitoring_name}</Col>
                   </Row>
                   <Row gutter={10} className='row'>
-                    <Col  className='theme'><div>采集器:</div>{identList[monitor.target_id]}</Col>
+                    <Col className='theme1'><div>采集器:</div>{identList[monitor.target_id]}</Col>
                   </Row>
                   <Row gutter={10} className='row'>
-                    <Col  className='theme'><div>描述:{monitor.remark}</div>{monitor.remark}</Col>
+                    <Col className='theme1'><div>描述:{monitor.remark}</div>{monitor.remark}</Col>
                   </Row>
                 </div>
                 <div className='script'>
                   <div className='title'>监控脚本：</div>
-                  <div className='content'>{monitor.monitoring_sql}</div>
+                  <div className='content1'>{monitor.monitoring_sql}</div>
                 </div>
 
               </div>
@@ -245,7 +298,17 @@ export default function (props: { initialValues: object; initParams: object; mod
             <div className='party_info'>
               {assetItems.length > 0 && assetItems.map((element, index) => {
                 return (
-                  <div className='assembly show_image'>
+                  <div className='assembly show_image' onClick={e => {
+                    let formItems: any = genForm(assetInfo.type, element.type);
+                    setAccessories({
+                      visual: true,
+                      label: formItems.label,
+                      title: element.type.toUpperCase(),
+                      name:formItems.name,
+                      items: element.items,
+                      properties: formItems.list
+                    })
+                  }}>
                     <div className='title'>{element.type.toUpperCase()}({element.items.length})</div>
                     <div className={'image ' + element.type}></div>
                     <div className='status'>状态：
@@ -265,7 +328,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'配置信息'} className='default_monitor'>
             <div className='header_'>
-              
+
               <Radio.Group value={size} onChange={handleSizeChange}>
                 <Radio.Button value="now-1h" >近1小时</Radio.Button>
                 <Radio.Button value="now-3h">近3小时</Radio.Button>
@@ -275,19 +338,19 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <Radio.Button value="now-30d">近30天</Radio.Button>
               </Radio.Group>
               <TimeRangePickerWithRefresh
-                  // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
-                  onChange={value=>{
-                    console.log(value)
-                    const newValue = {
-                      start: isMathString(value.start) ? parse(value.start) : moment(value.start),
-                      end: isMathString(value.end) ? parse(value.end) : moment(value.end),
-                    }
-                    setRefreshKey(_.uniqueId('refreshKey_'));
-                    setRange(newValue);                    
-                  }}
-                  value={range}
-                  localKey = 'monitor-timeRangePicker-value'
-             />
+                // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+                onChange={value => {
+                  console.log(value)
+                  const newValue = {
+                    start: isMathString(value.start) ? parse(value.start) : moment(value.start),
+                    end: isMathString(value.end) ? parse(value.end) : moment(value.end),
+                  }
+                  setRefreshKey(_.uniqueId('refreshKey_'));
+                  setRange(newValue);
+                }}
+                value={range}
+                localKey='monitor-timeRangePicker-value'
+              />
 
 
             </div>
@@ -328,38 +391,38 @@ export default function (props: { initialValues: object; initParams: object; mod
             {action === "asset" && (//当前监控展示
               <div className='group_monitor_body'>
 
-                  {monitors.map((item, index) => (
-                    <div className='every_graph'>
-                      <div className='monitor_title'>
-                        <div className='title'>{item.monitoring_name}</div>
-                        <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
-                          operateType.visual = true;
-                          setSelectMonitor(item);
-                          setOperateType(_.cloneDeep(operateType));
-                        }} /> </div>
-                      </div>
-                      <Graph
-                        title={item.monitoring_name}
-                        monitorId={parseInt(item.id + "")}
-                        contentMaxHeight={200}
-                        toolVisible={false}
-                        range={range}
-                        setRange={(erang) => {
-                          const newValue = {
-                            start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
-                            end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
-                          }
-                          setRange(newValue);
-                        }}
-                        step={12}
-                        graphOperates={{
-                          enabled: true
-                        }}
-                        refreshFlag={refreshKey}
-                      />
-
+                {monitors.map((item, index) => (
+                  <div className='every_graph'>
+                    <div className='monitor_title'>
+                      <div className='title'>{item.monitoring_name}</div>
+                      <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
+                        operateType.visual = true;
+                        setSelectMonitor(item);
+                        setOperateType(_.cloneDeep(operateType));
+                      }} /> </div>
                     </div>
-                  ))}
+                    <Graph
+                      title={item.monitoring_name}
+                      monitorId={parseInt(item.id + "")}
+                      contentMaxHeight={200}
+                      toolVisible={false}
+                      range={range}
+                      setRange={(erang) => {
+                        const newValue = {
+                          start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
+                          end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
+                        }
+                        setRange(newValue);
+                      }}
+                      step={12}
+                      graphOperates={{
+                        enabled: true
+                      }}
+                      refreshFlag={refreshKey}
+                    />
+
+                  </div>
+                ))}
 
               </div>
 
@@ -368,44 +431,80 @@ export default function (props: { initialValues: object; initParams: object; mod
           </Card>
         </div>
         <Modal
-              visible={operateType.visual}
-              title={selectMonitor.monitoring_name}
-              confirmLoading={false}
-              width={window.innerWidth*0.8}
-              okButtonProps={{
-                // danger: operateType === OperateType.RemoveBusi || operateType === OperateType.Delete,
-              }}
-              // okText={operateType === OperateType.RemoveBusi ? t('remove_busi.btn') : operateType === OperateType.Delete ? t('batch_delete.btn') : t('common:btn.ok')}
-              
-              onCancel={() => {
-                operateType.visual = false;
-                setOperateType(_.cloneDeep(operateType));
-                form.resetFields();
-              }}
-            >
+          visible={operateType.visual}
+          title={selectMonitor.monitoring_name}
+          confirmLoading={false}
+          width={window.innerWidth * 0.8}
+          okButtonProps={{
+          }}
+          onCancel={() => {
+            operateType.visual = false;
+            setOperateType(_.cloneDeep(operateType));
+            form.resetFields();
+          }}
+        >
 
-              <Graph                  
-                  title={selectMonitor.monitoring_name}
-                  monitorId={parseInt(selectMonitor.id + "")}
-                  contentMaxHeight={200}
-                  range={dialogRange}
-                  toolVisible={true}
-                  setRange={(erang) => {
-                    const newValue = {
-                      start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
-                      end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
-                    }
-                    setDialogRange(newValue);
-                  }}
-                  step={12}
-                  graphOperates={{
-                    enabled: true
-                  }}
-                  refreshFlag={refreshKey}
-                />
-            </Modal>
+          <Graph
+            title={selectMonitor.monitoring_name}
+            monitorId={parseInt(selectMonitor.id + "")}
+            contentMaxHeight={200}
+            range={dialogRange}
+            toolVisible={true}
+            setRange={(erang) => {
+              const newValue = {
+                start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
+                end: isMathString(erang.end) ? parse(erang.end) : moment(erang.end),
+              }
+              setDialogRange(newValue);
+            }}
+            step={12}
+            graphOperates={{
+              enabled: true
+            }}
+            refreshFlag={refreshKey}
+          />
+        </Modal>
+        <Modal
+          visible={accessories.visual}
+          title={accessories.title}
+          confirmLoading={false}
+          mask={true}
+          // width={window.innerWidth * 0.8}
+          // okButtonProps={{
+          // }}
+          onCancel={() => {
+            accessories.visual = false;
+            setAccessories(_.cloneDeep(accessories));
+          }}
+        >
+          <div className='accessories_body'>
+            {accessories.items.map((item,pos) => {
+              return <div className='accessories_every_group show_image'>
+                  <div className='title' style={{fontWeight:'600'}}>{accessories.label.toUpperCase()}({pos+1})</div>
+                    <div className={'image ' + accessories.name} style={{marginLeft:'20%'}}></div>
+                    <div className='status' style={{display:'flex'}}>状态：
+                      {true ? (
+                        <div>正常<CheckCircleFilled className='normal' /></div>
+                      ) : (
+                        <div>故障<CheckCircleFilled className='no_normal' /></div>
+                      )}
+               </div>
+               {
+               accessories.properties.map((property, index) => {
+                return <>
+                  <div className='accessories' key={"_div" + index}>
+                     <div>{property.label}:</div>{item[property.name]}
+                  </div>
+
+                </>
+              })}
+              </div>
+              
+            })}
+          </div>
+        </Modal>
       </div>
     </Form>
-    
+
   );
 }

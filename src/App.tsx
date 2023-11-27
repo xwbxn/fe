@@ -111,11 +111,6 @@ function App() {
   const { t, i18n } = useTranslation();
   const isPlus = useIsPlus();
   const initialized = useRef(false);
-  const history = useHistory();
-  const [leftMenuItems, setLeftMenuItems] = useState<any>();
-  const [leftMenuKey, setLeftMenuKey] = useState<any>("");
-  const [mainMenu, setMainMenu] = useState<any>({});
-  const [collapsed, setCollapsed] = useState(false)
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -228,10 +223,7 @@ function App() {
           });
         }
       })();
-      if (window.localStorage.getItem('leftMenuItems')) {
-        let leftMenus = window.localStorage.getItem('leftMenuItems') as string;
-        setLeftMenuKey([leftMenus]);
-      }
+      
     } catch (error) {
       console.error(error);
     }
@@ -242,18 +234,6 @@ function App() {
     return null;
   }
 
-  const handleClick = (item) => {
-    if ((item.key as string) === 'home') {
-      // window.location.href = '/prod-api/';
-      history.push('/prod-api/')
-    }
-    if ((item.key as string).startsWith('/')) {
-      // window.location.href = item.key;
-      history.push(item.key)
-      window.localStorage.setItem("mainMenuKey", mainMenu.key);
-      window.localStorage.setItem("leftMenuItems", item.key);
-    }
-  };
 
   return (
     <div className='App'>
@@ -264,15 +244,15 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
-                <LayoutXH />
+                {/* <LayoutXH /> */}
 
                 
 
 
-                {/* <TopMenu></TopMenu>
+                <TopMenu></TopMenu>
                 <div style={{display:'-webkit-flex'}}>
                     <Content />
-                </div> */}
+                </div>
 
               </>
             </Switch>

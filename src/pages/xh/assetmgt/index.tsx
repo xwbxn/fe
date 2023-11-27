@@ -46,34 +46,6 @@ let queryFilter = [
   { name: 'position', label: '资产位置', type: 'input' },
 
 ]
-export interface OrgType {
-  name: string;
-  id: number;
-  parent_id: number;
-  children: OrgType[];
-  isEditable?: boolean;
-}
-
-interface IProps {
-  url?: string;
-  datasourceValue: number;
-  contentMaxHeight?: number;
-  type?: 'table' | 'graph';
-  onTypeChange?: (type: 'table' | 'graph') => void;
-  defaultTime?: IRawTimeRange | number;
-  onTimeChange?: (time: IRawTimeRange) => void; // 用于外部控制时间范围
-  promQL?: string;
-  graphOperates?: {
-    enabled: boolean;
-  };
-  globalOperates?: {
-    enabled: boolean;
-  };
-  headerExtra?: HTMLDivElement | null;
-  executeQuery?: (promQL?: string) => void;
-}
-
-
 
 export default function () {
   const { t } = useTranslation('assets');
@@ -93,7 +65,6 @@ export default function () {
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total, setTotal] = useState<number>(0);
-  const [assetTypeItems, setAssetTypeItems] = useState<any[]>([]);
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
@@ -198,13 +169,13 @@ export default function () {
       render: (text: string, record: assetsType) => (
         <Space>
           <VideoCameraOutlined title='设置监控' onClick={(e) => {
-            location.href = "/xh/monitor?mode=view&assetId=" + record.id;
+            history.push("/xh/monitor?mode=view&assetId=" + record.id);
           }} />
           <FileSearchOutlined title='资产详情' onClick={(e) => {
             showModal("view", record)
           }} />
           <FundOutlined title='监控图表' onClick={(e) => {
-            location.href = "/xh/monitor/add?type=monitor&id=" + record.id + "&action=asset";
+            history.push("/xh/monitor/add?type=monitor&id=" + record.id + "&action=asset");
           }} />
           <EditOutlined title='编辑' onClick={(e) => {
             showModal("update", record)
@@ -550,7 +521,7 @@ export default function () {
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
       <div style={{ display: 'flex' }} className='asset_list_view'>
-        <div style={{ width: '250px', display: 'table', height: '100%' }}>
+        <div className="left_tree" style={{ width: '250px', display: 'table', height: '100%' }}>
           <div className='asset_organize_cls'>组织树列表
             <div style={{ margin: '0 10prx ' }}>
               {/* <Switch
