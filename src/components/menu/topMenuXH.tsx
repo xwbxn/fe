@@ -80,6 +80,11 @@ const getMenuList = (t) => {
           label: t('历史告警'),
         },
         {
+          key: '/help/notification-settings',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('通知设置'),
+        },
+        {
           key: '/help/notification-tpls',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知模板'),
