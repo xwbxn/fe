@@ -16,7 +16,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { Form, Row, Col, Card, Space, Input, Select, message } from 'antd';
+import { Form, Row, Col, Card, Space, Input, Select, message, Radio } from 'antd';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
@@ -80,14 +80,14 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
           title={
             <Space>
               <span>{t('metric.query.title')}</span>
-              <PlusCircleOutlined
+              {/* <PlusCircleOutlined
                 onClick={() => {
                   add()
                 }
 
                 }
               />
-              <Inhibit triggersKey='queries' />
+              <Inhibit triggersKey='queries' /> */}
             </Space>
           }
           size='small'
@@ -100,7 +100,7 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                     <Row gutter={10}>
                       <Col span={12}>
                         
-                        <Form.Item  rules={[{ required:true, message: `请选择监控名称` }]}   {...field} name={[field.name, 'monitor_id']} label={"告警条件" + (index + 1)}>
+                        <Form.Item  rules={[{ required:true, message: `请选择监控名称` }]}   {...field} name={[field.name, 'monitor_id']} label={"告警条件"}>
                           <Select placeholder="请选择监控名称" onDropdownVisibleChange={(e) => {
                             selectAsset(e);
                           }} options={monitors} />
@@ -119,15 +119,10 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                           <Input placeholder="请输入值" />
                         </Form.Item>
                       </Col>
-                    </Row>
-                    <Row gutter={10}>
-                      <Col span={24}>
-                        <Severity field={field} />
-                      </Col>
-                    </Row>
-                    <div className='remove_zone_button'>
+                    </Row>                    
+                    {/* <div className='remove_zone_button'>
                       <MinusCircleOutlined className='alert-rule-trigger-remove special_remove_icon' onClick={() => remove(field.name)} />
-                    </div>
+                    </div> */}
                   </div>
                 </Col>
               ))}
@@ -136,6 +131,20 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
         </Card>
       )}
     </Form.List>
+    <Row gutter={10}>
+      <Col span={24}>
+      <Space align='baseline'>
+      触发告警级别：
+      <Form.Item name={'severity'} rules={[{ required: true, message: '选择级别' }]} noStyle>
+        <Radio.Group disabled={disabled}>
+          <Radio value={1}>{t('common:severity.1')}</Radio>
+          <Radio value={2}>{t('common:severity.2')}</Radio>
+          <Radio value={3}>{t('common:severity.3')}</Radio>
+        </Radio.Group>
+      </Form.Item>
+    </Space>
+      </Col>
+    </Row>
     </>
   );
 }

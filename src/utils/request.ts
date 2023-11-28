@@ -1,6 +1,6 @@
 /** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
 import { extend } from 'umi-request';
-import { notification } from 'antd';
+import { message, notification } from 'antd';
 import _ from 'lodash';
 import { UpdateAccessToken } from '@/services/login';
 
@@ -9,18 +9,23 @@ const errorHandler = (error: Error): Response => {
   // 忽略掉 setting getter-only property "data" 的错误
   // 这是 umi-request 的一个 bug，当触发 abort 时 catch callback 里面不能 set data
   if (error.name !== 'AbortError' && error.message !== 'setting getter-only property "data"') {
+    debugger
     // @ts-ignore
     if (!error.silence) {
-      notification.error({
-        message: error.message,
-      });
+      // notification.error({
+      //   message: error.message,
+      // });
+      message.error(error.message)
+      throw error;
     }
     // 暂时认定只有开启 silence 的时候才需要传递 error 详情以便更加精确的处理错误
     // @ts-ignore
     if (error.silence) {
       throw error;
     } else {
-      throw new Error(error.message);
+      message.error(error.message)
+      // throw new Error();
+      throw error;
     }
   }
   throw error;

@@ -33,7 +33,6 @@ export default function Rule({ form,type }) {
     <Card {...panelBaseProps} className='rule-card' title={t('rule_configs')}>
       <ProdSelect
         onChange={(e) => {
-          console.log(e);
           const val = e.target.value;
           if (val === 'anomaly') {
             // 获取默认 brain 参数，用于初始化智能告警的设置

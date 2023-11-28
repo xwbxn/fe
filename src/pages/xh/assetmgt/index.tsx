@@ -2,15 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, SearchOutlined, UnorderedListOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, RightOutlined, SearchOutlined, UnorderedListOutlined, VideoCameraOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
 import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
-// import Add from './Add';
-// import Edit from './Edit';
+import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
 import moment from 'moment';
 import { assetsType } from '@/store/assetsInterfaces';
@@ -38,7 +37,7 @@ export enum OperateType {
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
-  { name: 'type', label: '资产类型', type: 'select' },
+  // { name: 'type', label: '资产类型', type: 'select' },
   { name: 'manufacturers', label: '厂商', type: 'input' },
   { name: 'os', label: '操作系统', type: 'input' },
   { name: 'status', label: '状态', type: 'select' },
@@ -69,17 +68,15 @@ export default function () {
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
 
-
-  const [typeId, setTypeId] = useState<any>(null);
+  const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
+  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 250));
+  const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_asset_type') || '0'));
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
   const [viewIndex, setViewIndex] = useState<number>(-1);
 
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
-
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
-
   const [modifyType, setModifyType] = useState<boolean>(true);
-
   const [queryCondition, setQueryCondition] = useState<any>({});
 
   const history = useHistory();
@@ -90,6 +87,9 @@ export default function () {
       fixed: 'left',
       width: "130px",
       ellipsis: true,
+      sorter: (a, b) =>{
+        return (a.name).localeCompare(b.name)
+      },
       render(value, record, index) {
         return <Link to={{ pathname: `/assets/${record.id}` }}>{value}</Link>;
       },
@@ -100,12 +100,18 @@ export default function () {
       dataIndex: 'type',
       fixed: 'left',
       ellipsis: true,
+      sorter: (a, b) =>{
+        return (a.type).localeCompare(b.type)
+      },
     },
     {
       title: "IP地址",
       dataIndex: 'ip',
       width: "130px",
       ellipsis: true,
+      sorter: (a, b) =>{
+        return (a.ip).localeCompare(b.ip)
+      },
       render(value, record, index) {
         return value;
       },
@@ -121,6 +127,9 @@ export default function () {
       dataIndex: 'position',
       width: "130px",
       ellipsis: true,
+      sorter: (a, b) =>{
+        return (a.position).localeCompare(b.position)
+      },
       render(value, record, index) {
         return value;
       },
@@ -148,6 +157,9 @@ export default function () {
       width: "105px",
       dataIndex: 'status',
       ellipsis: true,
+      sorter: (a, b) =>{
+        return a.status - b.status
+      },
       render(value, record, index) {
         let label = "-";
         if (value == 0) {
@@ -218,15 +230,11 @@ export default function () {
       setSecondAddButton(true)
     } else {
       setSecondAddButton(false)
-
-
     }
-    setTypeId(null);
   }, [modifyType]);
 
   useEffect(() => {
 
-    console.log("初始化页面和参数");
     let modelIds = Array.from(new Set(baseColumns.map(obj => obj.title)))
     setDefaultValues(modelIds);
     setOptionColumns(baseColumns);
@@ -252,6 +260,7 @@ export default function () {
         arr.push(item.id);
       })
       setExpandedKeys(arr);
+      console.log("expands ",arr);
       setAassetTypes(items);
       setTreeData(_.cloneDeep(treeData));
 
@@ -280,7 +289,6 @@ export default function () {
   }, [searchVal, typeId, refreshKey]);
 
   const getTableData = () => {
-
     const param = {
       page: current,
       limit: pageSize,
@@ -382,41 +390,29 @@ export default function () {
 
 
 
-  const datalDealValue = (value, data_type) => {
-    if (value != null) {
-      if (data_type == "date") {
-        value = moment(moment(value).format('YYYY-MM-DD')).valueOf() / 1000
-      } else if (data_type == "int") {
-        value = parseInt(value);
-      } else if (data_type == "float") {
-        value = parseFloat(value);
-      } else if (data_type == "timestamp") {
-        value = moment(moment(value).format('YYYY-MM-DD HH:mm:ss')).valueOf() / 1000
-      } else if (data_type == "boolean") {
-        value = value == true ? 1 : 0;
-      }
-      return value;
-    } else {
-      return null;
-    }
-  }
-
   const detailInfo = (id, data) => {
     let columns = groupColumns[id];
     console.log(columns, data);
-    return <Table
-      style={{ width: '650px' }}
-      dataSource={data}
-      columns={columns}
-      pagination={false}>
-    </Table>
+    return (
+      <div  className='other_infos' >
+            <Table            
+            style={{ width: '700px' }}
+            dataSource={data}
+            className='other_table'
+            columns={columns}
+            pagination={false}>
+          </Table>
+    </div>
+
+    )
+    
+    
   }
 
   const renderItem = (field, record, index) => {
 
     let key = field.split(".")[1];
     let values = record.expands ? record.expands[key] : [];
-    console.log("render", key, values);
     return <>
       <Popover content={detailInfo(key, values)} title="详细记录">
         <Button type="primary">详情</Button>
@@ -502,7 +498,7 @@ export default function () {
   const showModal = (action: string, formData: any) => {
 
     if (action == "add") {
-      history.push('/xh/assetmgt/add?mode=edit');
+      history.push('/xh/assetmgt/add?mode=edit&&type=');
     } else if (action == "update") {
       history.push('/xh/assetmgt/add?mode=edit&id=' + formData.id);
     } else if (action == "view") {
@@ -520,73 +516,103 @@ export default function () {
 
   return (
     <PageLayout icon={<GroupOutlined />} title={'资产管理'}>
-      <div style={{ display: 'flex' }} className='asset_list_view'>
-        <div className="left_tree" style={{ width: '250px', display: 'table', height: '100%' }}>
-          <div className='asset_organize_cls'>组织树列表
-            <div style={{ margin: '0 10prx ' }}>
-              {/* <Switch
-                className='switch'
-                checkedChildren='切至目录'
-                disabled={!modifySwitch}
-                
-                defaultChecked={modifyType}
-                unCheckedChildren='切至类型'
-                size="small"
-                onChange={(checked: boolean) => setModifyType(checked)}
-              /> */}
-            </div>
-
-          </div>
-          <Accordion
-            isAutoInitialized={false}
-            refreshLeft={refreshLeft}
-            treeData={treeData}
-            addButton={secondAddButton}
-            addMenu={true}
-            expandAll={true}
-            expandedKeys={expandedKeys}
-            handleClick={async (key: any, node: any, type) => {
-              console.log("点击的事件参数为", key, node, type)
-              if (type == "query" && !modifyType) {
-                setTypeId(key);
-                setRefreshKey(_.uniqueId('refreshKey_'));
-              }
-              if (type == "query" && modifyType) {
-                getAssetTypeItems(key);
-                setTypeId(key);
-                setRefreshKey(_.uniqueId('refreshKey_'));
-              }
-              if (key < 0) {
-                let params = {
-                  name: "新目录",
-                  parent_id: node
-                }
-                insertAssetDirectoryTree(params).then((res) => {
-                  loadDataCenter();
-                })
-              } else {
-                if (type == "delete") {
-                  deleteAssetDirectoryTree(key).then((res) => {
-                    message.success("删除成功！")
-                    loadDataCenter();
-                  })
-                } else if (type == 'update') {
-                  updateAssetDirectoryTree(node).then((res) => {
-                    message.success("修改成功！")
-                    loadDataCenter();
-                  })
-                } else if (type == 'move') {
-                  moveAssetDirectoryTree(node).then((res) => {
-                    message.success("修改成功！")
-                    loadDataCenter();
-                  })
-                }
-              }
-
-
+      <div style={{ display: 'inline-flex' }} className='asset_list_view'>
+        <Resizable
+          style={{
+            marginRight: collapse ? 0 : 10,
+          }}
+          size={{ width: collapse ? 0 : width, height: '100%' }}
+          enable={{
+            right: collapse ? false : true,
+          }}
+          onResizeStop={(e, direction, ref, d) => {
+            let curWidth = width + d.width;
+            if (curWidth < 250) {
+              curWidth = 250;
+            }
+            setWidth(curWidth);
+            localStorage.setItem('leftassetWidth', curWidth.toString());
+          }}
+        >
+        <div className={collapse ? 'left-area collapse' : 'left-area'}>
+          <div
+            className='collapse-btn'
+            onClick={() => {
+              localStorage.setItem('left_asset_list', !collapse ? '1' : '0');
+              setCollapse(!collapse);
             }}
-          />
-        </div>
+          >
+            {!collapse ? <LeftOutlined /> : <RightOutlined />}
+          </div>
+          <div className="left_tree" style={{ width: '220px', display: 'inline-block' }}>
+            <div className='asset_organize_cls'>组织树列表
+              <div style={{ margin: '0 10prx ' }}>
+                {/* <Switch
+                  className='switch'
+                  checkedChildren='切至目录'
+                  disabled={!modifySwitch}
+                  
+                  defaultChecked={modifyType}
+                  unCheckedChildren='切至类型'
+                  size="small"
+                  onChange={(checked: boolean) => setModifyType(checked)}
+                /> */}
+              </div>
+
+            </div>
+            <Accordion
+              isAutoInitialized={true}
+              refreshLeft={refreshLeft}
+              treeData={treeData}
+              addButton={secondAddButton}
+              addMenu={true}
+              expandAll={true}
+              selectedKey={typeId}
+              expandedKeys={expandedKeys}
+              handleClick={async (key: any, node: any, type) => {
+                if (type == "query" && !modifyType) {
+                  setTypeId(key);
+                  setRefreshKey(_.uniqueId('refreshKey_'));
+                }
+                if (type == "query" && modifyType) {//资产类型操作
+                  getAssetTypeItems(key);
+                  setTypeId(key);
+                  localStorage.setItem('left_asset_type', key);
+                  setRefreshKey(_.uniqueId('refreshKey_'));
+                }
+                if (key < 0) {
+                  let params = {
+                    name: "新目录",
+                    parent_id: node
+                  }
+                  insertAssetDirectoryTree(params).then((res) => {
+                    loadDataCenter();
+                  })
+                } else {
+                  if (type == "delete") {
+                    deleteAssetDirectoryTree(key).then((res) => {
+                      message.success("删除成功！")
+                      loadDataCenter();
+                    })
+                  } else if (type == 'update') {
+                    updateAssetDirectoryTree(node).then((res) => {
+                      message.success("修改成功！")
+                      loadDataCenter();
+                    })
+                  } else if (type == 'move') {
+                    moveAssetDirectoryTree(node).then((res) => {
+                      message.success("修改成功！")
+                      loadDataCenter();
+                    })
+                  }
+                }
+
+
+              }}
+            />
+          </div>
+          </div>
+       </Resizable>
         <div className='asset-operate_xh'>
           <div className='table-content_xh'>
             <Space>
@@ -770,6 +796,8 @@ export default function () {
             />
           </div>
         </div>
+        
+        
       </div>
     </PageLayout>
   );

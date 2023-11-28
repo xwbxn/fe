@@ -66,6 +66,7 @@ const Event: React.FC = () => {
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
+  const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [start, setStart] = useState<number>(0);
   const [end, setEnd] = useState<number>(0);
   
@@ -163,7 +164,11 @@ const Event: React.FC = () => {
               <FileSearchOutlined />
             </Link>
             <DownloadOutlined className='down_icon' title='导出'
-              onClick={() => {
+              onClick={() => {                   
+                   let ids = new Array();
+                   ids.push(record.id);
+                   setRowKeys(_.cloneDeep(ids));
+                   setModalOpen(true);
               }}
             />
             <DeleteOutlined onClick={() => {
@@ -177,7 +182,6 @@ const Event: React.FC = () => {
                     setRefreshFlag(_.uniqueId('refresh_'));
                   })
                 },
-
                 onCancel() { },
               });
             }} />
@@ -349,6 +353,7 @@ const Event: React.FC = () => {
                         });
                       } else {
                         setModalOpen(true);
+                        setRowKeys(selectRowKeys);
                       }
                     } else if (key == "delete") {
                       if (selectRowKeys.length <= 0) {
@@ -427,11 +432,11 @@ const Event: React.FC = () => {
     debounceWait: 500,
   });
 
-  const handleModal = (action: string) => {
+  const handleModal = (action: string,rowKeys:any[]) => {
     if (action == "open") {
       let params: any = {};
-      if (selectRowKeys != null && selectRowKeys.length > 0) {
-        params.ids = selectRowKeys;
+      if (rowKeys != null && rowKeys.length > 0) {
+        params.ids = rowKeys;
       }
       filter["ftype"] = ftype;
       filter["alert_type"] = 2;
@@ -492,7 +497,7 @@ const Event: React.FC = () => {
         </div>
       </div>
 
-      <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open") }} onCancel={e => { handleModal("close") }} >
+      <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open",rowKeys) }} onCancel={e => { handleModal("close",rowKeys) }} >
         <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
           <Radio value={1} onChange={e => {
             setFtype(parseInt("" + e.target.value))

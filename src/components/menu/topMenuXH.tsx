@@ -86,28 +86,7 @@ const getMenuList = (t) => {
         },
       ],
     },
-    {
-      key: 'log',
-      icon: <IconFont type='icon-Menu_LogAnalysis' />,
-      label: t('日志分析'),
-      children: [
-        {
-          key: '/log/debug/switch',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: '日志调试启动开关',
-        },
-        {
-          key: '/log/operlog',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('操作日志'),
-        },
-        {
-          key: '/log/syslog',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('系统日志'),
-        },
-      ],
-    },
+    
     {
       key: 'bigscreen',
       icon: <ProjectOutlined />,
@@ -151,6 +130,7 @@ const getMenuList = (t) => {
               key: '/permissions',
               label: t('角色管理'),
             },
+            
           ],
         },
         {
@@ -162,6 +142,28 @@ const getMenuList = (t) => {
           key: '/target/version',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('客户端版本'),
+        },
+        {
+          key: 'log',
+          icon: <IconFont type='icon-Menu_LogAnalysis' />,
+          label: t('日志分析'),
+          children: [
+            {
+              key: '/log/debug/switch',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: '日志调试启动开关',
+            },
+            {
+              key: '/log/operlog',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('操作日志'),
+            },
+            {
+              key: '/log/syslog',
+              icon: <IconFont type='icon-Menu_Infrastructure' />,
+              label: t('系统日志'),
+            },
+          ],
         },
         {
           key: '/help/other',
@@ -380,7 +382,7 @@ export default function () {//{ selectMenu?:any }
       <div className='logoImg'></div>
       <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       <div className='top_right'>
-        <span
+        {/* <span
           className='language'
           onClick={() => {
             let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
@@ -389,8 +391,8 @@ export default function () {//{ selectMenu?:any }
           }}
         >
           {i18n.language == 'zh_CN' ? 'EN' : '中'}
-        </span>
-        <Dropdown overlay={topRightMenu} trigger={['click']}>
+        </span> */}
+        <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
             <img src={profile.portrait || '/image/avatar1.png'} alt='' />
             <span className='display-name'>{profile.nickname || profile.username}</span>

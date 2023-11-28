@@ -146,7 +146,7 @@ export default function index(props: IProps) {
                             })
                             values["rule_config_cn"] = config_cn.join(";")    
                           }
-                          console.log("form values",values)
+                          values["rule_config_fe"] =JSON.stringify(values["rule_config"]);    
                           const data = processFormValues(values) as any;
                           if (type === 1) {
                             const res = EditStrategy(data, initialValues.group_id, initialValues.id);

@@ -98,7 +98,7 @@ export default function Base({ type }) {
       {type == 1 && (
         <Row gutter={10}>
         <Col span={8}>
-          <Form.Item label={'告警名称'} name='name' rules={[{ required: true }]}>
+          <Form.Item label={'告警规则名称'} name='name' rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         </Col>
