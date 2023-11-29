@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, PoweroffOutlined, ProfileTwoTone, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, PoweroffOutlined, ProfileTwoTone, RightOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
@@ -14,6 +14,7 @@ import _ from 'lodash';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
+import { Resizable } from 're-resizable';
 import { deleteAssets, insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 import { getMonitorInfoList, getMonitorInfo, getMonitorInfoListBasedOnSearch, deleteXhMonitor, updateMonitorStatus } from '@/services/manage';
 import { Link, useHistory } from 'react-router-dom';
@@ -35,11 +36,11 @@ export enum OperateType {
   TurnOnMonitoring = 'turnOnMonitoring',  //启用监控
   DisableMonitoring = 'disableMonitoring',  //禁止监控
 }
-let queryFilter =[
-  {name:'monitoring_name',label:'监控名称',type:'input'},
-  {name:'asset_name',label:'资产名称',type:'input'},
-  {name:'status',label:'监控状态',type:'select'},
-  {name:'is_alarm',label:'是否启用告警',type:'select'},
+let queryFilter = [
+  { name: 'monitoring_name', label: '监控名称', type: 'input' },
+  { name: 'asset_name', label: '资产名称', type: 'input' },
+  { name: 'status', label: '监控状态', type: 'select' },
+  { name: 'is_alarm', label: '是否启用告警', type: 'select' },
 ]
 export default function () {
   const { t } = useTranslation('assets');
@@ -64,12 +65,15 @@ export default function () {
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
-  const [typeId, setTypeId] = useState<any>(null)
+  const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_monitor_type') || '0'))
   const { search } = useLocation();
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
-  const [filterParam,setFilterParam] = useState<string>("");
+  const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
+  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('left_monitor_Width') || 250));
+  const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
+  const [filterParam, setFilterParam] = useState<string>("");
   const history = useHistory();
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const onSelectNone = () => {
@@ -160,21 +164,21 @@ export default function () {
                   onCancel() { },
                 });
               }
-            }} />          
+            }} />
 
           <FileProtectOutlined title='查看资产告警规则' onClick={() => {
-                showModal("rules", record.asset_id, "view")
+            showModal("rules", record.asset_id, "view")
           }} />
-          
+
           <FileSearchOutlined title='查看监控配置' onClick={() => {
-                showModal("asset", record.id, "view")
+            showModal("asset", record.id, "view")
           }}
           />
           <FundOutlined title='监控指标信息' onClick={() => {
-                showModal("monitor", record.id, "view")
+            showModal("monitor", record.id, "view")
           }} />
           <EditOutlined title='编辑监控信息' onClick={() => {
-                showModal("asset", record.id, "edit")
+            showModal("asset", record.id, "edit")
           }}
           />
           <DeleteOutlined title='删除监控信息' onClick={() => {
@@ -203,7 +207,7 @@ export default function () {
       if (checkedValues.includes(item.title)) {
         showColumns.push(item)
       }
-    });    
+    });
     setSelectColum(showColumns.concat(fixColumns));
   }
 
@@ -224,7 +228,7 @@ export default function () {
       // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       let treeData: any[] = [{
         id: 0,
-        name: '全部监控',
+        name: '全部',
         count: 0,
         children: items
       }];
@@ -236,11 +240,16 @@ export default function () {
         };
       })
       setAssetTypes(types);
+      let arr = ["0"];
+      items.map((item, index) => {
+        arr.push(item.id);
+      })
+      setExpandedKeys(arr);
       setTreeData(_.cloneDeep(treeData));
     });
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
 
-    
+
     getAssetsByCondition({}).then(({ dat }) => {
       dat.list.forEach(v => {
         assetInfo[v.id] = (v);
@@ -249,9 +258,9 @@ export default function () {
       getTableData(assetInfo);
     });
 
-    filterOptions["status"]=[{value:'0',label:'关闭'},{value:'1',label:'正常'}]    
-    filterOptions["is_alarm"]=[{value:'1',label:'已启用'},{value:'0',label:'未启用'}] 
-    setFilterOptions({...filterOptions})
+    filterOptions["status"] = [{ value: '0', label: '关闭' }, { value: '1', label: '正常' }]
+    filterOptions["is_alarm"] = [{ value: '1', label: '已启用' }, { value: '0', label: '未启用' }]
+    setFilterOptions({ ...filterOptions })
   }, []);
 
 
@@ -268,10 +277,10 @@ export default function () {
     if (currentAssetId > 0) {
       param["assetId"] = currentAssetId;
     }
-    if(searchVal!=null && searchVal.length > 0) {
+    if (searchVal != null && searchVal.length > 0) {
       param["query"] = searchVal;
     }
-    if(filterParam!=null && filterParam.length > 0 && searchVal!=null && searchVal.length > 0)  {
+    if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
       param["filter"] = filterParam;
     }
     if (typeId != null && typeId + "" != "0") {
@@ -363,19 +372,18 @@ export default function () {
     if (action == "asset") {
       let url = '/xh/monitor/add?type=asset&action=' + operate;
       if (id == 0) {
-            history.push(url);
+        history.push(url);
       } else {
-            history.push(url + "&id=" + id);
+        history.push(url + "&id=" + id);
       }
-    }else if (action == "monitor") {
-       history.push('/xh/monitor/add?type=monitor&id=' + id + "&action=monitor");
-    }else if(action == "rules"){
-        let asset = assetInfo[id];
-        history.push(`/alert-rules?id=${asset.group_id}&&asset_id=${id}`);
+    } else if (action == "monitor") {
+      history.push('/xh/monitor/add?type=monitor&id=' + id + "&action=monitor");
+    } else if (action == "rules") {
+      let asset = assetInfo[id];
+      history.push(`/alert-rules?id=${asset.group_id}&&asset_id=${id}`);
     }
   }
   const titleRender = (node) => {
-
     return (
       <div style={{ position: 'relative', width: '100%' }}>
         <span>
@@ -428,85 +436,130 @@ export default function () {
   };
   const onSelect = (selectedKeys, info) => {
     setTypeId(selectedKeys);
+    localStorage.setItem('left_monitor_type', selectedKeys);
     setCurrentAssetId(0);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'}>
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'}  showBack backPath='/xh/assetmgt'
+     >
       <div style={{ display: 'flex' }} className='monitor_list_view'>
-        <div style={{ width: '250px', display: 'table', height: '100%' }}>
-          <div className='asset_organize_cls'>资产类型
-            <div style={{ margin: '0 10prx ' }}>
+        <Resizable
+          style={{
+            marginRight: collapse ? 0 : 10,
+          }}
+          size={{ width: collapse ? 0 : width, height: '100%' }}
+          enable={{
+            right: collapse ? false : true,
+          }}
+          onResizeStop={(e, direction, ref, d) => {
+            let curWidth = width + d.width;
+            if (curWidth < 250) {
+              curWidth = 250;
+            }
+            setWidth(curWidth);
+            localStorage.setItem('left_monitor_Width', curWidth.toString());
+          }}
+        >
+          <div className={collapse ? 'left-area collapse' : 'left-area'}>
+            <div
+              className='collapse-btn'
+              onClick={() => {
+                localStorage.setItem('left_monitor_list', !collapse ? '1' : '0');
+                setCollapse(!collapse);
+              }}
+            >
+              {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
+            <div className="left_tree" style={{ width: '220px', display: 'inline-block' }}>
+              <div className='asset_organize_cls'>组织树列表
+                <div style={{ margin: '0 10prx ' }}>
+                  {/* <Switch
+                  className='switch'
+                  checkedChildren='切至目录'
+                  disabled={!modifySwitch}
+                  
+                  defaultChecked={modifyType}
+                  unCheckedChildren='切至类型'
+                  size="small"
+                  onChange={(checked: boolean) => setModifyType(checked)}
+                /> */}
+                </div>
 
+              </div>
+              <div style={{ width: '220px', display: 'table', height: '100%' }}>
+                {expandedKeys && treeData && (
+                  <Tree
+                    showLine={true}
+                    showIcon={true}
+                    style={{ marginTop: 0 }}
+                    titleRender={titleRender}
+                    defaultExpandedKeys={expandedKeys}
+                    treeData={treeData}
+                    defaultExpandAll={true}
+                    selectedKeys={[typeId]}
+                    autoExpandParent={true}
+                    checkStrictly
+                    fieldNames={{ key: 'id', title: 'name' }}
+                    onSelect={onSelect}
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
-          <Tree
-            showLine={true}
-            showIcon={true}
-            style={{ marginTop: 0 }}
-            titleRender={titleRender}
-            // onRightClick={this.handleRightClick}
-            treeData={treeData}
-            defaultExpandAll={true}
-            autoExpandParent={true}
-            checkStrictly
-            fieldNames={{ key: 'id', title: 'name' }}
-            onSelect={onSelect}
-          />
-         
-        </div>
-        <div className='asset-operate_xh'>
+        </Resizable>
+        <div className='monitor-operate_xh'>
           <div className='table-content_xh'>
             <Space>
-             <RefreshIcon
+              <RefreshIcon
                 onClick={() => {
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 }}
               />
               <div className='table-handle-search'>
-              <Select
+                <Select
                   // defaultValue="lucy"
                   placeholder="选择过滤器"
                   style={{ width: 120 }}
                   allowClear
-                  onChange={(value)=>{
-                       queryFilter.forEach((item)=>{
-                          if(item.name==value){
-                            setFilterType(item.type);                            
-                          }
-                       })
-                       setFilterParam(value);
-                       setSearchVal(null)
+                  onChange={(value) => {
+                    queryFilter.forEach((item) => {
+                      if (item.name == value) {
+                        setFilterType(item.type);
+                      }
+                    })
+                    setFilterParam(value);
+                    setSearchVal(null)
                   }}>
-                  {queryFilter.map((item,index)=>(
-                      <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
+                  {queryFilter.map((item, index) => (
+                    <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
                   ))
                   }
-                  </Select>
-                  {filterType=="input" && (
-                     <Input
-                     className={'searchInput'}
-                     value={searchVal}
-                     allowClear                     
-                     onChange={(e) => setSearchVal(e.target.value)}
-                     suffix={<SearchOutlined />}
-                     placeholder={'输入模糊检索关键字'}
-                   />
-                  )}
-                  {filterType=="select" && (
-                     <Select
-                        className={'searchInput'}
-                        value={searchVal}
-                        allowClear
-                        options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
-                        onChange={(val) => setSearchVal(val)}
-                        placeholder={'选择要查询的条件'}
-                   />
-                  )}
+                </Select>
+                {filterType == "input" && (
+                  <Input
+                    className={'searchInput'}
+                    value={searchVal}
+                    allowClear
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    suffix={<SearchOutlined />}
+                    placeholder={'输入模糊检索关键字'}
+                  />
+                )}
+                {filterType == "select" && (
+                  <Select
+                    className={'searchInput'}
+                    value={searchVal}
+                    allowClear
+                    options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
+                    onChange={(val) => setSearchVal(val)}
+                    placeholder={'选择要查询的条件'}
+                  />
+                )}
 
 
-                
+
 
               </div>
             </Space>
@@ -523,7 +576,6 @@ export default function () {
                 </Button>
                 &nbsp; &nbsp; &nbsp;
               </div>
-
               <div>
                 <Popover placement="bottom" content={pupupContent} trigger="click" className='filter_columns' >
                   <Button className='show_columns' >显示列</Button>
@@ -635,7 +687,7 @@ export default function () {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </PageLayout >
   );
 }
 

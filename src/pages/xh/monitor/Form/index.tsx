@@ -191,6 +191,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         name='asset'
         form={form}
         layout='vertical'
+        className='monitor_form'
         onFinish={submitForm}
         disabled={props.disabled}
         onValuesChange={() => {

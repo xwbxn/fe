@@ -147,7 +147,11 @@ export default function List(props: ListProps) {
               style={{ color: record.disabled === AlertRuleStatus.Enable ? 'green' : 'gray' }}
               onClick={(e) => {
                 const { id, disabled } = record;
-                bgid &&
+
+                Modal.confirm({
+                  title: `确认要修改状态为：${record.disabled === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
+                  onOk: () => {
+                    bgid &&
                   updateAlertRules(
                     {
                       ids: [id],
@@ -159,6 +163,12 @@ export default function List(props: ListProps) {
                   ).then(() => {
                     getAlertRules(params);
                   });
+                  },
+                  onCancel() { },
+                });
+
+
+                
               }}
             />
             <Link title='克隆'

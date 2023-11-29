@@ -2,30 +2,49 @@
   display: flex;
   position: relative;
   // justify-content: space-between;
+  background: url('/public/image/topmenu/topbg.png') no-repeat;
+  background-position: center;
+
   .logoImg {
-       background: url('/public/image/topmenu/logo.png') no-repeat;
-       background-position: center;
-       width: 297px;
-       height: 60px;
+    background: url('/public/image/topmenu/logo.png') no-repeat;
+    background-position: center;
+    width: 297px;
+    height: 60px;
   }
+
   .layer_1_menu {
-      background-color: #2979DE;
-      left: 10px;
-      height: 65px;
+    // background-color: #2979DE;
+    background: #f0f0f000;
+    left: 10px;
+    height: 60px;
+    line-height: 60px;
+    align-items: center;
+    width: 80%;
+
+    .ant-menu-item,.ant-menu-submenu {
+      color: #fff;
+    }
+
+    .ant-menu-item-selected {
+       background-color: #fff;
+    }
+
+    
+    .ant-menu {
+      background: #f5f5f500;
+      color: #fff;
+    }
+    
   }
+
   .top_right {
     position: absolute;
     right: 0px;
+    height: 60px;
+    line-height: 60px;
   }
-  
-  align-items: center;
-  
-  .ant-menu-item-selected {
-    background-color: #fff;
-  }
-  // .ant-menu {
-  //   background: #f5f5f5;
-  // }
+
+
 
   // .ant-menu {
   //   background-color: @primary-color !important;
@@ -52,6 +71,7 @@
 
 .avator {
   line-height: @baseFontSizeMiddle;
+
   img {
     width: @baseFontSizeMiddle;
     height: @baseFontSizeMiddle;
@@ -62,6 +82,7 @@
     display: inline-block;
     // background: url('/image/avatar1.png') 100% 100% / cover;
   }
+
   padding-right: 20px;
   color: #f5f5f5;
 }
@@ -69,4 +90,7 @@
 .language {
   margin-right: 20px;
   color: #f5f5f5;
+}
+.my_portrait {
+  cursor: pointer;
 }

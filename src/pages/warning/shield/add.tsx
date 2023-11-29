@@ -29,6 +29,12 @@ const AddShield: React.FC = () => {
   const { search } = useLocation();
   const { curBusiId } = useContext(CommonStateContext);
   const query: any = queryString.parse(search);
+  if (query.from) {
+     localStorage.setItem("current_alert_display", "list");
+  } else {
+     localStorage.setItem("current_alert_display", "card");
+  }
+
 
   if (query.busiGroup) {
     query.group_id = _.toNumber(query.busiGroup);

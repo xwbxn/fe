@@ -16,7 +16,7 @@
  */
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Tag, Button, Table, Tooltip } from 'antd';
+import { Tag, Button, Table, Tooltip, Space, Modal, message } from 'antd';
 import { useHistory, Link } from 'react-router-dom';
 import moment from 'moment';
 import _ from 'lodash';
@@ -27,27 +27,30 @@ import { getEvents } from './services';
 import { deleteAlertEventsModal } from './index';
 import { SeverityColor } from './index';
 import { getStrategiesByRuleIds } from '@/services/warning';
-
+import '../event/index.less';
 // @ts-ignore
 import AckBtn from 'plus:/parcels/Event/Acknowledge/AckBtn';
+import { FileSearchOutlined, DownloadOutlined, DeleteOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 interface IProps {
   filterObj: any;
   header: React.ReactNode;
   filter: any;
   setFilter: (filter: any) => void;
+  deleteAlert:(id: any) => void;
   refreshFlag: string;
   selectedRowKeys: number[];
   setSelectedRowKeys: (selectedRowKeys: number[]) => void;
 }
 
 export default function TableCpt(props: IProps) {
-  const { filterObj, filter, setFilter, header, selectedRowKeys, setSelectedRowKeys } = props;
+  const { filterObj, filter, setFilter, header, selectedRowKeys, setSelectedRowKeys,deleteAlert } = props;
   const history = useHistory();
   const { t } = useTranslation('AlertCurEvents');
   const { groupedDatasourceList } = useContext(CommonStateContext);
+  const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
-  const columns = [
+  const columns:any = [
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -83,66 +86,7 @@ export default function TableCpt(props: IProps) {
       render: (value) => {
         return value;
       },
-    },
-    // {
-    //   title: t('prod'),
-    //   dataIndex: 'rule_prod',
-    //   width: 100,
-    //   render: (value) => {
-    //     return t(`AlertHisEvents:rule_prod.${value}`);
-    //   },
-    // },
-    // {
-    //   title: t('common:datasource.id'),
-    //   dataIndex: 'datasource_id',
-    //   width: 100,
-    //   render: (value, record) => {
-    //     return _.find(groupedDatasourceList?.[record.cate], { id: value })?.name || '-';
-    //   },
-    // },
-    // {
-    //   title: t('rule_name'),
-    //   dataIndex: 'rule_name',
-    //   render(title, { id, tags }) {
-    //     return (
-    //       <>
-    //         <div>
-    //           <Link to={`/alert-cur-events/${id}`}>{title}</Link>
-    //         </div>
-    //         <div>
-    //           {_.map(tags, (item) => {
-    //             return (
-    //               <Tooltip key={item} title={item}>
-    //                 <Tag
-    //                   color='purple'
-    //                   style={{ maxWidth: '100%' }}
-    //                   onClick={() => {
-    //                     if (!filter.queryContent.includes(item)) {
-    //                       setFilter({
-    //                         ...filter,
-    //                         queryContent: filter.queryContent ? `${filter.queryContent.trim()} ${item}` : item,
-    //                       });
-    //                     }
-    //                   }}
-    //                 >
-    //                   <div
-    //                     style={{
-    //                       maxWidth: 'max-content',
-    //                       overflow: 'hidden',
-    //                       textOverflow: 'ellipsis',
-    //                     }}
-    //                   >
-    //                     {item}
-    //                   </div>
-    //                 </Tag>
-    //               </Tooltip>
-    //             );
-    //           })}
-    //         </div>
-    //       </>
-    //     );
-    //   },
-    // },
+    },    
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',
@@ -154,19 +98,19 @@ export default function TableCpt(props: IProps) {
     {
       title: t('common:table.operations'),
       dataIndex: 'operate',
-      width: 200,
+      width: 80,
+      align: 'center',
+      fixed:'right',
       render(value, record) {
         return (
           <>
-            <AckBtn
-              data={record}
-              onOk={() => {
-                setRefreshFlag(_.uniqueId('refresh_'));
-              }}
-            />
-            <Button
-              size='small'
-              type='link'
+            <Space>
+              <FileSearchOutlined onClick={()=>{
+                  history.push({
+                    pathname: `/alert-cur-events/${record.id}`
+                  });
+              }}/>
+            <EyeInvisibleOutlined  title='屏蔽'
               onClick={() => {
                 history.push({
                   pathname: '/alert-mutes/add',
@@ -174,31 +118,41 @@ export default function TableCpt(props: IProps) {
                     busiGroup: record.group_id,
                     prod: record.rule_prod,
                     cate: record.cate,
+                    from: "list",
                     datasource_ids: [record.datasource_id],
                     tags: record.tags,
                   }),
                 });
               }}
-            >
-              {t('shield')}
-            </Button>
-            <Button
-              size='small'
-              type='link'
-              danger
-              onClick={() =>
-                deleteAlertEventsModal(
-                  [record.id],
-                  () => {
-                    setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.id));
-                    setRefreshFlag(_.uniqueId('refresh_'));
-                  },
-                  t,
-                )
-              }
-            >
-              {t('common:btn.delete')}
-            </Button>
+            />
+            <DownloadOutlined className='down_icon' title='导出'
+              onClick={() => {
+                deleteAlert(record.id);
+              }}
+            />
+            <DeleteOutlined onClick={() => {
+              deleteAlertEventsModal(
+                [record.id],
+                () => {
+                  setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.id));
+                  setRefreshFlag(_.uniqueId('refresh_'));
+                },
+                t,
+              )
+            }} />
+
+          </Space>
+
+
+
+
+            <AckBtn
+              data={record}
+              onOk={() => {
+                setRefreshFlag(_.uniqueId('refresh_'));
+              }}
+            />
+            
           </>
         );
       },
@@ -258,6 +212,7 @@ export default function TableCpt(props: IProps) {
           tableLayout='fixed'
           rowKey={(record) => record.id}
           columns={columns}
+          className='current_events_list'
           {...tableProps}
           rowClassName={(record: { severity: number; is_recovered: number }) => {
             return SeverityColor[record.is_recovered ? 3 : record.severity - 1] + '-left-border';

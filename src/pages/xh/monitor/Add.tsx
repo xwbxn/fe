@@ -16,7 +16,7 @@ export default function () {
           <Form initialValues={{}}  initParams={{}} disabled={params.get('action') == "view" ? true : false}></Form>
       )}
       {params.get('type')=="monitor" && (
-          <Monitor initialValues={{}} initParams={{}}></Monitor>
+          <Monitor initialValues={{}}  initParams={{}}></Monitor>
       )} 
     </PageLayout>
   );

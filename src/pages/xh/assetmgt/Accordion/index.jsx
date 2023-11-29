@@ -1,6 +1,6 @@
-import React, { Component, Fragment,} from 'react';
+import React, { Component, Fragment, } from 'react';
 import './index.less';
-import {  CheckOutlined, CloseOutlined, PlusOutlined,  ClusterOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, PlusOutlined, ClusterOutlined } from '@ant-design/icons';
 import { Input, Menu, Modal, Tree, message } from 'antd';
 // import { getAssetsTree } from '@/services/assets/asset';
 // import { addAssetTree, updateAssetTree, deleteAssetTree } from '@/services/assets/asset-tree';
@@ -15,7 +15,7 @@ class Accordions extends Component {
     super(props);
     this.state = {
       dataCenterId: 0,
-      rooms: [],
+      defaultExpandKeys: [],
       treeData: [],
       pageX: 0,
       pageY: 0,
@@ -25,8 +25,7 @@ class Accordions extends Component {
       showMenu: false,
       openStatus: 0,
       refreshFlag: this.props.refreshFlag,
-      expandAll:true,
-      expandedKeys:[],
+      expandAll: true,
       autoExpandParent: true,
       style: {
         collapsed: {
@@ -47,14 +46,18 @@ class Accordions extends Component {
 
 
   componentDidMount() {
-    console.log('componentDidMount');
+  
+    console.log('componentDidMount',this.props);
+
+    this.state.defaultExpandKeys = this.props.expandedKeys;
+
     // if (status > 0) {
-      this.state.openStatus = status;
-      this.state.bindIndex = index;
-      // this.state.treeData = this.props.treeData;
-      this.setState(this.state);
-      // this.changeItem(status, index);
-      console.log('this.state',this.state);
+    this.state.openStatus = status;
+    this.state.bindIndex = index;
+    // this.state.treeData = this.props.treeData;
+    this.setState(this.state);
+    // this.changeItem(status, index);
+    console.log('查看当前组件的状态信息', this.state);
     // }
   }
 
@@ -63,35 +66,35 @@ class Accordions extends Component {
     if (event.key === 'delete') {
       Modal.confirm({
         title: "确认要删除吗",
-        onOk: async () => {          
-           this.props.handleClick(this.state.node["id"], 0, "delete");
+        onOk: async () => {
+          this.props.handleClick(this.state.node["id"], 0, "delete");
         },
         onCancel() { },
       });
     } else if (event.key === 'add') {
-        this.props.handleClick(-1,this.state.node.id,"add");
-    } else  if (event.key === 'update') {
-        this.changeEditProperty(this.props.treeData, this.state.node.id, true)
-    }else  if (event.key === 'up') {
-       let node = {
-          type:"up",
-          id:this.state.node.id
-       }
-       this.props.handleClick(this.state.node["id"],node,"move");
-       this.state.showMenu = false;
-     } else  if (event.key === 'down') {
+      this.props.handleClick(-1, this.state.node.id, "add");
+    } else if (event.key === 'update') {
+      this.changeEditProperty(this.props.treeData, this.state.node.id, true)
+    } else if (event.key === 'up') {
       let node = {
-        type:"down",
-        id:this.state.node.id
+        type: "up",
+        id: this.state.node.id
       }
-       this.props.handleClick(this.state.node["id"],node,"move");
-       this.state.showMenu = false;
+      this.props.handleClick(this.state.node["id"], node, "move");
+      this.state.showMenu = false;
+    } else if (event.key === 'down') {
+      let node = {
+        type: "down",
+        id: this.state.node.id
+      }
+      this.props.handleClick(this.state.node["id"], node, "move");
+      this.state.showMenu = false;
     }
     this.state.showMenu = false;
     this.setState(this.state)
   }
 
-  changeEditProperty = (arr, id, isEdit) => arr.map(item => {    
+  changeEditProperty = (arr, id, isEdit) => arr.map(item => {
     item.isEdit = item.id === id ? isEdit : false;
     (
       {
@@ -110,7 +113,7 @@ class Accordions extends Component {
       }
       this.props.handleClick(this.state.node["id"], params, "update");
     } else {
-        message.error("修改信息无效！检查输入内容")
+      message.error("修改信息无效！检查输入内容")
     }
   };
 
@@ -183,8 +186,8 @@ class Accordions extends Component {
         <div style={{ position: 'relative', width: '100%' }}>
           <span>
             {node.name}
-            {node.id>0 && (
-              <Fragment ><span style={{marginLeft:"5px"}} className="tree_node_count"> ({node.count})</span></Fragment>
+            {node.id > 0 && (
+              <Fragment ><span style={{ marginLeft: "5px" }} className="tree_node_count"> ({node.count})</span></Fragment>
             )}
           </span>
         </div>
@@ -198,21 +201,21 @@ class Accordions extends Component {
     children: item.children ? this.addEditProperty(item.children) : [] // 这里要判断原数据有没有子级如果没有判断会报错
   }))
 
-
+  
 
   handleRightClick = ({ event, node }) => {
     event.stopPropagation();
-    if(node.id>0){    
-        this.state.pageX = event.pageX;
-        this.state.pageY = event.pageY;
-        this.state.node = (node);
-        this.state.showMenu = true;   
-        this.setState(this.state)
+    if (node.id > 0) {
+      this.state.pageX = event.pageX;
+      this.state.pageY = event.pageY;
+      this.state.node = (node);
+      this.state.showMenu = true;
+      this.setState(this.state)
     }
   };
   onSelect = (selectedKeys, info) => {
     this.state.showMenu = false;
-    this.props.handleClick(selectedKeys[0],info, "query");
+    this.props.handleClick(selectedKeys[0], info, "query");
   };
 
   renderMenu = () => {
@@ -234,61 +237,78 @@ class Accordions extends Component {
             this.setState(this.state)
           }}
         >
-          
+
           {this.menu}
         </div>
       );
     }
     return null;
   };
-  
-   hiddenMenu =(e)=>{
+
+  hiddenMenu = (e) => {
     e.stopPropagation();
-    console.log("hiddenMenu",e);
+    console.log("hiddenMenu", e);
     this.state.showMenu = false;
     this.setState(this.state)
-   }
+  }
 
+  onExpand = (expandedKeysValue) => { 
+    console.log('onExpand', expandedKeysValue); // if not set autoExpandParent to false, if children expanded, parent can not collapse. 
+   // or, you can remove all expanded children keys.  
+  //  setExpandedKeys(expandedKeysValue); 
+   setAutoExpandParent(false); 
+  };
 
   render() {
-    let { treeData, expandAll,expandedKeys } = this.props;
-    // console.log("render----left Tree",treeData,expandAll,expandedKeys);
-    return (
-      <div className='bread-crumb-container_category' onClick={e=>{
-         this.hiddenMenu(e);
-      }}>
-        <div
-          className="collapse-content"
-          style={this.state.style.collapsed}
-        >
-
-          <Tree
-            showLine={true}
-            showIcon={true}
-            style={{ marginTop: 0 }}
-            titleRender={this.titleRender}
-            onRightClick={this.handleRightClick}
-            treeData={treeData}
-            defaultExpandAll={true}
-            autoExpandParent={true} 
-            checkStrictly
-            // multiple={true}
-            defaultExpandedKeys={expandedKeys}
-            fieldNames={{ key: 'id',title:'name'}}
-            onSelect={this.onSelect}          
-          />
-          {this.renderMenu()}
-        </div>
-        {this.props.addButton && (
-            <div className='addheader' onClick={e=>{
-              this.props.handleClick(-1, 0,"add");
-            }} >
-            <PlusOutlined />新增二级组织
+    let { treeData, expandAll, expandedKeys,selectedKey} = this.props;
+    // debugger;
+    console.log("render----left Tree this.props",this.props);
+    
+      return (
+        <>
+        {treeData!=null && ( 
+          <>
+          <div className='bread-crumb-container_category' onClick={e => {
+            this.hiddenMenu(e);
+          }}>
+            <div
+              className="collapse-content"
+              style={this.state.style.collapsed}
+            >
+    
+              <Tree
+                showLine={true}
+                showIcon={true}
+                style={{ marginTop: 0 }}
+                titleRender={this.titleRender}
+                onRightClick={this.handleRightClick}
+                treeData={treeData}
+                defaultExpandAll
+                checkStrictly
+                onExpand={this.onExpand}
+                defaultSelectedKeys={[selectedKey]}
+                // multiple={true}
+                defaultExpandedKeys={expandedKeys}
+                fieldNames={{ key: 'id', title: 'name' }}
+                onSelect={this.onSelect}
+              />
+              {this.renderMenu()}
             </div>
+            {this.props.addButton && (
+              <div className='addheader' onClick={e => {
+                this.props.handleClick(-1, 0, "add");
+              }} >
+                <PlusOutlined />新增二级组织
+              </div>
+            )}
+    
+          </div>
+          </>        
+         
+        
         )}
-     
-      </div>
-    )
+        </>
+      )
   }
 }
 export default Accordions;

@@ -108,11 +108,6 @@ function App() {
   const { t, i18n } = useTranslation();
   const isPlus = useIsPlus();
   const initialized = useRef(false);
-  const history = useHistory();
-  const [leftMenuItems, setLeftMenuItems] = useState<any>();
-  const [leftMenuKey, setLeftMenuKey] = useState<any>("");
-  const [mainMenu, setMainMenu] = useState<any>({});
-  const [collapsed, setCollapsed] = useState(false)
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -225,10 +220,7 @@ function App() {
           });
         }
       })();
-      if (window.localStorage.getItem('leftMenuItems')) {
-        let leftMenus = window.localStorage.getItem('leftMenuItems') as string;
-        setLeftMenuKey([leftMenus]);
-      }
+      
     } catch (error) {
       console.error(error);
     }
@@ -239,6 +231,7 @@ function App() {
     return null;
   }
 
+
   return (
     <div className='App'>
       <CommonStateContext.Provider value={commonState}>
@@ -248,15 +241,15 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:outputType' component={TaskOutput} />
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
-                <LayoutXH />
+                {/* <LayoutXH /> */}
 
                 
 
 
-                {/* <TopMenu></TopMenu>
+                <TopMenu></TopMenu>
                 <div style={{display:'-webkit-flex'}}>
                     <Content />
-                </div> */}
+                </div>
 
               </>
             </Switch>

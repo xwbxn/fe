@@ -18,6 +18,7 @@ import React, { useEffect, useState, createContext, useRef } from 'react';
 import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 
 import TopMenu from './topMenuXH'; //西航版本
+
 import { Layout, Menu } from 'antd';
 import Content from '@/routers';
 import { useLocalStorageState } from 'ahooks';
@@ -45,6 +46,9 @@ function layoutXH() {
       console.error(error);
     }
   }, []);
+  const toggleCollapsed=()=> {
+    setCollapsed(!collapsed);
+  }
 
   const handleClick = (item) => {
     // if ((item.key as string) === 'home') {
@@ -63,16 +67,16 @@ function layoutXH() {
     <Layout>
       {pathname != "/login" ? (
         <>
-          <Header className='yth_app_header'>
+          <Layout.Header className='yth_app_header'>
             <TopMenu
-              selectMenu={(mainMenu: any, items) => {
-                setMainMenu(mainMenu);
-                setLeftMenuItems(items)
-              }}
+              // selectMenu={(mainMenu: any, items) => {
+              //   setMainMenu(mainMenu);
+              //   setLeftMenuItems(items)
+              // }}
             ></TopMenu>
-          </Header>
+          </Layout.Header>
           <Layout hasSider>
-            <Sider collapsible trigger={null} collapsed={collapsed}>
+            <Layout.Sider collapsible trigger={null} onCollapse={()=>{toggleCollapsed}} collapsed={collapsed} collapsedWidth={0}>
               <Menu
                 mode="inline"
                 defaultSelectedKeys={leftMenuKey}
@@ -80,7 +84,7 @@ function layoutXH() {
                 onClick={handleClick}
                 style={{ height: '100%', borderRight: 0 }}
                 items={leftMenuItems}
-              /></Sider>
+              /></Layout.Sider>
             <Content />
           </Layout>
           {/* <Footer>Footer</Footer> */}

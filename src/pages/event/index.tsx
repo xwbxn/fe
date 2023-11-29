@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Input, message, Modal, Select, Space, Row, Col, Dropdown, Menu, DatePickerProps, Radio } from 'antd';
 import { AlertOutlined, ExclamationCircleOutlined, SearchOutlined, AppstoreOutlined, UnorderedListOutlined, DownOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -71,6 +71,9 @@ const Event: React.FC = () => {
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const [display, setDisplay] = useState<'card' | 'list'>(localStorage.getItem('current_alert_display')?_.toString(localStorage.getItem('current_alert_display')):"card");
+
   const [filter, setFilter] = useState<any | {
     group?: number;
     severity?: number;
@@ -86,6 +89,7 @@ const Event: React.FC = () => {
   });
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+  const [rowKeys, setRowKeys] = useState<any[]>([]);
   let prodOptions = getProdOptions(feats);
 
   const onChange = (
@@ -109,6 +113,9 @@ const Event: React.FC = () => {
     });
     setRefreshFlag(_.uniqueId('refresh_'));
   };
+  useEffect(()=>{
+       setView(display);
+  },[])
   function renderLeftHeader() {
     return (
       <Row justify='space-between' style={{ width: '100%' }}>
@@ -210,12 +217,11 @@ const Event: React.FC = () => {
                             },
                             onCancel() { },
                           });
+                          setRowKeys([]);
                         } else {
                           setModalOpen(true);
+                          setRowKeys(selectRowKeys);
                         }
-
-
-
                       }}>导出</Menu.Item>
 
                     <BatchAckBtn
@@ -253,11 +259,11 @@ const Event: React.FC = () => {
     { alert_type: 1 },
   );
 
-  const handleModal = (action: string) => {
+  const handleModal = (action: string,row:any[]) => {
     if (action == "open") {
       let params: any = {};
-      if (selectRowKeys != null && selectRowKeys.length > 0) {
-        params.ids = selectRowKeys;
+      if (row != null && row.length > 0) {
+        params.ids = row;
       }
       filter["ftype"] = ftype;
       filter["alert_type"] = 1;
@@ -312,9 +318,16 @@ const Event: React.FC = () => {
             setFilter={setFilter}
             refreshFlag={refreshFlag}
             selectedRowKeys={selectedRowKeys}
+            deleteAlert={(value)=>{
+              debugger;
+              let ids = new Array();
+               ids.push(value);
+              setModalOpen(true);
+              setRowKeys(ids);
+            }}
             setSelectedRowKeys={setSelectedRowKeys}
           />
-          <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open") }} onCancel={e => { handleModal("close") }} >
+          <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open",rowKeys) }} onCancel={e => { handleModal("close",rowKeys) }} >
             <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
               <Radio value={1} onChange={e => {
                 setFtype(parseInt("" + e.target.value))

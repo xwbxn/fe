@@ -33,11 +33,27 @@
         letter-spacing: 5px;
     }
 }
-
+.monitor_form {
+    .ant-card-head-title {
+        background: #e9f1ff;
+        font-size: 16px;
+        font-weight: 600;
+        padding-left: 5px !important ;
+    }
+}
 
 .view-form {
     .ant-card {
         border: 1px solid #ccc;
+    }
+    .ant-card-head-title {
+        background-color: #e9f1ff;
+        padding-left: 5px !important ;
+        font-size: 14px;
+        
+    }
+    .card-wrapper {
+        width: 99% !important;
     }
     .asset_info {
         border: 1px solid #ccc;
@@ -68,13 +84,15 @@
                     width: 20%;
                 }
             }
-            .theme {
+            .theme1 {
                 display: inline-flex;
-                width: 4cqh;
+                width: 25%;
                 div {
-                    width: 60px;
+                    margin-left: -5px;
                     text-align: right;
-                    margin-right: 20px;
+                    display: block;
+                    width: 120px;
+                    margin-right: 10px;
                 }
             }
         }
@@ -86,6 +104,7 @@
         display: flex;
         .base {
             width: 40%;
+            display: inline-block;
             .ant-row {
                 margin-left: 30px !important;
                 height: 35px;
@@ -93,7 +112,7 @@
                 width: 100%;
                 line-height: 35px;                
             }
-            .theme {
+            .theme1 {
                 display: inline-flex;
                 width: 100%;
                 div {
@@ -110,10 +129,11 @@
             .title {
                 margin-top: 20px;
             }
-            .content {
+            .content1 {
                 background-color: #efefef;
                 padding: 10px;
                 font-weight: 900;
+                width: 90%;
                 
             }
         }        
@@ -146,13 +166,14 @@
                 display: inline-flex;
                 position: relative;
                 width: 100%;
+                padding: 0 5px;
                 .ant-space-align-center {
                    align-items: baseline;
                 }
                 .auto-refresh-container {
                     background-color: re;
                     position: absolute;
-                    right: 0px;
+                    right: 5px;
                     float: right;
                 }
                 .flashcat-timeRangePicker-target {
@@ -191,7 +212,7 @@
                 .every_graph {
                     width: 32%;
                     border: 0.5px solid #cecece;
-                    margin: 8px;
+                    margin: 2px;
                 }
                 .every_graph :hover {
                     .icons {
@@ -229,7 +250,25 @@
 
 
 }
-
+.accessories_every_group {
+     width: 260px;
+     border: 1px solid #cecece;
+     height: 200px;
+     display: inline-block;
+     padding-top: 20px;
+     padding-left: 5px;
+     background-color: #F5F1F1;
+     .accessories {
+        display: inline-flex;
+        height: 20px;
+        line-height: 30px;
+        div {
+            font-size: 14px;
+            margin-right: 3px;            
+         }
+     }
+      
+}
 
 .show_image {
     
@@ -238,6 +277,7 @@
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
+        
     }
     .disk {
         background-image: url('/public/image/party/disk.png');

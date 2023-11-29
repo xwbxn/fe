@@ -12,26 +12,112 @@
     }
 }
 
+.left-area {
+    &.collapse {
+        width: 0px;
+        padding: 0px;
+        margin: 0px;
+        .collapse-btn {
+            right: 0px;
+        }
+    }
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    padding: 16px;
+
+    &-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+
+        &-title {
+            color: @fontColorLevel2;
+            font-size: @baseFontSizeSmall;
+            font-weight: bold;
+            line-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        &-search {
+            margin-bottom: 10px;
+        }
+
+        .radio-list {
+            flex-shrink: 1;
+            overflow: auto;
+
+            .radio-list-group-item {
+                margin-right: 0;
+            }
+
+            &-group,
+            &-group-space,
+            &-group-item {
+                width: 100%;
+            }
+        }
+
+        &:last-of-type {
+            margin-bottom: 0;
+        }
+
+        &.group-shrink {
+            flex: initial;
+            overflow: auto;
+        }
+
+        .ant-checkbox-group-item {
+            display: flex;
+            margin-bottom: 6px;
+        }
+    }
+
+    .collapse-btn {
+        cursor: pointer;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        top: 50%;
+        margin-top: -29px;
+        right: -10px;
+        height: 58px;
+        width: 10px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+}
+
 .table-content_xh {
     width: 100%;
+
     .table-header_xh {
-       width: 100%;
-       margin-right: 10px;
-    //    background-color: green;
-       display: inline-flex;
-       position: relative;
-       .tool_right {
-         position: absolute;
-         right: 0;
-         width: 245px;
-         display: flex;
-       }
+        width: 100%;
+        margin-right: 10px;
+        //    background-color: green;
+        display: inline-flex;
+        position: relative;
+
+        .tool_right {
+            position: absolute;
+            right: 0;
+            width: 245px;
+            display: flex;
+        }
     }
+
     // display: block;
     // flex-flow: row;
     // width: 77%;
 }
-.table-view{
+
+.table-view {
     .ant-table-thead .ant-table-cell {
         white-space: nowrap;
     }
@@ -51,13 +137,15 @@
     // background-color: red;
     width: 100%;
 }
+
 .ant-tree .ant-tree-node-content-wrapper {
     width: 100%;
     height: 25px;
     line-height: 25px;
-    
+
 
 }
+
 .ant-tree {
     box-sizing: border-box;
     padding: 0;
@@ -72,50 +160,72 @@
     border-radius: 2px;
     transition: background-color 0.3s;
 }
+
 .ant-tree-list-holder-inner {
     align-items: flex-start;
     width: 100%;
 }
-.asset_organize_cls{
+
+.asset_organize_cls {
     font-size: 16px;
     font-weight: 600;
     margin-top: 8px;
     margin-left: 10px;
     display: flex;
     position: relative;
+
     .switch {
-       position: absolute;
-       right: 0px;
-       margin-top: 5px;
-       margin-right: 10px;
+        position: absolute;
+        right: 0px;
+        margin-top: 5px;
+        margin-right: 10px;
     }
+
     .ant-switch-checked {
-      background: #7F7F7F;
+        background: #7F7F7F;
+    }
+}
+.other_infos {
+    right: 44px;
+    // position: absolute;
+    // background: #cecece;
+    padding: 1px;
+    .other_table {
+       margin: 5px;
     }
 }
 .asset_list_view {
-   .asset-operate_xh {
-       width:calc(100% - 250px);
-      .table-content_xh {
-         display: flex;
-         width: 100%;
-         position: relative;
-         .tool_right {
-            display: inline-flex;
-            right: 0px;
-            position: absolute;
-         }
-      }
-      .assets-list {
-        .table-view {
-            .anticon-video-camera, .anticon-file-search, .anticon-edit, .anticon-delete,.anticon-fund, .anticon-search{
-                color:#1890FF;
-                font-size: 16px;
-                font-weight: 900;
+    .asset-operate_xh {
+        width: calc(100%);
+
+        .table-content_xh {
+            display: flex;
+            width: 100%;
+            position: relative;
+
+            .tool_right {
+                display: inline-flex;
+                right: 0px;
+                position: absolute;
             }
         }
-      }
-   }
+
+        .assets-list {
+            .table-view {
+
+                .anticon-video-camera,
+                .anticon-file-search,
+                .anticon-edit,
+                .anticon-delete,
+                .anticon-fund,
+                .anticon-search {
+                    color: #1890FF;
+                    font-size: 16px;
+                    font-weight: 900;
+                }
+            }
+        }
+    }
 
 
 }
