@@ -42,7 +42,7 @@ const Bigscreen = () => {
 
   return (
     <>
-      <PageLayout title={''}>
+      <PageLayout title={'大屏设计'}>
         <div className='table-content'>
           <div className='table-header'>
             <Space>

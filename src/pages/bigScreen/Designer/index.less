@@ -1,6 +1,6 @@
 .designer {
   width: 100%;
-  height: calc(~'100vh - 50px');
+  height: calc(~'100vh - 100px');
   display: flex;
 }
 
@@ -119,14 +119,16 @@
   }
 }
 
+@top-height: 60px;
+
 .designer-left {
   position: absolute;
   left: 0;
-  top: 45px;
+  top: @top-height;
   bottom: 5;
   z-index: 101;
   width: 200px;
-  height: calc(~'100vh - 45px');
+  height: calc(~'100vh - @{top-height}');
   background-color: #535353;
   border-right: 1px solid rgba(0, 0, 0, 0.8);
   transition: all 0.25s ease 0s;
@@ -262,12 +264,12 @@
 
 .designer-right {
   position: absolute;
-  top: 45px;
+  top: @top-height;
   right: 0;
   bottom: 0;
   z-index: 101;
   width: 400px;
-  height: calc(~'100vh - 45px');
+  height: calc(~'100vh - @{top-height}');
   background-color: #535353;
   border-left: 1px solid rgba(0, 0, 0, 0.8);
   transition: all 0.25s ease 0s;

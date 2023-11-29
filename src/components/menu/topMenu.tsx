@@ -447,9 +447,9 @@ export default function () {
   };
 
   const handleClick = (item) => {
-    if ((item.key as string) === 'home') {
-      window.location.href = '/prod-api/';
-    }
+    // if ((item.key as string) === 'home') {
+    //   window.location.href = '/prod-api/';
+    // }
     if ((item.key as string).startsWith('/')) {
       history.push(item.key as string);
     }

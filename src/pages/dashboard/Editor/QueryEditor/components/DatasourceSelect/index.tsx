@@ -11,6 +11,13 @@ const defaultDatasourceCate = 'prometheus';
 export default function index({ chartForm, variableConfig }) {
   const { t } = useTranslation('dashboard');
   const { groupedDatasourceList, datasourceCateOptions } = useContext(CommonStateContext);
+  groupedDatasourceList['api'] = [
+    {
+      id: 999,
+      name: '数据接口服务',
+      plugin_type: 'apiservcie',
+    },
+  ];
   const cates = _.filter(datasourceCateOptions, (item) => {
     return !!item.dashboard;
   });

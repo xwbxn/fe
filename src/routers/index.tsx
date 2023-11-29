@@ -21,6 +21,7 @@ import _ from 'lodash';
 import NotFound from '@/pages/notFound';
 import Page403 from '@/pages/notFound/Page403';
 import Login from '@/pages/login';
+import Home from '@/pages/home';
 import Overview from '@/pages/login/overview';
 import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
@@ -99,7 +100,7 @@ import plusLoader from 'plus:/utils/loader';
 import useIsPlus from 'plus:/components/useIsPlus';
 import Designer from '@/pages/bigScreen/Designer';
 import Preview from '@/pages/bigScreen/Preview';
-// import Topo from '@/pages/topoGraph/Designer';
+import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
 import Bigscreen from '@/pages/bigScreen';
 import View from '@/pages/bigScreen/View';
@@ -137,6 +138,7 @@ export default function Content() {
   return (
     <div className={`content ${themeClassName}`}>
       <Switch>
+        <Route path='/home' component={Home} />
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
@@ -248,6 +250,7 @@ export default function Content() {
         <Route exact path='/bigscreen/designer' component={Designer} />
         <Route exact path='/bigscreen/designer/:id' component={Designer} />
         <Route exact path='/bigscreen/preview' component={Preview} />
+        <Route exact path='/bigscreen/topo' component={Topo} />
         <Route exact path='/bigscreen/view/:id' component={View} />
 
         <Route exact path='/bigscreen' component={Bigscreen} />

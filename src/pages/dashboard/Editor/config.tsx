@@ -54,6 +54,18 @@ export const visualizations = [
     type: 'iframe',
     name: '内嵌文档(iframe)',
   },
+  {
+    type: 'column',
+    name: '柱状图(g2)',
+  },
+  {
+    type: 'pien',
+    name: '饼图(g2)',
+  },
+  {
+    type: 'line',
+    name: '折线图(g2)',
+  },
 ];
 
 export const IRefreshMap = {
@@ -204,6 +216,7 @@ export const defaultCustomValuesMap = {
     textMode: 'valueAndName',
     calc: 'lastNotNull',
   },
+  column: {},
 };
 
 export const defaultOptionsValuesMap = {
@@ -220,6 +233,11 @@ export const defaultOptionsValuesMap = {
       steps: gaugeDefaultThresholds,
     },
   },
+  column: defaultOptionsValues,
+  pien: defaultOptionsValues,
+  line: defaultOptionsValues,
 };
 
 export const legendPostion = ['hidden', 'top', 'left', 'right', 'bottom'];
+export const legendLayout = ['horizontal', 'vertical'];
+export const legendPositionN = ['top', 'top-left', 'top-right', 'left', 'left-top', 'left-bottom', 'right', 'right-top', 'right-bottom', 'bottom', 'bottom-left', 'bottom-right'];

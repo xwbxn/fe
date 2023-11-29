@@ -48,6 +48,9 @@ import useQuery from '../datasource/useQuery';
 import { IPanel } from '../../types';
 import replaceFieldWithVariable from '../utils/replaceFieldWithVariable';
 import './style.less';
+import Column from './Column';
+import PieN from './PieN';
+import Line from './Line';
 
 interface IProps {
   datasourceValue?: number; // 全局数据源，如 values.datasourceValue 未设置则用全局数据源
@@ -113,6 +116,9 @@ function index(props: IProps) {
     text: () => <Text {...subProps} />,
     gauge: () => <Gauge {...subProps} themeMode={themeMode} />,
     iframe: () => <Iframe {...subProps} time={time} />,
+    column: () => <Column {...subProps} themeMode={themeMode} />,
+    pien: () => <PieN {...subProps} themeMode={themeMode} />,
+    line: () => <Line {...subProps} themeMode={themeMode}></Line>,
   };
 
   return (
