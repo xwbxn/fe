@@ -199,6 +199,14 @@ const Event: React.FC = () => {
   ) => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
+    if(value==null){
+      if (value == null) {
+        setRefreshFlag(_.uniqueId('refresh_'));
+        delete filter["start"];
+        delete filter["end"];
+      }
+      setRefreshFlag(_.uniqueId('refresh_'));
+    }
   };
 
   const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
@@ -282,56 +290,6 @@ const Event: React.FC = () => {
               placeholder={'选择要查询的条件'}
             />
           )}
-
-          {/* <Select
-            style={{ minWidth: 60 }}
-            placeholder={t('severity')}
-            allowClear
-            value={filter.severity}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                severity: val,
-              });
-            }}
-          >
-            <Select.Option value={1}>S1</Select.Option>
-            <Select.Option value={2}>S2</Select.Option>
-            <Select.Option value={3}>S3</Select.Option>
-          </Select>
-          <Select
-            style={{ minWidth: 120 }}
-            placeholder={t('common:business_group')}
-            allowClear
-            value={filter.bgid}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                bgid: val,
-              });
-            }}
-          >
-            {_.map(busiGroups, (item) => {
-              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
-            })}
-          </Select> */}
-
-
-          {/* <Input
-            className='search-input'
-            prefix={<SearchOutlined />}
-            placeholder={t('search_placeholder')}
-            value={filter.query}
-            onChange={(e) => {
-              setFilter({
-                ...filter,
-                query: e.target.value,
-              });
-            }}
-            onPressEnter={(e) => {
-              setRefreshFlag(_.uniqueId('refresh_'));
-            }}
-          /> */}
 
           
         </Space>

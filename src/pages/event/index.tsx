@@ -57,11 +57,7 @@ export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) 
   });
 }
 let cardQueryFilter = [
-  { name: 'severity', label: '告警级别', type: 'select' },
-  { name: 'group_id', label: '业务组', type: 'select' },
-  { name: 'rule_name', label: '告警名称', type: 'input' },
-  { name: 'name', label: '资产名称', type: 'input' },
-  { name: 'alert_rule', label: '告警规则', type: 'input' },
+  { name: 'severity', label: '告警级别', type: 'select' }
 ]
 
 const Event: React.FC = () => {
@@ -69,27 +65,29 @@ const Event: React.FC = () => {
   const [view, setView] = useState<'card' | 'list'>('card');
   const { busiGroups, feats } = useContext(CommonStateContext);
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
+  const [searchVal, setSearchVal] = useState<any>(null);
+  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const [display, setDisplay] = useState<'card' | 'list'>(localStorage.getItem('current_alert_display')?_.toString(localStorage.getItem('current_alert_display')):"card");
+  const [display, setDisplay] = useState<any>(localStorage.getItem('current_alert_display') ? _.toString(localStorage.getItem('current_alert_display')) : "card");
 
   const [filter, setFilter] = useState<any | {
-    group?: number;
+    group_id?: number;
     severity?: number;
     query: string;
     start: number;
     end: number;
-    type: any | number;
   }>({
     query: '',
-    type: null,
     start: 0,
     end: 0,
   });
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
+  const [filterType, setFilterType] = useState<string>("");
   let prodOptions = getProdOptions(feats);
 
   const onChange = (
@@ -98,6 +96,11 @@ const Event: React.FC = () => {
   ) => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
+    if (value == null) {
+      setRefreshFlag(_.uniqueId('refresh_'));
+      delete filter["start"];
+      delete filter["end"];
+    }
   };
 
   const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
@@ -113,20 +116,46 @@ const Event: React.FC = () => {
     });
     setRefreshFlag(_.uniqueId('refresh_'));
   };
-  useEffect(()=>{
-       setView(display);
-  },[])
+  useEffect(() => {
+     setView(display);
+     filterOptions["severity"]=[
+      { label: 'S1', value: '1' },
+      { label: 'S2', value: '2' },
+      { label: 'S3', value: '3' },
+    ];
+     setFilterOptions({...filterOptions})
+  }, [])
   function renderLeftHeader() {
     return (
       <Row justify='space-between' style={{ width: '100%' }}>
         <Space>
-          <Button icon={<AppstoreOutlined />} onClick={() => setView('card')} />
-          <Button icon={<UnorderedListOutlined />} onClick={() => setView('list')} />
-
-           
-
-
-
+          <Button icon={<AppstoreOutlined />} onClick={() => {
+            setView('card');
+            localStorage.setItem('current_alert_display', "card")
+          }} />
+          <Button icon={<UnorderedListOutlined />} onClick={() => {
+            setView('list')
+            localStorage.setItem('current_alert_display', "list")
+          }} />
+          <Select
+            // defaultValue="lucy"
+            placeholder="选择过滤器"
+            style={{ width: 120 }}
+            allowClear
+            onChange={(value) => {
+              cardQueryFilter.forEach((item) => {
+                if (item.name == value) {
+                  setFilterType(item.type);
+                }
+              })
+              setFilterParam(value);
+              setSearchVal(null)
+            }}>
+            {cardQueryFilter.map((item, index) => (
+              <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
+            ))
+            }
+          </Select>
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
@@ -134,50 +163,26 @@ const Event: React.FC = () => {
             locale={locale}
             onOk={onOk}
           />
-          <Select
-            style={{ minWidth: 60 }}
-            placeholder={t('severity')}
-            allowClear
-            value={filter.severity}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                severity: val,
-              });
-            }}
-          >
-            <Select.Option value={1}>S1</Select.Option>
-            <Select.Option value={2}>S2</Select.Option>
-            <Select.Option value={3}>S3</Select.Option>
-          </Select>
-          <Select
-            style={{ minWidth: 120 }}
-            placeholder={t('common:business_group')}
-            allowClear
-            value={filter.group}
-            onChange={(val) => {
-              setFilter({
-                ...filter,
-                group: val,
-              });
-            }}
-          >
-            {_.map(busiGroups, (item) => {
-              return <Select.Option value={item.id} key={item.id}>{item.name}</Select.Option>;
-            })}
-          </Select>
-          <Input
-            className='search-input'
-            prefix={<SearchOutlined />}
-            placeholder={t('search_placeholder')}
-            value={filter.query}
-            onChange={(e) => {
-              setFilter({
-                ...filter,
-                query: e.target.value,
-              });
-            }}
-          />
+        {filterType == "input" && (
+            <Input
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              onChange={(e) => setSearchVal(e.target.value)}
+              suffix={<SearchOutlined />}
+              placeholder={'输入模糊检索关键字'}
+            />
+          )}
+          {filterType == "select" && (
+            <Select
+              className={'searchInput'}
+              value={searchVal}
+              allowClear
+              options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
+               onChange={(val) => setSearchVal(val)}
+              placeholder={'选择要查询的条件'}
+            />
+          )}
         </Space>
         <Col
           flex='200px'
@@ -251,15 +256,12 @@ const Event: React.FC = () => {
   }
 
   const filterObj = Object.assign(
-    filter.severity ? { severity: filter.severity } : {},
-    filter.query ? { query: filter.query } : {},
-    { group: filter.group },
+    (searchVal!=null && searchVal.length>0) ? {filter:'severity',query: searchVal } : {},
     filter.start > 0 ? { start: filter.start } : {},
     filter.end > 0 ? { end: filter.end } : {},
-    { alert_type: 1 },
   );
 
-  const handleModal = (action: string,row:any[]) => {
+  const handleModal = (action: string, row: any[]) => {
     if (action == "open") {
       let params: any = {};
       if (row != null && row.length > 0) {
@@ -276,8 +278,6 @@ const Event: React.FC = () => {
       if (filter.end <= 0) {
         delete filter["end"];
       }
-
-
       let url = "/api/n9e/alert-events/export-xls";
       let exportTitle = "活跃告警告警信息";
       exportTemplet(url, filter, params).then((res) => {
@@ -318,16 +318,15 @@ const Event: React.FC = () => {
             setFilter={setFilter}
             refreshFlag={refreshFlag}
             selectedRowKeys={selectedRowKeys}
-            deleteAlert={(value)=>{
-              debugger;
+            deleteAlert={(value) => {
               let ids = new Array();
-               ids.push(value);
+              ids.push(value);
               setModalOpen(true);
               setRowKeys(ids);
             }}
             setSelectedRowKeys={setSelectedRowKeys}
           />
-          <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open",rowKeys) }} onCancel={e => { handleModal("close",rowKeys) }} >
+          <Modal title="告警信息导出" visible={modalOpen} onOk={e => { handleModal("open", rowKeys) }} onCancel={e => { handleModal("close", rowKeys) }} >
             <Radio.Group style={{ width: '100%', display: "flex", justifyContent: 'center' }} defaultValue={ftype}>
               <Radio value={1} onChange={e => {
                 setFtype(parseInt("" + e.target.value))

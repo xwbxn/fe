@@ -51,7 +51,7 @@ function Card(props: Props, ref) {
   const Ref = useRef<HTMLDivElement>(null);
   const history = useHistory();
   const [span, setSpan] = useState<number>(4);
-  const [rule, setRule] = useState<string>();
+  const [groupId, setGroupId] = useState<string>();
   const [cardList, setCardList] = useState<CardType[]>();
   const [openedCard, setOpenedCard] = useState<CardType>();
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
@@ -60,11 +60,12 @@ function Card(props: Props, ref) {
 
   useEffect(() => {
     reloadCard();
-  }, [filter, rule, refreshFlag]);
+  }, [filter, groupId, refreshFlag]);
 
   const { run: reloadCard } = useDebounceFn(
     () => {
-      if (!rule) return;
+      console.log('reloadCard')
+      if (!groupId) return;
       if(filter.query==null || filter.query.length==0){
           delete filter.query;          
       }
@@ -74,8 +75,8 @@ function Card(props: Props, ref) {
       if(filter.end<=0){
         delete filter.end;          
       }
-
-      getAlertCards({ ...filter, rule: rule.trim() }).then((res) => {
+      filter["group_id"] = groupId.trim();
+      getAlertCards(filter).then((res) => {
         setCardList(res.dat);
       });
     },
@@ -302,14 +303,14 @@ function Card(props: Props, ref) {
 
   return (
     <div className='event-content cur-events' style={{ display: 'flex', height: '100%' }} ref={Ref}>
-      <CardLeft onRefreshRule={setRule} />
+      <CardLeft onRefreshRule={setGroupId} />
       <div style={{ background: '#fff', flex: 1, padding: 16, overflowY: 'auto' }}>
         {header}
         <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
           {cardList?.map((card, i) => (
             <Col span={span} key={i}>
               <div className={`event-card ${SeverityColor[card.severity - 1]} ${SeverityColor[card.severity - 1]}-left-border`} onClick={() => fetchCardDetail(card)}>
-                <div className='event-card-title'>{card.title}</div>
+                <div className='event-card-title'>告警级别：S{card.severity}</div>
                 <div className='event-card-num'>{card.total}</div>
               </div>
             </Col>

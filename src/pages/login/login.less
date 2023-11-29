@@ -3,11 +3,12 @@
 .login-warp {
   height: 100%;
   width: 100%;
-  position: absolute;
   display: flex;
   justify-content: right;
   align-items: center;
-  background-image: url("/public/image/login-dashboard-new.png");
+  background-image: url("/public/image/topmenu/sysbk.png");
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: cover;
   .left-top-bg {
     position: absolute;
@@ -51,6 +52,7 @@
       display: flex;
       width: 900px;
       flex-direction: column;
+      
       .banner-logo img {
         width: 180px;
         margin: 62px 0 150px 100px;
@@ -93,17 +95,86 @@
     }
   }
   .login-panel {
-    height: 100%;
-    display: flex;
+    position: relative;
+    display:flex;
+    width: 60%;
+    height: 60%;
     justify-content: center;
     align-items: center;
-    background-color: #0b2a57A0;
-
+    background-color: #fff;
+    color: #000;
+    margin: 0 auto;
     .login-main {
-      &.integration {
-        z-index: 5;
-        margin-bottom: 35px;
-
+      display: block;
+      position: absolute;
+      left: 5%;
+      height: 100%;
+      margin-top: 5%;
+      width: 50%;
+      // border: 1px solid red;
+      padding-top: 30px;
+      .title {
+        height: 23px;
+        background-image: url("/public/image/topmenu/title.png");
+        background-size:cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 60% 100%;
+        
+        width: 100%;
+        left: 10%;
+      }
+      .main {
+        margin-top: 20px;
+        width: 100%;
+        display: block;
+        left: 10%;
+        background-image: url("/public/image/topmenu/mainshow.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 60% 100%;
+        // border: 1px solid red;
+        height:78%;
+      }
+      
+    }
+    
+    .integration {
+        // border: 1px solid red;
+        display: block;
+        right: 10%;
+        position: absolute;
+        width: 40%;
+        height: 80%;
+        margin-top: 10%;
+        .form_title {
+          width: 100%;
+          display: flex;
+          
+          justify-content: center;
+          margin-bottom: 20px;
+          font-weight: 900;
+          font-size: 20px;
+          color: #1382DF;
+        }
+        .login_form  {
+             padding-left: 10px;
+            .ant-form-item {
+              height: 50px;
+              margin-left: 20px;
+              width: 100%;
+              line-height: 60px;
+              .ant-input {
+                width: 100%;
+              }
+            }
+            .submit_button {
+              border-radius: 8px;
+              height: 38px;
+              width: 80%;
+              margin-left: 15%;
+            }
+        }
         .login-title {
           text-align: center;
           width: 80%;
@@ -128,9 +199,7 @@
           background-color: #0449ea;
         }
       }
-
-      width: 500px;
-      padding: 50px;
+  //  padding: 50px;
 
       .login-title {
         font-size: 30px;
@@ -167,7 +236,6 @@
           height: 40px;
         }
       }
-    }
   }
 
   .login-other {

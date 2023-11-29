@@ -71,8 +71,6 @@ export default function (props: { initialValues: object; initParams: object; mod
       }
       setProperties(properties);
       setFormItems(items);
-      console.log('items', items);
-      console.log('console.log', properties);
     }
   };
 

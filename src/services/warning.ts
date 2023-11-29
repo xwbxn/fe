@@ -253,8 +253,8 @@ export function getHistoryEventsById(eventId) {
  * 批量删除(忽略)告警历史
  */
 export const deleteAlertEvents = function (ids: Array<number | string>) {
-  return request(`/api/n9e/alert-cur-events`, {
-    method: RequestMethod.Delete,
+  return request(`/api/n9e/alert-cur-events/batch-del`, {
+    method: RequestMethod.Post,
     data: {
       ids,
     },
@@ -364,7 +364,7 @@ export const deleteAggrAlerts = function (ids: number[]) {
 };
 
 export const getAlertCards = function (params) {
-  return request('/api/n9e/alert-cur-events/card', {
+  return request('/api/n9e/alert-cur-events/card/xh', {
     method: RequestMethod.Get,
     params,
   });
