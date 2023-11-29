@@ -169,6 +169,7 @@ export default function TableCpt(props: IProps) {
     });
   }
   const fetchData = ({ current, pageSize }) => {
+    filterObj["alert_type"] =1;
     return getEvents({
       page: current,
       limit: pageSize,

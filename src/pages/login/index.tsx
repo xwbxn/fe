@@ -118,10 +118,14 @@ export default function Login() {
   return (
     <div className='login-warp'>
       <div className='login-panel'>
-        <div className='login-main  integration'>
-          <Form form={form} layout='vertical' requiredMark={true}>
+        <div className='login-main'>
+          <div className='title'> </div>
+          <div className='main'> </div>
+        </div>
+        <div className='integration'>
+          <div className='form_title'>登录账号</div>
+          <Form form={form} layout='vertical' className='login_form' requiredMark={true}>
             <Form.Item
-              label='账户'
               name='username'
               rules={[
                 {
@@ -130,10 +134,9 @@ export default function Login() {
                 },
               ]}
             >
-              <Input placeholder={t('请输入用户名')} prefix={<UserOutlined className='site-form-item-icon' />} />
+              <Input placeholder={t('请输入用户名')} prefix={<UserOutlined  />} />
             </Form.Item>
             <Form.Item
-              label='密码'
               name='password'
               rules={[
                 {
@@ -147,7 +150,6 @@ export default function Login() {
 
             <div className='verifyimg-div'>
               <Form.Item
-                label='验证码'
                 name='verifyvalue'
                 rules={[
                   {
@@ -173,7 +175,7 @@ export default function Login() {
             </div>
 
             <Form.Item>
-              <Button type='primary' onClick={handleSubmit}>
+              <Button type='primary' className='submit_button' onClick={handleSubmit}>
                 {t('登录')}
               </Button>
             </Form.Item>

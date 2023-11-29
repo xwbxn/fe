@@ -214,8 +214,8 @@ export default function () {
 
   useEffect(() => {
     setSecondAddButton(false)
-    setOptionColumns(choooseColumns.concat(baseColumns));
-    let modelIds = Array.from(new Set(choooseColumns.concat(baseColumns).map(obj => obj.title)))
+    setOptionColumns(baseColumns.concat(choooseColumns));
+    let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map(obj => obj.title)))
     setDefaultValues(modelIds);
     getAssetsStypes().then((res) => {
       const items = res.dat.map((v) => {

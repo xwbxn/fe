@@ -80,6 +80,7 @@ export default function () {
   const [queryCondition, setQueryCondition] = useState<any>({});
 
   const history = useHistory();
+
   const baseColumns: any[] = [
     {
       title: "资产名称",
@@ -91,7 +92,7 @@ export default function () {
         return (a.name).localeCompare(b.name)
       },
       render(value, record, index) {
-        return <Link to={{ pathname: `/assets/${record.id}` }}>{value}</Link>;
+        return value;
       },
     },
     {

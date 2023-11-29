@@ -290,7 +290,7 @@ const EventDetailPage: React.FC = () => {
   }, [busiId, eventId]);
 
   return (
-    <PageLayout title={t('detail.title')} showBack backPath='/alert-his-events'>
+    <PageLayout title={t('detail.title')} showBack backPath='/alert-cur-events'>
       <div className='event-detail-container'>
         <Spin spinning={!eventDetail}>
           <Card

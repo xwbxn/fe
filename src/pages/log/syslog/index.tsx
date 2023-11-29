@@ -8,13 +8,13 @@ import { CommonStateContext } from '@/App';
 import './style.less';
 import _, { set } from 'lodash';
 // import Add from './Add';
-import { getAssetsTree, getAssetsListByFilter, deleteDeviceOnline, getAssetById, exportTemplet } from '@/services/assets/asset'
 import { Link, useHistory } from 'react-router-dom';
 import { useAntdTable, useToggle } from 'ahooks';
 import { getScrapList ,addScrap} from '@/services/assets/device-scrap';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
 const { RangePicker } = DatePicker;
 import { getSysLogListBasedOnSearch } from '@/services/syslog';
+import { exportTempletZip } from '../../historyEvents/services';
 
 export default function () {
   const { t } = useTranslation('assets');
@@ -25,6 +25,7 @@ export default function () {
   const [filterParam, setFilterParam] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const [searchVal, setSearchVal] = useState<any>('');
+  const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [filter, setFilter] = useState<any | {
     group?: number;
     severity?: number;
@@ -34,6 +35,7 @@ export default function () {
     type: any | number;
   }>({
     query: '',
+    filter:'',
     type: null,
     start: 0,
     end: 0,
@@ -103,6 +105,35 @@ export default function () {
     });
     setRefreshFlag(_.uniqueId('refresh_'));
   };
+
+  const handleModal = (action: string,rowKeys:any[]) => {
+    if (action == "open") {
+      let url = "/api/n9e/xh/sys-log/export-xls";
+      let exportTitle = "系统";
+      let body = {}
+      if(rowKeys!=null){
+          body["name"]= rowKeys;
+      }
+
+
+
+      exportTempletZip(url, filter,(rowKeys!=null && rowKeys.length>0)?{name:rowKeys}:null).then((res) => {
+        let blob = new Blob([res], {
+          // 下载的文件类型(此处可更改：具体取值参考以下链接地址)
+          type: 'application/octet-stream',
+        });
+        let url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".zip"
+        const fileName = exportTitle + "日志_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+      })
+
+  }
+}
 
   const getTableData = ({ current, pageSize }): Promise<any> => {
     // debugger
@@ -212,7 +243,11 @@ export default function () {
                     </Col>     
 
                     
-                    <Button className='btn' type="primary" style={{right:'0',position:'absolute',marginRight:'16px'}}   onClick={()=>{}}>批量导出
+                    <Button className='btn' type="primary" style={{right:'0',position:'absolute',marginRight:'16px'}}  
+                     onClick={()=>{
+                        debugger;
+                        handleModal("open",selectRowKeys);
+                     }}>批量导出
                     </Button>
                                    
                   </Row>
@@ -222,6 +257,14 @@ export default function () {
                 
                 <Table
                   {...tableProps}
+                  rowKey='name'
+                  rowSelection={{
+                    onChange: (_, rows) => {
+                      setSelectRowKeys(rows ? rows.map(({ name }) => name) : []);
+                      console.log(selectRowKeys);
+                    },
+                    selectedRowKeys: selectRowKeys
+                  }}
                   pagination={{
                     ...tableProps.pagination,
                     size: 'small',
