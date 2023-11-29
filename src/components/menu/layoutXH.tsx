@@ -18,10 +18,12 @@ import React, { useEffect, useState, createContext, useRef } from 'react';
 import { BrowserRouter as Router, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 
 import TopMenu from './topMenuXH'; //西航版本
-import { Header, Footer } from 'antd/lib/layout/layout';
-import Sider from 'antd/lib/layout/Sider';
 import { Layout, Menu } from 'antd';
 import Content from '@/routers';
+import { useLocalStorageState } from 'ahooks';
+
+const {Header, Footer, Sider} = Layout
+
 function layoutXH() {
 
   const history = useHistory();
@@ -31,6 +33,7 @@ function layoutXH() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { pathname } = location;
+  const [home] = useLocalStorageState("HOME_URL")
 
   useEffect(() => {
     try {
@@ -44,10 +47,10 @@ function layoutXH() {
   }, []);
 
   const handleClick = (item) => {
-    if ((item.key as string) === 'home') {
-      // window.location.href = '/prod-api/';
-      history.push('/prod-api/')
-    }
+    // if ((item.key as string) === 'home') {
+    //   // window.location.href = '/prod-api/';
+    //   history.push(item.key)
+    // }
     if ((item.key as string).startsWith('/')) {
       // window.location.href = item.key;
       history.push(item.key)

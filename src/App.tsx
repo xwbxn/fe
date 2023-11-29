@@ -39,11 +39,8 @@ import useIsPlus from 'plus:/components/useIsPlus';
 import './App.less';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
-import TopMenu from './components/menu/topMenuXH'; //西航版本
+// import TopMenu from './components/menu/topMenuXH'; //西航版本
 import LayoutXH from './components/menu/layoutXH'; //西航版本
-import { Header, Footer } from 'antd/lib/layout/layout';
-import Sider from 'antd/lib/layout/Sider';
-import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 
 interface IProfile {
   admin?: boolean;
@@ -241,19 +238,6 @@ function App() {
   if (!initialized.current) {
     return null;
   }
-
-  const handleClick = (item) => {
-    if ((item.key as string) === 'home') {
-      // window.location.href = '/prod-api/';
-      history.push('/prod-api/')
-    }
-    if ((item.key as string).startsWith('/')) {
-      // window.location.href = item.key;
-      history.push(item.key)
-      window.localStorage.setItem("mainMenuKey", mainMenu.key);
-      window.localStorage.setItem("leftMenuItems", item.key);
-    }
-  };
 
   return (
     <div className='App'>

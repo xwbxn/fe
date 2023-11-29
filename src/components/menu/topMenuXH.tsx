@@ -12,11 +12,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
+import { useLocalStorageState } from 'ahooks';
 
 const getMenuList = (t) => {
   const menuList = [
     {
-      key: 'home',
+      key: '/home',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
       label: t('首页'),
     },
@@ -223,7 +224,7 @@ const getMenuList = (t) => {
     },
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
-    const targets:any = _.find(menuList, (item) => item.key === 'targets');
+    const targets: any = _.find(menuList, (item) => item.key === 'targets');
     if (targets) {
       targets.children?.push({
         key: '/collects',
@@ -235,7 +236,6 @@ const getMenuList = (t) => {
 };
 interface IProps {
   url?: string;
-  
 }
 
 export default function ({ selectMenu }) {
@@ -244,17 +244,17 @@ export default function ({ selectMenu }) {
   const menuList = getMenuList(t);
   const [menus, setMenus] = useState(menuList);
   const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
-  
+
   const [mainMenuKey, setMainMenuKey] = useState<string[]>([]);
-  const [mainMenuItems,setMainMenuItems] = useState<any>({});
+  const [mainMenuItems, setMainMenuItems] = useState<any>({});
   const location = useLocation();
   const history = useHistory();
   const { pathname } = location;
   const { profile } = useContext(CommonStateContext);
+  const [home] = useLocalStorageState('HOME_URL');
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
-    
 
     // for (const item of menuList) {
     //   if (item && item.key.startsWith('/') && pathname.includes(item.key)) {
@@ -291,23 +291,21 @@ export default function ({ selectMenu }) {
           setMenus(newMenus);
         });
       } else {
-        let mainMenus = menuList.map((item,index) => {
-          mainMenuItems[item.key] = item.children?item.children:[];
+        let mainMenus = menuList.map((item, index) => {
+          mainMenuItems[item.key] = item.children ? item.children : [];
           delete item.children;
-          return item
-        })
+          return item;
+        });
         setMenus(mainMenus);
-        setMainMenuItems({...mainMenuItems});
-        if(window.localStorage.getItem('mainMenuKey')){
+        setMainMenuItems({ ...mainMenuItems });
+        if (window.localStorage.getItem('mainMenuKey')) {
           let mainKey = window.localStorage.getItem('mainMenuKey') as string;
           setMainMenuKey([mainKey]);
-          for(let item of mainMenus){
-              if(item.key==mainKey){
-                handleClick(item);
-              }
+          for (let item of mainMenus) {
+            if (item.key == mainKey) {
+              handleClick(item);
+            }
           }
-          
-
         }
         // setMenus(menuList);
       }
@@ -337,10 +335,10 @@ export default function ({ selectMenu }) {
 
   const handleClick = (item) => {
     if ((item.key as string) === 'home') {
-      window.location.href = '/prod-api/';
-    }else{
-       selectMenu(item,mainMenuItems[item.key]?mainMenuItems[item.key]:[])
-       setMainMenuKey(item.key);
+      history.push(home);
+    } else {
+      selectMenu(item, mainMenuItems[item.key] ? mainMenuItems[item.key] : []);
+      setMainMenuKey(item.key);
     }
   };
 
