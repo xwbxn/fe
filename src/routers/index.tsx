@@ -27,6 +27,7 @@ import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
 import LoginCallbackOAuth from '@/pages/loginCallback/oauth';
 import LicenseBase from '@/pages/license/base';
+import LicenseBaseLic from '@/pages/license/base/license';
 import LicenseDevice from '@/pages/license/device';
 import LogoSet from '@/pages/system/logo_set';
 import LogDebug from '@/pages/system/log_debug';
@@ -228,6 +229,7 @@ export default function Content() {
         <Route exact path='/help/source/:action/:type/:id' component={DatasourceAdd} />
         <Route exact path='/help/sso' component={SSOConfigs} />
          <Route exact path='/license/base' component={LicenseBase} />
+         <Route exact path='/license/base/:id' component={LicenseBaseLic} />
          <Route exact path='/license/device' component={LicenseDevice} /> 
          <Route exact path='/system/logo' component={LogoSet} /> 
          <Route exact path='/log/debug/switch' component={LogDebug} /> 
