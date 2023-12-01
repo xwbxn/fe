@@ -350,12 +350,6 @@ export default function () {//{ selectMenu?:any }
     if ((item.key as string).startsWith('/')) {
       history.push(item.key as string);
     }
-    // if ((item.key as string) === 'home') {
-    //   window.location.href = '/prod-api/';
-    // }else{
-    //    selectMenu(item,mainMenuItems[item.key]?mainMenuItems[item.key]:[])
-    //    setMainMenuKey(item.key);
-    // }
   };
 
   const topRightMenu = (

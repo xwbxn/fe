@@ -1,35 +1,33 @@
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, FormInstance, Input, message, Modal, Row, Select, Space, Tabs } from 'antd';
+import { Button, Card, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateXHAsset, addXHAssetExpansion } from '@/services/assets';
-import { ControlOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetsStypes, updateXHAsset, addXHAssetExpansion } from '@/services/assets';
+import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 
-export default function (props: { initialValues: object; initParams: object; mode?: string }) {
+export default function () {
   const { t } = useTranslation('assets');
-  const commonState = useContext(CommonStateContext);
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
-  const [identList, setIdentList] = useState([]);
   const { busiGroups } = useContext(CommonStateContext);
   const [formItems, setFormItems] = useState<any[]>([]);
   const [tabIndex, setTabIndex] = useState<string>('base_set');
   const [editType, setEditType] = useState<string>('insert');
+  const history = useHistory();
 
   const [hasSave, setHasSave] = useState<boolean>(true);
 
   const { search } = useLocation();
-  const { mode } = queryString.parse(search);
-  const [id, setId] = useState(queryString.parse(search)['id']);
+  const { mode, id } = queryString.parse(search);
 
   const [properties, setProperties] = useState({});
 
-  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
+  const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
   const refForm = React.createRef<FormInstance>();
 
@@ -39,6 +37,9 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const genForm = (assetTypes) => {
+    if(mode !== 'edit' && mode !== 'view') {
+      return
+    }
     const assetType: any = assetTypes.find((v) => v.name === form.getFieldValue('type'));
     if (assetType) {
       setParams(assetType.form || []);
@@ -48,10 +49,12 @@ export default function (props: { initialValues: object; initParams: object; mod
       let map = new Map();
       for (let property in extra_props) {
         let group = extra_props[property];
-        map.set(group.sort,property);
+        map.set(group.sort, property);
       }
-      var arrayObj=Array.from(map);
-      arrayObj.sort(function(a,b){return a[0]-(b[0])})
+      var arrayObj = Array.from(map);
+      arrayObj.sort(function (a, b) {
+        return a[0] - b[0];
+      });
 
       for (var [key, value] of arrayObj) {
         let group = extra_props[value];
@@ -125,6 +128,11 @@ export default function (props: { initialValues: object; initParams: object; mod
           delete dat.exps;
         }
         form.setFieldsValue(dat);
+        try {
+          form.setFieldsValue(JSON.parse(dat.params));
+        } catch {
+          console.debug('parse param error:', dat.params);
+        }
         if (isTabLoading) {
           setTimeout(() => {
             genForm(assetTypes);
@@ -135,16 +143,6 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   useEffect(() => {
-    getAssetsIdents().then((res) => {
-      const items = res.dat.map((v) => {
-        return {
-          value: v.ident,
-          label: v.ident,
-        };
-      });
-      setIdentList(items);
-    });
-
     getAssetsStypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
@@ -174,6 +172,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const submitForm = async (values) => {
     console.log('提交数据');
+    values.params = JSON.stringify(values);
     if (tabIndex == 'base_set') {
       if (editType === 'edit' && id != null) {
         values.id = parseInt('' + id);
@@ -183,9 +182,7 @@ export default function (props: { initialValues: object; initParams: object; mod
       } else {
         await insertXHAsset(values).then((res) => {
           message.success('添加成功');
-          console.log(res);
-          setId(res.dat); //添加后从后端获取id，state更新id，保存按钮变为修改行为
-          setEditType('edit');
+          history.goBack();
         });
       }
     } else {
@@ -220,11 +217,11 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const renderFormItem = (v) => {
-    console.log("renderFormItem",v);
+    console.log('renderFormItem', v);
     if (v.type === 'select') {
       return (
         <Select
-          key={"v"+v.name}
+          key={'v' + v.name}
           style={{ width: '100%' }}
           options={v.options?.map((v) => {
             return { label: v.label, value: v.value };
@@ -233,33 +230,33 @@ export default function (props: { initialValues: object; initParams: object; mod
       );
     }
     if (v.type === 'password') {
-      return <Input.Password key={"v"+v.name} placeholder={`请输入${v.label}`} />;
+      return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
     }
-    return <Input key={"v"+v.name} placeholder={`请填写${v.label}`} name={v.name} />;
+    return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };
 
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
   return (
     <Fragment>
       <div className='assetmgt_header_select'>
-      <Tabs
-        className='assetmgt_list_2'
-        activeKey={tabIndex}
-        onTabClick={(key) => {
-          TabOperteClick(key);
-        }}
-      >
-        <Tabs.TabPane tab={'基本信息'} key='base_set' className='tab_header'></Tabs.TabPane>
-        {formItems.map((groupItem, index) => {
-          return <Tabs.TabPane tab={groupItem.label} key={groupItem.name} className='tab_header'></Tabs.TabPane>;
-        })}
-      </Tabs>
+        <Tabs
+          className='assetmgt_list_2'
+          activeKey={tabIndex}
+          onTabClick={(key) => {
+            TabOperteClick(key);
+          }}
+        >
+          <Tabs.TabPane tab={'基本信息'} key='base_set' className='tab_header'></Tabs.TabPane>
+          {formItems.map((groupItem, index) => {
+            return <Tabs.TabPane tab={groupItem.label} key={groupItem.name} className='tab_header'></Tabs.TabPane>;
+          })}
+        </Tabs>
       </div>
       <Form
         name='asset'
         form={form}
         layout='horizontal'
-        disabled={mode == "view" ? true : false}
+        disabled={mode == 'view' ? true : false}
         {...formItemLayout}
         onFinish={submitForm}
         ref={refForm}
@@ -276,6 +273,11 @@ export default function (props: { initialValues: object; initParams: object; mod
             <Card {...panelBaseProps} title={t('basic')} className='card_base'>
               <Row gutter={10}>
                 <Col span={12}>
+                  <Form.Item label='类型' name='type' rules={[{ required: true }]}>
+                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={id != null} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
                   <Form.Item label='名称' name='name' rules={[{ required: true }]}>
                     <Input placeholder='请输入资产名称' />
                   </Form.Item>
@@ -283,11 +285,6 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <Col span={12}>
                   <Form.Item label='IP地址' name='ip' rules={[{ required: true }]}>
                     <Input placeholder='请输入IP地址' />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='类型' name='type' rules={[{ required: true }]}>
-                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={id!=null}  />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -301,11 +298,15 @@ export default function (props: { initialValues: object; initParams: object; mod
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='业务组' name='group_id' rules={[{ required: true }]} >
-                    <Select style={{ width: '100%' }} options={busiGroups.map(({ id, name }) => ({
-                      label: name,
-                      value: id,
-                    }))} placeholder='请选择业务组' />
+                  <Form.Item label='业务组' name='group_id' rules={[{ required: true }]}>
+                    <Select
+                      style={{ width: '100%' }}
+                      options={busiGroups.map(({ id, name }) => ({
+                        label: name,
+                        value: id,
+                      }))}
+                      placeholder='请选择业务组'
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -315,6 +316,21 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </Col>
               </Row>
             </Card>
+            {params.length > 0 && (
+              <Card {...panelBaseProps} title={'扩展属性'} className='card_base'>
+                <Row gutter={10}>
+                  {params.map((v) => {
+                    return (
+                      <Col span={12} key={`col-${v.name}`}>
+                        <Form.Item label={v.label} name={v.name} key={`formitem=${v.name}`}>
+                          {renderFormItem(v)}
+                        </Form.Item>
+                      </Col>
+                    );
+                  })}
+                </Row>
+              </Card>
+            )}
           </div>
         )}
         {tabIndex != 'base_set' && (
@@ -327,13 +343,14 @@ export default function (props: { initialValues: object; initParams: object; mod
                       <Card {...panelBaseProps} key={'groupItem' + index} title={'基本信息'} className='card_group'>
                         <Row gutter={10}>
                           {groupItem.base.map((v) => {
-                            console.log("v-----------",v)
+                            console.log('v-----------', v);
                             return (
                               <Col key={`col=${v.name}`} span={12}>
-                                <Form.Item key={`form-item${v.name}`} 
-                                   label={v.label}
-                                   name={v.name}
-                                   rules={[{ required: v.required?v.required:false, message: `请选择您的${v.label}` }]}
+                                <Form.Item
+                                  key={`form-item${v.name}`}
+                                  label={v.label}
+                                  name={v.name}
+                                  rules={[{ required: v.required ? v.required : false, message: `请选择您的${v.label}` }]}
                                 >
                                   {renderFormItem(v)}
                                 </Form.Item>
@@ -354,7 +371,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                               className='card_group'
                               extra={
                                 <>
-                                  {mode == "edit" && (
+                                  {mode == 'edit' && (
                                     <Button
                                       type='primary'
                                       className='form_add'
@@ -366,7 +383,6 @@ export default function (props: { initialValues: object; initParams: object; mod
                                       ＋添加
                                     </Button>
                                   )}
-
                                 </>
                               }
                             >
@@ -376,7 +392,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                                     <span style={{ marginLeft: '3px' }}>
                                       {'项'}-{_suoyi + 1}
                                     </span>
-                                    {mode == "edit" && (
+                                    {mode == 'edit' && (
                                       <MinusCircleOutlined
                                         className='dynamic-delete-button'
                                         style={{ position: 'absolute', color: 'red', right: '2%', marginTop: 5, marginLeft: 8 }}
@@ -390,11 +406,11 @@ export default function (props: { initialValues: object; initParams: object; mod
                                       console.log('field', item, property);
                                       return (
                                         <Col key={property.name + index_} span={12}>
-                                          <Form.Item 
-                                            label={property.label} 
+                                          <Form.Item
+                                            label={property.label}
                                             name={[item.name, property.name]}
-                                            rules={[{ required: property.required?property.required:false, message: `请选择您的${property.label}` }]}
-                                            >
+                                            rules={[{ required: property.required ? property.required : false, message: `请选择您的${property.label}` }]}
+                                          >
                                             {renderFormItem(property)}
                                           </Form.Item>
                                         </Col>
@@ -414,7 +430,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             })}
           </div>
         )}
-        {mode == "edit" && (
+        {mode == 'edit' && (
           <div className='button-wrapper'>
             <Form.Item>
               <Space>
@@ -423,8 +439,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </Button>
                 <Button
                   onClick={() => {
-                    // window.location.href = '/xh/assetmgt';
-                    history.back();
+                    history.goBack();
                   }}
                 >
                   关闭
@@ -434,20 +449,17 @@ export default function (props: { initialValues: object; initParams: object; mod
           </div>
         )}
       </Form>
-      {mode == "view" && (
+      {mode == 'view' && (
         <div className='asset_manage_button_zone'>
           <Button
-          onClick={() => {
-            // window.location.href = '/xh/assetmgt';
-            history.back();
-          }}
-        >
-          关闭
-        </Button>
+            onClick={() => {
+              history.goBack();
+            }}
+          >
+            关闭
+          </Button>
         </div>
-        
       )}
-
     </Fragment>
   );
 }

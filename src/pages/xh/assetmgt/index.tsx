@@ -276,7 +276,6 @@ export default function () {
       setExpandedKeys(arr);
       console.log("expands ",arr);
       setAassetTypes(items);
-      setTreeData(_.cloneDeep(treeData));
 
       filterOptions["type"] = res.dat.map((v) => {
         return {

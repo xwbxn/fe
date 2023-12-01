@@ -71,7 +71,7 @@ export interface ICommonState {
   busiGroups: {
     name: string;
     id: number;
-    label_value?: string
+    label_value?: string;
   }[];
   setBusiGroups: (groups: { name: string; id: number; label_value?: string }[]) => void;
   curBusiId: number;
@@ -114,13 +114,15 @@ function App() {
     datasourceList: [],
     setDatasourceList: (datasourceList) => {
       setCommonState((state) => ({
-        ...state, datasourceList, groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type') as {
+        ...state,
+        datasourceList,
+        groupedDatasourceList: _.groupBy(datasourceList, 'plugin_type') as {
           [index: string]: {
             name: string;
             id: number;
             plugin_type: string;
           }[];
-        }
+        },
       }));
     },
     busiGroups: [],
@@ -134,7 +136,6 @@ function App() {
       setCommonState((state) => ({ ...state, curBusiId: id }));
     },
     organizationId: window.localStorage.getItem('organizationId') ? Number(window.localStorage.getItem('organizationId')) : 0,
-
 
     setOrganizationId: (id: number) => {
       window.localStorage.setItem('organizationId', String(id));
@@ -220,7 +221,6 @@ function App() {
           });
         }
       })();
-      
     } catch (error) {
       console.error(error);
     }
@@ -230,7 +230,6 @@ function App() {
   if (!initialized.current) {
     return null;
   }
-
 
   return (
     <div className='App'>
@@ -242,15 +241,10 @@ function App() {
               <Route exact path='/job-task/:busiId/output/:taskId/:host/:outputType' component={TaskHostOutput} />
               <>
                 {/* <LayoutXH /> */}
-
-                
-
-
                 <TopMenu></TopMenu>
-                <div style={{display:'-webkit-flex'}}>
-                    <Content />
+                <div style={{ display: '-webkit-flex' }}>
+                  <Content />
                 </div>
-
               </>
             </Switch>
           </Router>

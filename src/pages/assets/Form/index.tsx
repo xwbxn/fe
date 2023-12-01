@@ -34,7 +34,6 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const genDefaultConfig = () => {
     const name = form.getFieldValue('type');
-    debugger;
     const data = form.getFieldsValue();
     if (data.configs) {
       Modal.confirm({
