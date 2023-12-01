@@ -23,7 +23,7 @@ export default function () {
 
   return (
     <PageLayout title={t('title')} showBack>
-      <Form initialValues={initVal} initParams={initParams} mode='edit'></Form>
+      <Form></Form>
     </PageLayout>
   );
 }
