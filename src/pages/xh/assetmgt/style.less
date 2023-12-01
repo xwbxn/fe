@@ -94,29 +94,6 @@
     }
 }
 
-.table-content_xh {
-    width: 100%;
-
-    .table-header_xh {
-        width: 100%;
-        margin-right: 10px;
-        //    background-color: green;
-        display: inline-flex;
-        position: relative;
-
-        .tool_right {
-            position: absolute;
-            right: 0;
-            width: 245px;
-            display: flex;
-        }
-    }
-
-    // display: block;
-    // flex-flow: row;
-    // width: 77%;
-}
-
 .table-view {
     .ant-table-thead .ant-table-cell {
         white-space: nowrap;
@@ -202,11 +179,13 @@
             display: flex;
             width: 100%;
             position: relative;
+            justify-content: space-between;
+            padding: 15px 15px 0 15px;
+
 
             .tool_right {
-                display: inline-flex;
-                right: 0px;
-                position: absolute;
+                display: flex;
+                align-content: flex-end;
             }
         }
 

@@ -156,7 +156,7 @@ export default function () {
     {
       title: "状态",
       width: "105px",
-      dataIndex: 'status',
+      dataIndex: 'health',
       ellipsis: true,
       sorter: (a, b) =>{
         return a.status - b.status
@@ -167,6 +167,8 @@ export default function () {
           label = "离线";
         } else if (value == 1) {
           label = "在线"
+        } else if (value == 2) {
+          label = "待检测"
         }
         return label;
       },
