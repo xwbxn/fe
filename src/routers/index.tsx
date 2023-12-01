@@ -58,6 +58,7 @@ import XhAssetMgt from '@/pages/xh/assetmgt';
 import XhAssetAdd from '@/pages/xh/assetmgt/Add';
 import XhMonitor from '@/pages/xh/monitor';
 import XhMonitorAdd from '@/pages/xh/monitor/Add';
+import XhMonitorMutiAdd from '@/pages/xh/monitor/MutiAdd';
 import orderformEvents from '@/pages/orderformEvents';
 import Targets from '@/pages/targets';
 import DictTypes from  '@/pages/dictType/index';
@@ -155,7 +156,7 @@ export default function Content() {
         
         <Route path='/xh/monitor' component={XhMonitor} exact />
         <Route path='/xh/monitor/add' component={XhMonitorAdd} exact />
-        {/* <Route path='/xh/monitor/view' component={XhMonitorView} exact />         */}
+        <Route path='/xh/monitor/muti/add' component={XhMonitorMutiAdd} exact />        
         <Route path='/log/index-patterns' component={IndexPatterns} exact />
         <Route path='/log/index-patterns/:id' component={IndexPatternFields} exact />
         <Route path='/object/explorer' component={ObjectExplore} exact />

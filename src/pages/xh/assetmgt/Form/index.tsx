@@ -14,7 +14,7 @@ import queryString from 'query-string';
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
-  const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
+  const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [identList, setIdentList] = useState([]);
   const { busiGroups } = useContext(CommonStateContext);
   const [formItems, setFormItems] = useState<any[]>([]);
@@ -45,8 +45,16 @@ export default function (props: { initialValues: object; initParams: object; mod
       //TODO：处理分组属性
       let items = new Array();
       let extra_props = assetType.extra_props;
+      let map = new Map();
       for (let property in extra_props) {
         let group = extra_props[property];
+        map.set(group.sort,property);
+      }
+      var arrayObj=Array.from(map);
+      arrayObj.sort(function(a,b){return a[0]-(b[0])})
+
+      for (var [key, value] of arrayObj) {
+        let group = extra_props[value];
         if (group != null && group.props) {
           let baseItems = new Array();
           let listItems = new Array();
@@ -54,15 +62,15 @@ export default function (props: { initialValues: object; initParams: object; mod
             if (item.type === 'list') {
               item.items.forEach((element) => {
                 listItems.push(element);
-                properties[property + '.' + element.name] = element.label;
+                properties[value + '.' + element.name] = element.label;
               });
             } else {
               baseItems.push(item);
-              properties[property + '.' + item.name] = item.label;
+              properties[value + '.' + item.name] = item.label;
             }
           });
           items.push({
-            name: property,
+            name: value,
             label: group.label,
             base: baseItems,
             list: listItems,
@@ -212,9 +220,11 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const renderFormItem = (v) => {
+    console.log("renderFormItem",v);
     if (v.type === 'select') {
       return (
         <Select
+          key={"v"+v.name}
           style={{ width: '100%' }}
           options={v.options?.map((v) => {
             return { label: v.label, value: v.value };
@@ -223,9 +233,9 @@ export default function (props: { initialValues: object; initParams: object; mod
       );
     }
     if (v.type === 'password') {
-      return <Input.Password placeholder={`请输入${v.label}`} />;
+      return <Input.Password key={"v"+v.name} placeholder={`请输入${v.label}`} />;
     }
-    return <Input placeholder={`请填写${v.label}`} name={v.name} />;
+    return <Input key={"v"+v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };
 
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
@@ -317,9 +327,14 @@ export default function (props: { initialValues: object; initParams: object; mod
                       <Card {...panelBaseProps} key={'groupItem' + index} title={'基本信息'} className='card_group'>
                         <Row gutter={10}>
                           {groupItem.base.map((v) => {
+                            console.log("v-----------",v)
                             return (
                               <Col key={`col=${v.name}`} span={12}>
-                                <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name}>
+                                <Form.Item key={`form-item${v.name}`} 
+                                   label={v.label}
+                                   name={v.name}
+                                   rules={[{ required: v.required?v.required:false, message: `请选择您的${v.label}` }]}
+                                >
                                   {renderFormItem(v)}
                                 </Form.Item>
                               </Col>
@@ -375,7 +390,11 @@ export default function (props: { initialValues: object; initParams: object; mod
                                       console.log('field', item, property);
                                       return (
                                         <Col key={property.name + index_} span={12}>
-                                          <Form.Item label={property.label} name={[item.name, property.name]}>
+                                          <Form.Item 
+                                            label={property.label} 
+                                            name={[item.name, property.name]}
+                                            rules={[{ required: property.required?property.required:false, message: `请选择您的${property.label}` }]}
+                                            >
                                             {renderFormItem(property)}
                                           </Form.Item>
                                         </Col>

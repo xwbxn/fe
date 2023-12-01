@@ -151,6 +151,7 @@ export default function Login() {
             <div className='verifyimg-div'>
               <Form.Item
                 name='verifyvalue'
+                className='verifyimg-input'
                 rules={[
                   {
                     required: showcaptcha,
@@ -161,17 +162,19 @@ export default function Login() {
               >
                 <Input placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<PictureOutlined className='site-form-item-icon' />} />
               </Form.Item>
-
               <img
                 ref={verifyimgRef}
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
                   marginBottom: 16,
+                  float: 'right',
                   height: '35px'
                 }}
                 onClick={refreshCaptcha}
                 alt='点击获取验证码'
               />
+
+              
             </div>
 
             <Form.Item>
@@ -179,51 +182,7 @@ export default function Login() {
                 {t('登录')}
               </Button>
             </Form.Item>
-            <div className='login-other'>
-              <strong>其他登录方式：</strong>
-              <a
-                onClick={() => {
-                  getRedirectURL().then((res) => {
-                    if (res.dat) {
-                      window.location.href = res.dat;
-                    } else {
-                      message.warning('没有配置 OIDC 登录地址！');
-                    }
-                  });
-                }}
-              >
-                {displayName.oidc}
-              </a>
-              &nbsp;&nbsp;
-              <a
-                onClick={() => {
-                  getRedirectURLCAS().then((res) => {
-                    if (res.dat) {
-                      window.location.href = res.dat.redirect;
-                      localStorage.setItem('CAS_state', res.dat.state);
-                    } else {
-                      message.warning('没有配置 CAS 登录地址！');
-                    }
-                  });
-                }}
-              >
-                {displayName.cas}
-              </a>
-              &nbsp;&nbsp;
-              <a
-                onClick={() => {
-                  getRedirectURLOAuth().then((res) => {
-                    if (res.dat) {
-                      window.location.href = res.dat;
-                    } else {
-                      message.warning('没有配置 OAuth 登录地址！');
-                    }
-                  });
-                }}
-              >
-                {displayName.oauth}
-              </a>
-            </div>
+            
           </Form>
         </div>
       </div>

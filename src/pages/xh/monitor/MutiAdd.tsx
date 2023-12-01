@@ -1,33 +1,35 @@
 import './style.less';
 import React, { useContext, useEffect, useState } from 'react';
-
+import { useHistory, useLocation } from 'react-router-dom';
 import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
-import PromBox from './PromBox';
-import { useLocation } from 'react-router-dom';
+import PromBox from '../monitor/Form/PromBox';
+
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
-import { type } from 'os';
+import PageLayout from '@/components/pageLayout';
+import { GroupOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
-  const [assetTypes, setAssetTypes] = useState<any[]>([]);
+  const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [sqlCN, setSqlCN] = useState<string>("")
   const [identList, setIdentList] = useState([]);
-  const [params, setParams] = useState<{ label: string; name: string;editable?: boolean; required?: boolean; password?: boolean; items?: [] }[]>([]);
+  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
   const [datasource, setDatasource] = useState(1);
   const { search } = useLocation();
   const { id } = queryString.parse(search);
+  const history = useHistory();
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
 
@@ -35,57 +37,19 @@ export default function (props: { initialValues: object; initParams: object; mod
     size: 'small',
     bodyStyle: { padding: '24px 124px 8px 124px' },
   };
-  
 
   useEffect(() => {
-    if (action == null || 'addeditview'.indexOf(action + '') < 0) {
-      history.back();
-    }
-    const param = {
-      page: 1,
-      limit: 10000,
-    };
-    getAssetsStypes().then( (res) => {
-      const types = res.dat.map((v) => {
+   
+    
+    getAssetsStypes().then((res) => {
+      const items = res.dat.map((v) => {
         return {
           value: v.name,
           label: v.name,
           ...v,
         };
       });
-      // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
-      setAssetTypes(types);
-      getAssetsByCondition(param).then((assets) => {
-        let options = new Array();
-        const items = assets.dat.list.map((v) => {
-          options.push({
-            value: v.id,
-            label: v.name + '[' + v.type + ']',
-          });
-        });
-        setAssetOptions(options);
-        setAssetList(assets.dat.list);
-        if (id != null && id.length > 0 && id != 'null') {
-          getXhMonitor(id).then(({ dat }) => {
-            if (dat != null) {
-              setMonitor(dat);
-              let config = dat['config'];
-              delete dat['config'];
-              if (config != null && config.length > 0) {
-                let configJson = JSON.parse(config);
-                dat = { ...configJson, ...dat };
-              }
-              form.setFieldsValue(dat);
-              setMonitor(dat);
-              setTimeout(() => {
-                genForm(assets.dat.list, types);
-              }, 1500);
-            }
-          });
-        }
-      });
-
-      
+      setAssetTypes(items);
     });
 
     getAssetsIdents().then((res) => {
@@ -100,26 +64,12 @@ export default function (props: { initialValues: object; initParams: object; mod
     
   }, []);
 
-  // useEffect(()=>{
-  //   let formValue = form.getFieldsValue();
-  //   if(formValue["asset_id"]){
-      
-  //   }
-  // },[assetList,assetTypes,form])
-
   const genForm = (assets, types) => {
-    if(assets==null ||assets.length<=0 || types==null || types.length<=0) return
+
     console.log('genForm');
     let formValue = form.getFieldsValue();
-    console.log(formValue);
-    const asset: any = assets ? assets.find((v: any) => v.id === formValue['asset_id']) : assetList.find((v: any) => v.id === formValue['asset_id']);
-    if (asset) {
-      form.setFieldsValue({ type: asset.type });
-      let typeList = types ? types : assetTypes;
-      const assetType: any = typeList.find((v) => v.name === asset.type);
-      if (assetType) setParams(assetType.form || []);
-      console.log('gen---Form',assetType.form);
-    }
+    const assetType: any = assetTypes.find((v) => v.name ==formValue['type']);
+    if (assetType) setParams(assetType.form || []);
     if (formValue['monitoring_sql'] != null) {
       let sql = formValue['monitoring_sql'];;
       if (cn_name[sql]) {
@@ -135,7 +85,6 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const renderForm = (v) => {
-    console.log("config form item,",v)
     if (v.items) {
       return (
         <Select
@@ -146,7 +95,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         ></Select>
       );
     }
-    if (v.type=="password") {
+    if (v.password) {
       return <Input.Password placeholder={`填写${v.label}`} />;
     }
     return <Input placeholder={`填写${v.label}`} />;
@@ -162,20 +111,13 @@ export default function (props: { initialValues: object; initParams: object; mod
         delete values[group.name];
       }
     }
-    if (id != null && id.length > 0 && id != 'null') {
-      values.id = parseInt('' + id);
-      values['config'] = JSON.stringify(config);
-      updateXhMonitor(values).then((res) => {
-        message.success('修改成功');
-        location.href = '/xh/monitor';
-      });
-    } else {
-      values['config'] = JSON.stringify(config);
-      createXhMonitor(values).then((res) => {
-        message.success('操作成功');
-        location.href = '/xh/monitor?assetId=' + values['asset_id'];
-      });
-    }
+    values['config'] = JSON.stringify(config);
+
+    createXhMonitor(values).then((res) => {
+      message.success('操作成功');
+      // location.href = '/xh/monitor';
+      history.push("/xh/monitor")
+    });
   };
 
   const genDefaultConfig = () => {
@@ -201,6 +143,8 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   return (
     <>
+      <PageLayout icon={<GroupOutlined />} title={'批量添加'}
+     >
       <Form
         name='asset'
         form={form}
@@ -221,17 +165,52 @@ export default function (props: { initialValues: object; initParams: object; mod
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={t('basic')}>
             <Row gutter={10}>
-              <Col span={8}>
-                <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
-                  <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetOptions} placeholder='请选择资产' disabled={action === 'edit'} />
+              <Col span={12}>
+                  <Form.Item label='类型' name='type' rules={[{ required: true }]}>
+                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型'
+                    onChange={(value) => {
+                      form.setFieldsValue({"asset_ids":[]})
+                      const param = {
+                        page: 1,
+                        limit: 10000,
+                        type:value
+                      };
+                      getAssetsByCondition(param).then((res) => {
+                        let options = new Array();
+                        const items = res.dat.list.map((v) => {
+                          options.push({
+                            value: v.id,
+                            label: v.name + '[' + v.type + ']',
+                          });
+                        });
+                        setAssetOptions(options);
+                        setAssetList(res.dat.list);      
+                      });
+                    }} disabled={id!=null}  />
+                  </Form.Item>
+               </Col>
+              <Col span={12}>
+                <Form.Item label='资产名称' name='asset_ids' rules={[{ required: true }]}>
+                  <Select  mode="multiple"  style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetOptions} placeholder='请选择资产' disabled={props.mode === 'edit'} />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={12}>
+                <Form.Item label='资产IP' name='asset_ids' rules={[{ required: true }]}>
+                  <Select  mode="multiple"  style={{ width: '100%' }} showSearch
+                    filterOption optionFilterProp={"label"}                 
+                    placeholder='请选择资产' disabled={props.mode === 'edit'} >
+                     {assetList.map((item, index) => (
+                    <Select.Option value={item.id} key={index}>{item.ip}</Select.Option>
+                   ))}
+                   </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
                 <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
                   <Input placeholder='请输入资产名称' />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={12}>
                 <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
                   <Select
                     onChange={(v) => {
@@ -294,41 +273,15 @@ export default function (props: { initialValues: object; initParams: object; mod
               {params.map((v) => {
                 return (
                   <Col key={`col=${v.name}`} span={12}>
-                    <Form.Item key={`form-item${v.name}`}
-                       label={v.label} 
-                       name={v.name}  
-                       rules={[{ required: v.required?v.required:false, message: `请选择您的${v.label}` }]}  
-                       initialValue={props.initParams[v.name]}>
+                    <Form.Item key={`form-item${v.name}`} label={v.label} name={v.name} >
                       {renderForm(v)}
                     </Form.Item>
                   </Col>
                 );
-              })}
-              {/* <Col span={12}>
-              <Form.Item label='探针' name='ident'>
-                <Select style={{ width: '100%' }} options={identList} />
-              </Form.Item>
-            </Col> */}
-              {/* <Col span={24}>
-              <Form.Item
-                label={
-                  <Space>
-                    采集配置
-                    <Button type='primary' icon={<FileAddOutlined />} size='small' onClick={genDefaultConfig}>
-                      自动生成
-                    </Button>
-                  </Space>
-                }
-                name='configs'
-                rules={[{ required: true }]}
-              >
-                <CodeMirror height='200px' extensions={[StreamLanguage.define(toml)]}></CodeMirror>
-              </Form.Item>
-            </Col> */}
+              })}             
             </Row>
           </Card>
         </div>
-        {props.disabled == false && (
           <div className='card-wrapper'>
             <Form.Item>
               <div className='bottom_button'>
@@ -338,7 +291,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                   </Button>
                   <Button
                     onClick={() => {
-                      history.back();
+                      history.goBack()
                     }}
                   >
                     取消
@@ -347,22 +300,10 @@ export default function (props: { initialValues: object; initParams: object; mod
               </div>
             </Form.Item>
           </div>
-        )}
 
       </Form>
-      {props.disabled == true && (
-        <div className='monitor_management_button_zone'>
-          <Button
-            onClick={() => {
-              history.back();
-            }}
-          >
-            取消
-          </Button>
-
-
-        </div>
-      )}
+      </PageLayout >
+       
     </>
 
   );

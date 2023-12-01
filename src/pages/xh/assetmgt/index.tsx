@@ -1,11 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, RightOutlined, SearchOutlined, UnorderedListOutlined, VideoCameraOutlined } from '@ant-design/icons';
-const { confirm } = Modal;
-import CommonModal from '@/components/CustomForm/CommonModal';
-import { IRawTimeRange } from '@/components/TimeRangePicker';
+import ResizeableTitle from '@/components/table/ResizeableTitle';
 import './locale';
 import './style.less';
 import _ from 'lodash';
@@ -20,6 +18,8 @@ import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
+import { useSize } from 'ahooks';
+import useResizeTableCol from '@/components/table/useResizeTableCol';
 // export { Add, Edit };
 
 export enum OperateType {
@@ -48,6 +48,11 @@ let queryFilter = [
 
 export default function () {
   const { t } = useTranslation('assets');
+
+  const tableRef = useRef(null);
+  const tableWrapperSize = useSize(tableRef);
+  const [wrapperWidth, setWrapperWidth] = useState<number>();
+  
   const [list, setList] = useState<any[]>([]);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
@@ -78,7 +83,8 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
-
+  const [selectColum, setSelectColum] = useState<any[]>([])
+  const { colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
   const history = useHistory();
 
   const baseColumns: any[] = [
@@ -178,7 +184,7 @@ export default function () {
   const fixColumns: any[] = [
     {
       title: '操作',
-      width: '120px',
+      width: '140px',
       align: 'center',
       fixed: 'right',
       render: (text: string, record: assetsType) => (
@@ -215,8 +221,13 @@ export default function () {
     },
   ];
 
-
-  const [selectColum, setSelectColum] = useState<any[]>()
+  useEffect(() => {
+    console.log(tableWrapperSize);
+    if (tableWrapperSize) {
+      setWrapperWidth(tableWrapperSize.width);
+    }
+  }, [tableRef, tableWrapperSize]);
+  
 
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
@@ -735,8 +746,8 @@ export default function () {
                         items={[
                           { key: OperateType.AssetBatchImport, label: '导入设备' },
                           { key: OperateType.AssetBatchExport, label: '导出设备' },
-                          { key: OperateType.BindTag, label: '绑定标签' },
-                          { key: OperateType.UnbindTag, label: '解绑标签' },
+                          // { key: OperateType.BindTag, label: '绑定标签' },
+                          // { key: OperateType.UnbindTag, label: '解绑标签' },
                           // { key: OperateType.UpdateBusi, label: '修改业务组' },1 excle 2 xml 3 text
                           // { key: OperateType.RemoveBusi, label: '移出业务组' },
                           // { key: OperateType.UpdateNote, label: '修改备注' },
@@ -754,11 +765,17 @@ export default function () {
 
             </div>
           </div>
-          <div className='assets-list' style={{ width: '100%' }}>
+          <div className='assets-list-1' ref={tableRef}>
+          
             <Table
               dataSource={list}
               className='table-view'
-              scroll={{ x: 810 }}
+              scroll={{ x: 810}}
+              // components={{
+              //   header: {
+              //     cell: ResizeableTitle,
+              //   },
+              // }}
               onRow={(record) => {
                 return {
                   onClick: (event) => {
@@ -788,6 +805,7 @@ export default function () {
               rowKey='id'
               size='small'
             ></Table>
+            {/* ):null} */}
             <OperationModal
               operateType={operateType}
               setOperateType={setOperateType}
