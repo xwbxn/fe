@@ -17,7 +17,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
-import { PictureOutlined, UserOutlined, LockOutlined } from '@ant-design/icons';
+import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
 import { ifShowCaptcha, getCaptcha, getSsoConfig, getRedirectURL, getRedirectURLCAS, getRedirectURLOAuth, authLogin, getRSAConfig } from '@/services/login';
 import './login.less';
 
@@ -44,7 +44,7 @@ export default function Login() {
     cas: 'CAS',
     oauth: 'OAuth',
   });
-  const [showcaptcha, setShowcaptcha] = useState(false);
+  const [showcaptcha, setShowcaptcha] = useState(true);
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
   const refreshCaptcha = () => {
@@ -71,8 +71,8 @@ export default function Login() {
     });
 
     ifShowCaptcha().then((res) => {
-      setShowcaptcha(res?.dat?.show);
-      if (res?.dat?.show) {
+      // setShowcaptcha(res?.dat?.show);
+      // if (res?.dat?.show) {
         getCaptcha().then((res) => {
           if (res.dat && verifyimgRef.current) {
             verifyimgRef.current.src = res.dat.imgdata;
@@ -81,7 +81,7 @@ export default function Login() {
             message.warning('获取验证码失败');
           }
         });
-      }
+      // }
     });
   }, []);
 
@@ -134,7 +134,7 @@ export default function Login() {
                 },
               ]}
             >
-              <Input placeholder={t('请输入用户名')} prefix={<UserOutlined  />} />
+              <Input placeholder={t('请输入用户名')} prefix={<IdcardTwoTone  />} />
             </Form.Item>
             <Form.Item
               name='password'
@@ -145,7 +145,7 @@ export default function Login() {
                 },
               ]}
             >
-              <Input type='password' placeholder={t('请输入密码')} onPressEnter={handleSubmit} prefix={<LockOutlined className='site-form-item-icon' />} />
+              <Input type='password' placeholder={t('请输入密码')} onPressEnter={handleSubmit} prefix={<LockTwoTone  className='site-form-item-icon' />} />
             </Form.Item>
 
             <div className='verifyimg-div'>
@@ -160,21 +160,20 @@ export default function Login() {
                 ]}
                 hidden={!showcaptcha}
               >
-                <Input placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<PictureOutlined className='site-form-item-icon' />} />
+                <Input placeholder={t('请输入验证码')} onPressEnter={handleSubmit} prefix={<SafetyCertificateTwoTone className='site-form-item-icon' />} />
               </Form.Item>
               <img
                 ref={verifyimgRef}
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
-                  marginBottom: 16,
+                  marginTop: '5px',
                   float: 'right',
-                  height: '35px'
+                  width:'110px',
+                  height: '36px'
                 }}
                 onClick={refreshCaptcha}
                 alt='点击获取验证码'
               />
-
-              
             </div>
 
             <Form.Item>

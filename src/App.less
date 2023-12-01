@@ -36,7 +36,37 @@ html {
   font-family: codicon;
   src: url('/font/codicon.ttf');
 }
+.ant-modal-close-x {
+  height: 30px !important;
+  line-height: 30px !important;
+  margin-right: 5px;
+  color: #fff;
+}
+.down_load_button {    
+  span {
+    color: #2977d7;
+    text-decoration:underline;
+  }
+}
+.ant-modal-header {
+  background-color: #2977d7;
+  padding: 6px 20px;
+  .ant-modal-title {
+     color: #fff;
+  }  
+}
+.ant-upload-select-text {
 
+}
+.ant-modal-footer {
+  display: flex;
+  justify-content: center;
+  button {
+    width: 64px !important;
+    height: 30px !important;
+    border-radius: 6px !important;
+  }
+}
 .App {
   display: block;
   color: #333752;
@@ -48,10 +78,10 @@ html {
   }
   .content {
     flex: 1;
-    height: calc(~"100vh - 45px");
+    height: 100%;
     overflow: auto;
   }
-
+  
   .dot-block {
     padding: 16px;
     border: 1px dashed @primary-color;
