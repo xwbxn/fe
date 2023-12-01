@@ -65,7 +65,6 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const panelBaseProps: any = {
     size: 'small',
-    bodyStyle: { padding: '24px 124px 8px 124px' },
   };
 
   const handleSizeChange = (e: RadioChangeEvent) => {

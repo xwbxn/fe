@@ -87,7 +87,7 @@ const zh_CN = {
   },
 
   batch: {
-    not_select: '请先选择策略',
+    not_select: '请至少选择一条记录',
     delete: '删除告警规则',
     delete_confirm: '确认删除选中的告警规则吗？',
     delete_success: '删除成功',
