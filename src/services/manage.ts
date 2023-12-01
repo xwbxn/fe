@@ -52,6 +52,13 @@ export const deleteXhMonitor = function (id: string) {
     method: RequestMethod.Delete,
   });
 };
+//删除监控
+export const deleteXhBatchMonitor = function (data: any) {
+  return request(`/api/n9e/xh/monitoring/batch-del`, {
+    method: RequestMethod.Post,
+    data
+  });
+};
 export const getXhMonitor = function (id:any) {
   return request(`/api/n9e/xh/monitoring/${id}`, {
     method: RequestMethod.Get,

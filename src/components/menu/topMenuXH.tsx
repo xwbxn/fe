@@ -47,11 +47,11 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('监控指标'),
         },
-        {
-          key: '/dashboards-built-in',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('仪表盘'),
-        },
+        // {
+        //   key: '/dashboards-built-in',
+        //   icon: <IconFont type='icon-Menu_Infrastructure' />,
+        //   label: t('仪表盘'),
+        // },
         {
           key: '/metric/explorer',
           icon: <IconFont type='icon-Menu_Infrastructure' />,

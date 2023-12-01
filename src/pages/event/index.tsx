@@ -97,9 +97,10 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
     if (value == null) {
-      setRefreshFlag(_.uniqueId('refresh_'));
+      
       delete filter["start"];
       delete filter["end"];
+      setRefreshFlag(_.uniqueId('refresh_'));
     }
   };
 
@@ -131,11 +132,13 @@ const Event: React.FC = () => {
         <Space>
           <Button icon={<AppstoreOutlined />} onClick={() => {
             setView('card');
-            localStorage.setItem('current_alert_display', "card")
+            localStorage.setItem('current_alert_display', "card");
+            setSearchVal([]);
           }} />
           <Button icon={<UnorderedListOutlined />} onClick={() => {
             setView('list')
             localStorage.setItem('current_alert_display', "list")
+            setSearchVal([]);
           }} />
           <Select
             // defaultValue="lucy"
@@ -213,8 +216,7 @@ const Event: React.FC = () => {
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
-
-                        if (selectRowKeys.length <= 0) {
+                        if (selectedRowKeys.length == 0) {
                           Modal.confirm({
                             title: "确认导出所有告警信息吗",
                             onOk: async () => {
@@ -225,7 +227,7 @@ const Event: React.FC = () => {
                           setRowKeys([]);
                         } else {
                           setModalOpen(true);
-                          setRowKeys(selectRowKeys);
+                          setRowKeys(selectedRowKeys);
                         }
                       }}>导出</Menu.Item>
 

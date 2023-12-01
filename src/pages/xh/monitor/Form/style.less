@@ -138,10 +138,25 @@
             }
         }        
     }
+    .no_monitor {
+        width: 100%;
+        height: 200px;
+        text-align: center;
+        line-height: 200px;
+        font-size: 16px;
+        color: #cecece;
+        font-weight: 900;
+    }
     .party_info {
         display: inline-flex;
+        padding: 5px;
         .assembly {
             margin-left: 20px;
+            padding: 10px;
+            .image {
+                width: 138px;
+                height: 72px;
+            }
             .status {
                 display: flex;
                 justify-content: center;
@@ -250,25 +265,7 @@
 
 
 }
-.accessories_every_group {
-     width: 260px;
-     border: 1px solid #cecece;
-     height: 200px;
-     display: inline-block;
-     padding-top: 20px;
-     padding-left: 5px;
-     background-color: #F5F1F1;
-     .accessories {
-        display: inline-flex;
-        height: 20px;
-        line-height: 30px;
-        div {
-            font-size: 14px;
-            margin-right: 3px;            
-         }
-     }
-      
-}
+
 
 .show_image {
     
@@ -345,4 +342,53 @@
         height: 72px;
         background-repeat: no-repeat;
     }
+}
+.accessories_modal{
+    .accessories_body {
+        display: inline-flex;
+        .accessories_every_group {
+            width: 260px;
+            border: 1px solid #cecece;
+            display: inline-block;
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-bottom: 10px;        
+            background-color: #F5F1F1;
+            margin: 5px;
+            .status {
+                display: flex;
+                margin: 0px auto;
+                height: 20px;
+                line-height: 20px;
+                width: 100%;
+                justify-content: center;
+                .normal {
+                    color: green;
+                    margin-left: 5px;
+                }
+                .no_normal {
+                    color: red;
+                    margin-left: 5px;
+                }
+            }
+            .properties {
+                display: grid;
+            }
+            .accessories {
+               display: inline-flex;
+               height: 22px;
+               line-height: 22px;
+               div {
+                   font-size: 14px;
+                   margin-right: 3px;            
+                }
+            }
+             
+       }
+        
+    }
+    .ant-btn-primary {
+         display: none !important;
+    }
+
 }

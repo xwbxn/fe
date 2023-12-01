@@ -149,7 +149,6 @@ const Resource: React.FC = () => {
             label: role.name,
           }
         })
-        debugger;
         filterOptions["role"]=items;
         setFilterOptions({...filterOptions})      
     });

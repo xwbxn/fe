@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
 import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import Graph from '../Graph';
-import _, { values } from 'lodash';
+import _, { random, values } from 'lodash';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import moment from 'moment';
@@ -14,7 +14,7 @@ enum ChartType {
   Line = 'line',
   StackArea = 'stackArea',
 }
-import { useLocation } from 'react-router-dom';
+import { Link, Redirect, useHistory, useLocation } from 'react-router-dom';
 import { getXhMonitor, getXhMonitorByAssetId } from '@/services/manage';
 import { getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
@@ -25,6 +25,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [identList, setIdentList] = useState<any>({});
+  const [monitorStatus, setMonitorStatus] = useState<boolean>(false);
   const [operateType, setOperateType] = useState<any>({
     visual: false,
     title: "指标名称"
@@ -32,8 +33,8 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [accessories, setAccessories] = useState<any>({
     visual: false,
     title: "其他信息名称",
-    label:"",
-    name:"",
+    label: "",
+    name: "",
     items: [],
     properties: []
   });
@@ -46,7 +47,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [monitors, setMonitors] = useState<any[]>([]);
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [assetItems, setAssetItems] = useState<any[]>([]);
-
+  const history = useHistory();
   const [form] = Form.useForm();
   const [range, setRange] = useState<any>({
     start: parse('now-1h'),//"2023-11-02 01:00:00",
@@ -83,9 +84,17 @@ export default function (props: { initialValues: object; initParams: object; mod
     if (assetType) {
       //TODO：处理分组属性      
       let extra_props = assetType.extra_props;
-      for (let groupKey in extra_props) {
-        let group = extra_props[groupKey];
-        if (group != null && theme == groupKey && group.props) {
+      let map = new Map();
+      for (let property in extra_props) {
+        let group = extra_props[property];
+        map.set(group.sort, property);
+      }
+      var arrayObj = Array.from(map);
+      arrayObj.sort(function (a, b) { return a[0] - (b[0]) })
+
+      for (var [key, value] of arrayObj) {
+        let group = extra_props[value];
+        if (group != null && theme == value && group.props) {
           let baseItems = new Array();
           let listItems = new Array();
           group.props.map((item, index) => {
@@ -98,7 +107,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             }
           });
           items = {
-            name: groupKey,
+            name: value,
             label: group.label,
             base: baseItems,
             list: listItems,
@@ -110,22 +119,23 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   useEffect(() => {
-
     if (action == "asset" && id != null && id.length > 0 && id != "null") {
-      //资产信息
-      loadAssetInfo(id);
+      //资产信息      
       getAssetsStypes().then((res) => {
-        const items = res.dat.map((v) => {
+        const types = res.dat.map((v) => {
           return {
             value: v.name,
             label: v.name,
             ...v,
           };
-        });
-        setAssetTypes(items);
+        });        
+        loadAssetInfo(id,types);
+        setAssetTypes(types);
+        
       });
       //获取资产所有监控信息
       getXhMonitorByAssetId(id).then(({ dat }) => {
+        console.log("获取资产所有监控信息",dat);
         setMonitors(dat)
       })
     }
@@ -142,7 +152,9 @@ export default function (props: { initialValues: object; initParams: object; mod
       getXhMonitor(id).then(({ dat }) => {
         if (dat != null) {
           setMonitor(dat);
-          console.log("监控数据", dat);
+          if(dat.status>0){
+            setMonitorStatus(true);
+          }
           let config = dat["config"];
           delete dat["config"];
           if (config != null && config.length > 0) {
@@ -150,18 +162,47 @@ export default function (props: { initialValues: object; initParams: object; mod
             dat = { ...configJson, ...dat };
           }
           //资产信息
-          loadAssetInfo(dat.asset_id);
+          loadAssetInfo(dat.asset_id,null);
         }
       })
     }
-  }, []);
+  }, [action]);
 
 
-  const loadAssetInfo = (id) => {
+  const loadAssetInfo = (id,assetTypes) => {
+    
     getXhAsset("" + id).then(({ dat }) => {
       console.log(dat);
+      if(dat.status>0){
+        setMonitorStatus(true)
+      }
+      
+      let typeGroup = new Array();
       let expands = dat.exps;
-      let items = new Array()
+      if(assetTypes!=null){
+        const assetType: any = assetTypes.find((v) => v.name === dat.type);
+        if (assetType) {
+              //TODO：处理分组属性              
+              let extra_props = assetType.extra_props;
+              let map = new Map();
+              for (let property in extra_props) {
+                 let group = extra_props[property];
+                  map.set(group.sort,property);
+              }
+              var arrayObj=Array.from(map);
+              arrayObj.sort(function(a,b){return a[0]-(b[0])})
+              for (var [key, value] of arrayObj) {
+                let group = extra_props[value];
+                if (group != null && group.props) {                  
+                  typeGroup.push({
+                    name: value,
+                    label: group.label
+                  });
+                }
+              }
+        }
+      }
+      let typeValues = {};
       if (expands != null && expands.length > 0) {
         const map = new Map()
         expands.forEach((item, index, arr) => {
@@ -192,57 +233,30 @@ export default function (props: { initialValues: object; initParams: object; mod
             itemsChars = "{" + itemsChars.substring(0, itemsChars.length - 1) + "}";
             group.push(JSON.parse(itemsChars));
           })
-          items.push(
-            {
-              type: key,
-              items: group
-            }
-          );
-
+          typeValues[key] = group;
         })
         delete dat.exps;
       }
-      setAssetItems(items)
+      let everyTypeValues = new Array();
+      typeGroup.forEach((type) => {
+         if(typeValues[type.name]){
+          everyTypeValues.push({
+            type: type.name,
+            label: type.label,
+            items: typeValues[type.name]
+          })
+         }
+      })
+      setAssetItems(everyTypeValues);
+      console.log("everyTypeValues",everyTypeValues)
       setAssetInfo(dat);
       console.log("资产信息以及配置信息", dat);
     });
   }
 
-
-
-  const [chartType, setChartType] = useState<ChartType>(ChartType.Line);
-
-  const [highLevelConfig, setHighLevelConfig] = useState({
-    shared: true,
-    sharedSortDirection: 'desc',
-    legend: false,
-    unit: 'none',
-    reverseColorOrder: false,
-    colorDomainAuto: true,
-    colorDomain: [],
-    chartheight: 300,
-  });
-
-  const lineGraphProps = {
-    custom: {
-      drawStyle: 'lines',
-      fillOpacity: chartType === ChartType.Line ? 0 : 0.5,
-      stack: chartType === ChartType.Line ? 'hidden' : 'noraml',
-      lineInterpolation: 'smooth',
-    },
-    options: {
-      legend: {
-        displayMode: highLevelConfig.legend ? 'table' : 'hidden',
-      },
-      tooltip: {
-        mode: highLevelConfig.shared ? 'all' : 'single',
-        sort: highLevelConfig.sharedSortDirection,
-      },
-      standardOptions: {
-        util: highLevelConfig.unit,
-      },
-    },
-  };
+  const openMinitor=(assetId)=>{
+      
+  } 
 
 
   return (
@@ -260,12 +274,24 @@ export default function (props: { initialValues: object; initParams: object; mod
               </div>
               <div className='info'>
                 <div className='row'>
-                  <div className='theme1'><div>资产名称:</div>{assetInfo.name}</div>
+                
+                  <div className='theme1'>
+                    <div>资产名称:</div>
+                     <Link
+                      to={{
+                        pathname:'/xh/monitor/add',
+                        search:`type=monitor&id=${assetInfo.id}&action=asset`,
+                        hash:'#the-hash',
+                      }}
+                     >
+                      {assetInfo.name}
+                    </Link>
+                    </div>
                   <div className='theme1'><div>资产类型：</div>{assetInfo.type}</div>
                   <div className='theme1'><div>IP地址：</div>{assetInfo.ip}</div>
                   <div className='theme1'><div>厂商：</div>{assetInfo.manufacturers}</div>
                 </div>
-                <div  className='row'>
+                <div className='row'>
                   <div className='theme1'><div>资产位置：</div>{assetInfo.position}</div>
                   <div className='theme1'><div>状态：</div>{assetInfo.status == 1 ? '正常' : "下线"}</div>
                   <div className='theme1'></div>
@@ -294,68 +320,72 @@ export default function (props: { initialValues: object; initParams: object; mod
               </div>
 
             )}
-
-            <div className='party_info'>
-              {assetItems.length > 0 && assetItems.map((element, index) => {
-                return (
-                  <div className='assembly show_image' onClick={e => {
-                    let formItems: any = genForm(assetInfo.type, element.type);
-                    setAccessories({
-                      visual: true,
-                      label: formItems.label,
-                      title: element.type.toUpperCase(),
-                      name:formItems.name,
-                      items: element.items,
-                      properties: formItems.list
-                    })
-                  }}>
-                    <div className='title'>{element.type.toUpperCase()}({element.items.length})</div>
-                    <div className={'image ' + element.type}></div>
-                    <div className='status'>状态：
-                      {true ? (
-                        <div>正常<CheckCircleFilled className='normal' /></div>
-                      ) : (
-                        <div>故障<CheckCircleFilled className='no_normal' /></div>
-                      )}
+            {action === "asset" && (
+              <div className='party_info'>
+                {assetItems.length > 0 && assetItems.map((element, index) => {
+                  return (
+                    <div className='assembly show_image' onClick={e => {
+                      let formItems: any = genForm(assetInfo.type, element.type);
+                      setAccessories({
+                        visual: true,
+                        label: formItems.label,
+                        title: element.label,
+                        name: formItems.name,
+                        items: element.items,
+                        properties: formItems.list
+                      })
+                    }}>
+                      <div className='title'>{element.label}({element.items.length})</div>
+                      <div className={'image ' + element.type}></div>
+                      <div className='status'>状态：
+                        {true ? (
+                          <div>正常<CheckCircleFilled className='normal' /></div>
+                        ) : (
+                          <div>故障<CheckCircleFilled className='no_normal' /></div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
+                  )
 
-              })}
-            </div>
+                })}
+              </div>
+            )}
           </Card>
         </div>
         <div className='card-wrapper'>
-          <Card {...panelBaseProps} title={'配置信息'} className='default_monitor'>
-            <div className='header_'>
-
-              <Radio.Group value={size} onChange={handleSizeChange}>
-                <Radio.Button value="now-1h" >近1小时</Radio.Button>
-                <Radio.Button value="now-3h">近3小时</Radio.Button>
-                <Radio.Button value="now-12h">近12小时</Radio.Button>
-                <Radio.Button value="now-24h">近24小时</Radio.Button>
-                <Radio.Button value="now-7d">近7天</Radio.Button>
-                <Radio.Button value="now-30d">近30天</Radio.Button>
-              </Radio.Group>
-              <TimeRangePickerWithRefresh
-                // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
-                onChange={value => {
-                  console.log(value)
-                  const newValue = {
-                    start: isMathString(value.start) ? parse(value.start) : moment(value.start),
-                    end: isMathString(value.end) ? parse(value.end) : moment(value.end),
-                  }
-                  setRefreshKey(_.uniqueId('refreshKey_'));
-                  setRange(newValue);
-                }}
-                value={range}
-                localKey='monitor-timeRangePicker-value'
-              />
-
-
-            </div>
+          <Card {...panelBaseProps} title={'监控图表'} className='default_monitor'>
+            {monitorStatus && (
+               <div className='header_'>
+               <Radio.Group value={size} onChange={handleSizeChange}>
+                 <Radio.Button value="now-1h" >近1小时</Radio.Button>
+                 <Radio.Button value="now-3h">近3小时</Radio.Button>
+                 <Radio.Button value="now-12h">近12小时</Radio.Button>
+                 <Radio.Button value="now-24h">近24小时</Radio.Button>
+                 <Radio.Button value="now-7d">近7天</Radio.Button>
+                 <Radio.Button value="now-30d">近30天</Radio.Button>
+               </Radio.Group>
+               <TimeRangePickerWithRefresh
+                 // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+                 onChange={value => {
+                   const newValue = {
+                     start: isMathString(value.start) ? parse(value.start) : moment(value.start),
+                     end: isMathString(value.end) ? parse(value.end) : moment(value.end),
+                   }
+                   setRefreshKey(_.uniqueId('refreshKey_'));
+                   setRange(newValue);
+                 }}
+                 value={range}
+                 localKey='monitor-timeRangePicker-value'
+               />
+ 
+             </div>
+            )}
+           
             {action === "monitor" && (//当前监控展示
-              <div className='monitor_body'>
+               <>
+               {monitor.status>0 ? (
+                
+               <div className='monitor_body'>
                 <div style={{ width: '100%' }} >
                   <div className='monitor_title'>
                     <div className='title'>{monitor.monitoring_name}</div>
@@ -387,10 +417,20 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </div>
 
               </div>
+
+
+               ):(
+                 <div>
+                    <div className="no_monitor">未启动监控</div> 
+                 </div>
+               )}
+              </>
+              
             )}
             {action === "asset" && (//当前监控展示
+             <>
+            {monitorStatus ? (
               <div className='group_monitor_body'>
-
                 {monitors.map((item, index) => (
                   <div className='every_graph'>
                     <div className='monitor_title'>
@@ -425,7 +465,12 @@ export default function (props: { initialValues: object; initParams: object; mod
                 ))}
 
               </div>
-
+            ):(
+               <div>
+                  <div className="no_monitor">设备已离线</div> 
+               </div>
+             )}
+            </>
 
             )}
           </Card>
@@ -468,8 +513,9 @@ export default function (props: { initialValues: object; initParams: object; mod
           visible={accessories.visual}
           title={accessories.title}
           confirmLoading={false}
+          className='accessories_modal'
           mask={true}
-          // width={window.innerWidth * 0.8}
+          width={(320*accessories.items.length)+'px'}
           // okButtonProps={{
           // }}
           onCancel={() => {
@@ -478,28 +524,30 @@ export default function (props: { initialValues: object; initParams: object; mod
           }}
         >
           <div className='accessories_body'>
-            {accessories.items.map((item,pos) => {
+            {accessories.items.map((item, pos) => {
               return <div className='accessories_every_group show_image'>
-                  <div className='title' style={{fontWeight:'600'}}>{accessories.label.toUpperCase()}({pos+1})</div>
-                    <div className={'image ' + accessories.name} style={{marginLeft:'20%'}}></div>
-                    <div className='status' style={{display:'flex'}}>状态：
-                      {true ? (
-                        <div>正常<CheckCircleFilled className='normal' /></div>
-                      ) : (
-                        <div>故障<CheckCircleFilled className='no_normal' /></div>
-                      )}
-               </div>
-               {
-               accessories.properties.map((property, index) => {
-                return <>
-                  <div className='accessories' key={"_div" + index}>
-                     <div>{property.label}:</div>{item[property.name]}
-                  </div>
+                <div className='title' style={{ fontWeight: '600' }}>{accessories.label.toUpperCase()}({pos + 1})</div>
+                <div className={'image ' + accessories.name} style={{ marginLeft: '20%' }}></div>
+                <div className='status' style={{ display: 'flex',margin:'0 auto' }}>状态：
+                  {true ? (
+                    <div>正常<CheckCircleFilled className='normal' /></div>
+                  ) : (
+                    <div>故障<CheckCircleFilled className='no_normal' /></div>
+                  )}
+                </div>
+                <div  className='properties'>
+                {
+                  accessories.properties.map((property, index) => {
+                    return <>
+                      <div className='accessories' key={"_div" + index}>
+                        <div>{property.label}:</div>{item[property.name]}
+                      </div>
 
-                </>
-              })}
+                    </>
+                  })}
+                  </div>
               </div>
-              
+
             })}
           </div>
         </Modal>
