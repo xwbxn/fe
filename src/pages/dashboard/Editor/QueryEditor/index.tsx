@@ -8,6 +8,7 @@ import DatasourceSelect from './components/DatasourceSelect';
 import Prometheus from './Prometheus';
 import Elasticsearch from './Elasticsearch';
 import Monitoring from './Monitoring';
+import ApiService from './ApiService';
 
 export default function index({ chartForm, type, variableConfig, dashboardId }) {
   const { t } = useTranslation('dashboard');
@@ -43,6 +44,9 @@ export default function index({ chartForm, type, variableConfig, dashboardId }) 
             }
             if (cate === 'elasticsearch') {
               return <Elasticsearch chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
+            }
+            if (cate === 'api') {
+              return <ApiService chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId}></ApiService>
             }
             return <Monitoring chartForm={chartForm} variableConfig={variableConfig} dashboardId={dashboardId} />;
           }}

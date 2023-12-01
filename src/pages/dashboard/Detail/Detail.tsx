@@ -19,7 +19,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import semver from 'semver';
 import { useTranslation } from 'react-i18next';
-import { useInterval } from 'ahooks';
+import { useInterval, useLocalStorageState } from 'ahooks';
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -55,6 +55,7 @@ interface IProps {
   isBuiltin?: boolean;
   gobackPath?: string;
   builtinParams?: any;
+  isHome?: boolean;
   onLoaded?: (dashboard: Dashboard['configs']) => boolean;
 }
 
@@ -105,7 +106,7 @@ const getDefaultTimeRange = (query, t) => {
 };
 
 export default function DetailV2(props: IProps) {
-  const { isPreview = false, isBuiltin = false, gobackPath, builtinParams } = props;
+  const { isPreview = false, isBuiltin = false, gobackPath, builtinParams, isHome = false } = props;
   const { t, i18n } = useTranslation('dashboard');
   const history = useHistory();
   const { datasourceList, profile } = useContext(CommonStateContext);
@@ -113,6 +114,12 @@ export default function DetailV2(props: IProps) {
   const isAuthorized = !_.some(roles, (item) => item === 'Guest') && !isPreview;
   const [dashboardMeta, setDashboardMeta] = useGlobalState('dashboardMeta');
   let { id } = useParams<URLParam>();
+  const [home] = useLocalStorageState('HOME_URL', {
+    defaultValue: '1',
+  });
+  if (isHome) {
+    id = home;
+  }
   const query = queryString.parse(useLocation().search);
   if (isBuiltin) {
     id = builtinParamsToID(query);
@@ -130,8 +137,6 @@ export default function DetailV2(props: IProps) {
     id: '',
     initialValues: {} as any,
   });
-  const [migrationVisible, setMigrationVisible] = useState(false);
-  const [migrationModalOpen, setMigrationModalOpen] = useState(false);
   let updateAtRef = useRef<number>();
   const refresh = async (cbk?: () => void) => {
     fetchDashboard({
@@ -142,9 +147,6 @@ export default function DetailV2(props: IProps) {
       const configs = _.isString(res.configs) ? JSONParse(res.configs) : res.configs;
       if (props.onLoaded && !props.onLoaded(configs)) {
         return;
-      }
-      if ((!configs.version || semver.lt(configs.version, '3.0.0')) && !builtinParams) {
-        setMigrationVisible(true);
       }
       setDashboard({
         ...res,
@@ -217,6 +219,7 @@ export default function DetailV2(props: IProps) {
         <Title
           isPreview={isPreview}
           isBuiltin={isBuiltin}
+          isHome={isHome}
           isAuthorized={isAuthorized}
           gobackPath={gobackPath}
           dashboard={dashboard}
@@ -259,6 +262,10 @@ export default function DetailV2(props: IProps) {
               });
             }
           }}
+          id={id}
+          handleVariableChange={handleVariableChange}
+          stopAutoRefresh={stopAutoRefresh}
+          variableConfig={variableConfig}
         />
       }
     >
@@ -269,26 +276,6 @@ export default function DetailV2(props: IProps) {
               <Alert type='warning' message='仪表盘已经被别人修改，为避免相互覆盖，请刷新仪表盘查看最新配置和数据' />
             </div>
           )}
-          <div className='dashboard-detail-content-header'>
-            <div className='variable-area'>
-              {variableConfig && (
-                <VariableConfig isPreview={!isAuthorized} onChange={handleVariableChange} value={variableConfig} range={range} id={id} onOpenFire={stopAutoRefresh} />
-              )}
-            </div>
-            {isAuthorized && (
-              <DashboardLinks
-                value={dashboardLinks}
-                onChange={(v) => {
-                  const dashboardConfigs: any = dashboard.configs;
-                  dashboardConfigs.links = v;
-                  handleUpdateDashboardConfigs(id, {
-                    configs: JSON.stringify(dashboardConfigs),
-                  });
-                  setDashboardLinks(v);
-                }}
-              />
-            )}
-          </div>
           {variableConfigWithOptions && (
             <Panels
               dashboardId={id}
@@ -356,62 +343,6 @@ export default function DetailV2(props: IProps) {
           handleUpdateDashboardConfigs(dashboard.id, {
             configs: panelsMergeToConfigs(dashboard.configs, newPanels),
           });
-        }}
-      />
-      {/*迁移*/}
-      <Modal
-        title='迁移大盘'
-        visible={migrationVisible}
-        onCancel={() => {
-          setMigrationVisible(false);
-        }}
-        footer={[
-          <Button
-            key='cancel'
-            danger
-            onClick={() => {
-              setMigrationVisible(false);
-              handleUpdateDashboardConfigs(dashboard.id, {
-                configs: JSON.stringify({
-                  ...dashboard.configs,
-                  version: '3.0.0',
-                }),
-              });
-            }}
-          >
-            关闭并不再提示
-          </Button>,
-          <Button
-            key='batchMigrate'
-            type='primary'
-            ghost
-            onClick={() => {
-              history.push('/help/migrate');
-            }}
-          >
-            前往批量迁移大盘
-          </Button>,
-          <Button
-            key='migrate'
-            type='primary'
-            onClick={() => {
-              setMigrationVisible(false);
-              setMigrationModalOpen(true);
-            }}
-          >
-            迁移当前大盘
-          </Button>,
-        ]}
-      >
-        v6 版本将不再支持全局 Prometheus 集群切换，新版本可通过图表关联数据源变量来实现该能力。 <br />
-        迁移工具会创建数据源变量以及关联所有未关联数据源的图表。
-      </Modal>
-      <MigrationModal
-        visible={migrationModalOpen}
-        setVisible={setMigrationModalOpen}
-        boards={[dashboard]}
-        onOk={() => {
-          refresh();
         }}
       />
     </PageLayout>

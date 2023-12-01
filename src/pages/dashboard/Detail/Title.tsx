@@ -25,6 +25,8 @@ import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRang
 import { AddPanelIcon } from '../config';
 import { visualizations } from '../Editor/config';
 import { dashboardTimeCacheKey } from './Detail';
+import VariableConfig, { IVariable } from '../VariableConfig';
+import { useLocalStorageState } from 'ahooks';
 
 interface IProps {
   dashboard: any;
@@ -34,18 +36,30 @@ interface IProps {
   isPreview: boolean;
   isBuiltin: boolean;
   isAuthorized: boolean;
+  isHome: boolean;
   gobackPath?: string;
+  variableConfig?: IVariable[];
+  handleVariableChange: (value, b, valueWithOptions) => void;
+  id: string;
+  stopAutoRefresh: () => void;
 }
 
 const cachePageTitle = document.title;
 
 export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
-  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized } = props;
+  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome} = props;
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
   const { viewMode, themeMode } = query;
+  const [home, setHome] = useLocalStorageState('HOME_URL', {
+    defaultValue: '1',
+  });
+
+  const setHomePage = () => {
+    setHome(id);
+  };
 
   useEffect(() => {
     document.title = `${dashboard.name} - ${cachePageTitle}`;
@@ -66,11 +80,13 @@ export default function Title(props: IProps) {
             }}
           />
         )}
-        <div className='title' style={{width:'205px'}}>{dashboard.name}</div>
+        <div className='title' style={{ width: '205px' }}>
+          {dashboard.name}
+        </div>
       </div>
-      <div className='dashboard-detail-header-right'>
-        <Space>
-          <div>
+      {
+        <div className='dashboard-detail-header-right' style={{ display: isHome ? 'none' : '' }}>
+          <Space>
             {isAuthorized && (
               <Dropdown
                 trigger={['click']}
@@ -96,53 +112,57 @@ export default function Title(props: IProps) {
                 </Button>
               </Dropdown>
             )}
-          </div>
-          <TimeRangePickerWithRefresh
-            localKey={dashboardTimeCacheKey}
-            dateFormat='YYYY-MM-DD HH:mm:ss'
-            // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
-            value={range}
-            onChange={setRange}
-          />
-          {!isPreview && (
-            <Button
-              onClick={() => {
-                const newQuery = _.omit(query, ['viewMode', 'themeMode']);
-                if (!viewMode) {
-                  newQuery.viewMode = 'fullscreen';
-                }
-                history.replace({
-                  pathname: location.pathname,
-                  search: querystring.stringify(newQuery),
-                });
-                // TODO: 解决仪表盘 layout resize 问题
-                setTimeout(() => {
-                  window.dispatchEvent(new Event('resize'));
-                }, 500);
-              }}
-            >
-              {viewMode === 'fullscreen' ? t('exit_full_screen') : t('full_screen')}
-            </Button>
-          )}
-          {viewMode === 'fullscreen' && (
-            <Switch
-              checkedChildren='dark'
-              unCheckedChildren='light'
-              checked={themeMode === 'dark'}
-              onChange={(checked) => {
-                const newQuery = _.omit(query, ['themeMode']);
-                if (checked) {
-                  newQuery.themeMode = 'dark';
-                }
-                history.replace({
-                  pathname: location.pathname,
-                  search: querystring.stringify(newQuery),
-                });
-              }}
+            {variableConfig && (
+              <VariableConfig isPreview={!isAuthorized} onChange={handleVariableChange} value={variableConfig} range={range} id={id} onOpenFire={stopAutoRefresh} />
+            )}
+            <TimeRangePickerWithRefresh
+              localKey={dashboardTimeCacheKey}
+              dateFormat='YYYY-MM-DD HH:mm:ss'
+              // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
+              value={range}
+              onChange={setRange}
             />
-          )}
-        </Space>
-      </div>
+            {!isPreview && (
+              <Button
+                onClick={() => {
+                  const newQuery = _.omit(query, ['viewMode', 'themeMode']);
+                  if (!viewMode) {
+                    newQuery.viewMode = 'fullscreen';
+                  }
+                  history.replace({
+                    pathname: location.pathname,
+                    search: querystring.stringify(newQuery),
+                  });
+                  // TODO: 解决仪表盘 layout resize 问题
+                  setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                  }, 500);
+                }}
+              >
+                {viewMode === 'fullscreen' ? t('exit_full_screen') : t('full_screen')}
+              </Button>
+            )}
+            {viewMode === 'fullscreen' && (
+              <Switch
+                checkedChildren='dark'
+                unCheckedChildren='light'
+                checked={themeMode === 'dark'}
+                onChange={(checked) => {
+                  const newQuery = _.omit(query, ['themeMode']);
+                  if (checked) {
+                    newQuery.themeMode = 'dark';
+                  }
+                  history.replace({
+                    pathname: location.pathname,
+                    search: querystring.stringify(newQuery),
+                  });
+                }}
+              />
+            )}
+            <Button onClick={() => setHomePage()}>设为首页</Button>
+          </Space>
+        </div>
+      }
     </div>
   );
 }

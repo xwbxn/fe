@@ -32,6 +32,15 @@ export const baseCates: Cate[] = [
     graphPro: false,
     alertPro: true,
   },
+  {
+    value: 'api',
+    label: '数据接口',
+    type: ['api'],
+    alertRule: false,
+    dashboard: true,
+    graphPro: false,
+    alertPro: false,
+  },
 ];
 
 export const allCates = [...baseCates, ...advancedCates];

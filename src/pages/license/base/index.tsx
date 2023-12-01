@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Row, Card, Checkbox, Form, Select, Radio } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { CheckCircleOutlined, SyncOutlined, GroupOutlined, SearchOutlined, DoubleLeftOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, SyncOutlined, GroupOutlined, SearchOutlined, DoubleLeftOutlined, DeliveredProcedureOutlined, DoubleRightOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 import { SetConfigTables, SetConfigForms } from './catalog'
 import { CommonStateContext } from '@/App';
@@ -14,7 +14,8 @@ import { assetsType } from '@/store/assetsInterfaces';
 import { deleteAssets, getAssets, getOrganizationTree, updateOrganization, deleteOrganization, addOrganization } from '@/services/assets';
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
-const {TextArea} = Input
+import { getCertificate, getLicense, saveLicense, updateLicense } from '@/services/license';
+const { TextArea } = Input
 
 interface DataType {
   key: React.ReactNode;
@@ -35,7 +36,35 @@ export default function () {
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
-
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(false); // 表单编辑状态，默认为 false
+  const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
+  const [rowKeys, setRowKeys] = useState<any[]>([]);
+  const [radioCheck, setRadioCheck] = useState<any>();
+  const [licenseId, setLicenseId] = useState<any>();
+  const handleEdit = () => {
+    setEditing(true); // 点击编辑按钮后，将编辑状态设置为 true
+  };
+  const [form] = Form.useForm();
+  const lOptions = [
+    { label: '只发送一次', value: "once" },
+    { label: '每天发送一次', value: "days" },
+  ];
+  // 处理许可配置保存逻辑
+  const handleSave = (values) => {
+    
+    console.log(values);
+    values["nodes"]=parseInt(values["nodes"], 10);
+    values["frequency"] = radioCheck;
+    values["id"]=licenseId;
+    updateLicense(values)
+    message.success('操作成功');
+    //history.back();
+    setEditing(false); // 保存后，将编辑状态设置为 false
+  };
+  const toggleForm = () => {
+    setShowForm(!showForm);
+  };
   const loadingTree = () => {
     getOrganizationTree({}).then(({ dat }) => {
       setTreeData(dat);
@@ -45,7 +74,24 @@ export default function () {
   };
 
   useEffect(() => {
-    loadingTree();
+    // loadingTree();
+    // getCertificate().then(({ dat }) => {
+    //   console.log("BBBBB",dat)
+    //   // setTreeData(dat);
+    //   // initData["parent_id"] = dat;
+    //   //setInitData({ ...initData })
+    // });
+    getLicense().then(({ dat }) => {
+      // console.log("AAAAAAAAAAAAAA")
+      // console.log(dat);
+      if (dat.frequency == "once") {
+        setRadioCheck("once");
+      }else if (dat.frequency == "days") {
+        setRadioCheck("days");
+      }
+      setLicenseId(dat.id);
+      form.setFieldsValue(dat);
+    })
   }, [query]);
 
   const renderFields = (text, record, field, currentConfigId) => {
@@ -53,7 +99,12 @@ export default function () {
     let value = record[field];
     return value;
   }
+  const handleLogLeverChange = (e) => {
+    const selectedValue = e.target.value;
+    setRadioCheck(selectedValue);
+    //console.log('setRadioCheck:', selectedValue);
 
+  };
   const formSubmit = (param, businessForm) => {
     if (businessForm["operate"] == "添加") {
       addOrganization(param).then(() => {
@@ -122,10 +173,11 @@ export default function () {
       loadingTree();
     });
   };
+  
 
 
   return (
-    <PageLayout icon={<GroupOutlined />} title={'许可信息'}>
+    <PageLayout icon={<GroupOutlined />} title={'许可证管理'}>
       <div className='assets-list' style={{ height: '30px', lineHeight: '39px' }}>
         <Row className='event-table-search'>
           <div className='event-table-search-left' style={{ marginLeft: '10px' }}>
@@ -133,49 +185,96 @@ export default function () {
           </div>
           <div className='event-table-search-right'>
             <div className='user-manage-operate'>
-              <Button type='primary' onClick={() => handleClick('create')} >
-                一键导出
+              <Button type='primary' style={{ backgroundColor: "#4095E5" }} onClick={() => handleClick('create')} >
+                批量导出
               </Button>
             </div>
           </div>
         </Row>
         <Table
           dataSource={treeData}
-          rowSelection={{
-
-          }}
+          rowKey='id'
+            rowSelection={{
+              onChange: (_, rows) => {
+                setSelectRowKeys(rows ? rows.map(({ id }) => id) : []);
+                console.log(selectRowKeys);
+              },
+              selectedRowKeys: selectRowKeys
+            }}
           pagination={false}
           columns={[
             {
-              title: '采集器名称',
-              dataIndex: 'name',
+              title: '序列号',
+              dataIndex: 'city',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
+            },
+            {
+              title: '采集器信息',
+              dataIndex: 'manger',
+              ellipsis: true,
+              align: 'center',
               render(value, record, index) {
                 return value;
               },
             },
             {
               title: '主版本号',
-              dataIndex: 'city',
-            },
-            {
-              title: '采集器版本',
               dataIndex: 'address',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
+            },
+
+            {
+              title: '采集器版本号',
+              dataIndex: 'phone',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
             },
             {
-              title: t('有效模块'),
-              dataIndex: 'manger',
+              title: '有效模块',
+              dataIndex: 'description',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
             },
             {
               title: '有效期',
-              dataIndex: 'phone',
+              dataIndex: 'description',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
             },
             {
               title: '许可节点数',
               dataIndex: 'description',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
             },
             {
               title: '已用许可节点',
               dataIndex: 'description',
+              ellipsis: true,
+              align: 'center',
+              render(value, record, index) {
+                return value;
+              },
             },
             {
               title: '操作',
@@ -183,17 +282,23 @@ export default function () {
               align: 'center',
               render: (text: string, record: assetsType) => (
                 <div className='table-operator-area'>
-                  <Button size='small' className='oper-name' type='link' icon={<SyncOutlined />} onClick={() => {
+                  <Button size='small'  style={{ backgroundColor: "#57B894" }} className='oper-name' type='link' icon={<SyncOutlined />} 
+                  onClick={() => {
+                    history.push(`/license/base/${record.id}`);
+                  }}
+                  >
+                    更新证书
+                  </Button>
+                  <Button size='small' style={{ backgroundColor: "#4095E5" }} className='oper-name' type='link' icon={<DeliveredProcedureOutlined />} onClick={() => {
                     handleClick("update", record);
                   }}>
-                    更新证书
+                    导出
                   </Button>
 
                 </div>
               ),
             },
           ]}
-          rowKey='id'
           size='small'
         ></Table>
 
@@ -201,28 +306,49 @@ export default function () {
           hoverable
           title='License 通知设置'
           className='notice_set'
-          extra={<a href="#"><DoubleLeftOutlined style={{ transform: 'rotate(270deg)' }} /> 更多 </a>} style={{ width: 300 }}
+          // extra={<a href="#"><DoubleLeftOutlined style={{ transform: 'rotate(270deg)' }} /> 更多 </a>} style={{ width: 300 }}
+          extra={
+            <a type="link" onClick={toggleForm}>
+              {showForm ? (
+                <>
+                  <DoubleLeftOutlined style={{ transform: 'rotate(270deg)' }} /> 收起
+                </>
+              ) : (
+                <>
+                  <DoubleLeftOutlined style={{ transform: 'rotate(270deg)' }} /> 更多
+                </>
+              )}
+            </a>
+          }
+          style={{ width: 300 }}
         >
-          <Form
+          {showForm && <Form
+            form={form}
             name="basic"
             labelCol={{ span: 10 }}
             wrapperCol={{ span: 16 }}
             style={{ maxWidth: 890 }}
             initialValues={{ remember: true }}
             className='license_submit_form'
-            // onFinish={onFinish}
+            onFinish={handleSave}
             // onFinishFailed={onFinishFailed}
             autoComplete="off"
           >
             <Form.Item
               label="License 到期提醒时间"
-              name="username"
+              name="days"
+              // rules={[{ required: true,message: '请选择 License 到期提醒时间'}]}
               
-              rules={[{ required: true, message: '请选择 License 到期提醒时间' }]}
+            //rules={[{ required: true, message: '请选择 License 到期提醒时间' }]}
             >
-              <Select options={[{
-                 value:7,label:'7天'
-                }]}>
+              <Select style={{ width: '90px' }} disabled={!editing} options={[
+                { value: 7, label: '7天' },
+                { value: 10, label: '10天' },
+                { value: 30, label: '1个月' },
+                { value: 60, label: '2个月' },
+                { value: 90, label: '3个月' }
+
+              ]}>
               </Select>
             </Form.Item>
 
@@ -230,52 +356,51 @@ export default function () {
               label="剩余节点提醒"
             >
               <div className='hint_message'>
-              数量少于
-              <Form.Item
-                   name="password"
-                   rules={[{ required: true, message: '输入剩余节点提醒' }]}
-             >
-                 <Input placeholder='输入数值' />
-                 </Form.Item>              
-              开始提醒
+                数量少于
+                <Form.Item
+                  name="nodes"
+                  rules={[{ required: true, message: '输入剩余节点提醒' }]}
+                >
+                  <Input disabled={!editing} />
+                </Form.Item>
+                开始提醒
               </div>
             </Form.Item>
 
             <Form.Item
-              name="提醒频率"
+              name="frequency"
               label="提醒频率"
-              valuePropName="checked"
             >
-              <Radio.Group>
-                <Radio value={1}>只发送一次</Radio>
-                <Radio value={10000}>每天发送一次</Radio>
+              <Radio.Group disabled={!editing} options={lOptions} onChange={handleLogLeverChange}>  
               </Radio.Group>
             </Form.Item>
             <Form.Item
-              name="通知的邮箱地址"
+              name="email"
               label="通知的邮箱地址"
             >
-              <TextArea placeholder='多个邮件用英文分号隔开'> </TextArea>
+              <TextArea disabled={!editing} placeholder='多个邮件用英文分号隔开'> </TextArea>
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               name="微信号"
               label="微信号"
               valuePropName="checked"
             >
-              <TextArea placeholder='多个微信号用英文分号隔开(对接的微信才能发送通知)'>Remember me</TextArea>
-            </Form.Item>
+              <TextArea disabled={!editing} placeholder='多个微信号用英文分号隔开(对接的微信才能发送通知)'>Remember me</TextArea>
+            </Form.Item> */}
 
             <Form.Item wrapperCol={{ offset: 12, span: 16 }} className='submit_button'>
               <Space >
-                <Button >
-                  编辑
-                </Button>
-                <Button type="primary" htmlType="submit">
+                {  ( // 当不处于编辑状态时，显示编辑按钮
+                  <Button onClick={handleEdit}>
+                    编辑
+                  </Button>
+                )}
+                <Button type="primary" htmlType="submit" disabled={!editing}>
                   保存
                 </Button>
               </Space>
             </Form.Item>
-          </Form>
+          </Form>}
 
         </Card>
 

@@ -27,6 +27,7 @@ import prometheusQuery from './prometheus';
 import elasticsearchQuery from './elasticsearch';
 // @ts-ignore
 import plusDatasource from 'plus:/parcels/Dashboard/datasource';
+import apiServicequery from './apiservice';
 
 interface IProps {
   id?: string;
@@ -41,7 +42,7 @@ interface IProps {
   scopedVars?: any;
 }
 
-export default function usePrometheus(props: IProps) {
+export default function useQuery(props: IProps) {
   const { dashboardId, datasourceCate, time, targets, variableConfig, inViewPort, spanNulls, datasourceValue } = props;
   const [series, setSeries] = useState<any[]>([]);
   const [error, setError] = useState('');
@@ -53,6 +54,7 @@ export default function usePrometheus(props: IProps) {
   const fetchQueryMap = {
     prometheus: prometheusQuery,
     elasticsearch: elasticsearchQuery,
+    api: apiServicequery,
     ...plusDatasource,
   };
   const { run: fetchData } = useDebounceFn(

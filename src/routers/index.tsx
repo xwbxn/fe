@@ -21,11 +21,13 @@ import _ from 'lodash';
 import NotFound from '@/pages/notFound';
 import Page403 from '@/pages/notFound/Page403';
 import Login from '@/pages/login';
+import Home from '@/pages/home';
 import Overview from '@/pages/login/overview';
 import LoginCallback from '@/pages/loginCallback';
 import LoginCallbackCAS from '@/pages/loginCallback/cas';
 import LoginCallbackOAuth from '@/pages/loginCallback/oauth';
 import LicenseBase from '@/pages/license/base';
+import LicenseBaseLic from '@/pages/license/base/license';
 import LicenseDevice from '@/pages/license/device';
 import LogoSet from '@/pages/system/logo_set';
 import LogDebug from '@/pages/system/log_debug';
@@ -100,7 +102,7 @@ import plusLoader from 'plus:/utils/loader';
 import useIsPlus from 'plus:/components/useIsPlus';
 import Designer from '@/pages/bigScreen/Designer';
 import Preview from '@/pages/bigScreen/Preview';
-// import Topo from '@/pages/topoGraph/Designer';
+import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
 import Bigscreen from '@/pages/bigScreen';
 import View from '@/pages/bigScreen/View';
@@ -138,6 +140,7 @@ export default function Content() {
   return (
     <div className={`content ${themeClassName}`}>
       <Switch>
+        <Route path='/home' component={Home} />
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
@@ -227,6 +230,7 @@ export default function Content() {
         <Route exact path='/help/source/:action/:type/:id' component={DatasourceAdd} />
         <Route exact path='/help/sso' component={SSOConfigs} />
          <Route exact path='/license/base' component={LicenseBase} />
+         <Route exact path='/license/base/:id' component={LicenseBaseLic} />
          <Route exact path='/license/device' component={LicenseDevice} /> 
          <Route exact path='/system/logo' component={LogoSet} /> 
          <Route exact path='/log/debug/switch' component={LogDebug} /> 
@@ -249,6 +253,7 @@ export default function Content() {
         <Route exact path='/bigscreen/designer' component={Designer} />
         <Route exact path='/bigscreen/designer/:id' component={Designer} />
         <Route exact path='/bigscreen/preview' component={Preview} />
+        <Route exact path='/bigscreen/topo' component={Topo} />
         <Route exact path='/bigscreen/view/:id' component={View} />
 
         <Route exact path='/bigscreen' component={Bigscreen} />
@@ -266,7 +271,7 @@ export default function Content() {
           <RouteWithSubRoutes key={i} {...route} />
         ))}
         <Route path='/' exact>
-          <Redirect to='/metric/explorer' />
+          <Redirect to='/home' />
         </Route>
         <Route path='/403' component={Page403} />
         <Route path='/404' component={NotFound} />

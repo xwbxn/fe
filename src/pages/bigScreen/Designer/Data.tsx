@@ -9,8 +9,8 @@ const Data = ({ render, options, interval = 0 }) => {
   function getData() {
     if (options?.dataType === 'mock') {
       setData(Mock.mock(options.mock));
-    } else {
-      request(options?.url, {
+    } else if (options?.url) {
+      request(options.url, {
         method: options?.method,
       }).then((res) => {
         setData(res.dat);

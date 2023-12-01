@@ -41,9 +41,6 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import LayoutXH from './components/menu/layoutXH'; //西航版本
-import { Header, Footer } from 'antd/lib/layout/layout';
-import Sider from 'antd/lib/layout/Sider';
-import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 
 interface IProfile {
   admin?: boolean;

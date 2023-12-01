@@ -12,11 +12,12 @@ import { useHistory, useLocation } from 'react-router-dom';
 import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
+import { useLocalStorageState } from 'ahooks';
 
 const getMenuList = (t) => {
   const menuList = [
     {
-      key: 'home',
+      key: '/home',
       icon: <IconFont type='icon-Menu_Infrastructure' />,
       label: t('首页'),
     },
@@ -230,7 +231,7 @@ const getMenuList = (t) => {
     },
   ];
   if (import.meta.env['VITE_IS_COLLECT']) {
-    const targets:any = _.find(menuList, (item) => item.key === 'targets');
+    const targets: any = _.find(menuList, (item) => item.key === 'targets');
     if (targets) {
       targets.children?.push({
         key: '/collects',
@@ -242,7 +243,6 @@ const getMenuList = (t) => {
 };
 interface IProps {
   url?: string;
-  
 }
 
 export default function () {//{ selectMenu?:any }
@@ -251,17 +251,17 @@ export default function () {//{ selectMenu?:any }
   const menuList = getMenuList(t);
   const [menus, setMenus] = useState(menuList);
   const [defaultSelectedKeys, setDefaultSelectedKeys] = useState<string[]>();
-  
+
   const [mainMenuKey, setMainMenuKey] = useState<string[]>([]);
-  const [mainMenuItems,setMainMenuItems] = useState<any>({});
+  const [mainMenuItems, setMainMenuItems] = useState<any>({});
   const location = useLocation();
   const history = useHistory();
   const { pathname } = location;
   const { profile } = useContext(CommonStateContext);
+  const [home] = useLocalStorageState('HOME_URL');
 
   useEffect(() => {
     setDefaultSelectedKeys([]);
-    
 
     // for (const item of menuList) {
     //   if (item && item.key.startsWith('/') && pathname.includes(item.key)) {
