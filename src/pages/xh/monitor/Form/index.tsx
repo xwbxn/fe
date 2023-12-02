@@ -8,7 +8,7 @@ import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import { type } from 'os';
@@ -16,8 +16,7 @@ const { TextArea } = Input;
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
-  const commonState = useContext(CommonStateContext);
-  const [organizationId] = useState<number>(commonState.organizationId);
+  const history = useHistory();
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
@@ -39,7 +38,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   useEffect(() => {
     if (action == null || 'addeditview'.indexOf(action + '') < 0) {
-      history.back();
+      history.goBack();
     }
     const param = {
       page: 1,
@@ -167,36 +166,15 @@ export default function (props: { initialValues: object; initParams: object; mod
       values['config'] = JSON.stringify(config);
       updateXhMonitor(values).then((res) => {
         message.success('修改成功');
-        location.href = '/xh/monitor';
+        history.push('/xh/monitor')
       });
     } else {
       values['config'] = JSON.stringify(config);
       createXhMonitor(values).then((res) => {
         message.success('操作成功');
-        location.href = '/xh/monitor?assetId=' + values['asset_id'];
+        history.push(`/xh/monitor?assetId=${values['asset_id']}`)
       });
     }
-  };
-
-  const genDefaultConfig = () => {
-    const name = form.getFieldValue('type');
-    // debugger;
-    const data = form.getFieldsValue();
-    // if (data.configs) {
-    //   Modal.confirm({
-    //     title: '将会覆盖原有配置,是否继续?',
-    //     onOk: () => {
-    //       delete data.configs;
-    getAssetDefaultConfig(name, data).then((res) => {
-      form.setFieldsValue({ configs: res.dat.content });
-    });
-    // },
-    // });
-    // } else {
-    //   getAssetDefaultConfig(name, data).then((res) => {
-    //     form.setFieldsValue({ configs: res.dat.content });
-    //   });
-    // }
   };
 
   return (
@@ -304,27 +282,6 @@ export default function (props: { initialValues: object; initParams: object; mod
                   </Col>
                 );
               })}
-              {/* <Col span={12}>
-              <Form.Item label='探针' name='ident'>
-                <Select style={{ width: '100%' }} options={identList} />
-              </Form.Item>
-            </Col> */}
-              {/* <Col span={24}>
-              <Form.Item
-                label={
-                  <Space>
-                    采集配置
-                    <Button type='primary' icon={<FileAddOutlined />} size='small' onClick={genDefaultConfig}>
-                      自动生成
-                    </Button>
-                  </Space>
-                }
-                name='configs'
-                rules={[{ required: true }]}
-              >
-                <CodeMirror height='200px' extensions={[StreamLanguage.define(toml)]}></CodeMirror>
-              </Form.Item>
-            </Col> */}
             </Row>
           </Card>
         </div>
@@ -338,7 +295,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                   </Button>
                   <Button
                     onClick={() => {
-                      history.back();
+                      history.goBack()
                     }}
                   >
                     取消
@@ -354,7 +311,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         <div className='monitor_management_button_zone'>
           <Button
             onClick={() => {
-              history.back();
+              history.goBack()
             }}
           >
             取消

@@ -109,7 +109,7 @@ export default function () {
       fixed: 'left',
       ellipsis: true,
       render(value, record, index) {
-        let name = assetInfo[value]?.name;
+        let name = assetInfo[value]?.ip;
         return name;
       },
     },

@@ -115,7 +115,6 @@ export default function (props: { initialValues: object; initParams: object; mod
 
     createXhMonitor(values).then((res) => {
       message.success('操作成功');
-      // location.href = '/xh/monitor';
       history.push("/xh/monitor")
     });
   };

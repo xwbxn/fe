@@ -160,7 +160,25 @@ export default function () {
       }
     },
     {
-      title: "状态",
+      title: "管理状态",
+      width: "105px",
+      dataIndex: 'status',
+      ellipsis: true,
+      sorter: (a, b) =>{
+        return a.status - b.status
+      },
+      render(value, record, index) {
+        let label = "-";
+        if (value == 0) {
+          label = "离线";
+        } else if (value == 1) {
+          label = "正常"
+        }
+        return label;
+      }
+    },
+    {
+      title: "运行状态",
       width: "105px",
       dataIndex: 'health',
       ellipsis: true,

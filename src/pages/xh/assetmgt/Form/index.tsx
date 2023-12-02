@@ -37,12 +37,13 @@ export default function () {
   };
 
   const genForm = (assetTypes) => {
-    if(mode !== 'edit' && mode !== 'view') {
-      return
-    }
     const assetType: any = assetTypes.find((v) => v.name === form.getFieldValue('type'));
     if (assetType) {
-      setParams(assetType.form || []);
+      setParams(assetType.form || []); // 显示form表单
+      
+      if(!id) { // 新增时不显示扩展选项卡
+        return
+      }
       //TODO：处理分组属性
       let items = new Array();
       let extra_props = assetType.extra_props;

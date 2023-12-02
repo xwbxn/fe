@@ -51,12 +51,7 @@ function layoutXH() {
   }
 
   const handleClick = (item) => {
-    // if ((item.key as string) === 'home') {
-    //   // window.location.href = '/prod-api/';
-    //   history.push(item.key)
-    // }
     if ((item.key as string).startsWith('/')) {
-      // window.location.href = item.key;
       history.push(item.key)
       window.localStorage.setItem("mainMenuKey", mainMenu.key);
       window.localStorage.setItem("leftMenuItems", item.key);
