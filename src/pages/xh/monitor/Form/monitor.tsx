@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
 import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import Graph from '../Graph';
-import _, { random, values } from 'lodash';
+import _, { concat, random, values } from 'lodash';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import moment from 'moment';
@@ -387,7 +387,11 @@ export default function (props: { initialValues: object; initParams: object; mod
                <div className='monitor_body'>
                 <div style={{ width: '100%' }} >
                   <div className='monitor_title'>
-                    <div className='title'>{monitor.monitoring_name}</div>
+                    <div className='title'>{monitor.monitoring_name}
+                    {monitor.unit && (
+                       <>(<span style={{marginLeft:'0px',color:'#1367D8'}}>单位：{monitor.unit}</span>)</> 
+                      )
+                    }</div>
                     <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
                       operateType.visual = true;
                       setSelectMonitor(monitor);
@@ -395,7 +399,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     }} /> </div>
                   </div>
                   <Graph
-                    title={monitor.monitoring_name}
+                    title={monitor.monitoring_name+"(单位:"+monitor.unit+")"}
                     monitorId={parseInt(id + "")}
                     contentMaxHeight={200}
                     toolVisible={false}
@@ -433,7 +437,12 @@ export default function (props: { initialValues: object; initParams: object; mod
                 {monitors.map((item, index) => (
                   <div className='every_graph'>
                     <div className='monitor_title'>
-                      <div className='title'>{item.monitoring_name}</div>
+                      <div className='title'>{item.monitoring_name} 
+                      {item.unit && (
+                         <> (<span style={{marginLeft:'0px',color:'#1367D8'}}>单位：{item.unit}</span>)</>
+                      )
+                      }                      
+                      </div>
                       <div className='icons'><PlusOutlined /><FullscreenOutlined onClick={() => {
                         operateType.visual = true;
                         setSelectMonitor(item);
@@ -476,10 +485,15 @@ export default function (props: { initialValues: object; initParams: object; mod
         </div>
         <Modal
           visible={operateType.visual}
-          title={selectMonitor.monitoring_name}
+          title={selectMonitor.monitoring_name+" (单位："+selectMonitor.unit+")"}
           confirmLoading={false}
           width={window.innerWidth * 0.8}
           okButtonProps={{
+            onClick: () =>{
+              operateType.visual = false;
+              setOperateType(_.cloneDeep(operateType));
+              form.resetFields();
+            }            
           }}
           onCancel={() => {
             operateType.visual = false;

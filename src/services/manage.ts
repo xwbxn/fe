@@ -46,6 +46,12 @@ export const createXhMonitor = function (data: object) {
     data,
   });
 };
+
+export const getMonitorUnit = function () {
+  return request(`/api/n9e/xh/monitoring/unit`, {
+    method: RequestMethod.Get
+  });
+};
 //删除监控
 export const deleteXhMonitor = function (id: string) {
   return request(`/api/n9e/xh/monitoring/${id}`, {

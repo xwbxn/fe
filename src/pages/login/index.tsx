@@ -15,12 +15,12 @@
  *
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
 import { ifShowCaptcha, getCaptcha, getSsoConfig, getRedirectURL, getRedirectURLCAS, getRedirectURLOAuth, authLogin, getRSAConfig } from '@/services/login';
 import './login.less';
-
+// import cookie from "react-cookies";
 // @ts-ignore
 import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
 
@@ -32,6 +32,7 @@ export interface DisplayName {
   cas: string;
   oauth: string;
 }
+
 
 export default function Login() {
   const { t } = useTranslation();
@@ -166,7 +167,6 @@ export default function Login() {
                 ref={verifyimgRef}
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
-                  marginTop: '5px',
                   float: 'right',
                   width:'110px',
                   height: '36px'
@@ -175,6 +175,9 @@ export default function Login() {
                 alt='点击获取验证码'
               />
             </div>
+            <Form.Item name="remember" valuePropName='checked' wrapperCol={{offset:0,span:24}}>
+               <Checkbox>记住密码</Checkbox>
+            </Form.Item>
 
             <Form.Item>
               <Button type='primary' className='submit_button' onClick={handleSubmit}>

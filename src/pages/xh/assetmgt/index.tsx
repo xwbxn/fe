@@ -224,7 +224,7 @@ export default function () {
               Modal.confirm({
                 title: t('common:confirm.delete'),
                 onOk: async () => {
-                  await deleteAssets({ ids: [record.id.toString()] });
+                  await deleteXhAssets({ ids: [record.id.toString()] });
                   message.success(t('common:success.delete'));
                   setRefreshKey(_.uniqueId('refreshKey_'));
                 },
@@ -721,7 +721,6 @@ export default function () {
                       <Menu
                         style={{ width: '100px' }}
                         onClick={({ key }) => {
-
                           if (key == OperateType.AssetBatchExport) {
                             let names = new Array;
                             names.push(queryCondition);
@@ -755,8 +754,14 @@ export default function () {
                                 onCancel() { },
                               });
                             }
-                          } else {
-                            setOperateType(key as OperateType);
+                          } else if(key == OperateType.UpdateBusi){
+                                if (selectedAssets.length <= 0) {
+                                  message.warning("请选择要批量操作记录")
+                                  return
+                                }
+                                setOperateType(key as OperateType);
+                          } else{
+                                setOperateType(key as OperateType);
                           }
 
                         }}
@@ -765,7 +770,7 @@ export default function () {
                           { key: OperateType.AssetBatchExport, label: '导出设备' },
                           // { key: OperateType.BindTag, label: '绑定标签' },
                           // { key: OperateType.UnbindTag, label: '解绑标签' },
-                          // { key: OperateType.UpdateBusi, label: '修改业务组' },1 excle 2 xml 3 text
+                          { key: OperateType.UpdateBusi, label: '批量转移' },
                           // { key: OperateType.RemoveBusi, label: '移出业务组' },
                           // { key: OperateType.UpdateNote, label: '修改备注' },
                           { key: OperateType.Delete, label: '批量删除' },

@@ -3,7 +3,6 @@ import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree,
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, PoweroffOutlined, ProfileTwoTone, RightOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
-
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
 
@@ -16,7 +15,7 @@ import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
 import { deleteAssets, insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
-import { getMonitorInfoList, getMonitorInfo, getMonitorInfoListBasedOnSearch, deleteXhMonitor,deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
+import { getMonitorInfoList, getMonitorUnit, deleteXhMonitor,deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
@@ -41,6 +40,8 @@ let queryFilter = [
   { name: 'asset_name', label: '资产名称', type: 'input' },
   { name: 'status', label: '监控状态', type: 'select' },
   { name: 'is_alarm', label: '是否启用告警', type: 'select' },
+  { name: 'asset_ip', label: 'IP地址', type: 'input' },
+  // { name: 'asset_type', label: '资产类型', type: 'select' },
 ]
 export default function () {
   const { t } = useTranslation('assets');
@@ -75,6 +76,7 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [filterParam, setFilterParam] = useState<string>("");
   const history = useHistory();
+  const [unitOptions, setUnitOptions] = useState<any>(null);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const onSelectNone = () => {
     setSelectedAssets([]);
@@ -88,7 +90,7 @@ export default function () {
       width: "100px",
       ellipsis: true,
       render(value, record, index) {
-        return <div  style={{color:'#2B7EE5',cursor:'pointer'}}onClick={(e)=>{showModal("asset", record.id, "view")} }>{value}</div>;
+        return <div  style={{color:'#2B7EE5',cursor:'pointer'}} onClick={(e)=>{showModal("asset", record.id, "view")} }>{value}</div>;
       },
     },
     {
@@ -99,7 +101,9 @@ export default function () {
       ellipsis: true,
       render(value, record, index) {
         let name = assetInfo[value]?.name;
-        return name;
+        return <div  style={{color:'#2B7EE5',cursor:'pointer'}} onClick={(e)=>{          
+            history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
+        } }>{name}</div>;
       },
     },
     {
@@ -127,6 +131,15 @@ export default function () {
       render(value, record, index) {
         return value == 0 ? '关闭' : '正常';
       },
+    },
+    {
+      title: "指标单位",
+      width: "105px",
+      dataIndex: 'unit_name',
+      render(value, record, index) {
+        return value;
+      },
+
     },
     {
       title: "是否启用告警",
@@ -253,7 +266,6 @@ export default function () {
           ...v,
         };
       })
-      // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       let treeData: any[] = [{
         id: 0,
         name: '全部',
@@ -286,15 +298,45 @@ export default function () {
 
     filterOptions["status"] = [{ value: '0', label: '关闭' }, { value: '1', label: '正常' }]
     filterOptions["is_alarm"] = [{ value: '1', label: '已启用' }, { value: '0', label: '未启用' }]
+    getAssetsStypes().then((res) => {
+      filterOptions["asset_type"] = res.dat.map((v) => {
+        return {
+          value: v.name,
+          label: v.name,
+        };
+      });
+      setFilterOptions({ ...filterOptions })
+      selectFilterType("asset_ip");
+    });
+
     setFilterOptions({ ...filterOptions })
+    
+
   }, []);
 
+  const selectFilterType=(value)=>{
+    queryFilter.forEach((item) => {
+      if (item.name == value) {
+        setFilterType(item.type);
+      }
+    })
+    setFilterParam(value);
+    setSearchVal(null)
+  }
 
-  useEffect(() => {
-    getTableData(assetInfo);
+  useEffect(() => {    
+    if(unitOptions==null){
+      getMonitorUnit().then( (units) => {
+       setUnitOptions(unitOptions)
+       getTableData(assetInfo,units.dat);
+     });        
+   }else{
+      getTableData(assetInfo,unitOptions);
+   }
+    
   }, [searchVal, refreshFlag, typeId, refreshKey]);
 
-  const getTableData = (assets) => {
+  const getTableData = (assets,units) => {
     const param = {
       page: current,
       limit: pageSize,
@@ -312,9 +354,18 @@ export default function () {
     if (typeId != null && typeId + "" != "0") {
       param["assetType"] = typeId;
     }
+    
     getMonitorInfoList(param
-    ).then(({ dat }) => {
-      setList(dat.list);
+    ).then(({ dat }) => { 
+      dat.list.forEach(entity => {
+        if(entity.unit!=null && entity.unit.length>0  && units[entity.unit]){
+          entity["unit_name"] = units[entity.unit];
+        }else{
+          entity["unit_name"] = "";
+        }
+        return entity;
+      });     
+      setList(dat.list)    
       setTotal(dat.total)
     });
   };
@@ -546,18 +597,12 @@ export default function () {
               />
               <div className='table-handle-search'>
                 <Select
-                  // defaultValue="lucy"
+                  defaultValue="asset_ip"
                   placeholder="选择过滤器"
                   style={{ width: 120 }}
                   allowClear
                   onChange={(value) => {
-                    queryFilter.forEach((item) => {
-                      if (item.name == value) {
-                        setFilterType(item.type);
-                      }
-                    })
-                    setFilterParam(value);
-                    setSearchVal(null)
+                    selectFilterType(value);
                   }}>
                   {queryFilter.map((item, index) => (
                     <Select.Option value={item.name} key={index}>{item.label}</Select.Option>

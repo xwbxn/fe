@@ -30,7 +30,6 @@ import { GetProfile } from '@/services/account';
 import { getBusiGroups, getDatasourceBriefList } from '@/services/common';
 import { getLicense } from '@/components/AdvancedWrap';
 import { getVersions } from '@/components/pageLayout/Version/services';
-import HeaderMenu from './components/menu';
 import Content from './routers';
 
 // @ts-ignore
@@ -108,6 +107,12 @@ function App() {
   const { t, i18n } = useTranslation();
   const isPlus = useIsPlus();
   const initialized = useRef(false);
+  const path = location.pathname;
+  console.log(path,path.startsWith("/login"));
+  const bodyStyle = {
+       overflow: 'hidden'
+  }
+
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -232,7 +237,7 @@ function App() {
   }
 
   return (
-    <div className='App'>
+    <div className='App' style={path.startsWith("/login")?{overflow:"hidden"}:{overflow:"auto"}}>
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
           <Router>
