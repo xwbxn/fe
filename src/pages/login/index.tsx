@@ -15,23 +15,25 @@
  *
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
 import { ifShowCaptcha, getCaptcha, getSsoConfig, getRedirectURL, getRedirectURLCAS, getRedirectURLOAuth, authLogin, getRSAConfig } from '@/services/login';
 import './login.less';
-
+// import cookie from "react-cookies";
 // @ts-ignore
 import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
 
 import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
+import _ from 'lodash';
 
 export interface DisplayName {
   oidc: string;
   cas: string;
   oauth: string;
 }
+
 
 export default function Login() {
   const { t } = useTranslation();
@@ -47,6 +49,7 @@ export default function Login() {
   const [showcaptcha, setShowcaptcha] = useState(true);
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
+  const [remember, setRemember] = useState(false);
   const refreshCaptcha = () => {
     getCaptcha().then((res) => {
       if (res.dat && verifyimgRef.current) {
@@ -58,8 +61,30 @@ export default function Login() {
     });
   };
   useSsoWay();
+  useEffect(()=>{
 
+}, [remember]);
   useEffect(() => {
+    // 从 localStorage 中读取用户的登录信息
+    const username = localStorage.getItem('username');
+    const password = localStorage.getItem('password');
+    const remember = localStorage.getItem('remember') === 'true';
+    //console.log("1111",remember)
+    if(username){
+      form.setFieldsValue({
+        username,
+    });
+  }
+    // 如果记住密码，则填充表单
+    if (remember  && password) {
+      form.setFieldsValue({
+        // username,
+        password,
+        remember
+      });
+    }
+     // 更新记住密码的状态
+    setRemember(remember);
     getSsoConfig().then((res) => {
       if (res.dat) {
         setDis({
@@ -84,15 +109,24 @@ export default function Login() {
       // }
     });
   }, []);
-
+  const handleRememberChange = (e) => {
+    // setRemember(_.cloneDeep(e.target.checked))
+    setRemember(e.target.checked);
+    //console.log("FFFFFFFFFF",remember);
+  };
   const handleSubmit = () => {
     form.validateFields().then(() => {
       login();
     });
   };
+  
 
   const login = async () => {
     let { username, password, verifyvalue } = form.getFieldsValue();
+     // 将用户的登录信息存储到 localStorage 中
+     localStorage.setItem('username', username);
+     localStorage.setItem('password', password);
+     localStorage.setItem('remember', remember ? 'true' : 'false');
     // const rsaConf = await getRSAConfig();
     // const {
     //   dat: { OpenRSA, RSAPublicKey },
@@ -166,7 +200,6 @@ export default function Login() {
                 ref={verifyimgRef}
                 style={{
                   display: showcaptcha ? 'inline-block' : 'none',
-                  marginTop: '5px',
                   float: 'right',
                   width:'110px',
                   height: '36px'
@@ -175,6 +208,9 @@ export default function Login() {
                 alt='点击获取验证码'
               />
             </div>
+            <Form.Item name="remember" valuePropName='checked'   wrapperCol={{offset:0,span:24}}>
+               <Checkbox onChange={handleRememberChange}>记住密码</Checkbox>
+            </Form.Item>
 
             <Form.Item>
               <Button type='primary' className='submit_button' onClick={handleSubmit}>

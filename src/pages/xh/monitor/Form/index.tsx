@@ -5,8 +5,8 @@ import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } fr
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
-import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
-import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
+import {  getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
+import { getMonitorUnit,createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -29,6 +29,9 @@ export default function (props: { initialValues: object; initParams: object; mod
   const { id } = queryString.parse(search);
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
+  const [unitOptions, setUnitOptions] = useState<any>({});
+
+
 
   const panelBaseProps: any = {
     size: 'small',
@@ -44,6 +47,11 @@ export default function (props: { initialValues: object; initParams: object; mod
       page: 1,
       limit: 10000,
     };
+    getMonitorUnit().then( (res) => {
+      console.log("getMonitorUnit",res);
+      setUnitOptions(res.dat)
+    });
+
     getAssetsStypes().then( (res) => {
       const types = res.dat.map((v) => {
         return {
@@ -215,6 +223,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     onChange={(v) => {
                       setDatasource(v);
                     }}
+                    defaultValue={1}
                     options={[
                       {
                         value: 1,
@@ -226,7 +235,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
             </Row>
             <Row gutter={10}>
-              <Col span={24}>
+              <Col span={20}>
                 <Form.Item label='监控脚本' rules={[{ required: false }]}>
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
@@ -235,6 +244,18 @@ export default function (props: { initialValues: object; initParams: object; mod
                     <div className='chinese_remark'><span className='title' style={{color:'#0A4B9D',fontSize:"14px"}}>指标关键词说明：</span>{sqlCN}</div>
                   )}
 
+                </Form.Item>
+
+              </Col>
+              <Col span={4}>
+                <Form.Item label='指标单位' rules={[{ required: false }]}>
+                  <Form.Item name='unit' rules={[{ required: true }]}>
+                  <Select >
+                     {Object.keys(unitOptions).map((key) =>{
+                       return (<Select.Option value={key}>{unitOptions[key]}</Select.Option>)
+                     })}
+                  </Select>
+                  </Form.Item>
                 </Form.Item>
 
               </Col>

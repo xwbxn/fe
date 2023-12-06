@@ -290,9 +290,21 @@ const EventDetailPage: React.FC = () => {
   }, [busiId, eventId]);
 
   return (
-    <PageLayout title={t('detail.title')} showBack backPath='/alert-cur-events'>
+    <PageLayout title={t('detail.title')} showBack backPath={isHistory ?'/alert-his-events':'/alert-cur-events'}>
       <div className='event-detail-container'>
+        
         <Spin spinning={!eventDetail}>
+          <div className='event-detail-nav'><span onClick={(e)=>{
+            //  history.push({
+            //   pathname: '/xh/monitor/add',
+            //   search: queryString.stringify({
+            //     type: 'monitor',
+            //     id: eventDetail.asset_id,
+            //     action: 'asset'
+            //   }),
+            // });
+             
+          }}>监控图表</span></div>
           <Card
             size='small'
             className='desc-container'

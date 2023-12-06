@@ -105,7 +105,7 @@ export default function TableCpt(props: IProps) {
         return (
           <>
             <Space>
-              <FileSearchOutlined onClick={()=>{
+              <FileSearchOutlined title='详情' onClick={()=>{
                   history.push({
                     pathname: `/alert-cur-events/${record.id}`
                   });
@@ -130,7 +130,7 @@ export default function TableCpt(props: IProps) {
                 deleteAlert(record.id);
               }}
             />
-            <DeleteOutlined onClick={() => {
+            <DeleteOutlined  title='删除' onClick={() => {
               deleteAlertEventsModal(
                 [record.id],
                 () => {
@@ -226,6 +226,9 @@ export default function TableCpt(props: IProps) {
           }}
           pagination={{
             ...tableProps.pagination,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `总共 ${total} 条`,
             pageSizeOptions: ['30', '100', '200', '500'],
           }}
         />

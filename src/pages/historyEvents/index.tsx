@@ -21,7 +21,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import { useAntdTable } from 'ahooks';
 import { Input, Tag, Button, Space, Table, Select, message, Modal, DatePickerProps, Menu, Dropdown, Radio } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import PageLayout from '@/components/pageLayout';
 import RefreshIcon from '@/components/RefreshIcon';
 import { hoursOptions } from '@/pages/event/constants';
@@ -69,7 +69,7 @@ const Event: React.FC = () => {
   const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [start, setStart] = useState<number>(0);
   const [end, setEnd] = useState<number>(0);
-  
+  const history = useHistory();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [ftype, setFtype] = useState<number>(1);
   const [filter, setFilter] = useState<{
@@ -154,15 +154,10 @@ const Event: React.FC = () => {
       render: (record: any) => {
         return (
           <Space>
-            <Link
-              title='查看'
-              to={{
-                pathname: `/alert-his-events/${record.id}`,
-              }}
-              target='_blank'
-            >
-              <FileSearchOutlined />
-            </Link>
+            <FileSearchOutlined title='详情'
+               onClick={()=>{
+                 history.push(`/alert-his-events/${record.id}?from=history`);
+               }} />
             <DownloadOutlined className='down_icon' title='导出'
               onClick={() => {                   
                    let ids = new Array();
@@ -171,7 +166,7 @@ const Event: React.FC = () => {
                    setModalOpen(true);
               }}
             />
-            <DeleteOutlined onClick={() => {
+            <DeleteOutlined title='删除' onClick={() => {
               Modal.confirm({
                 title: '确认要强制删除历史告警信息？',
                 onOk: () => {
@@ -200,13 +195,13 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
     if(value==null){
-      if (value == null) {
-        setRefreshFlag(_.uniqueId('refresh_'));
         delete filter["start"];
+        setStart(0)
         delete filter["end"];
-      }
-      setRefreshFlag(_.uniqueId('refresh_'));
+        setEnd(0)
+        setFilter(_.cloneDeep(filter))
     }
+     setRefreshFlag(_.uniqueId('refresh_'));
   };
 
   const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
@@ -256,7 +251,7 @@ const Event: React.FC = () => {
               setSearchVal(null)
             }}>
             {queryFilter.map((item, index) => (
-              <option value={item.name} key={index}>{item.label}</option>
+              <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
             ))
             }
           </Select>
@@ -349,6 +344,7 @@ const Event: React.FC = () => {
   }
 
   const fetchData = ({ current, pageSize }) => {
+    // debugger;
     if (start > 0) {
       filterObj["start"] = start
     }
@@ -449,7 +445,10 @@ const Event: React.FC = () => {
             }}
             pagination={{
               ...tableProps.pagination,
-              pageSizeOptions: ['30', '100', '200', '500'],
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total) => `总共 ${total} 条`,
+              pageSizeOptions: [30, 50, 100, 200]
             }}
           />
         </div>

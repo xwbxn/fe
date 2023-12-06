@@ -21,6 +21,7 @@ import queryString from 'query-string';
 import { SettingOutlined } from '@ant-design/icons';
 import PageLayout from '@/components/pageLayout';
 import { BusinessGroup } from '@/pages/targets';
+import classNames from 'classnames';
 import BlankBusinessPlaceholder from '@/components/BlankBusinessPlaceholder';
 import { CommonStateContext } from '@/App';
 import List from './List';
@@ -44,10 +45,41 @@ export default function index() {
     <PageLayout title={t('title')} icon={<SettingOutlined />}>
       <div className='alert-rules-container'>
         <BusinessGroup
+        
           curBusiId={bgid}
           setCurBusiId={(id) => {
             history.push(`/alert-rules?id=${id}`);
             commonState.setCurBusiId(id);
+          }}
+          renderHeadExtra={() => {
+            return (
+              <div>
+                <div className='left-area-group-title'>预制筛选</div>
+                {/* <div
+                  className={classNames({
+                    'n9e-biz-group-item': true,
+                    active: bgid === 0,
+                  })}
+                  onClick={() => {
+                    commonState.setCurBusiId(0);
+                  }}
+                >
+                  {'未归组对象'}
+                </div> */}
+                <div
+                  className={classNames({
+                    'n9e-biz-group-item': true,
+                    active: bgid === -1,
+                  })}
+                  onClick={() => {
+                    commonState.setCurBusiId(-1);
+                    history.push(`/alert-rules?id=-1`);
+                  }}
+                >
+                  {'全部对象'}
+                </div>
+              </div>
+            );
           }}
         />
         {bgid ? <List bgid={bgid}  assetid={assetid}/> : <BlankBusinessPlaceholder text='告警规则' />}
