@@ -179,7 +179,7 @@ export default function Webhooks() {
           </div>
         </Form>
       </div>
-      <div className='webhooks-doc'>
+      {/* <div className='webhooks-doc'>
         <Alert
           type='info'
           message={
@@ -193,7 +193,7 @@ export default function Webhooks() {
             />
           }
         />
-      </div>
+      </div> */}
     </div>
   );
 }
