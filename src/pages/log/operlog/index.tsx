@@ -27,6 +27,14 @@ export default function () {
   const [filterType, setFilterType] = useState<string>("");
   const [filterParam, setFilterParam] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
+  
+  const modelOptions=[
+  {label:"资产",value:"资产模块"},{label:"监控",value:"监控模块"},
+  {label:"用户配置",value:"用户配置模块"},{label:"告警",value:"告警模块"},
+  {label:"用户信息",value:"用户信息模块"},
+  {label:"接口管理",value:"接口管理模块"},{label:"登录",value:"登录模块"},
+  {label:"许可管理",value:"许可管理模块"}
+  ];
   // const statusOptions =[
   //   {label:"类型",value:1},{label:"对象",value:2},
   //   {label:"用户",value:4},{label:"描述",value:3}]; 
@@ -248,6 +256,7 @@ export default function () {
                           className={'searchInput'}
                           value={searchVal}
                           allowClear
+                          options={modelOptions}
                           // options={}
                           onChange={(val) => setSearchVal(val)}
                           placeholder={'选择要查询的条件'}
