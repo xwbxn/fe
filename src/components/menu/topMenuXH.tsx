@@ -1,6 +1,6 @@
 import { CommonStateContext } from '@/App';
 import { getMenuPerm } from '@/services/common';
-import Icon, { DownOutlined, ProjectOutlined } from '@ant-design/icons';
+import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
 import { Dropdown, Menu, Space } from 'antd';
 import _ from 'lodash';
@@ -156,17 +156,14 @@ const getMenuList = (t) => {
           children: [
             {
               key: '/log/debug/switch',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: '日志调试启动开关',
             },
             {
               key: '/log/operlog',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('操作日志'),
             },
             {
               key: '/log/syslog',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('系统日志'),
             },
           ],
@@ -178,43 +175,37 @@ const getMenuList = (t) => {
           children: [
             {
               key: '/help/source',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('数据源'),
             },
             {
               key: '/help/servers',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('告警引擎'),
             },
             {
               key: '/system/logo',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('LOGO设置'),
             },
             {
               key: '/system/parameters',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: '系统参数设置',
             },
             {
               key: '/system/interface',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: '接口访问设置',
             },
             {
               key: '/types/dictype',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('数据字典'),
             },
             {
               key: '/system/upgrade',
-              icon: <IconFont type='icon-Menu_Infrastructure' />,
               label: t('系统升级'),
             },
           ],
         },
         {
           key: '/license/management',
+          icon: <ProfileOutlined />,
           label: t('许可管理'),
           children: [
             {

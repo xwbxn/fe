@@ -88,7 +88,6 @@ const Event: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [filterType, setFilterType] = useState<string>("");
-  let prodOptions = getProdOptions(feats);
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
@@ -125,7 +124,8 @@ const Event: React.FC = () => {
       { label: 'S3', value: '3' },
     ];
      setFilterOptions({...filterOptions})
-  }, [])
+  }, [filterType])
+
   function renderLeftHeader() {
     return (
       <Row justify='space-between' style={{ width: '100%' }}>
@@ -141,7 +141,6 @@ const Event: React.FC = () => {
             setSearchVal([]);
           }} />
           <Select
-            // defaultValue="lucy"
             placeholder="选择过滤器"
             style={{ width: 120 }}
             allowClear
@@ -159,14 +158,7 @@ const Event: React.FC = () => {
             ))
             }
           </Select>
-          <RangePicker
-            showTime={{ format: 'HH:mm:ss' }}
-            format="YYYY-MM-DD HH:mm"
-            onChange={onChange}
-            locale={locale}
-            onOk={onOk}
-          />
-        {filterType == "input" && (
+          {filterType == "input" && (
             <Input
               className={'searchInput'}
               value={searchVal}
@@ -186,6 +178,13 @@ const Event: React.FC = () => {
               placeholder={'选择要查询的条件'}
             />
           )}
+          <RangePicker
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm"
+            onChange={onChange}
+            locale={locale}
+            onOk={onOk}
+          />
         </Space>
         <Col
           flex='200px'

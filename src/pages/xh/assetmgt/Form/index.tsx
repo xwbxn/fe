@@ -243,6 +243,8 @@ export default function () {
         <Tabs
           className='assetmgt_list_2'
           activeKey={tabIndex}
+          type="card"
+          size='small'
           onTabClick={(key) => {
             TabOperteClick(key);
           }}

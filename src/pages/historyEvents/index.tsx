@@ -112,38 +112,57 @@ const Event: React.FC = () => {
           </>
         );
       },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
     },
     {
       title: '资产名称',
       dataIndex: 'asset_name',
       width: 100,
+      align: 'center',
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.asset_name).localeCompare(b.asset_name)
       },
     },
     {
       title: '资产IP',
       dataIndex: 'asset_ip',
       width: 100,
+      align: 'center',
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.asset_ip).localeCompare(b.asset_ip)
       },
     },
     {
       title: '告警规则',
       dataIndex: 'rule_config_cn',
       width: 180,
+      align: 'center',
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.rule_config_cn).localeCompare(b.rule_config_cn)
       },
     },
     {
       title: '触发时间',
       dataIndex: 'last_eval_time',
       // fixed:  'right',
+      align: 'center',
       width: 100,
       render(value) {
         return moment((value ? value : 0) * 1000).format('YYYY-MM-DD HH:mm:ss');
+      },
+      sorter: (a, b) =>{
+        return a.last_eval_time > b.last_eval_time ? 1 : -1
       },
     },
     {
@@ -186,24 +205,7 @@ const Event: React.FC = () => {
       },
     },
   ];
-  const [exportBtnLoadding, setExportBtnLoadding] = useState(false);
-
-  const onChange = (
-    value: DatePickerProps['value'] | RangePickerProps['value'],
-    dateString: [string, string] | string,
-  ) => {
-    console.log('Selected Time: ', value);
-    console.log('Formatted Selected Time: ', dateString);
-    if(value==null){
-        delete filter["start"];
-        setStart(0)
-        delete filter["end"];
-        setEnd(0)
-        setFilter(_.cloneDeep(filter))
-    }
-     setRefreshFlag(_.uniqueId('refresh_'));
-  };
-
+  
   const onOk = (value: DatePickerProps['value'] | RangePickerProps['value'] | any) => {
     console.log('onOk: ', value);
     value?.forEach((element, index) => {
@@ -223,8 +225,6 @@ const Event: React.FC = () => {
     { group: filter.bgid },
     { alert_type: 2 },
   );
-
-
 
   function renderLeftHeader() {
     return (
@@ -258,7 +258,6 @@ const Event: React.FC = () => {
           <RangePicker
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
-            onChange={onChange}
             locale={locale}
             onOk={onOk}
           />

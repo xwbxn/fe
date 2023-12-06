@@ -74,7 +74,7 @@ export default function () {
   const { busiGroups } = useContext(CommonStateContext);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
-  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 250));
+  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
   const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_asset_type') || '0'));
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
   const [viewIndex, setViewIndex] = useState<number>(-1);
@@ -106,6 +106,7 @@ export default function () {
       width: "105px",
       dataIndex: 'type',
       fixed: 'left',
+      align: 'center',
       ellipsis: true,
       sorter: (a, b) =>{
         return (a.type).localeCompare(b.type)
@@ -115,6 +116,7 @@ export default function () {
       title: "IP地址",
       dataIndex: 'ip',
       width: "130px",
+      align: 'center',
       ellipsis: true,
       sorter: (a, b) =>{
         return (a.ip).localeCompare(b.ip)
@@ -127,12 +129,14 @@ export default function () {
       title: "厂商",
       width: "105px",
       dataIndex: 'manufacturers',
+      align: 'center',
       ellipsis: true,
     },
     {
       title: "位置",
       dataIndex: 'position',
       width: "130px",
+      align: 'center',
       ellipsis: true,
       sorter: (a, b) =>{
         return (a.position).localeCompare(b.position)
@@ -145,6 +149,7 @@ export default function () {
       title: "所属业务组",
       dataIndex: 'group_id',
       width: "130px",
+      align: 'center',
       ellipsis: true,
       render(value, record, index) {
         if (value > 0) {
@@ -163,6 +168,7 @@ export default function () {
       title: "管理状态",
       width: "105px",
       dataIndex: 'status',
+      align: 'center',
       ellipsis: true,
       sorter: (a, b) =>{
         return a.status - b.status
@@ -181,6 +187,7 @@ export default function () {
       title: "运行状态",
       width: "105px",
       dataIndex: 'health',
+      align: 'center',
       ellipsis: true,
       sorter: (a, b) =>{
         return a.status - b.status
@@ -486,6 +493,7 @@ export default function () {
                 dataIndex: element.name,
                 width: "120px",
                 ellipsis: true,
+                align: 'center',
               })
             });
             let newItem = {
@@ -559,8 +567,8 @@ export default function () {
           }}
           onResizeStop={(e, direction, ref, d) => {
             let curWidth = width + d.width;
-            if (curWidth < 250) {
-              curWidth = 250;
+            if (curWidth < 200) {
+              curWidth = 200;
             }
             setWidth(curWidth);
             localStorage.setItem('leftassetWidth', curWidth.toString());
@@ -576,7 +584,7 @@ export default function () {
           >
             {!collapse ? <LeftOutlined /> : <RightOutlined />}
           </div>
-          <div className="left_tree" style={{ width: '220px', display: 'inline-block' }}>
+          <div className="left_tree" style={{ display: 'inline-block' }}>
             <div className='asset_organize_cls'>组织树列表
               <div style={{ margin: '0 10prx ' }}>
                 {/* <Switch

@@ -62,35 +62,54 @@ export default function TableCpt(props: IProps) {
           </>
         );
       },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
     },
     {
       title: '资产名称',
       dataIndex: 'asset_name',
       width: 100,
+      align: "center",
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.asset_name).localeCompare(b.asset_name)
       },
     },
     {
       title: '资产IP',
       dataIndex: 'asset_ip',
       width: 100,
+      align: "center",
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.asset_ip).localeCompare(b.asset_ip)
       },
     },
     {
       title: '告警规则',
       dataIndex: 'rule_config_cn',
+      align: "center",
       width: 180,
       render: (value) => {
         return value;
+      },
+      sorter: (a, b) =>{
+        return (a.rule_config_cn).localeCompare(b.rule_config_cn)
       },
     },    
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',
+      align: "center",
       width: 120,
+      sorter: (a, b) =>{
+        return a.trigger_time > b.trigger_time ? 1 : -1
+      },
       render(value) {
         return moment(value * 1000).format('YYYY-MM-DD HH:mm:ss');
       },

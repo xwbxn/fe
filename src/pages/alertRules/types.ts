@@ -26,6 +26,11 @@ export interface AlertRuleType<T> {
   annotations: any;
   prod: string;
   severities: number[];
+
+  asset_name: string;
+  asset_ip: string;
+  update_at: number;
+  rule_config_cn: string;
 }
 
 export enum AlertRuleStatus {

@@ -72,7 +72,7 @@ export default function () {
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
-  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('left_monitor_Width') || 250));
+  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('left_monitor_Width') || 200));
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [filterParam, setFilterParam] = useState<string>("");
   const history = useHistory();
@@ -92,12 +92,16 @@ export default function () {
       render(value, record, index) {
         return <div  style={{color:'#2B7EE5',cursor:'pointer'}} onClick={(e)=>{showModal("asset", record.id, "view")} }>{value}</div>;
       },
+      sorter: (a, b) =>{
+        return (a.monitoring_name).localeCompare(b.monitoring_name)
+      },
     },
     {
       title: "资产名称",
       width: "100px",
       dataIndex: 'asset_id',
       fixed: 'left',
+      align: 'center',
       ellipsis: true,
       render(value, record, index) {
         let name = assetInfo[value]?.name;
@@ -105,16 +109,25 @@ export default function () {
             history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
         } }>{name}</div>;
       },
+      sorter: (a, b) =>{
+        return (a.asset_id).localeCompare(b.asset_id)
+      },
     },
     {
-      title: "IP",
+      title: "IP地址",
       width: "100px",
       dataIndex: 'asset_id',
       fixed: 'left',
+      align: 'center',
       ellipsis: true,
       render(value, record, index) {
         let name = assetInfo[value]?.ip;
         return name;
+      },
+      sorter: (a, b) =>{
+        const aip = assetInfo[a.asset_id]?.ip
+        const bip = assetInfo[b.asset_id]?.ip
+        return (aip).localeCompare(bip)
       },
     },
   ];
@@ -122,46 +135,38 @@ export default function () {
     {
       title: "描述",
       width: "105px",
+      align: 'center',
       dataIndex: 'remark',
     },
     {
       title: "监控状态",
       width: "105px",
+      align: 'center',
       dataIndex: 'status',
       render(value, record, index) {
         return value == 0 ? '关闭' : '正常';
       },
-    },
-    {
-      title: "指标单位",
-      width: "105px",
-      dataIndex: 'unit_name',
-      render(value, record, index) {
-        return value;
+      sorter: (a, b) =>{
+        return a.status > b.status ? 1 : -1
       },
-
-    },
-    {
-      title: "是否启用告警",
-      width: "105px",
-      dataIndex: 'is_alarm',
-      render(value, record, index) {
-        return value == 0 ? '未启用' : '启用中';
-      },
-
     },
     {
       title: "更新时间",
       width: "105px",
       dataIndex: 'updated_at',
+      align: 'center',
       render(text, record, index) {
         return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
+      },
+      sorter: (a, b) =>{
+        return a.updated_at > b.updated_at ? 1 : -1
       },
     },
     {
       title: "更新人",
       width: "105px",
       dataIndex: 'updated_by',
+      align: 'center',
       render(text, record, index) {
         return text;
       },
@@ -549,7 +554,7 @@ export default function () {
             >
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
-            <div className="left_tree" style={{ width: '220px', display: 'inline-block' }}>
+            <div className="left_tree" style={{ display: 'inline-block' }}>
               <div className='asset_organize_cls'>组织树列表
                 <div style={{ margin: '0 10prx ' }}>
                   {/* <Switch
@@ -565,7 +570,7 @@ export default function () {
                 </div>
 
               </div>
-              <div style={{ width: '220px', display: 'table', height: '100%' }}>
+              <div style={{ display: 'table', height: '100%' }}>
                 {expandedKeys && treeData && (
                   <Tree
                     showLine={true}

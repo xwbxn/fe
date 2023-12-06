@@ -69,9 +69,9 @@ export default function List(props: ListProps) {
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
   const [type, setType] = useState<string>("");
-  const [filterType, setFilterType] = useState<string>("");
+  const [filterType, setFilterType] = useState<string>("input");
   const [searchVal, setSearchVal] = useState<any>(null);
-  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterParam, setFilterParam] = useState<string>("ip");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const { busiGroups } = useContext(CommonStateContext);
   const [typeOptions, setTypeOptions] = useState<any[]>([
@@ -90,26 +90,42 @@ export default function List(props: ListProps) {
       title: '告警规则名称',
       dataIndex: 'name',
       width: 100,
+      sorter: (a, b) =>{
+        return (a.name).localeCompare(b.name)
+      },
     },
     {
       title: '资产名称',
       dataIndex: 'asset_name',
+      align: "center",
       width: 100,
+      sorter: (a, b) =>{
+        return (a.asset_name).localeCompare(b.asset_name)
+      },
     },
     {
       title: '资产IP',
       dataIndex: 'asset_ip',
+      align: "center",
       width: 100,
+      sorter: (a, b) =>{
+        return (a.asset_ip).localeCompare(b.asset_ip)
+      },
     },
     {
       title: '告警规则',
       dataIndex: 'rule_config_cn',
+      align: "center",
       width: 100,
+      sorter: (a, b) =>{
+        return (a.rule_config_cn).localeCompare(b.rule_config_cn)
+      },
     },
     {
       title: '告警接收组',
       dataIndex: 'notify_groups_obj',
       width: 140,
+      align: "center",
       render: (data) => {
         return (
           <Tags
@@ -124,14 +140,19 @@ export default function List(props: ListProps) {
     {
       title: '更新时间',
       dataIndex: 'update_at',
+      align: "center",
       width: 90,
       render: (text: string) => {
         return <div className='table-text'>{moment.unix(Number(text)).format('YYYY-MM-DD HH:mm:ss')}</div>;
+      },
+      sorter: (a, b) =>{
+        return a.update_at > b.update_at ? 1 : -1
       },
     },
     {
       title: '更新人',
       dataIndex: 'update_by',
+      align: "center",
       width: 65,
     },
     {
@@ -317,7 +338,7 @@ export default function List(props: ListProps) {
             <Select
               placeholder="选择过滤器"
               style={{ width: 120 }}
-              allowClear
+              value={filterParam}
               onChange={(value) => {
                 queryFilter.forEach((item) => {
                   if (item.name == value) {
