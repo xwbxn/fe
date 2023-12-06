@@ -106,6 +106,7 @@ import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
 import Bigscreen from '@/pages/bigScreen';
 import View from '@/pages/bigScreen/View';
+import Board from '@/pages/dashboard/Detail/Board'
 
 
 const Packages = dynamicPackages();
@@ -172,6 +173,7 @@ export default function Content() {
         <Route path='/dashboards-built-in' exact component={DashboardBuiltin} />
         <Route path='/dashboards-built-in/detail' exact component={DashboardBuiltinDetail} />
         <Route path='/chart/:ids' component={Chart} />
+        <Route path='/board/:id' exact component={Board}/>
 
         <Route exact path='/alert-rules/add/:bgid' component={AlertRuleAdd} />
         <Route exact path='/alert-rules/edit/:id' component={AlertRuleEdit} />

@@ -141,7 +141,7 @@ function index(props: IProps) {
       >
         {_.map(panels, (item) => {
           return (
-            <div key={item.layout.i} data-id={item.layout.i}>
+            <div key={item.layout.i} data-id={item.layout.i} style={{display: item.hidden ? 'none': ''}}>
               {item.type !== 'row' ? (
                 semver.valid(item.version) ? (
                   <Renderer

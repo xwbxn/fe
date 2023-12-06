@@ -277,7 +277,6 @@ export default function (props: { initialValues: object; initParams: object; mod
     let imageName = "/image/factory/other.png";
     for (let factor in factories) {
       let image = factories[factor]
-      console.log("images...", image);
       if (image.value == cn_name) {
         imageName = "/image/factory/" + image.key + ".png";
       }
@@ -450,6 +449,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                         contentMaxHeight={200}
                         toolVisible={false}
                         unit={monitor.unit}
+                        label={monitor.label}
                         range={range}
                         setRange={(erang) => {
                           const newValue = {
@@ -503,6 +503,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                           toolVisible={false}
                           unit={item.unit}
                           range={range}
+                          label={item.label}
                           setRange={(erang) => {
                             const newValue = {
                               start: isMathString(erang.start) ? parse(erang.start) : moment(erang.start),
@@ -555,6 +556,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             contentMaxHeight={200}
             range={dialogRange}
             toolVisible={true}
+            label={selectMonitor.label}
             unit={selectMonitor.unit}
             setRange={(erang) => {
               const newValue = {

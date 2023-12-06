@@ -14,8 +14,6 @@ interface IProps {
 export default function (props: IProps) {
   const { values, series, themeMode } = props;
   const { custom, options } = values;
-  console.log('props', props);
-  console.log('custom', custom);
 
   const customOptions = {
     radius: 1,

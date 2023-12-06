@@ -27,6 +27,7 @@ import './graph.less'
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
 import { Button, InputNumber, Popover, Radio, Space, RadioChangeEvent } from 'antd';
+import replaceExpressionBracket from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
 
 interface IProps {
   monitorId: number;
@@ -38,6 +39,7 @@ interface IProps {
   range: IRawTimeRange | any;
   setRange: (range: IRawTimeRange) => void;
   step: number;
+  label: string;
   unit: string;
   graphOperates: {
     enabled: boolean;
@@ -67,7 +69,7 @@ const getSerieName = (metric: any) => {
 
 export default function Graph(props: IProps) {
   const { datasourceList } = useContext(CommonStateContext);
-  const { monitorId, setQueryStats, setErrorContent, setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
+  const { monitorId, label, setErrorContent, setRange, contentMaxHeight, range, graphOperates, refreshFlag } = props;
   const [data, setData] = useState<any[]>([]);
   const [step, setStep] = useState<number>(props.step);
   const [size, setSize] = useState<any>('now-1h');
@@ -109,9 +111,7 @@ export default function Graph(props: IProps) {
   const handleSizeChange = (e: RadioChangeEvent) => {
     range.start = parse(e.target.value);
     setRange(range);
-    console.log('handleSizeChange', e.target.value)
     setSize(e.target.value)
-    console.log('handleSizeChange', range);
   };
 
   useEffect(() => {
@@ -131,14 +131,11 @@ export default function Graph(props: IProps) {
       ).then((res) => {
         let series = new Array();
         _.map(res?.dat[0], (item) => {
-          console.log("指标数据",item);
           let yValues = new Array();
           item.values.forEach(element => {
             yValues.push(Number(element["1"]))
           });
-          console.log("----------yValues",yValues);
           let yMax = byteMaxNumber(yValues);
-          console.log("----------Max",yMax);
           
           localStorage.removeItem("monitorUnit-"+monitorId);
           if(props.unit=="percent-100"){
@@ -150,7 +147,6 @@ export default function Graph(props: IProps) {
              });
           }else if(props.unit=="bit"){
             let maxUnit = bitCompute(yMax);
-            console.log("maxUnit", maxUnit)
             item.values.forEach(element => {
                element["1"]= (element["1"]% maxUnit[1]).toFixed(2);              
             });
@@ -163,13 +159,11 @@ export default function Graph(props: IProps) {
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
           }else if(props.unit=="S"){
             let maxUnit = formatSeconds(yMax);
-            console.log("maxUnit", maxUnit)            
             // item.values.forEach(element => {
             //   let times =  moment.unix(element["1"]*1000).unix ;
             //   console.log("------times------",times)    
             //   element["1"]= times;              
             // });
-            console.log("------serieValues------",item.values)  
             // series.push({
             //   id: _.uniqueId('series_'),
             //   name: getSerieName(item.metric),
@@ -178,9 +172,11 @@ export default function Graph(props: IProps) {
             // });
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
           }
+          console.log('first', label, item.metric)
             series.push({
               id: _.uniqueId('series_'),
-              name: getSerieName(item.metric),
+              // name: getSerieName(item.metric),
+              name: replaceExpressionBracket(label, item.metric) || getSerieName(item.metric),
               metric: item.metric["__name__"],
               data: item.values,
             });
@@ -229,7 +225,6 @@ export default function Graph(props: IProps) {
                 <TimeRangePickerWithRefresh
                   // refreshTooltip={t('refresh_tip', { num: getStepByTimeAndStep(range, step) })}
                   onChange={value => {
-                    console.log(value)
                     range.start = isMathString(value.start) ? parse(value.start) : moment(value.start);
                     range.end = isMathString(value.end) ? parse(value.end) : moment(value.end);
                     setRange(range);

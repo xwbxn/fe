@@ -4,14 +4,12 @@ import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { CommonStateContext } from '@/App';
 import { getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
 import { getMonitorUnit, createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
-import { type } from 'os';
 const { TextArea } = Input;
 import { factories, unitTypes } from '../../assetmgt/catalog';
 import { MinusCircleOutlined } from '@ant-design/icons';
@@ -232,7 +230,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
             </Row>
             <Row gutter={10}>
-              <Col span={20}>
+              <Col span={16}>
                 <Form.Item label='监控脚本' rules={[{ required: false }]}>
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
@@ -240,9 +238,12 @@ export default function (props: { initialValues: object; initParams: object; mod
                   {sqlCN != null && sqlCN.length > 0 && (
                     <div className='chinese_remark'><span className='title' style={{ color: '#0A4B9D', fontSize: "14px" }}>指标关键词说明：</span>{sqlCN}</div>
                   )}
-
                 </Form.Item>
-
+              </Col>
+              <Col span={4}>
+                <Form.Item name="label" label="标签">
+                    <Input placeholder='{{name}}'></Input>
+                </Form.Item>
               </Col>
               <Col span={4}>
                 <Form.Item label='指标计算单位' rules={[{ required: false }]}>
@@ -257,24 +258,12 @@ export default function (props: { initialValues: object; initParams: object; mod
 
               </Col>
             </Row>
-            <Row gutter={10}>
-              <Col span={12}>
-                <Form.Item label='状态' name='status'>
-                  <Select
-                    style={{ width: '100%' }}
-                    options={[
-                      { value: 0, label: '正常' },
-                      { value: 1, label: '失效' },
-                    ]}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label='采集器' name='target_id'>
-                  <Select style={{ width: '100%' }} options={identList} />
-                </Form.Item>
-              </Col>
-            </Row>
+            <Form.Item hidden label='状态' name='status'>
+              <InputNumber/>
+            </Form.Item>
+            <Form.Item hidden label='采集器' name='target_id'>
+             <InputNumber/>
+            </Form.Item>
             <Row gutter={10}>
               <Col span={24}>
                 <Form.Item label='描述' name='remark'>
@@ -285,7 +274,7 @@ export default function (props: { initialValues: object; initParams: object; mod
           </Card>
         </div>
         <div className='card-wrapper'>
-          <Card title={'告警消息'} className='alert_rule_card'>
+          <Card title={'告警设置'} className='alert_rule_card'>
             <Row gutter={10}>
               <Form.List name={'alert_rules'} initialValue={[{}]}>
                 {(field, { add, remove }) => {
@@ -308,28 +297,36 @@ export default function (props: { initialValues: object; initParams: object; mod
                           </>
                         }
                       >
-                        <Row gutter={10} className='rule-row'>
-                          <Col span={6}>关系</Col>
-                          <Col span={6}>阈值</Col>
+                        {field.length > 0 && <Row gutter={10} className='rule-row'>
+                          <Col span={5}>指标</Col>
+                          <Col span={2}>关系</Col>
+                          <Col span={5}>阈值</Col>
                           <Col span={12}>告警级别</Col>
-                        </Row>
+                        </Row>}
                         {field.map((item, _suoyi) => (
                           <Fragment>
                             <Row gutter={10} className='rule-row'>
-                              <Col span={6}>
+                              <Col span={5}>
+                                <Form.Item>
+                                  <Input readOnly value={form.getFieldValue("monitoring_name")}></Input>
+                                </Form.Item>
+                              </Col>
+                              <Col span={2}>
                                 <Form.Item
                                   // label={'关系'}
+                                  required
                                   name={[item.name, 'relation']}
                                   rules={[{ required: true, message: `请选择符号` }]}
                                 >
-                                  <Select options={[
+                                  <Select style={{width: "100%"}} options={[
                                     { value: ">", label: '大于' }, { value: "=", label: '等于' }, { value: "<", label: '小于' },
                                   ]}></Select>
                                 </Form.Item>
                               </Col>
-                              <Col span={6}>
+                              <Col span={5}>
                                 <Form.Item
                                   // label={'阈值'}
+                                  required
                                   name={[item.name, 'value']}
                                   rules={[{ required: true, message: `请选择阈值` }]}
                                 >
@@ -368,25 +365,6 @@ export default function (props: { initialValues: object; initParams: object; mod
             </Row>
           </Card>
         </div>
-        <div className='card-wrapper'>
-          <Card {...panelBaseProps} title={'配置信息'}>
-            <Row gutter={10}>
-              {params.map((v) => {
-                return (
-                  <Col key={`col=${v.name}`} span={12}>
-                    <Form.Item key={`form-item${v.name}`}
-                      label={v.label}
-                      name={v.name}
-                      rules={[{ required: v.required ? v.required : false, message: `请选择您的${v.label}` }]}
-                      initialValue={props.initParams[v.name]}>
-                      {renderForm(v)}
-                    </Form.Item>
-                  </Col>
-                );
-              })}
-            </Row>
-          </Card>
-        </div>
         {props.disabled == false && (
           <div className='card-wrapper'>
             <Form.Item>
@@ -418,8 +396,6 @@ export default function (props: { initialValues: object; initParams: object; mod
           >
             取消
           </Button>
-
-
         </div>
       )}
     </>
