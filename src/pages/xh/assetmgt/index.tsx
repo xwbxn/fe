@@ -3,13 +3,11 @@ import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree,
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, DeleteOutlined, DownOutlined, EditOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, RightOutlined, SearchOutlined, UnorderedListOutlined, VideoCameraOutlined } from '@ant-design/icons';
-import ResizeableTitle from '@/components/table/ResizeableTitle';
 import './locale';
 import './style.less';
 import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
-import moment from 'moment';
 import { assetsType } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import { deleteXhAssets, deleteAssets, insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
@@ -17,6 +15,7 @@ import { deleteXhAssets, deleteAssets, insertXHAsset, updateXHAsset, getAssetsSt
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
+import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useSize } from 'ahooks';
 import useResizeTableCol from '@/components/table/useResizeTableCol';
@@ -37,8 +36,7 @@ export enum OperateType {
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
-  // { name: 'type', label: '资产类型', type: 'select' },
-  { name: 'manufacturers', label: '厂商', type: 'input' },
+  { name: 'manufacturers', label: '厂商', type: 'select' },
   { name: 'os', label: '操作系统', type: 'input' },
   { name: 'status', label: '状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
@@ -311,6 +309,12 @@ export default function () {
         label: group.name,
       }
     })
+    filterOptions["manufacturers"] = factories.map(factory => {
+      return {
+        value: "" + factory.value,
+        label: factory.value,
+      }
+    })    
     setFilterOptions({ ...filterOptions })
 
   }, []);

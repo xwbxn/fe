@@ -10,7 +10,7 @@ import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-
+import { factories } from '../catalog';
 export default function () {
   const { t } = useTranslation('assets');
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
@@ -290,7 +290,15 @@ export default function () {
                 </Col>
                 <Col span={12}>
                   <Form.Item label='厂商' name='manufacturers' rules={[{ required: false }]}>
-                    <Input placeholder='请输入厂商' />
+                    <Select
+                      style={{ width: '100%' }}
+                      options={factories.map(({ key, value }) => ({
+                        label: value,
+                        value: value,
+                      }))}
+                      placeholder='请选择厂商'
+                    />
+
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -344,7 +352,6 @@ export default function () {
                       <Card {...panelBaseProps} key={'groupItem' + index} title={'基本信息'} className='card_group'>
                         <Row gutter={10}>
                           {groupItem.base.map((v) => {
-                            console.log('v-----------', v);
                             return (
                               <Col key={`col=${v.name}`} span={12}>
                                 <Form.Item

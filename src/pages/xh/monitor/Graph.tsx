@@ -20,6 +20,7 @@ import _ from 'lodash';
 import TimeRangePicker, { TimeRangePickerWithRefresh, IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
+import { byteMaxNumber ,formatSeconds,fomartTime,formatSecondToTime,byteCompute,bitCompute} from '@/components/ComputeByte';
 import { CommonStateContext } from '@/App';
 import { getAssetsMonitor } from '@/services/assets';
 import './graph.less'
@@ -37,6 +38,7 @@ interface IProps {
   range: IRawTimeRange | any;
   setRange: (range: IRawTimeRange) => void;
   step: number;
+  unit: string;
   graphOperates: {
     enabled: boolean;
   };
@@ -114,6 +116,7 @@ export default function Graph(props: IProps) {
 
   useEffect(() => {
     if (monitorId > 0) {
+      // localStorage.removeItem("monitorUnit-"+monitorId);
       const parsedRange = parseRange(range);
       const start = moment(parsedRange.start).unix();
       const end = moment(parsedRange.end).unix();
@@ -127,14 +130,61 @@ export default function Graph(props: IProps) {
         ids
       ).then((res) => {
         let series = new Array();
-        console.log("指标数据查看");
         _.map(res?.dat[0], (item) => {
-          series.push({
-            id: _.uniqueId('series_'),
-            name: getSerieName(item.metric),
-            metric: item.metric["__name__"],
-            data: item.values,
+          console.log("指标数据",item);
+          let yValues = new Array();
+          item.values.forEach(element => {
+            yValues.push(Number(element["1"]))
           });
+          console.log("----------yValues",yValues);
+          let yMax = byteMaxNumber(yValues);
+          console.log("----------Max",yMax);
+          
+          localStorage.removeItem("monitorUnit-"+monitorId);
+          if(props.unit=="percent-100"){
+             localStorage.setItem("monitorUnit-"+monitorId,"%");
+          }else if(props.unit=="percent-1"){
+             localStorage.setItem("monitorUnit-"+monitorId,"%");
+             item.values.forEach(element => {
+              element["1"]= (element["1"]*100).toFixed(2);              
+             });
+          }else if(props.unit=="bit"){
+            let maxUnit = bitCompute(yMax);
+            console.log("maxUnit", maxUnit)
+            item.values.forEach(element => {
+               element["1"]= (element["1"]% maxUnit[1]).toFixed(2);              
+            });
+            localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
+          }else if(props.unit=="byte"){
+            let maxUnit = byteCompute(yMax);
+            item.values.forEach(element => {
+              element["1"]= (element["1"]% maxUnit[1]).toFixed(2);              
+           });
+            localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
+          }else if(props.unit=="S"){
+            let maxUnit = formatSeconds(yMax);
+            console.log("maxUnit", maxUnit)            
+            // item.values.forEach(element => {
+            //   let times =  moment.unix(element["1"]*1000).unix ;
+            //   console.log("------times------",times)    
+            //   element["1"]= times;              
+            // });
+            console.log("------serieValues------",item.values)  
+            // series.push({
+            //   id: _.uniqueId('series_'),
+            //   name: getSerieName(item.metric),
+            //   metric: item.metric["__name__"],
+            //   data: serieValues,
+            // });
+            localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
+          }
+            series.push({
+              id: _.uniqueId('series_'),
+              name: getSerieName(item.metric),
+              metric: item.metric["__name__"],
+              data: item.values,
+            });
+          
         });
         setData(series);
 

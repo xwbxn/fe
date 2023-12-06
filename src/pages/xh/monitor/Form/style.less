@@ -40,6 +40,48 @@
         font-weight: 600;
         padding-left: 5px !important ;
     }
+    .alert_rule_card {
+        .ant-card-extra {
+            .form_add {
+                margin-right: 5px;
+            }
+        }
+        .ant-card-body {
+            padding: 0 5px;
+            .ant-col {
+                display: flex;
+                width: 100%;
+                justify-content: center;
+                margin-top: 5px;
+                .ant-form-item {
+                    flex-direction: column;
+                    width: 100%;
+                    .ant-select-single {
+                        margin-left: 5%;
+                    }
+                    .ant-input-number-in-form-item {
+                        margin-left: 30%;
+                        width: 60%;
+                    }
+                    .ant-radio-group {
+                        margin-left: 30%;
+                    }
+                }
+            }
+        }
+    }
+    .rule_card_group {
+        width: 100%;
+        .rule_card_group {
+            .ant-card-head  {
+                clear: both;
+                min-height: 20px !important;
+                height: 20px !important;
+                line-height: 20px !important
+                ;
+            }
+        }
+    }
 }
 
 .view-form {
@@ -60,6 +102,28 @@
         margin: 0px 5px;
         height: 80px;
         display: flex;
+        .image_name {
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            margin: 5px;
+            width: 200px;
+            height: 70px;
+            img {
+                width: 210px;
+                height: 60px;
+                margin: 0 auto;
+                border-radius: 3px;
+            }
+            .image_not {
+                width: 100%;
+                text-align: center;
+                font-size: 16px;
+                font-weight: 900;
+                color: darkgrey;
+            }
+        }
+
         .images {
             justify-content: center;
             vertical-align: middle;
@@ -87,13 +151,17 @@
             .theme1 {
                 display: inline-flex;
                 width: 25%;
-                div {
-                    margin-left: -5px;
-                    text-align: right;
-                    display: block;
-                    width: 120px;
-                    margin-right: 10px;
+                .title {
+                   width: 60px;
+                //    background-color: red;
                 }
+                // div {
+                //     margin-left: -5px;
+                //     text-align: right;
+                //     display: block;
+                //     width: 120px;
+                //     margin-right: 10px;
+                // }
             }
         }
     }
@@ -348,12 +416,17 @@
         background-repeat: no-repeat;
     }
 }
+.asset_item_ctr_button {
+    position: absolute;
+    right: 20px;
+    cursor: pointer;
+}
 .accessories_modal{
     .accessories_body {
         display: -moz-grid-line;
         width: 100%;
         .accessories_every_group {
-            width: 260px;
+            width: 320px;
             min-width: 260px;
             border: 1px solid #cecece;
             display: inline-block;
@@ -385,9 +458,25 @@
                display: inline-flex;
                height: 22px;
                line-height: 22px;
-               div {
+               width: 100%;
+               .title {
                    font-size: 14px;
-                   margin-right: 3px;            
+                   text-overflow: ellipsis;
+                   font-weight: 400;
+                //    display: flex;
+                   text-align: right;
+                   overflow: hidden;
+                //    width: 40px;
+                   white-space: nowrap;
+                   margin-right: 5px;
+                   width: 25%;         
+                }
+                .content {
+                    width: 80%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+
+                    white-space: nowrap;
                 }
             }
              

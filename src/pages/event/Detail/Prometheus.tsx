@@ -16,7 +16,7 @@ export default function PrometheusDetail(props: IProps) {
 
   return [
     {
-      label: 'PromQL',
+      label: 'PromQL脚本',
       key: 'rule_config',
       render(ruleConfig) {
         const queries = _.get(ruleConfig, 'queries', []);

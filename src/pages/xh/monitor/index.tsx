@@ -6,7 +6,6 @@ import { DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSe
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
 
-import { IRawTimeRange } from '@/components/TimeRangePicker';
 import './locale';
 import './style.less';
 import _ from 'lodash';
@@ -14,12 +13,13 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { deleteAssets, insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
+import {  insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 import { getMonitorInfoList, getMonitorUnit, deleteXhMonitor,deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import RefreshIcon from '@/components/RefreshIcon';
+import { unitTypes } from '../assetmgt/catalog';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -76,7 +76,7 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [filterParam, setFilterParam] = useState<string>("");
   const history = useHistory();
-  const [unitOptions, setUnitOptions] = useState<any>(null);
+  const [unitOptions, setUnitOptions] = useState<any>(unitTypes);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
   const onSelectNone = () => {
     setSelectedAssets([]);
@@ -133,7 +133,7 @@ export default function () {
       },
     },
     {
-      title: "指标单位",
+      title: "指标计算单位",
       width: "105px",
       dataIndex: 'unit_name',
       render(value, record, index) {
@@ -293,7 +293,7 @@ export default function () {
         assetInfo[v.id] = (v);
       })
       setAssetInfo({ ...assetInfo });
-      getTableData(assetInfo);
+      getTableData(assetInfo,unitTypes);
     });
 
     filterOptions["status"] = [{ value: '0', label: '关闭' }, { value: '1', label: '正常' }]
@@ -308,10 +308,7 @@ export default function () {
       setFilterOptions({ ...filterOptions })
       selectFilterType("asset_ip");
     });
-
     setFilterOptions({ ...filterOptions })
-    
-
   }, []);
 
   const selectFilterType=(value)=>{
@@ -324,16 +321,8 @@ export default function () {
     setSearchVal(null)
   }
 
-  useEffect(() => {    
-    if(unitOptions==null){
-      getMonitorUnit().then( (units) => {
-       setUnitOptions(unitOptions)
-       getTableData(assetInfo,units.dat);
-     });        
-   }else{
-      getTableData(assetInfo,unitOptions);
-   }
-    
+  useEffect(() => { 
+      getTableData(assetInfo,unitOptions);    
   }, [searchVal, refreshFlag, typeId, refreshKey]);
 
   const getTableData = (assets,units) => {
@@ -480,38 +469,7 @@ export default function () {
     setPageSize(pageSize);
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
-  const formSubmit = (values, businessForm, action, businessZip) => {
-    let fields = dealFieldsToForm(businessZip);
-    console.log("_Submit", values, businessForm);
-    let submitFieldMap = new Map();
-    for (let item in values) {
-      let value = datalDealValue(values[item], fields.get(item).data_type);
-      if (value) {
-        submitFieldMap.set(item, value)
-      }
-    }
-    console.log("提交数据", businessForm, values);
-    if (action == "add") {
-      insertXHAsset(Object.fromEntries(submitFieldMap)).then((res) => {
-        setRefreshLeft(_.uniqueId('refresh_left'));
-        console.log(refreshLeft);
-        businessForm.isOpen = false;
-        setBusinessForm(businessForm)
-        // loadDataCenter();
-        setRefreshKey(_.uniqueId('refreshKey_'));
-      })
-    } else {
-      submitFieldMap.set("id", businessForm["operateId"]);
-      updateXHAsset(Object.fromEntries(submitFieldMap)).then((res) => {
-        setRefreshLeft(_.uniqueId('refresh_left'));
-        console.log(refreshLeft);
-        businessForm.isOpen = false;
-        setBusinessForm(businessForm)
-        // loadDataCenter();
-        setRefreshKey(_.uniqueId('refreshKey_'));
-      })
-    }
-  };
+ 
   const onSelect = (selectedKeys, info) => {
     setTypeId(selectedKeys);
     localStorage.setItem('left_monitor_type', selectedKeys);
@@ -575,7 +533,7 @@ export default function () {
                     defaultExpandedKeys={expandedKeys}
                     treeData={treeData}
                     defaultExpandAll={true}
-                    selectedKeys={[typeId]}
+                    defaultSelectedKeys={[typeId]}
                     autoExpandParent={true}
                     checkStrictly
                     fieldNames={{ key: 'id', title: 'name' }}

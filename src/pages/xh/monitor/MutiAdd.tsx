@@ -1,24 +1,26 @@
 import './style.less';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } from 'antd';
+import { Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
 import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from '../monitor/Form/PromBox';
-
+import { factories,unitTypes } from '../assetmgt/catalog';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import PageLayout from '@/components/pageLayout';
-import { GroupOutlined } from '@ant-design/icons';
+import { GroupOutlined, MinusCircleOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
+const { Option } = Select;
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
   const commonState = useContext(CommonStateContext);
   const [organizationId] = useState<number>(commonState.organizationId);
+  const [selectedValues, setSelectedValues] = useState<any[]>([]);
   const [assetTypes, setAssetTypes] = useState<{ name: string; form: any }[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
@@ -32,14 +34,17 @@ export default function (props: { initialValues: object; initParams: object; mod
   const history = useHistory();
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [isSearchEmpty, setIsSearchEmpty] = useState(false);
+  
+  const [options, setOptions] = useState<any[]>([]);
 
   const panelBaseProps: any = {
     size: 'small',
-    bodyStyle: { padding: '24px 124px 8px 124px' },
+    // bodyStyle: { padding: '24px 124px 8px 124px' },
   };
 
-  useEffect(() => {
-   
+  useEffect(() => {  
     
     getAssetsStypes().then((res) => {
       const items = res.dat.map((v) => {
@@ -61,7 +66,7 @@ export default function (props: { initialValues: object; initParams: object; mod
       });
       setIdentList(items);
     });
-    
+    form.setFieldsValue({ datasource_id: 1 })
   }, []);
 
   const genForm = (assets, types) => {
@@ -102,7 +107,13 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const submitForm = async (values) => {
-    console.log('submitForm', values);
+    console.log('submitForm', values);    
+    if(values.alert_rules!=null && values.alert_rules.length>0){
+      values.alert_rules.forEach(rule => {
+        let relation = rule.relation==">"?"大于":(rule.relation=="=="?"等于":"小于")
+        rule["rule_config_cn"]=values.monitoring_name+relation+rule.value;
+      });
+    }
     let config = {};
     if (params != null && params.length > 0) {
       for (let param in params) {
@@ -139,6 +150,48 @@ export default function (props: { initialValues: object; initParams: object; mod
     //   });
     // }
   };
+  const isAllOptionSelected = () => {
+    const selectedOptions = options
+      .filter(
+        (option) =>
+          option.value !== undefined &&
+          option.value !== null &&
+          option.value !== '',
+      )
+      .map((option) => option.value!);
+    return (
+      selectedOptions.length > 0 &&
+      selectedOptions.every((value) => selectedValues.indexOf(value) !== -1)
+    );
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchKeyword(value);
+    setIsSearchEmpty(
+      options.filter((option) =>
+        option.label.toLowerCase().includes(value.toLowerCase()),
+      ).length === 0,
+    );
+  };
+
+  const handleSelectChange = (values: number[]) => {
+    setSelectedValues(values);
+    searchKeyword && setSearchKeyword('');
+    console.log('handleSelectChange',values)
+    form.setFieldsValue({asset_ids:values})
+  };
+
+  const handleAllOptionSelect = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (event.target.checked) {
+      handleSelectChange(options.map((option) => option.value!));
+    } else {
+      handleSelectChange([]);
+    }
+  };
+  
+
 
   return (
     <>
@@ -175,32 +228,151 @@ export default function (props: { initialValues: object; initParams: object; mod
                         type:value
                       };
                       getAssetsByCondition(param).then((res) => {
-                        let options = new Array();
-                        const items = res.dat.list.map((v) => {
-                          options.push({
+                        const names = res.dat.list.map((v) => {
+                          return {
                             value: v.id,
-                            label: v.name + '[' + v.type + ']',
+                            label: v.name,
+                          }
+                        });
+                        setAssetOptions(names);
+                        const ips = res.dat.list.map((v) => {
+                          return ({
+                            value: v.id,
+                            label: v.ip,
                           });
                         });
-                        setAssetOptions(options);
-                        setAssetList(res.dat.list);      
+                        setOptions(ips);      
                       });
                     }} disabled={id!=null}  />
                   </Form.Item>
                </Col>
               <Col span={12}>
                 <Form.Item label='资产名称' name='asset_ids' rules={[{ required: true }]}>
-                  <Select  mode="multiple"  style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetOptions} placeholder='请选择资产' disabled={props.mode === 'edit'} />
+                  <Select  mode="multiple"  style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} 
+                  placeholder='请选择资产' 
+                  disabled={props.mode === 'edit'} 
+                  maxTagCount={3}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                  maxTagPlaceholder={(omittedValues) => `+ ${omittedValues.length} 项`}
+                  dropdownRender={(menu) => (
+                    <div className="my-select-wrapper">
+                      {!searchKeyword && (
+                        <div onClick={(e) => e.stopPropagation()} className="my-menu-all">
+                          <Checkbox
+                            checked={isAllOptionSelected()}
+                            onChange={handleAllOptionSelect as any}
+                            style={{ width: '100%', padding: '5px 20px' }}
+                          >
+                            全选
+                          </Checkbox>
+                        </div>
+                      )}
+                      {isSearchEmpty ? (
+                        <div className="my-empty">
+                          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                        </div>
+                      ) : (
+                        assetOptions
+                          .filter((option) =>
+                            option.label
+                              .toLowerCase()
+                              .includes(searchKeyword.toLowerCase()),
+                          )
+                          .map((option) => (
+                            <div
+                              key={option.value}
+                              onClick={(e) => e.stopPropagation()}
+                              className="my-menu-item"
+                            >
+                              <Checkbox
+                                checked={selectedValues.indexOf(option.value) !== -1}
+                                onChange={(e) => {
+                                  const nextSelectedValues = e.target.checked
+                                    ? [...selectedValues, option.value]
+                                    : selectedValues.filter(
+                                        (value) => value !== option.value,
+                                      );
+                                  handleSelectChange(nextSelectedValues);
+                                }}
+                                style={{ width: '100%', padding: '5px 20px' }}
+                              >
+                                {option.label}
+                              </Checkbox>
+                            </div>
+                          ))
+                      )}
+                    </div>
+                  )}
+                  
+                  />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label='资产IP' name='asset_ids' rules={[{ required: true }]}>
                   <Select  mode="multiple"  style={{ width: '100%' }} showSearch
                     filterOption optionFilterProp={"label"}                 
-                    placeholder='请选择资产' disabled={props.mode === 'edit'} >
-                     {assetList.map((item, index) => (
+                    placeholder='请选择资产' disabled={props.mode === 'edit'}
+                    value={selectedValues}
+                    maxTagCount={3}
+                    getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                    maxTagPlaceholder={(omittedValues) => `+ ${omittedValues.length} 项`}
+                    dropdownRender={(menu) => (
+                      <div className="my-select-wrapper">
+                        {!searchKeyword && (
+                          <div onClick={(e) => e.stopPropagation()} className="my-menu-all">
+                            <Checkbox
+                              checked={isAllOptionSelected()}
+                              onChange={handleAllOptionSelect as any}
+                              style={{ width: '100%', padding: '5px 20px' }}
+                            >
+                              全部
+                            </Checkbox>
+                          </div>
+                        )}
+                        {isSearchEmpty ? (
+                          <div className="my-empty">
+                            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                          </div>
+                        ) : (
+                          options
+                            .filter((option) =>
+                              option.label
+                                .toLowerCase()
+                                .includes(searchKeyword.toLowerCase()),
+                            )
+                            .map((option) => (
+                              <div
+                                key={option.value}
+                                onClick={(e) => e.stopPropagation()}
+                                className="my-menu-item"
+                              >
+                                <Checkbox
+                                  checked={selectedValues.indexOf(option.value) !== -1}
+                                  onChange={(e) => {
+                                    const nextSelectedValues = e.target.checked
+                                      ? [...selectedValues, option.value]
+                                      : selectedValues.filter(
+                                          (value) => value !== option.value,
+                                        );
+                                    handleSelectChange(nextSelectedValues);
+
+                                    console.log(nextSelectedValues);
+                                  }}
+                                  style={{ width: '100%', padding: '5px 20px' }}
+                                >
+                                  {option.label}
+                                </Checkbox>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    )}
+                    
+                    
+                    >
+                     {/* {assetList.map((item, index) => (
                     <Select.Option value={item.id} key={index}>{item.ip}</Select.Option>
-                   ))}
+                   ))} */}
                    </Select>
                 </Form.Item>
               </Col>
@@ -215,6 +387,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     onChange={(v) => {
                       setDatasource(v);
                     }}
+                    defaultValue={1}
                     options={[
                       {
                         value: 1,
@@ -226,7 +399,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
             </Row>
             <Row gutter={10}>
-              <Col span={24}>
+              <Col span={20}>
                 <Form.Item label='监控脚本' rules={[{ required: false }]}>
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
@@ -238,12 +411,25 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </Form.Item>
 
               </Col>
+              <Col span={4}>
+                <Form.Item label='指标计算单位' rules={[{ required: false }]}>
+                  <Form.Item name='unit' rules={[{ required: true }]}>
+                  <Select >
+                     {Object.keys(unitTypes).map((key) =>{
+                       return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)
+                     })}
+                  </Select>
+                  </Form.Item>
+                </Form.Item>
+
+              </Col>
             </Row>
             <Row gutter={10}>
               <Col span={12}>
                 <Form.Item label='状态' name='status'>
                   <Select
                     style={{ width: '100%' }}
+                    defaultValue={0}
                     options={[
                       { value: 0, label: '正常' },
                       { value: 1, label: '失效' },
@@ -263,6 +449,90 @@ export default function (props: { initialValues: object; initParams: object; mod
                   <TextArea placeholder='填写描述' />
                 </Form.Item>
               </Col>
+            </Row>
+          </Card>
+        </div>
+        <div className='card-wrapper'>
+          <Card title={'告警消息'} className='alert_rule_card'>
+            <Row gutter={10}>
+              <Form.List name={'alert_rules'} initialValue={[{}]}>
+                {(field, { add, remove }) => {
+                  return (
+                    <Fragment>
+                      <Card
+                        className='rule_card_group'
+                        extra={
+                          <>
+                            <Button
+                              type='primary'
+                              className='form_add'
+                              onClick={() => {
+                                add();
+                              }}
+                            >
+                              {' '}
+                              ＋添加
+                            </Button>
+                          </>
+                        }
+                      >
+                        <Row gutter={10} className='rule-row'>
+                          <Col span={6}>关系</Col>
+                          <Col span={6}>阈值</Col>
+                          <Col span={12}>告警级别</Col>
+                        </Row>
+                        {field.map((item, _suoyi) => (
+                          <Fragment>
+                            <Row gutter={10} className='rule-row'>
+                              <Col span={6}>
+                                <Form.Item
+                                  // label={'关系'}
+                                  name={[item.name, 'relation']}
+                                  rules={[{ required: true, message: `请选择符号` }]}
+                                >
+                                  <Select options={[
+                                    { value: ">", label: '大于' }, { value: "=", label: '等于' }, { value: "<", label: '小于' },
+                                  ]}></Select>
+                                </Form.Item>
+                              </Col>
+                              <Col span={6}>
+                                <Form.Item
+                                  // label={'阈值'}
+                                  name={[item.name, 'value']}
+                                  rules={[{ required: true, message: `请选择阈值` }]}
+                                >
+                                  <InputNumber placeholder="请输入值" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={10}>
+                                <Form.Item
+                                  // label={'告警级别'}
+                                  name={[item.name, 'severity']}
+                                  rules={[{ required: true, message: `请选择告警级别` }]}
+                                >
+                                  <Radio.Group>
+                                    <Radio value={1}>{t('common:severity.1')}</Radio>
+                                    <Radio value={2}>{t('common:severity.2')}</Radio>
+                                    <Radio value={3}>{t('common:severity.3')}</Radio>
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                              <Col span={2}>
+                                  <MinusCircleOutlined
+                                    className='dynamic-delete-button'
+                                    style={{ color: 'red', marginTop:14, marginLeft: 8 }}
+                                    onClick={() => remove(_suoyi)}
+                                  />
+                              </Col>
+                            </Row>
+                          </Fragment>
+                        ))}
+                      </Card>
+                    </Fragment>
+                  );
+                }}
+              </Form.List>
+
             </Row>
           </Card>
         </div>
