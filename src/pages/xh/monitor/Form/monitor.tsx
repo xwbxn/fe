@@ -274,12 +274,12 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const loadImages = (cn_name) => {
     console.log("Loading images...", cn_name);
-    let imageName = "/public/image/factory/other.png";
+    let imageName = "/image/factory/other.png";
     for (let factor in factories) {
       let image = factories[factor]
       console.log("images...", image);
       if (image.value == cn_name) {
-        imageName = "/public/image/factory/" + image.key + ".png";
+        imageName = "/image/factory/" + image.key + ".png";
       }
     }
     return imageName;

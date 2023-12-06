@@ -1,7 +1,7 @@
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, InputNumber, message, Modal, Radio, Radio, Row, Select, Space } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
