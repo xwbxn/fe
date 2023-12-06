@@ -129,11 +129,8 @@ export default function () {
           delete dat.exps;
         }
         form.setFieldsValue(dat);
-        try {
-          form.setFieldsValue(JSON.parse(dat.params));
-        } catch {
-          console.debug('parse param error:', dat.params);
-        }
+        form.setFieldsValue(dat.params)
+        
         if (isTabLoading) {
           setTimeout(() => {
             genForm(assetTypes);
