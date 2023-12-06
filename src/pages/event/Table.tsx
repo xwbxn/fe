@@ -58,7 +58,7 @@ export default function TableCpt(props: IProps) {
       render(title, { id, tags }) {
         return (
           <>
-          <Link to={`/alert-cur-events/${id}`} target='_blank'>{title}</Link>
+          <Link to={`/alert-cur-events/${id}`} target='_self'>{title}</Link>
           </>
         );
       },

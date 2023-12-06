@@ -57,7 +57,7 @@ request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
   };
-  headers['Authorization'] = `Bearer ${localStorage.getItem('access_token') || ''}`;
+  headers['Authorization'] = `Bearer ${sessionStorage.getItem('access_token') || ''}`;
   headers['X-Language'] = localStorage.getItem('language') === 'en_US' ? 'en' : 'zh';
   return {
     url,
@@ -135,7 +135,7 @@ request.interceptors.response.use(
                 location.href = `/login${location.pathname != '/' ? '?redirect=' + location.pathname + location.search : ''}`;
               } else {
                 const { access_token, refresh_token } = res.dat;
-                localStorage.setItem('access_token', access_token);
+                sessionStorage.setItem('access_token', access_token);
                 localStorage.setItem('refresh_token', refresh_token);
                 location.href = `${location.pathname}${location.search}`;
               }

@@ -76,46 +76,46 @@ const EventDetailPage: React.FC = () => {
         return content;
       },
     },
-    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod)
-      ? [
-          {
-            label: t('detail.group_name'),
-            key: 'group_name',
-            render(content, { group_id }) {
-              return (
-                <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
-                  {content}
-                </Button>
-              );
-            },
-          },
-        ]
-      : [
-          {
-            label: t('detail.detail_url'),
-            key: 'rule_config',
-            render(val) {
-              const detail_url = _.get(val, 'detail_url');
-              return (
-                <a href={detail_url} target='_blank'>
-                  {detail_url}
-                </a>
-              );
-            },
-          },
-        ]),
+    {
+      label: '资产名称',
+      key: 'asset_name',
+      render: (asset_name,{ asset_id }) => {
+        return (<Link
+              to={{
+                pathname: `/xh/assetmgt/add?mode=view&id=${asset_id}`,
+              }}
+              target='_blank'
+            >
+              {asset_name}
+            </Link>)
+      },
+    },
+    {
+      label: '资产IP',
+      key: 'asset_ip',
+      render: (asset_ip,{ asset_id }) => {
+        return (<Link
+          to={{
+            pathname: `/xh/assetmgt/add?mode=view&id=${asset_id}`,
+          }}
+          target='_blank'
+        >
+          {asset_ip}
+        </Link>)
+      },
+    },
+    {
+      label: t('detail.group_name'),
+      key: 'group_name',
+      render(content, { group_id }) {
+        return (
+          <Button size='small' type='link' className='rule-link-btn' onClick={() => handleNavToWarningList(group_id)}>
+            {content}
+          </Button>
+        );
+      }
+    },
     { label: t('detail.rule_note'), key: 'rule_note' },
-    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod)
-      ? [
-          {
-            label: t('detail.datasource_id'),
-            key: 'datasource_id',
-            render(content) {
-              return _.find(datasourceList, (item) => item.id === content)?.name;
-            },
-          },
-        ]
-      : [false]),
     {
       label: t('detail.severity'),
       key: 'severity',
@@ -123,13 +123,7 @@ const EventDetailPage: React.FC = () => {
         return <Tag color={priorityColor[severity - 1]}>S{severity}</Tag>;
       },
     },
-    {
-      label: '资产名称/IP',
-      key: 'asset_name',
-      render: (asset_name,{ asset_ip }) => {
-        return <div style={{fontSize:"15px"}}>{asset_name} &nbsp;/ &nbsp; {asset_ip} </div>;
-      },
-    },
+   
     {
       label: '告警规则',
       key: 'rule_config_cn',
@@ -144,20 +138,20 @@ const EventDetailPage: React.FC = () => {
         return <Tag color={isRecovered ? 'green' : 'red'}>{isRecovered ? 'Recovered' : 'Triggered'}</Tag>;
       },
     },
-    {
-      label: t('detail.tags'),
-      key: 'tags',
-      render(tags) {
-        return tags
-          ? tags.map((tag) => (
-              <Tag color='purple' key={tag}>
-                {tag}
-              </Tag>
-            ))
-          : '';
-      },
-    },
-    ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
+    // {
+    //   label: t('detail.tags'),
+    //   key: 'tags',
+    //   render(tags) {
+    //     return tags
+    //       ? tags.map((tag) => (
+    //           <Tag color='purple' key={tag}>
+    //             {tag}
+    //           </Tag>
+    //         ))
+    //       : '';
+    //   },
+    // },
+    // ...(!_.includes(['firemap', 'northstar'], eventDetail?.rule_prod) ? [{ label: t('detail.target_note'), key: 'target_note' }] : [false]),
     {
       label: t('detail.trigger_time'),
       key: 'trigger_time',
@@ -194,18 +188,18 @@ const EventDetailPage: React.FC = () => {
     //     return t('detail.rule_algo_threshold');
     //   },
     // },
-    {
-      label: t('detail.cate'),
-      key: 'cate',
-    },
-    ...(eventDetail?.cate === 'prometheus'
-      ? PrometheusDetail({
-          eventDetail,
-          history,
-        })
-      : [false]),
-    ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
-    ...(plusEventDetail(eventDetail?.cate, t) || []),
+    // {
+    //   label: t('detail.cate'),
+    //   key: 'cate',
+    // },
+    // ...(eventDetail?.cate === 'prometheus'
+    //   ? PrometheusDetail({
+    //       eventDetail,
+    //       history,
+    //     })
+    //   : [false]),
+    // ...(eventDetail?.cate === 'host' ? Host(t, commonState) : [false]),
+    // ...(plusEventDetail(eventDetail?.cate, t) || []),
     {
       label: t('detail.prom_eval_interval'),
       key: 'prom_eval_interval',
@@ -234,21 +228,21 @@ const EventDetailPage: React.FC = () => {
         return groups ? groups.map((group) => <Tag color='purple'>{group.name}</Tag>) : '';
       },
     },
-    {
-      label: t('detail.callbacks'),
-      key: 'callbacks',
-      render(callbacks) {
-        return callbacks
-          ? callbacks.map((callback) => (
-              <Tag>
-                <Paragraph copyable style={{ margin: 0 }}>
-                  {callback}
-                </Paragraph>
-              </Tag>
-            ))
-          : '';
-      },
-    },
+    // {
+    //   label: t('detail.callbacks'),
+    //   key: 'callbacks',
+    //   render(callbacks) {
+    //     return callbacks
+    //       ? callbacks.map((callback) => (
+    //           <Tag>
+    //             <Paragraph copyable style={{ margin: 0 }}>
+    //               {callback}
+    //             </Paragraph>
+    //           </Tag>
+    //         ))
+    //       : '';
+    //   },
+    // },
   ];
 
   if (eventDetail?.annotations) {
@@ -295,14 +289,17 @@ const EventDetailPage: React.FC = () => {
         
         <Spin spinning={!eventDetail}>
           <div className='event-detail-nav'><span onClick={(e)=>{
-            //  history.push({
-            //   pathname: '/xh/monitor/add',
-            //   search: queryString.stringify({
-            //     type: 'monitor',
-            //     id: eventDetail.asset_id,
-            //     action: 'asset'
-            //   }),
-            // });
+            history.push({
+              pathname: '/metric/explorer',
+              search: queryString.stringify({
+                prom_ql:eventDetail.prom_ql,
+                data_source_name: 'prometheus',
+                data_source_id: eventDetail.datasource_id,
+                mode: 'graph',
+                start: moment.unix(eventDetail.trigger_time).subtract(30, 'minutes').unix(),
+                end: moment.unix(eventDetail.trigger_time).add(30, 'minutes').unix(),
+              }),
+            });
              
           }}>监控图表</span></div>
           <Card
@@ -310,7 +307,7 @@ const EventDetailPage: React.FC = () => {
             className='desc-container'
             title={t('detail.card_title')}
             actions={[
-              <div className='action-btns'>
+              <div className='alert_detail_action-btns'>
                 <Space>
                   <Button
                     type='primary'
@@ -329,26 +326,20 @@ const EventDetailPage: React.FC = () => {
                   >
                     {t('shield')}
                   </Button>
-                  {!isHistory && (
+                  {/* {!isHistory && ( */}
                     <Button
-                      danger
+                      // danger
                       onClick={() => {
-                        if (eventDetail.group_id) {
-                          deleteAlertEventsModal(
-                            [Number(eventId)],
-                            () => {
-                              history.replace('/alert-cur-events');
-                            },
-                            t,
-                          );
-                        } else {
-                          message.warn('该告警未返回业务组ID');
-                        }
+                        history.goBack()
+                        // history.push(
+                        //   isHistory ?'/alert-his-events':'/alert-cur-events'
+                        // )
+                        
                       }}
                     >
-                      {t('common:btn.delete')}
+                     返回
                     </Button>
-                  )}
+                  {/* )} */}
                 </Space>
               </div>,
             ]}
@@ -362,6 +353,7 @@ const EventDetailPage: React.FC = () => {
                     return parsedEventDetail.is_recovered ? true : item.key !== 'recover_time';
                   })
                   .map(({ label, key, render }: any, i) => {
+                    
                     return (
                       <div className='desc-row' key={key + i}>
                         <div className='desc-label'>{label}：</div>

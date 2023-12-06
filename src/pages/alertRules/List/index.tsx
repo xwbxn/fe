@@ -306,10 +306,9 @@ export default function List(props: ListProps) {
   }, []);
 
   useEffect(() => {
-    console.log('------------');
     if (bgid) {
       if (assetid != null && assetid > 0) {
-           params["filter"] = 3;
+           params["filter"] = "asset_id";
            params["query"] = "" + assetid;
       } else if (searchVal != null && searchVal.length > 0) {
            params["query"] = searchVal;

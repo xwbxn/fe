@@ -76,6 +76,11 @@ const getMenuList = (t) => {
           label: t('历史告警'),
         },
         {
+          key: '/alert-mutes',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('屏蔽规则'),
+        },
+        {
           key: '/help/notification-settings',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('通知设置'),
@@ -355,7 +360,7 @@ export default function () {//{ selectMenu?:any }
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            localStorage.removeItem('access_token');
+            sessionStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             history.push('/login');

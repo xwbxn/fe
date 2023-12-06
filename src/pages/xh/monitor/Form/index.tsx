@@ -1,18 +1,20 @@
 import './style.less';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, message, Modal, Radio, Radio, Row, Select, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
-import {  getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
-import { getMonitorUnit,createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
+import { getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
+import { getMonitorUnit, createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import { type } from 'os';
 const { TextArea } = Input;
+import { factories, unitTypes } from '../../assetmgt/catalog';
+import { MinusCircleOutlined } from '@ant-design/icons';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
@@ -22,22 +24,21 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [sqlCN, setSqlCN] = useState<string>("")
   const [identList, setIdentList] = useState([]);
-  const [params, setParams] = useState<{ label: string; name: string;editable?: boolean; required?: boolean; password?: boolean; items?: [] }[]>([]);
+  const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; required?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
   const [datasource, setDatasource] = useState(1);
   const { search } = useLocation();
   const { id } = queryString.parse(search);
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
-  const [unitOptions, setUnitOptions] = useState<any>({});
 
 
 
   const panelBaseProps: any = {
     size: 'small',
-    bodyStyle: { padding: '24px 124px 8px 124px' },
+    // bodyStyle: { padding: '24px 124px 8px 124px' },
   };
-  
+
 
   useEffect(() => {
     if (action == null || 'addeditview'.indexOf(action + '') < 0) {
@@ -47,12 +48,8 @@ export default function (props: { initialValues: object; initParams: object; mod
       page: 1,
       limit: 10000,
     };
-    getMonitorUnit().then( (res) => {
-      console.log("getMonitorUnit",res);
-      setUnitOptions(res.dat)
-    });
 
-    getAssetsStypes().then( (res) => {
+    getAssetsStypes().then((res) => {
       const types = res.dat.map((v) => {
         return {
           value: v.name,
@@ -92,7 +89,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         }
       });
 
-      
+
     });
 
     getAssetsIdents().then((res) => {
@@ -104,18 +101,13 @@ export default function (props: { initialValues: object; initParams: object; mod
       });
       setIdentList(items);
     });
-    
+    form.setFieldsValue({ datasource_id: 1 })
+
   }, []);
 
-  // useEffect(()=>{
-  //   let formValue = form.getFieldsValue();
-  //   if(formValue["asset_id"]){
-      
-  //   }
-  // },[assetList,assetTypes,form])
 
   const genForm = (assets, types) => {
-    if(assets==null ||assets.length<=0 || types==null || types.length<=0) return
+    if (assets == null || assets.length <= 0 || types == null || types.length <= 0) return
     console.log('genForm');
     let formValue = form.getFieldsValue();
     console.log(formValue);
@@ -125,7 +117,7 @@ export default function (props: { initialValues: object; initParams: object; mod
       let typeList = types ? types : assetTypes;
       const assetType: any = typeList.find((v) => v.name === asset.type);
       if (assetType) setParams(assetType.form || []);
-      console.log('gen---Form',assetType.form);
+      console.log('gen---Form', assetType.form);
     }
     if (formValue['monitoring_sql'] != null) {
       let sql = formValue['monitoring_sql'];;
@@ -142,7 +134,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   };
 
   const renderForm = (v) => {
-    console.log("config form item,",v)
+    console.log("config form item,", v)
     if (v.items) {
       return (
         <Select
@@ -153,7 +145,7 @@ export default function (props: { initialValues: object; initParams: object; mod
         ></Select>
       );
     }
-    if (v.type=="password") {
+    if (v.type == "password") {
       return <Input.Password placeholder={`填写${v.label}`} />;
     }
     return <Input placeholder={`填写${v.label}`} />;
@@ -161,6 +153,12 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   const submitForm = async (values) => {
     console.log('submitForm', values);
+    if(values.alert_rules!=null && values.alert_rules.length>0){
+      values.alert_rules.forEach(rule => {
+        let relation = rule.relation==">"?"大于":(rule.relation=="=="?"等于":"小于")
+        rule["rule_config_cn"]=values.monitoring_name+relation+rule.value;
+      });
+    }
     let config = {};
     if (params != null && params.length > 0) {
       for (let param in params) {
@@ -223,7 +221,6 @@ export default function (props: { initialValues: object; initParams: object; mod
                     onChange={(v) => {
                       setDatasource(v);
                     }}
-                    defaultValue={1}
                     options={[
                       {
                         value: 1,
@@ -240,21 +237,21 @@ export default function (props: { initialValues: object; initParams: object; mod
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
                   </Form.Item>
-                  {sqlCN != null && sqlCN.length>0 && (
-                    <div className='chinese_remark'><span className='title' style={{color:'#0A4B9D',fontSize:"14px"}}>指标关键词说明：</span>{sqlCN}</div>
+                  {sqlCN != null && sqlCN.length > 0 && (
+                    <div className='chinese_remark'><span className='title' style={{ color: '#0A4B9D', fontSize: "14px" }}>指标关键词说明：</span>{sqlCN}</div>
                   )}
 
                 </Form.Item>
 
               </Col>
               <Col span={4}>
-                <Form.Item label='指标单位' rules={[{ required: false }]}>
+                <Form.Item label='指标计算单位' rules={[{ required: false }]}>
                   <Form.Item name='unit' rules={[{ required: true }]}>
-                  <Select >
-                     {Object.keys(unitOptions).map((key) =>{
-                       return (<Select.Option value={key}>{unitOptions[key]}</Select.Option>)
-                     })}
-                  </Select>
+                    <Select >
+                      {Object.keys(unitTypes).map((key) => {
+                        return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)
+                      })}
+                    </Select>
                   </Form.Item>
                 </Form.Item>
 
@@ -288,16 +285,100 @@ export default function (props: { initialValues: object; initParams: object; mod
           </Card>
         </div>
         <div className='card-wrapper'>
+          <Card title={'告警消息'} className='alert_rule_card'>
+            <Row gutter={10}>
+              <Form.List name={'alert_rules'} initialValue={[{}]}>
+                {(field, { add, remove }) => {
+                  return (
+                    <Fragment>
+                      <Card
+                        className='rule_card_group'
+                        extra={
+                          <>
+                            <Button
+                              type='primary'
+                              className='form_add'
+                              onClick={() => {
+                                add();
+                              }}
+                            >
+                              {' '}
+                              ＋添加
+                            </Button>
+                          </>
+                        }
+                      >
+                        <Row gutter={10} className='rule-row'>
+                          <Col span={6}>关系</Col>
+                          <Col span={6}>阈值</Col>
+                          <Col span={12}>告警级别</Col>
+                        </Row>
+                        {field.map((item, _suoyi) => (
+                          <Fragment>
+                            <Row gutter={10} className='rule-row'>
+                              <Col span={6}>
+                                <Form.Item
+                                  // label={'关系'}
+                                  name={[item.name, 'relation']}
+                                  rules={[{ required: true, message: `请选择符号` }]}
+                                >
+                                  <Select options={[
+                                    { value: ">", label: '大于' }, { value: "=", label: '等于' }, { value: "<", label: '小于' },
+                                  ]}></Select>
+                                </Form.Item>
+                              </Col>
+                              <Col span={6}>
+                                <Form.Item
+                                  // label={'阈值'}
+                                  name={[item.name, 'value']}
+                                  rules={[{ required: true, message: `请选择阈值` }]}
+                                >
+                                  <InputNumber placeholder="请输入值" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={10}>
+                                <Form.Item
+                                  // label={'告警级别'}
+                                  name={[item.name, 'severity']}
+                                  rules={[{ required: true, message: `请选择告警级别` }]}
+                                >
+                                  <Radio.Group>
+                                    <Radio value={1}>{t('common:severity.1')}</Radio>
+                                    <Radio value={2}>{t('common:severity.2')}</Radio>
+                                    <Radio value={3}>{t('common:severity.3')}</Radio>
+                                  </Radio.Group>
+                                </Form.Item>
+                              </Col>
+                              <Col span={2}>
+                                  <MinusCircleOutlined
+                                    className='dynamic-delete-button'
+                                    style={{ color: 'red', marginTop:14, marginLeft: 8 }}
+                                    onClick={() => remove(_suoyi)}
+                                  />
+                              </Col>
+                            </Row>
+                          </Fragment>
+                        ))}
+                      </Card>
+                    </Fragment>
+                  );
+                }}
+              </Form.List>
+
+            </Row>
+          </Card>
+        </div>
+        <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'配置信息'}>
             <Row gutter={10}>
               {params.map((v) => {
                 return (
                   <Col key={`col=${v.name}`} span={12}>
                     <Form.Item key={`form-item${v.name}`}
-                       label={v.label} 
-                       name={v.name}  
-                       rules={[{ required: v.required?v.required:false, message: `请选择您的${v.label}` }]}  
-                       initialValue={props.initParams[v.name]}>
+                      label={v.label}
+                      name={v.name}
+                      rules={[{ required: v.required ? v.required : false, message: `请选择您的${v.label}` }]}
+                      initialValue={props.initParams[v.name]}>
                       {renderForm(v)}
                     </Form.Item>
                   </Col>
