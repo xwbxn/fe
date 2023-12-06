@@ -66,6 +66,10 @@ export const visualizations = [
     type: 'line',
     name: '折线图(g2)',
   },
+  {
+    type: 'barGaugeN',
+    name: '排行榜(g2)',
+  },
 ];
 
 export const IRefreshMap = {
@@ -217,6 +221,13 @@ export const defaultCustomValuesMap = {
     calc: 'lastNotNull',
   },
   column: {},
+  barGaugeN: {
+    calc: 'lastNotNull',
+    baseColor: '#9470FF',
+    displayMode: 'basic',
+    serieWidth: 20,
+    sortOrder: 'desc',
+  },
 };
 
 export const defaultOptionsValuesMap = {
@@ -236,6 +247,7 @@ export const defaultOptionsValuesMap = {
   column: defaultOptionsValues,
   pien: defaultOptionsValues,
   line: defaultOptionsValues,
+  barGaugeN: defaultOptionsValues
 };
 
 export const legendPostion = ['hidden', 'top', 'left', 'right', 'bottom'];

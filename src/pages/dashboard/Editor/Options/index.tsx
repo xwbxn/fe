@@ -28,6 +28,7 @@ import Iframe from './Iframe';
 import Column from './Column';
 import PieN from './PieN';
 import Line from './Line';
+import BarGaugeN from './BarGaugeN';
 
 export default function index({ type, targets, chartForm, variableConfigWithOptions }) {
   const OptionsCptMap = {
@@ -42,7 +43,8 @@ export default function index({ type, targets, chartForm, variableConfigWithOpti
     gauge: <Gauge />,
     column: <Column />,
     pien: <PieN />,
-    line: <Line></Line>
+    line: <Line></Line>,
+    barGaugeN: <BarGaugeN></BarGaugeN>
   };
   return OptionsCptMap[type] || `无效的图表类型 ${type}`;
 }

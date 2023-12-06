@@ -31,11 +31,6 @@ const getMenuList = (t) => {
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('资产清单'),
         },
-        {
-          key: '/targets',
-          icon: <IconFont type='icon-Menu_Infrastructure' />,
-          label: t('探针管理'),
-        },
       ],
     },
     {
@@ -148,6 +143,11 @@ const getMenuList = (t) => {
           key: '/target/version',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('客户端版本'),
+        },
+        {
+          key: '/targets',
+          icon: <IconFont type='icon-Menu_Infrastructure' />,
+          label: t('探针管理'),
         },
         {
           key: 'log',

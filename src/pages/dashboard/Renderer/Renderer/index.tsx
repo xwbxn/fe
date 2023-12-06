@@ -51,6 +51,7 @@ import './style.less';
 import Column from './Column';
 import PieN from './PieN';
 import Line from './Line';
+import BarGaugeN from './BarGaugeN';
 
 interface IProps {
   datasourceValue?: number; // 全局数据源，如 values.datasourceValue 未设置则用全局数据源
@@ -119,6 +120,7 @@ function index(props: IProps) {
     column: () => <Column {...subProps} themeMode={themeMode} />,
     pien: () => <PieN {...subProps} themeMode={themeMode} />,
     line: () => <Line {...subProps} themeMode={themeMode}></Line>,
+    barGaugeN: () => <BarGaugeN {...subProps} themeMode={themeMode}></BarGaugeN>,
   };
 
   return (

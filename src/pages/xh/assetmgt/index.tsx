@@ -208,6 +208,7 @@ export default function () {
       render: (text: string, record: assetsType) => (
         <Space>
           <VideoCameraOutlined title='设置监控' onClick={(e) => {
+            localStorage.setItem('left_monitor_type', '0');
             history.push("/xh/monitor?mode=view&assetId=" + record.id);
           }} />
           <FileSearchOutlined title='资产详情' onClick={(e) => {
