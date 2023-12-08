@@ -1,10 +1,10 @@
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu } from 'antd';
+import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { CommonStateContext } from '@/App';
-import { CheckCircleFilled, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CheckCircleOutlined, CloseCircleOutlined, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
 import Graph from '../Graph';
 import _, { concat, random, values } from 'lodash';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
@@ -321,7 +321,11 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </div>
                 <div className='row'>
                   <div className='theme1'><div className='title'>资产位置：</div>{assetInfo.position}</div>
-                  <div className='theme1'><div className='title'>状态：</div>{assetInfo.status == 1 ? '正常' : "下线"}</div>
+                  <div className='theme1'><div className='title'>状态：</div>
+                    {assetInfo.health == 1 
+                    ? <Tag icon={<CheckCircleOutlined />} color='success'>在线</Tag> 
+                    : <Tag icon={<CloseCircleOutlined />} color='error'>离线</Tag>}
+                  </div>
                   <div className='theme1'></div>
                   <div className='theme1'></div>
                 </div>
