@@ -110,12 +110,12 @@ export default function () {
     setRefreshFlag(_.uniqueId('refresh_'));
   };
 
-  const handleModal = (action: string,rowKeys:any[]) => {
+  const handleModal = (action: string,rowKeys:any[]|null) => {
     if (action == "open") {
       let url = "/api/n9e/xh/sys-log/export-xls";
       let exportTitle = "系统";
       let body = {}
-      debugger;
+      // debugger;
       if(rowKeys!=null){
           body["names"]= rowKeys;
       }
@@ -247,7 +247,19 @@ export default function () {
                     
                     <Button className='btn' type="primary" style={{right:'0',position:'absolute',marginRight:'16px'}}  
                      onClick={()=>{
+                      if (selectRowKeys.length <= 0) {
+                        Modal.confirm({
+                          title: "确认导出所有日志信息吗",
+                          onOk: async () => {
+                            handleModal("open",null);
+                          },
+                          onCancel() { },
+                        });
+                      } else {
                         handleModal("open",selectRowKeys);
+                      }
+
+                        
                      }}>批量导出
                     </Button>
                                    
