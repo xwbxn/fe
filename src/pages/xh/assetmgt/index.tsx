@@ -226,6 +226,7 @@ export default function () {
             showModal("update", record)
           }} />
           <DeleteOutlined
+            className='table-operator-area-warning'
             onClick={async () => {
               Modal.confirm({
                 title: t('common:confirm.delete'),
@@ -324,7 +325,8 @@ export default function () {
       }
     })    
     setFilterOptions({ ...filterOptions })
-
+    setFilterType("input");
+    setFilterParam("ip");
   }, []);
 
   useEffect(() => {
@@ -668,7 +670,7 @@ export default function () {
               <div className='table-handle-search'>
                 <Space>
                   <Select
-                    // defaultValue="lucy"
+                    defaultValue="ip"
                     placeholder="选择过滤器"
                     style={{ width: 120 }}
                     allowClear

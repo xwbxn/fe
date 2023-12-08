@@ -19,6 +19,26 @@ import moment from 'moment';
 import { utilValMap } from '../config';
 import * as byteConverter from './byteConverter';
 
+export function formatSecondToTime(value): any {
+  if (!value || Number(value) == 0) return ''
+  // 最终时间结果对象
+  let day =  Number(value) / 60 / 60 / 24; // 天
+  let hour =  Number(value) / 60 / 60 % 24; // 时
+  let minute =  Number(value) / 60 % 60; // 分
+  let second =  Number(value) % 60; // 秒
+  let result = '' + parseInt(""+second)+"秒"
+  if (minute > 0) {
+    result = '' + parseInt(""+minute) + '分' + result
+  }
+  if (hour > 0) {
+    result = '' + parseInt(""+hour) + '时' + result
+  }
+   if (day > 0) {
+     result = '' + parseInt(""+day) + '天' + result
+   }
+  return result;
+}
+
 export function timeFormatter(val, type: 'seconds' | 'milliseconds', decimals) {
   if (typeof val !== 'number')
     return {
@@ -83,6 +103,7 @@ export function timeFormatter(val, type: 'seconds' | 'milliseconds', decimals) {
 }
 
 const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss' }, val) => {
+
   if (val === null || val === '' || val === undefined) {
     return {
       value: '',
@@ -96,6 +117,7 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
     val = _.toNumber(val);
   }
   if (unit) {
+    console.log('时间", ' + decimals)
     const utilValObj = utilValMap[unit];
     if (utilValObj) {
       const { type, base } = utilValObj;
@@ -164,6 +186,14 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
         value: moment(val).format(dateFormat),
         unit: '',
         text: moment(val).format(dateFormat),
+        stat: val,
+      };
+    }
+    if (unit === '时间') {
+      return {
+        value: formatSecondToTime(val),//moment(val).format(dateFormat),
+        unit: '',
+        text: formatSecondToTime(val),//moment(val).format(dateFormat),
         stat: val,
       };
     }

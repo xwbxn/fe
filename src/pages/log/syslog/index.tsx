@@ -64,7 +64,11 @@ export default function () {
       align: 'center',
       render: (val, record: any) => {
         return (
-          <a onClick={() => {}}  target='_blank'>
+          <a onClick={() => {
+            let ids = new Array();
+            ids.push(record.name);
+            handleModal("open",ids);
+          }}  target='_blank'>
             导出
           </a>
         );
@@ -111,16 +115,14 @@ export default function () {
       let url = "/api/n9e/xh/sys-log/export-xls";
       let exportTitle = "系统";
       let body = {}
+      debugger;
       if(rowKeys!=null){
-          body["name"]= rowKeys;
+          body["names"]= rowKeys;
       }
-
-
-
-      exportTempletZip(url, filter,(rowKeys!=null && rowKeys.length>0)?{name:rowKeys}:null).then((res) => {
+      exportTempletZip(url, filter,(rowKeys!=null && rowKeys.length>0)?{names:rowKeys}:null).then((res) => {
         let blob = new Blob([res], {
           // 下载的文件类型(此处可更改：具体取值参考以下链接地址)
-          type: 'application/octet-stream',
+          type: 'application/zip',
         });
         let url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -245,7 +247,6 @@ export default function () {
                     
                     <Button className='btn' type="primary" style={{right:'0',position:'absolute',marginRight:'16px'}}  
                      onClick={()=>{
-                        debugger;
                         handleModal("open",selectRowKeys);
                      }}>批量导出
                     </Button>

@@ -97,6 +97,7 @@ export const unitTypes ={
     'bit': "比特-bit",
     'byte': "字节-byte",
     'S':'时间单位-秒',
+    'MS':'时间单位-毫秒',
     'N':'未指定',
 };
 export const factories = [

@@ -131,6 +131,11 @@ const Resource: React.FC = () => {
     getTeamInfoList({ query: '' }).then(({ dat }) => {
       treeData[0].children = dat || [];
       setTreeData(treeData.slice());
+      let arr = ["0"];
+      dat.map((item, index) => {
+        arr.push(item.id);
+      })
+      setExpandedKeys(arr);
     });
   };
   useEffect(() => {    
@@ -152,7 +157,7 @@ const Resource: React.FC = () => {
         filterOptions["role"]=items;
         setFilterOptions({...filterOptions})      
     });
-    
+    loadingTree();
   }, []);
 
 
@@ -465,7 +470,8 @@ const Resource: React.FC = () => {
             treeData={treeData}
             showLine
             selectedKeys={selectedKeys}
-            expandedKeys={expandedKeys}
+            // expandedKeys={expandedKeys}
+            defaultExpandedKeys={expandedKeys}
             defaultExpandAll={true}
             fieldNames={{ key: 'id' }}
             onExpand={(keys) => setExpandedKeys(keys)}

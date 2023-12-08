@@ -153,6 +153,7 @@
                 width: 25%;
                 .title {
                    width: 60px;
+                   text-align: right;
                 //    background-color: red;
                 }
                 // div {
@@ -183,6 +184,7 @@
             .theme1 {
                 display: inline-flex;
                 width: 100%;
+                
                 div {
                     width: 30%;
                     margin-right: 10px;
@@ -216,16 +218,20 @@
         font-weight: 900;
     }
     .party_info {
-        display: inline-flex;
-        overflow-y: auto;
-        width: 100%;
         width: 99.5%;
         padding: 5px;
+        display: block;
         // border: 1px solid #cecece;
         margin: 4px;
-        .assembly {
+        .party_show {
+            display: inline-flex;
+            width: 100%;
+            flex-wrap: wrap;
+           .assembly {
             margin-left: 20px;
             padding: 10px;
+            display: block;
+            width: 15%;
             .image {
                 width: 138px;
                 height: 72px;
@@ -242,6 +248,7 @@
                     margin-left: 3px;
                 }
             }
+           }
         }
     }
     
@@ -343,74 +350,95 @@
 .show_image {
     
     .cpu {
-        background-image: url('/public/image/party/cpu.png');
+        background-image: url('/image/party/cpu.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
         
     }
+    .board {
+        background-image: url('/image/party/board.png');
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size:60%;
+        
+    }
+    .bus {
+        background-image: url('/image/party/bus.png');
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size:60%;
+        
+    }
+    .os {
+        background-image: url('/image/party/os.png');
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size:60%;
+        
+    }
     .disk {
-        background-image: url('/public/image/party/disk.png');
+        background-image: url('/image/party/disk.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .fixed_party {
-        background-image: url('/public/image/party/fixed_party.png');
+        background-image: url('/image/party/fixed_party.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .flow {
-        background-image: url('/public/image/party/flow.png');
+        background-image: url('/image/party/flow.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .liunx {
-        background-image: url('/public/image/party/liunx.png');
+        background-image: url('/image/party/liunx.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .main_board {
-        background-image: url('/public/image/party/main_board.png');
+        background-image: url('/image/party/main_board.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .memory {
-        background-image: url('/public/image/party/memory.png');
+        background-image: url('/image/party/memory.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .bios {
-        background-image: url('/public/image/party/memory.png');
+        background-image: url('/image/party/memory.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .net {
-        background-image: url('/public/image/party/net.png');
+        background-image: url('/image/party/net.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .power {
-        background-image: url('/public/image/party/power.png');
+        background-image: url('/image/party/power.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .windows {
-        background-image: url('/public/image/party/windows.png');
+        background-image: url('/image/party/windows.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;
     }
     .zhuji {
-        background-image: url('/public/image/party/zhuji.png');
+        background-image: url('/image/party/zhuji.png');
         width: 138px;
         height: 72px;
         background-repeat: no-repeat;

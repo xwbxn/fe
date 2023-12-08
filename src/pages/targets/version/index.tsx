@@ -11,7 +11,7 @@ const props: UploadProps = {
   name: 'file',
   multiple: false,
   action: '/api/n9e/target/version',
-  headers: { Authorization: `Bearer ${localStorage.getItem('access_token') || ''}` },
+  headers: { Authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}` },
   onChange(info) {
     const { status } = info.file;
     if (status !== 'uploading') {

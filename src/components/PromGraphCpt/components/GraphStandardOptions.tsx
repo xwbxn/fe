@@ -18,6 +18,7 @@ import React from 'react';
 import _ from 'lodash';
 import { Menu, Checkbox, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+import { debug } from 'console';
 
 interface IProps {
   highLevelConfig: any;
@@ -87,6 +88,7 @@ export default function GraphStandardOptions(props: IProps) {
   const precisionMenu = (
     <Menu
       onClick={(e) => {
+        debugger
         setHighLevelConfig({ ...highLevelConfig, unit: e.key });
       }}
       selectedKeys={[highLevelConfig.unit]}

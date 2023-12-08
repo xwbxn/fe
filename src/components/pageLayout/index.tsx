@@ -56,7 +56,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
       <Menu.Item
         onClick={() => {
           Logout().then(() => {
-            localStorage.removeItem('access_token');
+            sessionStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('curBusiId');
             history.push('/login');
