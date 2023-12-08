@@ -70,6 +70,7 @@ export default function () {
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
+  const [allColumns,setAllColumns] =useState<any[]>([]);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
@@ -82,7 +83,7 @@ export default function () {
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
   const [selectColum, setSelectColum] = useState<any[]>([])
-  const { colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
+  const {colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
   const history = useHistory();
 
   const baseColumns: any[] = [
@@ -204,6 +205,81 @@ export default function () {
     },
   ];
 
+
+   /**
+   * 选择左边，加载列属性
+  */
+   const getAssetTypeItems = (type:any,types?:any) => {
+    debugger;
+    let dealTypes = types!=null?types:assetTypes;
+    if(type=='0'){
+      return loadAssetTypeAllColumns(dealTypes);
+    }
+    
+    const extendType: any = dealTypes.find((v) => v.name === type);
+    if (extendType) {
+      //TODO：处理分组属性
+      const extra_items = new Array();
+      extendType.metrics?.forEach(element => {
+        let newItem = {
+          name: element.metrics,
+          label: element.name,
+        };
+        extra_items.push(newItem);
+      });
+      let extra_props = extendType.extra_props;
+      for (let property in extra_props) {
+        let group = extra_props[property];
+        let columns = new Array;
+        if (group != null) {
+          for (let item of group.props) {
+            item.items.forEach(element => {
+              columns.push({
+                title: element.label,
+                dataIndex: element.name,
+                width: "120px",
+                ellipsis: true,
+                align: 'center',
+              })
+            });
+            let newItem = {
+              name: property + "." + (item.name),
+              label: item.label,
+            };
+            extra_items.push(newItem);
+          }
+        }
+        groupColumns[property] = columns;
+        setGroupColumns({ ...groupColumns })
+      }
+
+      const cloumns = new Array();
+      extra_items.map(item => {
+        cloumns.push({
+          title: item.label,
+          dataIndex: item.name,
+          width: "80px",
+          align: "center",
+          ellipsis: true,
+          render: (val, record, i) => {
+            if (item.name.split(".").length > 1) {
+              return renderItem(item.name, record, i);
+            } else {
+              return renderMetricsItem(item.name, record, i);
+            }
+
+          }
+        })
+      })
+
+      let columns = baseColumns.concat(cloumns);
+      setOptionColumns(_.cloneDeep(columns));
+      console.log(columns);
+      setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
+    }
+
+  }
+
   const fixColumns: any[] = [
     {
       title: '操作',
@@ -288,7 +364,6 @@ export default function () {
           ...v,
         };
       })
-      // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       let treeData: any[] = [{
         id: "0",
         name: '全部资产',
@@ -299,9 +374,7 @@ export default function () {
         arr.push(item.id);
       })
       setExpandedKeys(arr);
-      console.log("expands ",arr);
       setAassetTypes(items);
-
       filterOptions["type"] = res.dat.map((v) => {
         return {
           value: v.name,
@@ -310,6 +383,8 @@ export default function () {
       });
       setFilterOptions({ ...filterOptions })
       setTreeData(_.cloneDeep(treeData));
+      getAssetTypeItems(typeId,items)
+      
     });
     filterOptions["status"] = [{ value: '1', label: '在线' }, { value: '0', label: '离线' }]
     filterOptions["group_id"] = busiGroups.map(group => {
@@ -349,7 +424,6 @@ export default function () {
       param["filter"] = filterParam;
     }
     setQueryCondition(param);
-
     getAssetsByCondition(param).then(({ dat }) => {
       dat.list.forEach((entity, index) => {
         let expands = entity.exps;
@@ -455,7 +529,6 @@ export default function () {
   }
 
   const renderItem = (field, record, index) => {
-
     let key = field.split(".")[1];
     let values = record.expands ? record.expands[key] : [];
     return <>
@@ -475,17 +548,25 @@ export default function () {
     }
     return vaue;
   }
-  const getAssetTypeItems = (type) => {
-    const extendType: any = assetTypes.find((v) => v.name === type);
-    if (extendType) {
+ 
+
+  const loadAssetTypeAllColumns = (dealTypes) => {
+    const extra_items = new Array();
+    const map = new Map();
+
+    dealTypes.map(extendType => {        
       //TODO：处理分组属性
-      const extra_items = new Array();
+      
       extendType.metrics?.forEach(element => {
-        let newItem = {
-          name: element.metrics,
-          label: element.name,
-        };
-        extra_items.push(newItem);
+        if(!map.has(element.name)){
+          let newItem = {
+            name: element.metrics,
+            label: element.name,
+          };
+          extra_items.push(newItem);
+          map.set(element.name,element.name)
+        }
+        
       });
       let extra_props = extendType.extra_props;
       for (let property in extra_props) {
@@ -502,44 +583,47 @@ export default function () {
                 align: 'center',
               })
             });
-            let newItem = {
-              name: property + "." + (item.name),
-              label: item.label,
-            };
-            extra_items.push(newItem);
+            if(!map.has(item.label)){
+              let newItem = {
+                name: property + "." + (item.name),
+                label: item.label,
+              };
+              extra_items.push(newItem);
+              map.set(item.label,item.label)
+            }
+           
           }
         }
         groupColumns[property] = columns;
         setGroupColumns({ ...groupColumns })
-      }
-
-      const cloumns = new Array();
-      extra_items.map(item => {
-        cloumns.push({
-          title: item.label,
-          dataIndex: item.name,
-          width: "80px",
-          align: "center",
-          ellipsis: true,
-          render: (val, record, i) => {
-            if (item.name.split(".").length > 1) {
-              return renderItem(item.name, record, i);
-            } else {
-              return renderMetricsItem(item.name, record, i);
-            }
-
+      }   
+      
+    })
+    const cloumns = new Array();
+    extra_items.map(item => {
+      cloumns.push({
+        title: item.label,
+        dataIndex: item.name,
+        width: "80px",
+        align: "center",
+        ellipsis: true,
+        render: (val, record, i) => {
+          if (item.name.split(".").length > 1) {
+            return renderItem(item.name, record, i);
+          } else {
+            return renderMetricsItem(item.name, record, i);
           }
-        })
-      })
 
-      let columns = baseColumns.concat(cloumns);
-      setOptionColumns(_.cloneDeep(columns));
-      console.log(columns);
-      setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
-    }
+        }
+      })
+    })
+
+    let columns = baseColumns.concat(cloumns);
+    setOptionColumns(_.cloneDeep(columns));
+    console.log(columns);
+    setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
 
   }
-
 
   const showModal = (action: string, formData: any) => {
 

@@ -160,11 +160,12 @@ export default function Graph(props: IProps) {
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
           }else if(props.unit=="S"){
             let maxUnit = formatSeconds(yMax);
-            setHighLevelConfig({ ...highLevelConfig, unit: "时间" });
+            setHighLevelConfig({ ...highLevelConfig, unit: "humantimeSeconds" });
             console.log("values",item.values);
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
            }else if(props.unit=="MS"){
             localStorage.setItem("monitorUnit-"+monitorId,'毫秒');
+            setHighLevelConfig({ ...highLevelConfig, unit: "milliseconds" });
            }
           series.push({
               id: _.uniqueId('series_'),

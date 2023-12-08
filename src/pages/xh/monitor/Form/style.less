@@ -348,6 +348,9 @@
 
 
 .show_image {
+    .image {
+        margin-left: 17%;
+    }
     
     .cpu {
         background-image: url('/image/party/cpu.png');
@@ -358,24 +361,30 @@
     }
     .board {
         background-image: url('/image/party/board.png');
-        background-position: center center;
+        width: 138px;
+        height: 72px;
+        background-position: center;
         background-repeat: no-repeat;
         background-size:60%;
         
     }
     .bus {
         background-image: url('/image/party/bus.png');
-        background-position: center center;
+        // background-position: center center;
+        width: 138px;
+        height: 72px;
+        background-position: center;
         background-repeat: no-repeat;
         background-size:60%;
         
     }
     .os {
         background-image: url('/image/party/os.png');
-        background-position: center center;
+        width: 138px;
+        height: 72px;
+        background-position: center;
         background-repeat: no-repeat;
-        background-size:60%;
-        
+        background-size:60%;        
     }
     .disk {
         background-image: url('/image/party/disk.png');
@@ -462,6 +471,9 @@
             padding-left: 5px;
             padding-bottom: 10px;        
             background-color: #F5F1F1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            empty-cells: show;
             margin: 5px;
             .status {
                 display: flex;

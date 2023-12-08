@@ -578,7 +578,7 @@ export default function (props: { initialValues: object; initParams: object; mod
           confirmLoading={false}
           className='accessories_modal'
           mask={true}
-          width={(400 * accessories.items.length) + 'px'}
+          width={(360 * (accessories.items.length>=4?4:accessories.items.length)) + 'px'}
           // okButtonProps={{
           // }}
           onCancel={() => {
@@ -590,7 +590,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             {accessories.items.map((item, pos) => {
               return <div className='accessories_every_group show_image'>
                 <div className='title' style={{ fontWeight: '600' }}>{accessories.label.toUpperCase()}({pos + 1})</div>
-                <div className={'image ' + accessories.name} style={{ marginLeft: '20%' }}></div>
+                <div className={'image ' + accessories.name} style={{ marginLeft: '30%' }}></div>
                 <div className='status' style={{ display: 'flex', margin: '0 auto' }}>状态：
                   {true ? (
                     <div>正常<CheckCircleFilled className='normal' /></div>
