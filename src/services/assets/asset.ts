@@ -143,9 +143,10 @@ export const exportAssetTemplet = function () {
     responseType:"blob"
   });
 }
-export const exportTemplet = function (url,data) {
+export const exportTemplet = function (url,data,params?:any) {
   return request(url, {
     method: RequestMethod.Post,
+    params: params || {},
     data,
     responseType:"blob"
   });

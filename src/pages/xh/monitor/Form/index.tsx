@@ -307,6 +307,9 @@ export default function (props: { initialValues: object; initParams: object; mod
                           <Fragment>
                             <Row gutter={10} className='rule-row'>
                               <Col span={5}>
+                              <Form.Item name={[item.name, 'id']} hidden>
+                                  <Input></Input>
+                                </Form.Item>
                                 <Form.Item>
                                   <Input readOnly value={form.getFieldValue("monitoring_name")}></Input>
                                 </Form.Item>

@@ -28,6 +28,7 @@ import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metri
 import { QueryStats } from '@/components/PromGraphCpt/components/QueryStatsView';
 import { Button, InputNumber, Popover, Radio, Space, RadioChangeEvent } from 'antd';
 import replaceExpressionBracket from '@/pages/dashboard/Renderer/utils/replaceExpressionBracket';
+import { completeBreakpoints } from '@/pages/dashboard/Renderer/datasource/utils';
 
 interface IProps {
   monitorId: number;
@@ -129,7 +130,7 @@ export default function Graph(props: IProps) {
         moment(parsedRange.end).unix(),
         ids
       ).then((res) => {
-        let series = new Array();
+        const series = new Array();
         _.map(res?.dat[0], (item) => {
           let yValues = new Array();
           item.values.forEach(element => {
@@ -159,46 +160,21 @@ export default function Graph(props: IProps) {
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
           }else if(props.unit=="S"){
             let maxUnit = formatSeconds(yMax);
-            // item.values.forEach(element => {
-            //   let times =  moment.unix(element["1"]*1000).unix ;
-            //   console.log("------times------",times)    
-            //   element["1"]= times;              
-            // });
-            // series.push({
-            //   id: _.uniqueId('series_'),
-            //   name: getSerieName(item.metric),
-            //   metric: item.metric["__name__"],
-            //   data: serieValues,
-            // });
+            setHighLevelConfig({ ...highLevelConfig, unit: "时间" });
+            console.log("values",item.values);
             localStorage.setItem("monitorUnit-"+monitorId,maxUnit[0]);
-          }
-          console.log('first', label, item.metric)
-            series.push({
+           }else if(props.unit=="MS"){
+            localStorage.setItem("monitorUnit-"+monitorId,'毫秒');
+           }
+          series.push({
               id: _.uniqueId('series_'),
-              // name: getSerieName(item.metric),
               name: replaceExpressionBracket(label, item.metric) || getSerieName(item.metric),
               metric: item.metric["__name__"],
-              data: item.values,
+              data: item.values,//completeBreakpoints(realStep, item.values),
             });
-          
+          console.log('first', label, item.metric)
         });
         setData(series);
-
-        /**
-         let values = res.dat["id="+monitorId];
-         let list:any =[];
-         for(var key in values) {
-            list.push([key, values[key]]);
-         }
-         const series = new Array;
-         series.push({
-           id: _.uniqueId('series_'),
-           name: "指标",
-           metric: "指标",
-           data: list,
-         })         
-         setData(series);
-         */
 
 
       })

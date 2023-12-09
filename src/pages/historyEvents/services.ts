@@ -19,9 +19,8 @@ export const exportTemplet = function (url,params,body) {
 export const exportTempletZip = function (url,params,body) {
   return request(url, {
     method: RequestMethod.Post,
-    params,
     data:body || {},
-    responseType:"arrayBuffer"
+    responseType:'blob'
   });
 }
 export function deleteHistoryEvents(data: any) {

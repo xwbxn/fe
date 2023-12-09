@@ -143,40 +143,16 @@ export function  fomartTime (value:any):any {
 export function formatSeconds(value):any {
   
   let returns :any[] = [2];
-
+  
   if (!value || Number(value) == 0) return ''
-  if(value< 1){
-     return value;
-  }
-  //  秒
-  let second:number = parseInt(value)
-  //  分
-  let minute:number = 0
-  //  小时
-  let hour:number = 0
-  //  天
-   let day = 0
-  //  如果秒数大于60，将秒数转换成整数
-  if (second > 60) {
-    //  获取分钟，除以60取整数，得到整数分钟
-    minute = parseInt(""+(second / 60))
-    //  获取秒数，秒数取佘，得到整数秒数
-    second = parseInt(""+(second % 60))
-    //  如果分钟大于60，将分钟转换成小时
-    if (minute > 60) {
-      //  获取小时，获取分钟除以60，得到整数小时
-      hour = parseInt(""+(minute / 60))
-      //  获取小时后取佘的分，获取分钟除以60取佘的分
-      minute = parseInt(""+(minute % 60))
-      //  如果小时大于24，将小时转换成天
-       if (hour > 23) {
-         //  获取天数，获取小时除以24，得到整天数
-         day = parseInt(""+(hour / 2))
-         //  获取天数后取余的小时，获取小时除以24取余的小时
-         hour = parseInt(""+(hour % 24))
-       }
-    }
-  }
+  // 最终时间结果对象
+  let day =  Number(value) / 60 / 60 / 24; // 天
+
+  let hour =  Number(value) / 60 / 60 % 24; // 时
+
+  let minute =  Number(value) / 60 % 60; // 分
+
+  let second =  Number(value) % 60; // 秒
 
   let result = '' + parseInt(""+second) + '秒'
   returns[0] = '秒'
@@ -192,55 +168,8 @@ export function formatSeconds(value):any {
      result = '' + parseInt(""+day) + '天' + result
      returns[0] = '天'
    }
-  console.log('result：', result)
   returns[1] =result;
   return returns;
 }
 
-export function formatSecondToTime(value):any { 
-  if (!value || Number(value) == 0) return ''
-  if(value< 1){
-     return value;
-  }
-  //  秒
-  let second:number = parseInt(value)
-  //  分
-  let minute:number = 0
-  //  小时
-  let hour:number = 0
-  //  天
-   let day = 0
-  //  如果秒数大于60，将秒数转换成整数
-  if (second > 60) {
-    //  获取分钟，除以60取整数，得到整数分钟
-    minute = parseInt(""+(second / 60))
-    //  获取秒数，秒数取佘，得到整数秒数
-    second = parseInt(""+(second % 60))
-    //  如果分钟大于60，将分钟转换成小时
-    if (minute > 60) {
-      //  获取小时，获取分钟除以60，得到整数小时
-      hour = parseInt(""+(minute / 60))
-      //  获取小时后取佘的分，获取分钟除以60取佘的分
-      minute = parseInt(""+(minute % 60))
-      //  如果小时大于24，将小时转换成天
-       if (hour > 23) {
-         //  获取天数，获取小时除以24，得到整天数
-         day = parseInt(""+(hour / 2))
-         //  获取天数后取余的小时，获取小时除以24取余的小时
-         hour = parseInt(""+(hour % 24))
-       }
-    }
-  }
 
-  let result = '' + parseInt(""+second)+ '秒'
-  if (minute > 0) {
-    result = '' + parseInt(""+minute) + '分钟' + result
-  }
-  if (hour > 0) {
-    result = '' + parseInt(""+hour) + '小时' + result
-  }
-   if (day > 0) {
-     result = '' + parseInt(""+day) + '天' + result
-   }
-  return result;
-}

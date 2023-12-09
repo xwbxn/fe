@@ -304,7 +304,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 <div className='row'>
 
                   <div className='theme1'>
-                    <div className='title'>资产名称:</div>
+                    <div className='title'>资产名称：</div>
                     <Link
                       to={{
                         pathname: '/xh/monitor/add',
@@ -364,7 +364,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 }
               }}>{itemButton}</div>
               {itemButton == "收起" && (
-                <>
+                <div className='party_show'>
                 {
                   assetItems.length > 0 && assetItems.map((element, index) => {
                     return (
@@ -393,7 +393,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
                   })
                 }
-                </>             
+                </div>             
               )}
 
             </div>
