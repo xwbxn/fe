@@ -261,9 +261,7 @@ class Accordions extends Component {
 
   render() {
     let { treeData, expandAll, expandedKeys,selectedKey} = this.props;
-    // debugger;
-    console.log("render----left Tree this.props",this.props);
-    
+   
       return (
         <>
         {treeData!=null && ( 

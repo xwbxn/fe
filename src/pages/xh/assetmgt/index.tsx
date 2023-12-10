@@ -46,8 +46,9 @@ import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
-import { useSize } from 'ahooks';
+import { useSize, useTimeout } from 'ahooks';
 import useResizeTableCol from '@/components/table/useResizeTableCol';
+import { useInterval } from 'react-use';
 // export { Add, Edit };
 
 export enum OperateType {
@@ -98,7 +99,7 @@ export default function () {
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
-  const [allColumns,setAllColumns] =useState<any[]>([]);
+  const [allColumns, setAllColumns] = useState<any[]>([]);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
@@ -110,8 +111,8 @@ export default function () {
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
-  const [selectColum, setSelectColum] = useState<any[]>([])
-  const {colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
+  const [selectColum, setSelectColum] = useState<any[]>([]);
+  const { colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
   const history = useHistory();
 
   const baseColumns: any[] = [
@@ -125,7 +126,7 @@ export default function () {
         return a.name.localeCompare(b.name);
       },
       render(value, record, index) {
-        return <Link to={`/xh/monitor/add?type=monitor&id=${record.id}&action=asset`}>{value}</Link>;
+        return <Link to={`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`}>{value}</Link>;
       },
     },
     {
@@ -252,22 +253,20 @@ export default function () {
     },
   ];
 
-
-   /**
+  /**
    * 选择左边，加载列属性
-  */
-   const getAssetTypeItems = (type:any,types?:any) => {
-    debugger;
-    let dealTypes = types!=null?types:assetTypes;
-    if(type=='0'){
+   */
+  const getAssetTypeItems = (type: any, types?: any) => {
+    let dealTypes = types != null ? types : assetTypes;
+    if (type == '0') {
       return loadAssetTypeAllColumns(dealTypes);
     }
-    
+
     const extendType: any = dealTypes.find((v) => v.name === type);
     if (extendType) {
       //TODO：处理分组属性
       const extra_items = new Array();
-      extendType.metrics?.forEach(element => {
+      extendType.metrics?.forEach((element) => {
         let newItem = {
           name: element.metrics,
           label: element.name,
@@ -277,55 +276,52 @@ export default function () {
       let extra_props = extendType.extra_props;
       for (let property in extra_props) {
         let group = extra_props[property];
-        let columns = new Array;
+        let columns = new Array();
         if (group != null) {
           for (let item of group.props) {
-            item.items.forEach(element => {
+            item.items.forEach((element) => {
               columns.push({
                 title: element.label,
                 dataIndex: element.name,
-                width: "120px",
+                width: '120px',
                 ellipsis: true,
                 align: 'center',
-              })
+              });
             });
             let newItem = {
-              name: property + "." + (item.name),
+              name: property + '.' + item.name,
               label: item.label,
             };
             extra_items.push(newItem);
           }
         }
         groupColumns[property] = columns;
-        setGroupColumns({ ...groupColumns })
+        setGroupColumns({ ...groupColumns });
       }
 
       const cloumns = new Array();
-      extra_items.map(item => {
+      extra_items.map((item) => {
         cloumns.push({
           title: item.label,
           dataIndex: item.name,
-          width: "80px",
-          align: "center",
+          width: '80px',
+          align: 'center',
           ellipsis: true,
           render: (val, record, i) => {
-            if (item.name.split(".").length > 1) {
+            if (item.name.split('.').length > 1) {
               return renderItem(item.name, record, i);
             } else {
               return renderMetricsItem(item.name, record, i);
             }
-
-          }
-        })
-      })
+          },
+        });
+      });
 
       let columns = baseColumns.concat(cloumns);
       setOptionColumns(_.cloneDeep(columns));
-      console.log(columns);
       setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
     }
-
-  }
+  };
 
   const fixColumns: any[] = [
     {
@@ -351,7 +347,7 @@ export default function () {
           <FundOutlined
             title='监控图表'
             onClick={(e) => {
-              history.push('/xh/monitor/add?type=monitor&id=' + record.id + '&action=asset');
+              history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
             }}
           />
           <EditOutlined
@@ -381,7 +377,6 @@ export default function () {
   ];
 
   useEffect(() => {
-    console.log(tableWrapperSize);
     if (tableWrapperSize) {
       setWrapperWidth(tableWrapperSize.width);
     }
@@ -419,19 +414,21 @@ export default function () {
           name: v.name,
           ...v,
         };
-      })
-      let treeData: any[] = [{
-        id: "0",
-        name: '全部资产',
-        count: 0,
-        children: items
-      }];
+      });
+      let treeData: any[] = [
+        {
+          id: '0',
+          name: '全部资产',
+          count: 0,
+          children: items,
+        },
+      ];
       items.map((item, index) => {
         arr.push(item.id);
       });
       setExpandedKeys(arr);
       setAassetTypes(items);
-      filterOptions["type"] = res.dat.map((v) => {
+      filterOptions['type'] = res.dat.map((v) => {
         return {
           value: v.name,
           label: v.name,
@@ -439,8 +436,7 @@ export default function () {
       });
       setFilterOptions({ ...filterOptions });
       setTreeData(_.cloneDeep(treeData));
-      getAssetTypeItems(typeId,items)
-      
+      getAssetTypeItems(typeId, items);
     });
     filterOptions['status'] = [
       { value: '1', label: '在线' },
@@ -456,16 +452,20 @@ export default function () {
       return {
         value: '' + factory.value,
         label: factory.value,
-      }
-    })    
-    setFilterOptions({ ...filterOptions })
-    setFilterType("input");
-    setFilterParam("ip");
+      };
+    });
+    setFilterOptions({ ...filterOptions });
+    setFilterType('input');
+    setFilterParam('ip');
   }, []);
 
   useEffect(() => {
     getTableData();
   }, [searchVal, typeId, refreshKey]);
+
+  useInterval(() => {
+    setRefreshKey(_.uniqueId('refreshKey_'));
+  }, 1000 * 30);
 
   const getTableData = () => {
     const param = {
@@ -571,7 +571,7 @@ export default function () {
   };
 
   const renderItem = (field, record, index) => {
-    let key = field.split(".")[1];
+    let key = field.split('.')[1];
     let values = record.expands ? record.expands[key] : [];
     return (
       <>
@@ -591,26 +591,24 @@ export default function () {
       }
     }
     return vaue;
-  }
- 
+  };
 
   const loadAssetTypeAllColumns = (dealTypes) => {
     const extra_items = new Array();
     const map = new Map();
 
-    dealTypes.map(extendType => {        
+    dealTypes.map((extendType) => {
       //TODO：处理分组属性
-      
-      extendType.metrics?.forEach(element => {
-        if(!map.has(element.name)){
+
+      extendType.metrics?.forEach((element) => {
+        if (!map.has(element.name)) {
           let newItem = {
             name: element.metrics,
             label: element.name,
           };
           extra_items.push(newItem);
-          map.set(element.name,element.name)
+          map.set(element.name, element.name);
         }
-        
       });
       let extra_props = extendType.extra_props;
       for (let property in extra_props) {
@@ -627,47 +625,42 @@ export default function () {
                 align: 'center',
               });
             });
-            if(!map.has(item.label)){
+            if (!map.has(item.label)) {
               let newItem = {
-                name: property + "." + (item.name),
+                name: property + '.' + item.name,
                 label: item.label,
               };
               extra_items.push(newItem);
-              map.set(item.label,item.label)
+              map.set(item.label, item.label);
             }
-           
           }
         }
         groupColumns[property] = columns;
-        setGroupColumns({ ...groupColumns })
-      }   
-      
-    })
+        setGroupColumns({ ...groupColumns });
+      }
+    });
     const cloumns = new Array();
-    extra_items.map(item => {
+    extra_items.map((item) => {
       cloumns.push({
         title: item.label,
         dataIndex: item.name,
-        width: "80px",
-        align: "center",
+        width: '80px',
+        align: 'center',
         ellipsis: true,
         render: (val, record, i) => {
-          if (item.name.split(".").length > 1) {
+          if (item.name.split('.').length > 1) {
             return renderItem(item.name, record, i);
           } else {
             return renderMetricsItem(item.name, record, i);
           }
-
-        }
-      })
-    })
+        },
+      });
+    });
 
     let columns = baseColumns.concat(cloumns);
     setOptionColumns(_.cloneDeep(columns));
-    console.log(columns);
     setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
-
-  }
+  };
 
   const showModal = (action: string, formData: any) => {
     if (action == 'add') {
@@ -794,7 +787,7 @@ export default function () {
               <div className='table-handle-search'>
                 <Space>
                   <Select
-                    defaultValue="ip"
+                    defaultValue='ip'
                     placeholder='选择过滤器'
                     style={{ width: 120 }}
                     allowClear

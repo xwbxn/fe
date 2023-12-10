@@ -1,7 +1,7 @@
 import './style.less';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs } from 'antd';
+import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { CommonStateContext } from '@/App';
@@ -40,9 +40,10 @@ export default function () {
     const assetType: any = assetTypes.find((v) => v.name === form.getFieldValue('type'));
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
-      
-      if(!id) { // 新增时不显示扩展选项卡
-        return
+
+      if (!id) {
+        // 新增时不显示扩展选项卡
+        return;
       }
       //TODO：处理分组属性
       let items = new Array();
@@ -129,8 +130,8 @@ export default function () {
           delete dat.exps;
         }
         form.setFieldsValue(dat);
-        form.setFieldsValue(dat.params)
-        
+        form.setFieldsValue(dat.params);
+
         if (isTabLoading) {
           setTimeout(() => {
             genForm(assetTypes);
@@ -170,7 +171,7 @@ export default function () {
 
   const submitForm = async (values) => {
     console.log('提交数据');
-    values.params = {...values};
+    values.params = { ...values };
     if (tabIndex == 'base_set') {
       if (editType === 'edit' && id != null) {
         values.id = parseInt('' + id);
@@ -215,20 +216,14 @@ export default function () {
   };
 
   const renderFormItem = (v) => {
-    console.log('renderFormItem', v);
     if (v.type === 'select') {
-      return (
-        <Select
-          key={'v' + v.name}
-          style={{ width: '100%' }}
-          options={v.options?.map((v) => {
-            return { label: v.label, value: v.value };
-          })}
-        ></Select>
-      );
+      return <Select key={'v' + v.name} style={{ width: '100%' }} options={v.options}></Select>;
     }
     if (v.type === 'password') {
       return <Input.Password key={'v' + v.name} placeholder={`请输入${v.label}`} />;
+    }
+    if (v.type === 'checkbox') {
+      return <Checkbox></Checkbox>;
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
   };
@@ -240,7 +235,7 @@ export default function () {
         <Tabs
           className='assetmgt_list_2'
           activeKey={tabIndex}
-          type="card"
+          type='card'
           size='small'
           onTabClick={(key) => {
             TabOperteClick(key);
@@ -297,7 +292,6 @@ export default function () {
                       }))}
                       placeholder='请选择厂商'
                     />
-
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -330,7 +324,7 @@ export default function () {
                   {params.map((v) => {
                     return (
                       <Col span={12} key={`col-${v.name}`}>
-                        <Form.Item label={v.label} name={v.name} key={`formitem=${v.name}`}>
+                        <Form.Item label={v.label} name={v.name} key={`formitem=${v.name}`} valuePropName={v.type === 'checkbox' ? 'checked' : 'value'} required={v.required}>
                           {renderFormItem(v)}
                         </Form.Item>
                       </Col>
@@ -410,7 +404,6 @@ export default function () {
 
                                   <Row gutter={10}>
                                     {groupItem.list.map((property, index_) => {
-                                      console.log('field', item, property);
                                       return (
                                         <Col key={property.name + index_} span={12}>
                                           <Form.Item

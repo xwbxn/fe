@@ -23,6 +23,10 @@ export const visualizations = [
     name: '时间序列图',
   },
   {
+    type: 'timeseriesN',
+    name: '时间序列图(g2)',
+  },
+  {
     type: 'stat',
     name: '指标值',
   },
@@ -49,6 +53,10 @@ export const visualizations = [
   {
     type: 'gauge',
     name: '仪表盘',
+  },
+  {
+    type: 'gaugeN',
+    name: '仪表盘(g2)',
   },
   {
     type: 'iframe',
@@ -117,7 +125,7 @@ export const calcsOptions = {
 };
 
 export const defaultThreshold = {
-  color: '#634CD9',
+  color: '#6395fa',
   value: null,
   type: 'base',
 };
@@ -171,6 +179,17 @@ export const defaultCustomValuesMap = {
       type: 'linear',
     },
   },
+  timeseriesN: {
+    drawStyle: 'lines',
+    lineInterpolation: 'smooth',
+    lineWidth: 1,
+    fillOpacity: 0.5,
+    gradientMode: 'none',
+    stack: 'off',
+    scaleDistribution: {
+      type: 'linear',
+    },
+  },
   stat: {
     textMode: 'valueAndName',
     colorMode: 'value',
@@ -180,6 +199,14 @@ export const defaultCustomValuesMap = {
     textSize: {},
   },
   pie: {
+    textMode: 'valueAndName',
+    colorMode: 'value',
+    calc: 'lastNotNull',
+    textSize: {},
+    legengPosition: 'right',
+    detailName: '详情',
+  },
+  pien: {
     textMode: 'valueAndName',
     colorMode: 'value',
     calc: 'lastNotNull',
@@ -203,7 +230,14 @@ export const defaultCustomValuesMap = {
   },
   barGauge: {
     calc: 'lastNotNull',
-    baseColor: '#9470FF',
+    baseColor: '#6395fa',
+    displayMode: 'basic',
+    serieWidth: 20,
+    sortOrder: 'desc',
+  },
+  barGaugeN: {
+    calc: 'lastNotNull',
+    baseColor: '#6395fa',
     displayMode: 'basic',
     serieWidth: 20,
     sortOrder: 'desc',
@@ -220,14 +254,11 @@ export const defaultCustomValuesMap = {
     textMode: 'valueAndName',
     calc: 'lastNotNull',
   },
-  column: {},
-  barGaugeN: {
+  gaugeN: {
+    textMode: 'valueAndName',
     calc: 'lastNotNull',
-    baseColor: '#9470FF',
-    displayMode: 'basic',
-    serieWidth: 20,
-    sortOrder: 'desc',
   },
+  column: {},
 };
 
 export const defaultOptionsValuesMap = {
@@ -244,10 +275,17 @@ export const defaultOptionsValuesMap = {
       steps: gaugeDefaultThresholds,
     },
   },
+  gaugeN: {
+    ...defaultOptionsValues,
+    thresholds: {
+      steps: gaugeDefaultThresholds,
+    },
+  },
   column: defaultOptionsValues,
   pien: defaultOptionsValues,
   line: defaultOptionsValues,
-  barGaugeN: defaultOptionsValues
+  timeseriesN: defaultOptionsValues,
+  barGaugeN: defaultOptionsValues,
 };
 
 export const legendPostion = ['hidden', 'top', 'left', 'right', 'bottom'];

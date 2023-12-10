@@ -20,6 +20,8 @@ import { Button, Checkbox, Col, Dropdown, Menu, Modal, Radio, Row, Select, Space
 import { IRawTimeRange, TimeRangePickerWithRefresh } from '@/components/TimeRangePicker';
 import VariableConfig, { IVariable } from '../VariableConfig';
 import { dashboardTimeCacheKey } from './Detail';
+import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-use';
 
 interface IProps {
   dashboard: any;
@@ -34,16 +36,8 @@ interface IProps {
 
 export default function BoardTitle(props: IProps) {
   const { dashboard, range, setRange, variableConfig, handleVariableChange, id, stopAutoRefresh, handlePanelChange } = props;
-  const [openView, setOpenView] = useState(false);
-
-  const options =
-    dashboard?.configs?.panels.map((v) => {
-      return { label: v.name, value: v.id, checked: !v.hidden };
-    }) || [];
-
-  const defaultOptions = options.filter((v) => !v.hidden).map(v => v.value);
-  console.log('options', options)
-  console.log('defaultOptions', defaultOptions)
+  const history = useHistory();
+  const location = useLocation();
 
   return (
     <div className='dashboard-detail-header'>
@@ -62,7 +56,8 @@ export default function BoardTitle(props: IProps) {
         <Space>
           <Button
             onClick={() => {
-              setOpenView(true);
+              location;
+              history.push(`/dashboards/${dashboard.id}?${location.search}`);
             }}
           >
             设置
@@ -77,28 +72,6 @@ export default function BoardTitle(props: IProps) {
           />
         </Space>
       </div>
-
-      <Modal
-        title='指标设置'
-        visible={openView}
-        onOk={() => {
-          setOpenView(false);
-        }}
-      >
-        <Checkbox.Group defaultValue={defaultOptions} onChange={handlePanelChange}>
-          <Row gutter={8}>
-            {options.map((v) => {
-              return (
-                <Col span={8}>
-                  <Checkbox style={{ padding: 8 }} value={v.value}>
-                    {v.label}
-                  </Checkbox>
-                </Col>
-              );
-            })}
-          </Row>
-        </Checkbox.Group>
-      </Modal>
     </div>
   );
 }

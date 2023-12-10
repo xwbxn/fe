@@ -29,6 +29,8 @@ import Column from './Column';
 import PieN from './PieN';
 import Line from './Line';
 import BarGaugeN from './BarGaugeN';
+import TimeseriesN from './TimeseriesN';
+import GaugeN from './GaugeN';
 
 export default function index({ type, targets, chartForm, variableConfigWithOptions }) {
   const OptionsCptMap = {
@@ -44,7 +46,9 @@ export default function index({ type, targets, chartForm, variableConfigWithOpti
     column: <Column />,
     pien: <PieN />,
     line: <Line></Line>,
-    barGaugeN: <BarGaugeN></BarGaugeN>
+    barGaugeN: <BarGaugeN></BarGaugeN>,
+    timeseriesN: <TimeseriesN></TimeseriesN>,
+    gaugeN: <GaugeN></GaugeN>
   };
   return OptionsCptMap[type] || `无效的图表类型 ${type}`;
 }

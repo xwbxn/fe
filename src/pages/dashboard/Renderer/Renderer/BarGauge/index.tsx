@@ -36,7 +36,7 @@ interface IProps {
 
 function Item(props) {
   const { item, custom, themeMode, maxValue, time } = props;
-  const { baseColor = '#FF656B', displayMode = 'basic', serieWidth = 20, detailUrl } = custom as IBarGaugeStyles;
+  const { baseColor = '#6395fa', displayMode = 'basic', serieWidth = 20, detailUrl } = custom as IBarGaugeStyles;
   const color = item.color ? item.color : baseColor;
   const bgRef = useRef(null);
   const bgSize = useSize(bgRef);
@@ -90,7 +90,7 @@ function Item(props) {
             color: themeMode === 'dark' ? '#fff' : '#20222E',
             borderRight: `2px solid ${color}`,
             backgroundColor: Color(color)
-              .alpha(displayMode === 'basic' ? 0.2 : 1)
+              // .alpha(displayMode === 'basic' ? 0.2 : 1)
               .rgb()
               .string(),
             width: `${(item.stat / maxValue) * 100}%`,
@@ -101,7 +101,7 @@ function Item(props) {
               ref={textRef}
               className='renderer-bar-gauge-item-value-text'
               style={{
-                color: color,
+                color: themeMode === 'dark' ? '#20222E' : '#fff',
                 right: getTextRight(),
               }}
             >

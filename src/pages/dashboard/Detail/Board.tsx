@@ -1,40 +1,32 @@
-import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
-import semver from 'semver';
 import { useTranslation } from 'react-i18next';
-import { useInterval, useLocalStorageState } from 'ahooks';
-import { v4 as uuidv4 } from 'uuid';
+import { useInterval } from 'ahooks';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import { Alert, Modal, Button, message } from 'antd';
+import { message } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { IRawTimeRange, getDefaultValue, isValid } from '@/components/TimeRangePicker';
 import { Dashboard } from '@/store/dashboardInterface';
 import { getDashboard, updateDashboardConfigs, getDashboardPure, getBuiltinDashboard } from '@/services/dashboardV2';
 import { SetTmpChartData } from '@/services/metric';
 import { CommonStateContext } from '@/App';
-import MigrationModal from '@/pages/help/migrate/MigrationModal';
-import VariableConfig, { IVariable } from '../VariableConfig';
+import { IVariable } from '../VariableConfig';
 import { replaceExpressionVars } from '../VariableConfig/constant';
 import { ILink } from '../types';
-import DashboardLinks from '../DashboardLinks';
 import Panels from '../Panels';
 import BoardTitle from './BoardTitle';
 import { JSONParse } from '../utils';
 import Editor from '../Editor';
-import { defaultCustomValuesMap, defaultOptionsValuesMap } from '../Editor/config';
 import { sortPanelsByGridLayout, panelsMergeToConfigs, updatePanelsInsertNewPanelToGlobal } from '../Panels/utils';
 import { useGlobalState } from '../globalState';
 import './style.less';
 import './dark.antd.less';
 import './dark.less';
 
-interface URLParam {
-  id: string;
-}
-
 interface IProps {
+  id: string;
   isPreview?: boolean;
   isBuiltin?: boolean;
   gobackPath?: string;
@@ -49,9 +41,6 @@ const fetchDashboard = ({ id, builtinParams }) => {
     return getBuiltinDashboard(builtinParams);
   }
   return getDashboard(id);
-};
-const builtinParamsToID = (builtinParams) => {
-  return `${builtinParams['__built-in-cate']}_${builtinParams['__built-in-name']}`;
 };
 /**
  * 获取默认的时间范围
@@ -90,18 +79,12 @@ const getDefaultTimeRange = (query, t) => {
 };
 
 export default function Board(props: IProps) {
-  const { isPreview = true, isBuiltin = false, gobackPath, builtinParams, isHome = false } = props;
+  const { id, isPreview = true, isBuiltin = false, gobackPath, builtinParams, isHome = false } = props;
   const { t, i18n } = useTranslation('dashboard');
-  const history = useHistory();
   const { datasourceList, profile } = useContext(CommonStateContext);
   const roles = _.get(profile, 'roles', []);
-  const isAuthorized = !_.some(roles, (item) => item === 'Guest') && !isPreview;
   const [dashboardMeta, setDashboardMeta] = useGlobalState('dashboardMeta');
-  let { id } = useParams<URLParam>();
   const query = queryString.parse(useLocation().search);
-  if (isBuiltin) {
-    id = builtinParamsToID(query);
-  }
   const refreshRef = useRef<{ closeRefresh: Function }>();
   const [dashboard, setDashboard] = useState<Dashboard>({} as Dashboard);
   const [variableConfig, setVariableConfig] = useState<IVariable[]>();
@@ -116,6 +99,7 @@ export default function Board(props: IProps) {
     initialValues: {} as any,
   });
   let updateAtRef = useRef<number>();
+
   const refresh = async (cbk?: () => void) => {
     fetchDashboard({
       id,
@@ -151,12 +135,14 @@ export default function Board(props: IProps) {
       }
     });
   };
+
   const handleUpdateDashboardConfigs = (id, configs) => {
     updateDashboardConfigs(id, configs).then((res) => {
       updateAtRef.current = res.update_at;
       refresh();
     });
   };
+
   const handleVariableChange = (value, b, valueWithOptions) => {
     const dashboardConfigs: any = dashboard.configs;
     dashboardConfigs.var = value;
@@ -171,6 +157,7 @@ export default function Board(props: IProps) {
       });
     }
   };
+
   const handlePanelChange = (ids: any[]) => {
     panels.map((p) => {
       p.hidden = !ids.includes(p.id);
@@ -182,7 +169,9 @@ export default function Board(props: IProps) {
   };
 
   useEffect(() => {
-    refresh();
+    if (id !== "") {
+      refresh();
+    }
   }, [id]);
 
   useInterval(() => {

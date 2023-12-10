@@ -52,6 +52,8 @@ import Column from './Column';
 import PieN from './PieN';
 import Line from './Line';
 import BarGaugeN from './BarGaugeN';
+import TimeSeriesN from './TimeSeriesN';
+import GaugeN from './GaugeN';
 
 interface IProps {
   datasourceValue?: number; // 全局数据源，如 values.datasourceValue 未设置则用全局数据源
@@ -109,6 +111,7 @@ function index(props: IProps) {
   };
   const RendererCptMap = {
     timeseries: () => <Timeseries {...subProps} themeMode={themeMode} time={time} />,
+    timeseriesN: () => <TimeSeriesN {...subProps} themeMode={themeMode} time={time} />,
     stat: () => <Stat {...subProps} bodyWrapRef={bodyWrapRef} themeMode={themeMode} />,
     table: () => <Table {...subProps} themeMode={themeMode} />,
     pie: () => <Pie {...subProps} themeMode={themeMode} time={time} />,
@@ -121,6 +124,7 @@ function index(props: IProps) {
     pien: () => <PieN {...subProps} themeMode={themeMode} />,
     line: () => <Line {...subProps} themeMode={themeMode}></Line>,
     barGaugeN: () => <BarGaugeN {...subProps} themeMode={themeMode}></BarGaugeN>,
+    gaugeN: () => <GaugeN {...subProps} themeMode={themeMode}></GaugeN>
   };
 
   return (

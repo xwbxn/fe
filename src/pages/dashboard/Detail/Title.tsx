@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import querystring from 'query-string';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Button, Space, Dropdown, Menu, Switch } from 'antd';
+import { Button, Space, Dropdown, Menu, Switch, Modal, Form, Select, message, Checkbox } from 'antd';
 import { RollbackOutlined } from '@ant-design/icons';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import { AddPanelIcon } from '../config';
@@ -27,6 +27,9 @@ import { visualizations } from '../Editor/config';
 import { dashboardTimeCacheKey } from './Detail';
 import VariableConfig, { IVariable } from '../VariableConfig';
 import { useLocalStorageState } from 'ahooks';
+import { getAssetsStypes } from '@/services/assets';
+import { GetAssetType } from '@/services/metric';
+import { setDashboardAssetType } from '@/services/dashboardV2';
 
 interface IProps {
   dashboard: any;
@@ -48,7 +51,7 @@ const cachePageTitle = document.title;
 
 export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
-  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome} = props;
+  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome } = props;
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
@@ -56,9 +59,20 @@ export default function Title(props: IProps) {
   const [home, setHome] = useLocalStorageState('HOME_URL', {
     defaultValue: '1',
   });
-
+  const [defaultModal, setdefaultModal] = useState(false);
+  const [form] = Form.useForm();
+  const [options, setOptions] = useState([]);
   const setHomePage = () => {
     setHome(id);
+  };
+
+  const formSubmit = () => {
+    form.validateFields().then((values) => {
+      setDashboardAssetType(id, values).then(() => {
+        message.success('设置成功');
+        setdefaultModal(false);
+      });
+    });
   };
 
   useEffect(() => {
@@ -67,6 +81,16 @@ export default function Title(props: IProps) {
       document.title = cachePageTitle;
     };
   }, [dashboard.name]);
+
+  useEffect(() => {
+    getAssetsStypes().then((res) => {
+      setOptions(
+        res.dat.map((v) => {
+          return { label: v.name, value: v.name };
+        }),
+      );
+    });
+  }, []);
 
   return (
     <div className='dashboard-detail-header'>
@@ -160,9 +184,33 @@ export default function Title(props: IProps) {
               />
             )}
             <Button onClick={() => setHomePage()}>设为首页</Button>
+            <Button
+              onClick={() => {
+                setdefaultModal(true);
+              }}
+            >
+              设置默认
+            </Button>
           </Space>
         </div>
       }
+      <Modal
+        title={'默认看板设置'}
+        visible={defaultModal}
+        onOk={formSubmit}
+        onCancel={() => {
+          setdefaultModal(false);
+        }}
+      >
+        <Form name='control-ref' form={form} labelCol={{ span: 8 }}>
+          <Form.Item name='asset_type' label='请选择资产类型' rules={[{ required: true }]}>
+            <Select options={options}></Select>
+          </Form.Item>
+          <Form.Item name='apply_all' valuePropName='checked' label='应用到所有资产' help={'选中后将会其他资产的看板,请谨慎选择'}>
+            <Checkbox></Checkbox>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

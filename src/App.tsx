@@ -108,10 +108,10 @@ function App() {
   const isPlus = useIsPlus();
   const initialized = useRef(false);
   const path = location.pathname;
-  console.log(path,path.startsWith("/login"));
+  console.log(path, path.startsWith('/login'));
   const bodyStyle = {
-       overflow: 'hidden'
-  }
+    overflow: 'hidden',
+  };
 
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
@@ -237,7 +237,7 @@ function App() {
   }
 
   return (
-    <div className='App' style={path.startsWith("/login")?{overflow:"hidden"}:{overflow:"auto"}}>
+    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
           <Router>
@@ -247,7 +247,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
-                <div style={{ display: '-webkit-flex',height:"100%" }}>
+                <div style={{ display: '-webkit-flex', height: '100%' }}>
                   <Content />
                 </div>
               </>

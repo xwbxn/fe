@@ -66,12 +66,12 @@ const DemoPie = (props: Props) => {
   const { data, positon, hidden, labelWithName, labelWithValue, themeMode, detailName, detailUrl, donut, dataFormatter, detailFormatter } = props;
 
   const config: PieConfig = {
-    padding: [16, 8, 16, 8],
-    appendPadding: 10,
+    padding: 8,
+    // appendPadding: 10,
     data,
     angleField: 'value',
     colorField: 'name',
-    radius: 0.9,
+    radius: 1,
     innerRadius: donut ? 0.6 : 0,
     label: {
       type: 'spider',
@@ -86,7 +86,7 @@ const DemoPie = (props: Props) => {
     },
     statistic: {
       title: {
-        offsetY: 16,
+        offsetY: 32,
         style: {
           color: themeMode === 'dark' ? '#ABADBA' : 'unset',
         },

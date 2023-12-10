@@ -117,7 +117,6 @@ const valueFormatter = ({ unit, decimals = 3, dateFormat = 'YYYY-MM-DD HH:mm:ss'
     val = _.toNumber(val);
   }
   if (unit) {
-    console.log('时间", ' + decimals)
     const utilValObj = utilValMap[unit];
     if (utilValObj) {
       const { type, base } = utilValObj;

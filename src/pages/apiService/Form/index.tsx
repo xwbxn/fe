@@ -41,7 +41,6 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
               <Select
                 options={[
                   { value: 'sql', label: 'sql' },
-                  { value: 'promql', label: 'promql' },
                 ]}
               />
             </Form.Item>
@@ -52,7 +51,7 @@ export default function ({ title, disabled, initialValues, onFinish }: IProps) {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name='url' label='URL' rules={[{ required: true }]}>
+            <Form.Item name='value_field' label='取值字段' rules={[{ required: true }]}>
               <Input />
             </Form.Item>
           </Col>

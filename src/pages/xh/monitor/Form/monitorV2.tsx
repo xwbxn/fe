@@ -1,0 +1,370 @@
+import './style.less';
+import React, { useEffect, useState } from 'react';
+
+import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu, Tag } from 'antd';
+import { CheckCircleFilled, CheckCircleOutlined, CloseCircleOutlined, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
+import _ from 'lodash';
+
+import { factories } from '../../assetmgt/catalog';
+import { Link, useLocation } from 'react-router-dom';
+import { getAssetBoard, getXhAsset } from '@/services/assets';
+import queryString from 'query-string';
+import { getAssetsIdents, getAssetsStypes } from '@/services/assets';
+import Board from '@/pages/dashboard/Detail/Board';
+
+export default function () {
+  const [itemButton, setItemButton] = useState<string>(localStorage.getItem('asset_item_ctr_button') ? '' + localStorage.getItem('asset_item_ctr_button') : '收起');
+  const [accessories, setAccessories] = useState<any>({
+    visual: false,
+    title: '其他信息名称',
+    label: '',
+    name: '',
+    items: [],
+    properties: [],
+  });
+  const [assetTypes, setAssetTypes] = useState<any[]>([]);
+  const { search } = useLocation();
+  const { id, action } = queryString.parse(search);
+  const [assetInfo, setAssetInfo] = useState<any>({});
+  const [assetItems, setAssetItems] = useState<any[]>([]);
+  const [boardId, setBoardId] = useState("");
+  const [form] = Form.useForm();
+
+  const panelBaseProps: any = {
+    size: 'small',
+  };
+
+  const genForm = (type: string, theme: string) => {
+    const assetType: any = assetTypes.find((v) => v.name === type);
+    let items = {};
+    if (assetType) {
+      //TODO：处理分组属性
+      let extra_props = assetType.extra_props;
+      let map = new Map();
+      for (let property in extra_props) {
+        let group = extra_props[property];
+        map.set(group.sort, property);
+      }
+      var arrayObj = Array.from(map);
+      arrayObj.sort(function (a, b) {
+        return a[0] - b[0];
+      });
+
+      for (var [key, value] of arrayObj) {
+        let group = extra_props[value];
+        if (group != null && theme == value && group.props) {
+          let baseItems = new Array();
+          let listItems = new Array();
+          group.props.map((item, index) => {
+            if (item.type === 'list') {
+              item.items.forEach((element) => {
+                listItems.push(element);
+              });
+            } else {
+              baseItems.push(item);
+            }
+          });
+          items = {
+            name: value,
+            label: group.label,
+            base: baseItems,
+            list: listItems,
+          };
+        }
+      }
+    }
+    return items;
+  };
+
+  useEffect(() => {
+    if (action == 'asset' && id != null && id.length > 0 && id != 'null') {
+      //资产信息
+      getAssetsStypes().then((res) => {
+        const types = res.dat.map((v) => {
+          return {
+            value: v.name,
+            label: v.name,
+            ...v,
+          };
+        });
+        loadAssetInfo(id, types);
+        setAssetTypes(types);
+      });
+    }
+  }, [action]);
+
+  useEffect(() => {
+    getAssetBoard(id as string).then((res) => {
+      setBoardId(res.dat.id.toString());
+    });
+  }, [id]);
+
+  const loadAssetInfo = (id, assetTypes) => {
+    getXhAsset('' + id).then(({ dat }) => {
+      let typeGroup = new Array();
+      let expands = dat.exps;
+      if (assetTypes != null) {
+        const assetType: any = assetTypes.find((v) => v.name === dat.type);
+        if (assetType) {
+          //TODO：处理分组属性
+          let extra_props = assetType.extra_props;
+          let map = new Map();
+          for (let property in extra_props) {
+            let group = extra_props[property];
+            map.set(group.sort, property);
+          }
+          var arrayObj = Array.from(map);
+          arrayObj.sort(function (a, b) {
+            return a[0] - b[0];
+          });
+          for (var [key, value] of arrayObj) {
+            let group = extra_props[value];
+            if (group != null && group.props) {
+              typeGroup.push({
+                name: value,
+                label: group.label,
+              });
+            }
+          }
+        }
+      }
+      let typeValues = {};
+      if (expands != null && expands.length > 0) {
+        const map = new Map();
+        expands.forEach((item, index, arr) => {
+          if (!map.has(item.config_category)) {
+            map.set(
+              item.config_category,
+              arr.filter((a) => a.config_category == item.config_category),
+            );
+          }
+        });
+        //以上分组加载数据
+        map.forEach(function (value, key) {
+          const formDataMap = new Map();
+          value.forEach((item, index, arr) => {
+            if (!formDataMap.has(item.group_id)) {
+              formDataMap.set(
+                item.group_id,
+                arr.filter((a) => a.group_id == item.group_id),
+              );
+            }
+          });
+          let group: any = [];
+          formDataMap.forEach(function (value, i) {
+            let itemsChars = '';
+            value.forEach((item, index, arr) => {
+              itemsChars += '"' + item.name + '":"' + item.value + '",';
+            });
+            itemsChars = '{' + itemsChars.substring(0, itemsChars.length - 1) + '}';
+            group.push(JSON.parse(itemsChars));
+          });
+          typeValues[key] = group;
+        });
+        delete dat.exps;
+      }
+      let everyTypeValues = new Array();
+      typeGroup.forEach((type) => {
+        if (typeValues[type.name]) {
+          everyTypeValues.push({
+            type: type.name,
+            label: type.label,
+            items: typeValues[type.name],
+          });
+        }
+      });
+      setAssetItems(everyTypeValues);
+      setAssetInfo(dat);
+    });
+  };
+
+  const loadImages = (cn_name) => {
+    console.log('Loading images...', cn_name);
+    let imageName = '/image/factory/other.png';
+    for (let factor in factories) {
+      let image = factories[factor];
+      if (image.value == cn_name) {
+        imageName = '/image/factory/' + image.key + '.png';
+      }
+    }
+    return imageName;
+  };
+
+  return (
+    <Form name='asset' form={form} layout='vertical'>
+      <div className='view-form'>
+        <div className='card-wrapper'>
+          <Card {...panelBaseProps} title={'基本信息'}>
+            <div className='asset_info'>
+              <div className='image_name'>{assetInfo.manufacturers ? <img src={loadImages(assetInfo.manufacturers)}></img> : <div className='image_not'>没有厂商信息</div>}</div>
+              <div className='info'>
+                <div className='row'>
+                  <div className='theme1'>
+                    <div className='title'>资产名称：</div>
+                    <Link
+                      to={{
+                        pathname: '/xh/monitor/add',
+                        search: `type=monitor&id=${assetInfo.id}&action=asset`,
+                        hash: '#the-hash',
+                      }}
+                    >
+                      {assetInfo.name}
+                    </Link>
+                  </div>
+                  <div className='theme1'>
+                    <div className='title'>资产类型：</div>
+                    {assetInfo.type}
+                  </div>
+                  <div className='theme1'>
+                    <div className='title'>IP地址：</div>
+                    {assetInfo.ip}
+                  </div>
+                  <div className='theme1'>
+                    <div className='title'>厂商：</div>
+                    {assetInfo.manufacturers}
+                  </div>
+                </div>
+                <div className='row'>
+                  <div className='theme1'>
+                    <div className='title'>资产位置：</div>
+                    {assetInfo.position}
+                  </div>
+                  <div className='theme1'>
+                    <div className='title'>状态：</div>
+                    {assetInfo.health == 1 ? (
+                      <Tag icon={<CheckCircleOutlined />} color='success'>
+                        在线
+                      </Tag>
+                    ) : (
+                      <Tag icon={<CloseCircleOutlined />} color='error'>
+                        离线
+                      </Tag>
+                    )}
+                  </div>
+                  <div className='theme1'></div>
+                  <div className='theme1'></div>
+                </div>
+              </div>
+            </div>
+            <div className='party_info'>
+              <div
+                className='asset_item_ctr_button'
+                onClick={(e) => {
+                  if (itemButton == '收起') {
+                    localStorage.setItem('asset_item_ctr_button', '展开');
+                    setItemButton('展开');
+                  } else {
+                    localStorage.setItem('asset_item_ctr_button', '收起');
+                    setItemButton('收起');
+                  }
+                }}
+              >
+                {itemButton}
+              </div>
+              {itemButton == '收起' && (
+                <div className='party_show'>
+                  {assetItems.length > 0 &&
+                    assetItems.map((element, index) => {
+                      return (
+                        <div
+                          className='assembly show_image'
+                          onClick={(e) => {
+                            let formItems: any = genForm(assetInfo.type, element.type);
+                            setAccessories({
+                              visual: true,
+                              label: formItems.label,
+                              title: element.label,
+                              name: formItems.name,
+                              items: element.items,
+                              properties: formItems.list,
+                            });
+                          }}
+                        >
+                          <div className='title'>
+                            {element.label}({element.items.length})
+                          </div>
+                          <div className={'image ' + element.type}></div>
+                          <div className='status'>
+                            状态：
+                            {true ? (
+                              <div>
+                                正常
+                                <CheckCircleFilled className='normal' />
+                              </div>
+                            ) : (
+                              <div>
+                                故障
+                                <CheckCircleFilled className='no_normal' />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+        <div className='card-wrapper'>
+          <Board id={boardId}></Board>
+        </div>
+        <Modal
+          visible={accessories.visual}
+          title={accessories.title}
+          confirmLoading={false}
+          className='accessories_modal'
+          mask={true}
+          width={360 * (accessories.items.length >= 4 ? 4 : accessories.items.length) + 'px'}
+          onCancel={() => {
+            accessories.visual = false;
+            setAccessories(_.cloneDeep(accessories));
+          }}
+        >
+          <div className='accessories_body'>
+            {accessories.items.map((item, pos) => {
+              return (
+                <div className='accessories_every_group show_image'>
+                  <div className='title' style={{ fontWeight: '600' }}>
+                    {accessories.label.toUpperCase()}({pos + 1})
+                  </div>
+                  <div className={'image ' + accessories.name} style={{ marginLeft: '30%' }}></div>
+                  <div className='status' style={{ display: 'flex', margin: '0 auto' }}>
+                    状态：
+                    {true ? (
+                      <div>
+                        正常
+                        <CheckCircleFilled className='normal' />
+                      </div>
+                    ) : (
+                      <div>
+                        故障
+                        <CheckCircleFilled className='no_normal' />
+                      </div>
+                    )}
+                  </div>
+                  <div className='properties'>
+                    {accessories.properties.map((property, index) => {
+                      return (
+                        <>
+                          <div className='accessories' key={'_div' + index}>
+                            <div className='title' title={property.label}>
+                              {property.label}:
+                            </div>
+                            <div className='content' title={item[property.name]}>
+                              {item[property.name]}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Modal>
+      </div>
+    </Form>
+  );
+}

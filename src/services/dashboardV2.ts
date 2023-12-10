@@ -113,6 +113,14 @@ export const migrateDashboard = function (id: number, data: { name: string; tags
   });
 };
 
+// 设置资产类型默认仪表盘
+export const setDashboardAssetType = function (id: string | number, data: { asset_name: string; apply_all?: boolean }) {
+  return request(`/api/n9e/board/${id}/asset-type`, {
+    method: RequestMethod.Put,
+    data,
+  });
+};
+
 // 以下是非仪表盘相关的接口
 
 export const getBuiltinDashboard = function (data) {
@@ -197,7 +205,7 @@ export const getMetric = function (data = {}, datasourceValue: number) {
     method: RequestMethod.Get,
     params: { ...data },
     silence: true,
-    paramsSerializer: (params) => stringify(params, { arrayFormat: 'bracket' })
+    paramsSerializer: (params) => stringify(params, { arrayFormat: 'bracket' }),
   });
 };
 
