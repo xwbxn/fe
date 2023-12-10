@@ -20,7 +20,7 @@ import _ from 'lodash';
 import TimeRangePicker, { TimeRangePickerWithRefresh, IRawTimeRange, parseRange } from '@/components/TimeRangePicker';
 import Timeseries from '@/pages/dashboard/Renderer/Renderer/Timeseries';
 import { parse, isMathString } from '@/components/TimeRangePicker/utils';
-import { byteMaxNumber ,formatSeconds,fomartTime,formatSecondToTime,byteCompute,bitCompute} from '@/components/ComputeByte';
+import { byteMaxNumber ,formatSeconds,fomartTime,byteCompute,bitCompute} from '@/components/ComputeByte';
 import { CommonStateContext } from '@/App';
 import { getAssetsMonitor } from '@/services/assets';
 import './graph.less'
