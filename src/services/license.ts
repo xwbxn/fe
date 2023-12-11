@@ -43,3 +43,13 @@ export const getCertificate = function (params={}) {
     params,
   });
 };
+//上传证书
+export const uploadLicense = function (url,data) {
+  return request(url, {
+    headers: {
+       "enctype": "multipart/form-data"
+    },
+    body:data,
+    method: RequestMethod.Put   
+  });
+}
