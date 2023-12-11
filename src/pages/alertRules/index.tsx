@@ -55,17 +55,6 @@ export default function index() {
             return (
               <div>
                 <div className='left-area-group-title'>预制筛选</div>
-                {/* <div
-                  className={classNames({
-                    'n9e-biz-group-item': true,
-                    active: bgid === 0,
-                  })}
-                  onClick={() => {
-                    commonState.setCurBusiId(0);
-                  }}
-                >
-                  {'未归组对象'}
-                </div> */}
                 <div
                   className={classNames({
                     'n9e-biz-group-item': true,
