@@ -61,7 +61,6 @@ export default function List(props: ListProps) {
   const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
-  const [filter, setFilter] = useState<Filter>({});
   const [params, setParams] = useState<any>({
     limit: 10, page: 1
   });
@@ -104,7 +103,7 @@ export default function List(props: ListProps) {
       },
     },
     {
-      title: '资产IP',
+      title: 'IP地址',
       dataIndex: 'asset_ip',
       align: "center",
       width: 100,

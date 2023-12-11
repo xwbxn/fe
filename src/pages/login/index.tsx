@@ -213,7 +213,9 @@ export default function Login() {
             </Form.Item>
 
             <Form.Item>
-              <Button type='primary' className='submit_button' onClick={handleSubmit}>
+              <Button type='primary' className='submit_button' onClick={handleSubmit} onKeyPress={e=>{
+                 handleSubmit
+              }}>
                 {t('登录')}
               </Button>
             </Form.Item>
