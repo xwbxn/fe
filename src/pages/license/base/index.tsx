@@ -15,6 +15,9 @@ import { deleteAssets, getAssets, getOrganizationTree, updateOrganization, delet
 import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 import { getCertificate, getLicense, saveLicense, updateLicense } from '@/services/license';
+import moment from 'moment';
+import { exportTempletZip } from '@/pages/historyEvents/services';
+import { useAntdTable } from 'ahooks';
 const { TextArea } = Input
 
 interface DataType {
@@ -39,9 +42,23 @@ export default function () {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(false); // 表单编辑状态，默认为 false
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
-  const [rowKeys, setRowKeys] = useState<any[]>([]);
+  // const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [radioCheck, setRadioCheck] = useState<any>();
   const [licenseId, setLicenseId] = useState<any>();
+  const [filter, setFilter] = useState<any | {
+    group?: number;
+    severity?: number;
+    query: string;
+    start: number;
+    end: number;
+    type: any | number;
+  }>({
+    query: '',
+    filter:'',
+    type: null,
+    start: 0,
+    end: 0,
+  });
   const handleEdit = () => {
     setEditing(true); // 点击编辑按钮后，将编辑状态设置为 true
   };
@@ -72,15 +89,18 @@ export default function () {
       setInitData({ ...initData })
     });
   };
-
+  // const { tableProps } = useAntdTable(getTableData, {
+  //   defaultPageSize: 10,
+  //   refreshDeps: [query, refreshFlag],
+  // });
   useEffect(() => {
     // loadingTree();
-    // getCertificate().then(({ dat }) => {
-    //   console.log("BBBBB",dat)
-    //   // setTreeData(dat);
-    //   // initData["parent_id"] = dat;
-    //   //setInitData({ ...initData })
-    // });
+    getCertificate().then(({ dat }) => {
+      console.log("BBBBB",dat)
+      setTreeData(dat);
+      initData["parent_id"] = dat;
+      setInitData({ ...initData })
+    });
     getLicense().then(({ dat }) => {
       // console.log("AAAAAAAAAAAAAA")
       // console.log(dat);
@@ -173,6 +193,34 @@ export default function () {
       loadingTree();
     });
   };
+  const handleModal = (action: string,rowKeys:any[]|null) => {
+    if (action == "open") {
+      let url = "/api/n9e/xh/license/export-xls";
+      let exportTitle = "证书";
+      let body = {}
+      // debugger;
+      console.log("RRRR",rowKeys);
+      if(rowKeys!=null ){
+          body["ids"]= rowKeys;
+          console.log("IIII",body);
+      }
+      exportTempletZip(url, filter,(rowKeys!=null && rowKeys.length>0)?{ids:rowKeys}:null).then((res) => {
+        let blob = new Blob([res], {
+          // 下载的文件类型(此处可更改：具体取值参考以下链接地址)
+          type: 'application/zip',
+        });
+        let url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        let fileType = ".zip"
+        const fileName = exportTitle + "日志_" + moment().format('MMDDHHmmss') + fileType //decodeURI(res.headers['filename']);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+      })
+
+  }
+}
   
 
 
@@ -185,7 +233,20 @@ export default function () {
           </div>
           <div className='event-table-search-right'>
             <div className='user-manage-operate'>
-              <Button type='primary' style={{ backgroundColor: "#4095E5" }} onClick={() => handleClick('create')} >
+              <Button type='primary' style={{ backgroundColor: "#4095E5" }} onClick={()=>{
+                        if (selectRowKeys.length <= 0) {
+                          Modal.confirm({
+                            title: "确认导出所有许可信息吗",
+                            onOk: async () => {
+                              handleModal("open",null);
+                            },
+                            onCancel() { },
+                          });
+                        }else{
+                          handleModal("open",selectRowKeys);
+                        }
+                        
+                     }} >
                 批量导出
               </Button>
             </div>
@@ -193,6 +254,7 @@ export default function () {
         </Row>
         <Table
           dataSource={treeData}
+          // {...tableProps}
           rowKey='id'
             rowSelection={{
               onChange: (_, rows) => {
@@ -205,7 +267,7 @@ export default function () {
           columns={[
             {
               title: '序列号',
-              dataIndex: 'city',
+              dataIndex: 'serial_number',
               ellipsis: true,
               align: 'center',
               render(value, record, index) {
@@ -223,7 +285,7 @@ export default function () {
             },
             {
               title: '主版本号',
-              dataIndex: 'address',
+              dataIndex: 'target_version',
               ellipsis: true,
               align: 'center',
               render(value, record, index) {
@@ -241,26 +303,22 @@ export default function () {
               },
             },
             {
-              title: '有效模块',
-              dataIndex: 'description',
-              ellipsis: true,
-              align: 'center',
-              render(value, record, index) {
-                return value;
-              },
-            },
-            {
               title: '有效期',
-              dataIndex: 'description',
+              dataIndex: 'start',
               ellipsis: true,
               align: 'center',
               render(value, record, index) {
-                return value;
+                const sdate = moment.unix(record.start_time);
+                const edate = moment.unix(record.end_time);
+                const sformattedTime = sdate.format('YYYY-MM-DD HH:mm:ss'); // 使用 format 方法将时间格式化为 24 小时制的时间
+                const eformattedTime = edate.format('YYYY-MM-DD HH:mm:ss');
+                return sformattedTime+'-'+eformattedTime;
+                
               },
             },
             {
               title: '许可节点数',
-              dataIndex: 'description',
+              dataIndex: 'permission_node',
               ellipsis: true,
               align: 'center',
               render(value, record, index) {
@@ -269,7 +327,7 @@ export default function () {
             },
             {
               title: '已用许可节点',
-              dataIndex: 'description',
+              dataIndex: 'used_node',
               ellipsis: true,
               align: 'center',
               render(value, record, index) {
@@ -284,13 +342,17 @@ export default function () {
                 <div className='table-operator-area'>
                   <Button size='small'  style={{ backgroundColor: "#57B894" }} className='oper-name' type='link' icon={<SyncOutlined />} 
                   onClick={() => {
+                     localStorage.setItem("license_select_detail",JSON.stringify(record))
                     history.push(`/license/base/${record.id}`);
                   }}
                   >
                     更新证书
                   </Button>
-                  <Button size='small' style={{ backgroundColor: "#4095E5" }} className='oper-name' type='link' icon={<DeliveredProcedureOutlined />} onClick={() => {
-                    handleClick("update", record);
+                  <Button size='small' style={{ backgroundColor: "#4095E5" }} className='oper-name' type='link' icon={<DeliveredProcedureOutlined />} 
+                  onClick={() => {
+                    let ids = new Array();
+                    ids.push(record.id);
+                    handleModal("open",ids);
                   }}>
                     导出
                   </Button>
