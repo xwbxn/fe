@@ -331,27 +331,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </div>
               </div>
             </div>
-            {/* {action === "monitor" && (
-              <div className='monitor_info'>
-                <div className='base'>
-                  <Row gutter={10} className='row'>
-                    <Col className='theme1'><div>监控名称：</div>{monitor.monitoring_name}</Col>
-                  </Row>
-                  <Row gutter={10} className='row'>
-                    <Col className='theme1'><div>采集器:</div>{identList[monitor.target_id]}</Col>
-                  </Row>
-                  <Row gutter={10} className='row'>
-                    <Col className='theme1'><div>描述:{monitor.remark}</div>{monitor.remark}</Col>
-                  </Row>
-                </div>
-                <div className='script'>
-                  <div className='title'>监控脚本：</div>
-                  <div className='content1'>{monitor.monitoring_sql}</div>
-                </div>
-
-              </div>
-
-            )} */}
+            
             {/* {action === "asset" && ( */}
             <div className='party_info'>
               <div className='asset_item_ctr_button' onClick={e => {
@@ -593,7 +573,7 @@ export default function (props: { initialValues: object; initParams: object; mod
           <div className='accessories_body'>
             {accessories.items.map((item, pos) => {
               return <div className='accessories_every_group show_image'>
-                <div className='title' style={{ fontWeight: '600' }}>{accessories.label.toUpperCase()}({pos + 1})</div>
+                <div className='title' style={{ fontWeight: '600' }}>{accessories.label.toUpperCase()} &nbsp;({pos + 1})</div>
                 <div className={'image ' + accessories.name} style={{ marginLeft: '30%' }}></div>
                 <div className='status' style={{ display: 'flex', margin: '0 auto' }}>状态：
                   {true ? (
@@ -602,6 +582,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                     <div>故障<CheckCircleFilled className='no_normal' /></div>
                   )}
                 </div>
+                
                 <div className='properties'>
                   {
                     accessories.properties.map((property, index) => {

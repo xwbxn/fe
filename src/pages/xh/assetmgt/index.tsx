@@ -1,9 +1,11 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select, Tooltip } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
+import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
+import '@minko-fe/use-antd-resizable-header/dist/style.css';
+
 import {
-  BulbFilled,
   CheckCircleOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
@@ -28,16 +30,12 @@ import { assetsType } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import {
   deleteXhAssets,
-  deleteAssets,
-  insertXHAsset,
-  updateXHAsset,
   getAssetsStypes,
   updateAssetDirectoryTree,
   moveAssetDirectoryTree,
   getAssetsByCondition,
   insertAssetDirectoryTree,
   deleteAssetDirectoryTree,
-  getOrganizationTree,
   getAssetDirectoryTree,
 } from '@/services/assets';
 
@@ -47,9 +45,8 @@ import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useSize, useTimeout } from 'ahooks';
-import useResizeTableCol from '@/components/table/useResizeTableCol';
 import { useInterval } from 'react-use';
-// export { Add, Edit };
+
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -99,7 +96,6 @@ export default function () {
   const [groupColumns, setGroupColumns] = useState<any>({});
   const [initData, setInitData] = useState({});
   const { busiGroups } = useContext(CommonStateContext);
-  const [allColumns, setAllColumns] = useState<any[]>([]);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
@@ -112,16 +108,27 @@ export default function () {
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
   const [selectColum, setSelectColum] = useState<any[]>([]);
-  const { colIsInit, tableColumns } = useResizeTableCol(wrapperWidth, tableRef, selectColum);
+  const eleRef = useRef<HTMLDivElement>(null);
+  const size = useSize(eleRef);
+  const { resizableColumns,components, tableWidth } = useAntdResizableHeader({
+    columns: useMemo(() => selectColum, [selectColum]),
+    columnsState: {
+      persistenceType: 'localStorage',
+      persistenceKey: `dashboard-table-resizable-xh-asset-management`,
+    },
+  });
+
+
   const history = useHistory();
+  
 
   const baseColumns: any[] = [
     {
       title: '资产名称',
       dataIndex: 'name',
       fixed: 'left',
-      width: '130px',
       ellipsis: true,
+      width: size?.width! - 200,
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -131,7 +138,6 @@ export default function () {
     },
     {
       title: '资产类型',
-      width: '105px',
       dataIndex: 'type',
       fixed: 'left',
       align: 'center',
@@ -143,7 +149,6 @@ export default function () {
     {
       title: 'IP地址',
       dataIndex: 'ip',
-      width: '130px',
       align: 'center',
       ellipsis: true,
       sorter: (a, b) => {
@@ -155,7 +160,6 @@ export default function () {
     },
     {
       title: '厂商',
-      width: '105px',
       dataIndex: 'manufacturers',
       align: 'center',
       ellipsis: true,
@@ -163,7 +167,6 @@ export default function () {
     {
       title: '位置',
       dataIndex: 'position',
-      width: '130px',
       align: 'center',
       ellipsis: true,
       sorter: (a, b) => {
@@ -176,7 +179,6 @@ export default function () {
     {
       title: '所属业务组',
       dataIndex: 'group_id',
-      width: '130px',
       align: 'center',
       ellipsis: true,
       render(value, record, index) {
@@ -193,7 +195,6 @@ export default function () {
     },
     {
       title: '管理状态',
-      width: '105px',
       dataIndex: 'status',
       align: 'center',
       ellipsis: true,
@@ -220,7 +221,6 @@ export default function () {
     },
     {
       title: '运行状态',
-      width: '105px',
       dataIndex: 'health',
       align: 'center',
       ellipsis: true,
@@ -304,7 +304,6 @@ export default function () {
         cloumns.push({
           title: item.label,
           dataIndex: item.name,
-          width: '80px',
           align: 'center',
           ellipsis: true,
           render: (val, record, i) => {
@@ -322,6 +321,7 @@ export default function () {
       setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
     }
   };
+
 
   const fixColumns: any[] = [
     {
@@ -376,6 +376,8 @@ export default function () {
     },
   ];
 
+
+
   useEffect(() => {
     if (tableWrapperSize) {
       setWrapperWidth(tableWrapperSize.width);
@@ -390,7 +392,10 @@ export default function () {
       }
     });
     setSelectColum(showColumns.concat(fixColumns));
+    tableRef.current
+    
   }
+ 
   useEffect(() => {
     if (!modifyType) {
       loadDataCenter();
@@ -917,55 +922,54 @@ export default function () {
               </Space>
             </div>
           </div>
-          <div className='assets-list-1' ref={tableRef}>
-            <Table
-              dataSource={list}
-              className='table-view'
-              scroll={{ x: 810 }}
-              // components={{
-              //   header: {
-              //     cell: ResizeableTitle,
-              //   },
-              // }}
-              onRow={(record) => {
-                return {
-                  onClick: (event) => {
-                    // debugger;
-                    setViewIndex(record.id);
-                    console.log(viewIndex);
+          <div className='renderer-table-container' ref={eleRef}>
+            <div className='assets-list-1 renderer-table-container-box'>
+              <Table
+                dataSource={list}
+                className='table-view'
+                scroll={{ x: tableWidth }}
+                components={components}
+                columns={resizableColumns}
+                bordered
+                onRow={(record) => {
+                  return {
+                    onClick: (event) => {
+                      // debugger;
+                      setViewIndex(record.id);
+                      console.log(viewIndex);
+                    },
+                  };
+                }}
+                rowSelection={{
+                  onChange: (_, rows) => {
+                    setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
+                    setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
                   },
-                };
-              }}
-              rowSelection={{
-                onChange: (_, rows) => {
-                  setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
-                  setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
-                },
-              }}
-              pagination={{
-                showSizeChanger: true,
-                showQuickJumper: true,
-                current: current,
-                pageSize: pageSize,
-                total: total,
-                onChange: onPageChange,
-                showTotal: (total) => `总共 ${total} 条`,
-                pageSizeOptions: [10, 20, 50, 100],
-              }}
-              columns={selectColum}
-              rowKey='id'
-              size='small'
-            ></Table>
-            {/* ):null} */}
-            <OperationModal
-              operateType={operateType}
-              setOperateType={setOperateType}
-              assets={selectedAssets}
-              names={selectedAssetsName}
-              reloadList={() => {
-                setRefreshKey(_.uniqueId('refreshKey_'));
-              }}
-            />
+                }}
+                pagination={{
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  current: current,
+                  pageSize: pageSize,
+                  total: total,
+                  onChange: onPageChange,
+                  showTotal: (total) => `总共 ${total} 条`,
+                  pageSizeOptions: [10, 20, 50, 100],
+                }}
+                rowKey='id'
+                size='small'
+              ></Table>
+              {/* ):null} */}
+              <OperationModal
+                operateType={operateType}
+                setOperateType={setOperateType}
+                assets={selectedAssets}
+                names={selectedAssetsName}
+                reloadList={() => {
+                  setRefreshKey(_.uniqueId('refreshKey_'));
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
