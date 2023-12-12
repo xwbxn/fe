@@ -1,15 +1,17 @@
 import { useMemoizedFn, useSafeState } from 'ahooks';
-import type { ColumnType } from 'antd/lib/table';
 import { useState, useEffect } from 'react';
 import useTableCol from './useTableCol';
+import { ColumnType } from 'antd/es/table';
 
 const useResizeTableCol = (wrapperWidth: number | undefined, tableRef: any, columns: ColumnType<any>[]) => {
   const [colIsInit, setColInit] = useSafeState<boolean>(false);
+  console.assert(colIsInit)
   const [tableColumns, setTableColumns] = useState<ColumnType<any>[]>(columns);
   const { tableShowColumns, isInit, setTitleWidthMapMethod } = useTableCol(wrapperWidth, columns);
 
   const handleResize = useMemoizedFn((index: number) => (e: any, { size }: any) => {
     e.stopImmediatePropagation();
+    console.log('handleResize');
     if (tableRef.current) {
       const widthList = [
         ...(tableRef.current as HTMLElement).querySelectorAll('.ant-table-thead th.react-resizable'),
@@ -55,6 +57,7 @@ const useResizeTableCol = (wrapperWidth: number | undefined, tableRef: any, colu
   });
 
   useEffect(() => {
+    console.log("kjlj")
     if (isInit) {
       setTableColumns(
         tableShowColumns.map((col, index) => ({

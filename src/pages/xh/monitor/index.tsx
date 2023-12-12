@@ -1,10 +1,12 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { DeleteOutlined, DownOutlined, EditOutlined, FileProtectOutlined, FileSearchOutlined, FundOutlined, GroupOutlined, LeftOutlined, PoweroffOutlined, ProfileTwoTone, RightOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
+import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
+import '@minko-fe/use-antd-resizable-header/dist/style.css';
 
 import './locale';
 import './style.less';
@@ -13,8 +15,8 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import {  insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
-import { getMonitorInfoList, getMonitorUnit, deleteXhMonitor,deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
+import { insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
+import { getMonitorInfoList, getMonitorUnit, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
@@ -87,35 +89,35 @@ export default function () {
       title: "监控名称",
       dataIndex: 'monitoring_name',
       fixed: 'left',
-      width: "100px",
+      // width: "80px",
       ellipsis: true,
       render(value, record, index) {
-        return <div  style={{color:'#2B7EE5',cursor:'pointer'}} onClick={(e)=>{showModal("asset", record.id, "view")} }>{value}</div>;
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => { showModal("asset", record.id, "view") }}>{value}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.monitoring_name).localeCompare(b.monitoring_name)
       },
     },
     {
       title: "资产名称",
-      width: "100px",
+      // width: "100px",
       dataIndex: 'asset_id',
       fixed: 'left',
       align: 'center',
       ellipsis: true,
       render(value, record, index) {
         let name = assetInfo[value]?.name;
-        return <div  style={{color:'#2B7EE5',cursor:'pointer'}} onClick={(e)=>{          
-            history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
-        } }>{name}</div>;
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
+        }}>{name}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.asset_id).localeCompare(b.asset_id)
       },
     },
     {
       title: "IP地址",
-      width: "100px",
+      // width: "100px",
       dataIndex: 'asset_id',
       fixed: 'left',
       align: 'center',
@@ -124,7 +126,7 @@ export default function () {
         let name = assetInfo[value]?.ip;
         return name;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         const aip = assetInfo[a.asset_id]?.ip
         const bip = assetInfo[b.asset_id]?.ip
         return (aip).localeCompare(bip)
@@ -137,34 +139,36 @@ export default function () {
       width: "105px",
       align: 'center',
       dataIndex: 'remark',
+      ellipsis: true,
     },
     {
       title: "监控状态",
-      width: "105px",
+      width: 120,
+      ellipsis: true,
       align: 'center',
       dataIndex: 'status',
       render(value, record, index) {
         return value == 0 ? '关闭' : '正常';
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return a.status > b.status ? 1 : -1
       },
     },
     {
       title: "更新时间",
-      width: "105px",
+      width: 120,
       dataIndex: 'updated_at',
       align: 'center',
       render(text, record, index) {
         return moment.unix(text).format('YYYY-MM-DD HH:mm:ss');
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return a.updated_at > b.updated_at ? 1 : -1
       },
     },
     {
       title: "更新人",
-      width: "105px",
+      width: 120,
       dataIndex: 'updated_by',
       align: 'center',
       render(text, record, index) {
@@ -175,7 +179,7 @@ export default function () {
   const fixColumns: any[] = [
     {
       title: '操作',
-      width: '120px',
+      width: 200,
       align: 'center',
       fixed: 'right',
       render: (val, record: any) => (
@@ -247,6 +251,14 @@ export default function () {
 
 
   const [selectColum, setSelectColum] = useState<any[]>()
+
+  const { components, resizableColumns, tableWidth } = useAntdResizableHeader({
+    columns: useMemo(() => selectColum, [selectColum]),
+    columnsState: {
+      persistenceType: 'localStorage',
+      persistenceKey: `dashboard-table-resizable-xh-monitor-management`,
+    },
+  });
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
     optionColumns.forEach(item => {
@@ -298,7 +310,7 @@ export default function () {
         assetInfo[v.id] = (v);
       })
       setAssetInfo({ ...assetInfo });
-      getTableData(assetInfo,unitTypes);
+      getTableData(assetInfo, unitTypes);
     });
 
     filterOptions["status"] = [{ value: '0', label: '关闭' }, { value: '1', label: '正常' }]
@@ -316,7 +328,7 @@ export default function () {
     setFilterOptions({ ...filterOptions })
   }, []);
 
-  const selectFilterType=(value)=>{
+  const selectFilterType = (value) => {
     queryFilter.forEach((item) => {
       if (item.name == value) {
         setFilterType(item.type);
@@ -326,11 +338,11 @@ export default function () {
     setSearchVal(null)
   }
 
-  useEffect(() => { 
-      getTableData(assetInfo,unitOptions);    
+  useEffect(() => {
+    getTableData(assetInfo, unitOptions);
   }, [searchVal, refreshFlag, typeId, refreshKey]);
 
-  const getTableData = (assets,units) => {
+  const getTableData = (assets, units) => {
     const param = {
       page: current,
       limit: pageSize,
@@ -348,18 +360,18 @@ export default function () {
     if (typeId != null && typeId + "" != "0") {
       param["assetType"] = typeId;
     }
-    
+
     getMonitorInfoList(param
-    ).then(({ dat }) => { 
+    ).then(({ dat }) => {
       dat.list.forEach(entity => {
-        if(entity.unit!=null && entity.unit.length>0  && units[entity.unit]){
+        if (entity.unit != null && entity.unit.length > 0 && units[entity.unit]) {
           entity["unit_name"] = units[entity.unit];
-        }else{
+        } else {
           entity["unit_name"] = "";
         }
         return entity;
-      });     
-      setList(dat.list)    
+      });
+      setList(dat.list)
       setTotal(dat.total)
     });
   };
@@ -440,7 +452,7 @@ export default function () {
     }
   }
   const showModal = (action: string, id: any, operate: string) => {
-    console.log("showModal, id: " + id  )
+    console.log("showModal, id: " + id)
     if (action == "asset") {
       let url = '/xh/monitor/add?type=asset&action=' + operate;
       if (id == 0) {
@@ -474,7 +486,7 @@ export default function () {
     setPageSize(pageSize);
     setRefreshKey(_.uniqueId('refreshKey_'));
   }
- 
+
   const onSelect = (selectedKeys, info) => {
     setTypeId(selectedKeys);
     localStorage.setItem('left_monitor_type', selectedKeys);
@@ -482,8 +494,8 @@ export default function () {
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'}  showBack backPath='/xh/assetmgt'
-     >
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack backPath='/xh/assetmgt'
+    >
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
           style={{
@@ -624,9 +636,9 @@ export default function () {
                     <Menu
                       style={{ width: '100px' }}
                       onClick={({ key }) => {
-                        if("assetBatchImport"==key){
-                           history.push('/xh/monitor/muti/add')
-                        }else {
+                        if ("assetBatchImport" == key) {
+                          history.push('/xh/monitor/muti/add')
+                        } else {
                           if (selectedAssets.length <= 0) {
                             message.error("未选中监控信息");
                             return
@@ -635,13 +647,13 @@ export default function () {
                             Modal.confirm({
                               title: "确认要强制删除当前选中的监控信息？",
                               onOk: async () => {
-                                deleteXhBatchMonitor({ids:selectedAssets.toString().split(",")}).then((res) => {
+                                deleteXhBatchMonitor({ ids: selectedAssets.toString().split(",") }).then((res) => {
                                   message.success('删除成功');
                                   setRefreshFlag(_.uniqueId('refreshFlag_'));
                                 });
                               },
                               onCancel() { },
-                            });  
+                            });
                           } else if (key == "turnOnMonitoring") {
                             Modal.confirm({
                               title: "确认要启用当前选择监控？",
@@ -654,7 +666,7 @@ export default function () {
                                 });
                               },
                               onCancel() { },
-                            });  
+                            });
                           } else if (key == "disableMonitoring") {
                             Modal.confirm({
                               title: "确认要禁止当前用户使用？",
@@ -673,12 +685,12 @@ export default function () {
                           }
                         }
 
-                        
+
                       }}
                       items={[
                         { key: OperateType.TurnOnMonitoring, label: '启用监控' },
                         { key: OperateType.DisableMonitoring, label: '禁止监控' },
-                        { key: OperateType.AssetBatchImport, label: '批量添加' },                        
+                        { key: OperateType.AssetBatchImport, label: '批量添加' },
                         { key: OperateType.Delete, label: '批量删除' },
                       ]}
 
@@ -692,50 +704,54 @@ export default function () {
               </div>
             </div>
           </div>
-          <div className='monitor-list' style={{ width: '100%' }}>
-            <Table
-              dataSource={list}
-              className='table-view'
-              scroll={{ x: 810, }}
-              rowSelection={{
-                onChange: (_, rows) => {
-                  setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
-                  setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
-                },
-                selectedRowKeys: selectedAssets
-              }}
-              pagination={{
-                showSizeChanger: true,
-                showQuickJumper: true,
-                current: current,
-                pageSize: pageSize,
-                total: total,
-                onChange: onPageChange,
-                showTotal: (total) => `总共 ${total} 条`,
-                pageSizeOptions: [10, 20, 50, 100]
-              }}
-              columns={selectColum}
-              rowKey='id'
-              size='small'
-            ></Table>
-            <CommonModal
-              Modal={props.Modal}
-              Form={props.Form}
-              initial={initData}
-              defaultValue={formData}
-              isInline={props.isInline}
-              operate={businessForm.operate}
-              isOpen={businessForm.isOpen} >
-            </CommonModal>
-            <OperationModal
-              operateType={operateType}
-              setOperateType={setOperateType}
-              assets={selectedAssets}
-              names={selectedAssetsName}
-              reloadList={() => {
-                setRefreshKey(_.uniqueId('refreshKey_'));
-              }}
-            />
+          <div className='renderer-table-container' >
+            <div className='monitor-list renderer-table-container-box' >
+              <Table
+                dataSource={list}
+                className='table-view'
+                scroll={{ x: tableWidth }}
+                components={components}
+                columns={resizableColumns}
+                bordered
+                rowSelection={{
+                  onChange: (_, rows) => {
+                    setSelectedAssets(rows ? rows.map(({ id }) => id) : []);
+                    setSelectedAssetsName(rows ? rows.map(({ name }) => name) : []);
+                  },
+                  selectedRowKeys: selectedAssets
+                }}
+                pagination={{
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  current: current,
+                  pageSize: pageSize,
+                  total: total,
+                  onChange: onPageChange,
+                  showTotal: (total) => `总共 ${total} 条`,
+                  pageSizeOptions: [10, 20, 50, 100]
+                }}
+                rowKey='id'
+                size='small'
+              ></Table>
+              <CommonModal
+                Modal={props.Modal}
+                Form={props.Form}
+                initial={initData}
+                defaultValue={formData}
+                isInline={props.isInline}
+                operate={businessForm.operate}
+                isOpen={businessForm.isOpen} >
+              </CommonModal>
+              <OperationModal
+                operateType={operateType}
+                setOperateType={setOperateType}
+                assets={selectedAssets}
+                names={selectedAssetsName}
+                reloadList={() => {
+                  setRefreshKey(_.uniqueId('refreshKey_'));
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

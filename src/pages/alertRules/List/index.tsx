@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, Link } from 'react-router-dom';
 import _, { concat } from 'lodash';
@@ -34,6 +34,8 @@ import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
 import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, PoweroffOutlined, SearchOutlined } from '@ant-design/icons';
 import parameters from '@/pages/system/parameters';
+import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
+import '@minko-fe/use-antd-resizable-header/dist/style.css';
 
 interface ListProps {
   bgid?: number;
@@ -83,13 +85,14 @@ export default function List(props: ListProps) {
     //   ]
     //  }
   ]);
+
   const [loading, setLoading] = useState(false);
-  const columns: ColumnType<AlertRuleType<any>>[] = [
+  const selectColumns: any[] = [
     {
       title: '告警规则名称',
       dataIndex: 'name',
-      width: 100,
-      sorter: (a, b) =>{
+      width: "120px",
+      sorter: (a, b) => {
         return (a.name).localeCompare(b.name)
       },
     },
@@ -97,8 +100,8 @@ export default function List(props: ListProps) {
       title: '资产名称',
       dataIndex: 'asset_name',
       align: "center",
-      width: 100,
-      sorter: (a, b) =>{
+      width: 120,
+      sorter: (a, b) => {
         return (a.asset_name).localeCompare(b.asset_name)
       },
     },
@@ -106,8 +109,7 @@ export default function List(props: ListProps) {
       title: 'IP地址',
       dataIndex: 'asset_ip',
       align: "center",
-      width: 100,
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.asset_ip).localeCompare(b.asset_ip)
       },
     },
@@ -115,15 +117,13 @@ export default function List(props: ListProps) {
       title: '告警规则',
       dataIndex: 'rule_config_cn',
       align: "center",
-      width: 100,
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return (a.rule_config_cn).localeCompare(b.rule_config_cn)
       },
     },
     {
       title: '告警接收组',
       dataIndex: 'notify_groups_obj',
-      width: 140,
       align: "center",
       render: (data) => {
         return (
@@ -140,11 +140,11 @@ export default function List(props: ListProps) {
       title: '更新时间',
       dataIndex: 'update_at',
       align: "center",
-      width: 90,
+      
       render: (text: string) => {
         return <div className='table-text'>{moment.unix(Number(text)).format('YYYY-MM-DD HH:mm:ss')}</div>;
       },
-      sorter: (a, b) =>{
+      sorter: (a, b) => {
         return a.update_at > b.update_at ? 1 : -1
       },
     },
@@ -156,39 +156,39 @@ export default function List(props: ListProps) {
     },
     {
       title: '操作',
-      width: 120,
+      width: '210px',
       align: 'center',
       fixed: 'right',
-      render: (record: any) => {
+      render: (val,record: any) => {
         return (
           <Space>
             <PoweroffOutlined
-              title={record.disabled === AlertRuleStatus.Enable ? '已启动' : '未启动'}
-              style={{ color: record.disabled === AlertRuleStatus.Enable ? 'green' : 'gray' }}
+              title={record["disabled"] === AlertRuleStatus.Enable ? '已启动' : '未启动'}
+              style={{ color: record["disabled"]  === AlertRuleStatus.Enable ? 'green' : 'gray' }}
               onClick={(e) => {
                 const { id, disabled } = record;
 
                 Modal.confirm({
-                  title: `确认要修改状态为：${record.disabled === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
+                  title: `确认要修改状态为：${record["disabled"]  === AlertRuleStatus.Enable ? '关闭' : '启动'}`,
                   onOk: () => {
                     bgid &&
-                  updateAlertRules(
-                    {
-                      ids: [id],
-                      fields: {
-                        disabled: !disabled ? 1 : 0,
-                      },
-                    },
-                    bgid,
-                  ).then(() => {
-                    getAlertRules(params);
-                  });
+                      updateAlertRules(
+                        {
+                          ids: [id],
+                          fields: {
+                            disabled: !disabled ? 1 : 0,
+                          },
+                        },
+                        bgid,
+                      ).then(() => {
+                        getAlertRules(params);
+                      });
                   },
                   onCancel() { },
                 });
 
 
-                
+
               }}
             />
             <Link title='克隆'
@@ -239,6 +239,14 @@ export default function List(props: ListProps) {
     },
   ];
 
+  const { components, resizableColumns, tableWidth } = useAntdResizableHeader({
+    columns: useMemo(() => selectColumns, []),
+    columnsState: {
+      persistenceType: 'localStorage',
+      persistenceKey: `dashboard-table-resizable-xh-asset-management`,
+    },
+  });
+
   const filterData = () => {
     // return data.filter((item) => {
     //   const { cate, datasourceIds, search, prod, severities } = filter;
@@ -276,13 +284,13 @@ export default function List(props: ListProps) {
   };
   useEffect(() => {
     getAssetsStypes().then((res) => {
-      filterOptions["type"]= res.dat.map((v) => {
+      filterOptions["type"] = res.dat.map((v) => {
         return {
           value: v.name,
           label: v.name,
         };
       });
-      setFilterOptions({...filterOptions})
+      setFilterOptions({ ...filterOptions })
       const items = res.dat.map((v) => {
         return {
           value: v.name,
@@ -296,22 +304,22 @@ export default function List(props: ListProps) {
       })
       setTypeOptions(_.cloneDeep(typeOptions));
     });
-    filterOptions["severity"]=[
-          { label: 'S1', value: '1' },
-          { label: 'S2', value: '2' },
-          { label: 'S3', value: '3' },
+    filterOptions["severity"] = [
+      { label: 'S1', value: '1' },
+      { label: 'S2', value: '2' },
+      { label: 'S3', value: '3' },
     ];
-    setFilterOptions({...filterOptions})
+    setFilterOptions({ ...filterOptions })
   }, []);
 
   useEffect(() => {
     if (bgid) {
       if (assetid != null && assetid > 0) {
-           params["filter"] = "asset_id";
-           params["query"] = "" + assetid;
+        params["filter"] = "asset_id";
+        params["query"] = "" + assetid;
       } else if (searchVal != null && searchVal.length > 0) {
-           params["query"] = searchVal;
-           params["filter"] = filterParam;       
+        params["query"] = searchVal;
+        params["filter"] = filterParam;
       } else {
         delete params["filter"];
         delete params["query"];
@@ -366,11 +374,11 @@ export default function List(props: ListProps) {
                 className={'searchInput'}
                 value={searchVal}
                 allowClear
-                options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
+                options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
                 onChange={(val) => setSearchVal(val)}
                 placeholder={'选择要查询的条件'}
               />
-            )}           
+            )}
           </Space>
         </Col>
         <Col>
@@ -389,23 +397,30 @@ export default function List(props: ListProps) {
           </Space>
         </Col>
       </Row>
-      <Table
-        tableLayout='fixed'
-        size='small'
-        rowKey='id'
-        pagination={pagination}
-        loading={loading}
-        dataSource={filteredData}
-        className='ruler-table_columns'
-        rowSelection={{
-          selectedRowKeys: selectedRows.map((item) => item.id),
-          onChange: (selectedRowKeys: React.Key[], selectedRows: AlertRuleType<any>[]) => {
-            setSelectRowKeys(selectedRowKeys);
-            setSelectedRows(selectedRows);
-          },
-        }}
-        columns={columns}
-      />
+      <div className='renderer-table-container' >
+        <div className='renderer-table-container-box' >
+        <Table
+          // tableLayout='fixed'
+          size='small'
+          rowKey='id'
+          pagination={pagination}
+          loading={loading}
+          bordered
+          dataSource={filteredData}
+          className='ruler-table_columns'
+          rowSelection={{
+            selectedRowKeys: selectedRows.map((item) => item.id),
+            onChange: (selectedRowKeys: React.Key[], selectedRows: AlertRuleType<any>[]) => {
+              setSelectRowKeys(selectedRowKeys);
+              setSelectedRows(selectedRows);
+            },
+          }}
+          scroll={{ x: tableWidth }}
+          components={components}
+          columns={resizableColumns}
+        />
+      </div>
+    </div>
     </div>
   );
 }

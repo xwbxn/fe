@@ -167,7 +167,7 @@ const Event: React.FC = () => {
     },
     {
       title: '操作',
-      width: '120px',
+      width: 100,
       align: 'center',
       fixed: 'right',
       render: (record: any) => {

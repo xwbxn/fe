@@ -218,8 +218,7 @@ export default function Login() {
               }}>
                 {t('登录')}
               </Button>
-            </Form.Item>
-            
+            </Form.Item>            
           </Form>
         </div>
       </div>
