@@ -246,13 +246,14 @@ export default function () {
                 </div>
               </div>
             </div>
+            {assetItems!=null && assetItems.length > 0 && (   
             <div className='party_info'>
               <div
                 className='asset_item_ctr_button'
                 onClick={(e) => {
                   if (itemButton == '收起') {
-                    localStorage.setItem('asset_item_ctr_button', '展开');
-                    setItemButton('展开');
+                    localStorage.setItem('asset_item_ctr_button', '查看部件');
+                    setItemButton('查看部件');
                   } else {
                     localStorage.setItem('asset_item_ctr_button', '收起');
                     setItemButton('收起');
@@ -304,6 +305,7 @@ export default function () {
                 </div>
               )}
             </div>
+            )}
           </Card>
         </div>
         <div className='card-wrapper'>
