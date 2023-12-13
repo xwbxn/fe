@@ -46,7 +46,7 @@ export default function Login() {
     cas: 'CAS',
     oauth: 'OAuth',
   });
-  const [showcaptcha, setShowcaptcha] = useState(true);
+  const [showcaptcha, setShowcaptcha] = useState(false);
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
   const [remember, setRemember] = useState(false);
@@ -96,8 +96,8 @@ export default function Login() {
     });
 
     ifShowCaptcha().then((res) => {
-      // setShowcaptcha(res?.dat?.show);
-      // if (res?.dat?.show) {
+      setShowcaptcha(res?.dat?.show);
+      if (res?.dat?.show) {
         getCaptcha().then((res) => {
           if (res.dat && verifyimgRef.current) {
             verifyimgRef.current.src = res.dat.imgdata;
@@ -106,7 +106,7 @@ export default function Login() {
             message.warning('获取验证码失败');
           }
         });
-      // }
+      }
     });
   }, []);
   const handleRememberChange = (e) => {

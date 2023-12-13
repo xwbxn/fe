@@ -129,6 +129,7 @@ export default function () {
       fixed: 'left',
       ellipsis: true,
       width: size?.width! - 200,
+      className: 'renderer-table-td-content-value-container',
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -142,39 +143,41 @@ export default function () {
       fixed: 'left',
       align: 'center',
       ellipsis: true,
+      className: 'renderer-table-td-content-value-container',
       sorter: (a, b) => {
         return a.type.localeCompare(b.type);
       },
+      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: 'IP地址',
       dataIndex: 'ip',
       align: 'center',
+      className: 'renderer-table-td-content-value-container',
       ellipsis: true,
       sorter: (a, b) => {
         return a.ip.localeCompare(b.ip);
       },
-      render(value, record, index) {
-        return value;
-      },
+      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '厂商',
       dataIndex: 'manufacturers',
       align: 'center',
       ellipsis: true,
+      className: 'renderer-table-td-content-value-container',
+      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '位置',
       dataIndex: 'position',
       align: 'center',
       ellipsis: true,
+      className: 'renderer-table-td-content-value-container',
       sorter: (a, b) => {
         return a.position.localeCompare(b.position);
       },
-      render(value, record, index) {
-        return value;
-      },
+      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '所属业务组',

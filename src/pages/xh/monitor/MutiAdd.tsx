@@ -485,7 +485,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
               <Col span={4}>
                 <Form.Item label='指标计算单位' rules={[{ required: false }]}>
-                  <Form.Item name='unit' rules={[{ required: true }]}>
+                  <Form.Item name='unit' rules={[{ required: true,message:'请输入指标计算单位' }]}>
                   <Select >
                      {Object.keys(unitTypes).map((key) =>{
                        return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)

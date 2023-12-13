@@ -331,9 +331,8 @@ export default function (props: { initialValues: object; initParams: object; mod
                   <div className='theme1'></div>
                 </div>
               </div>
-            </div>
-            
-            {/* {action === "asset" && ( */}
+            </div>            
+            {assetItems!=null && assetItems.length > 0 && (            
             <div className='party_info'>
               <div className='asset_item_ctr_button' onClick={e => {
                 if (itemButton == "收起") {
@@ -378,8 +377,8 @@ export default function (props: { initialValues: object; initParams: object; mod
               )}
 
             </div>
-            {/* )} */}
-          </Card>
+            )}
+          </Card>          
         </div>
         <div className='card-wrapper'>
           <Card {...panelBaseProps} title={'监控图表'} className='default_monitor'>

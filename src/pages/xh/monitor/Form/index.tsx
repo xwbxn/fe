@@ -315,8 +315,8 @@ const [operateScript, setOperateScript] = useState<any>({
                 </Form.Item>
               </Col>
               <Col span={4}>
-                <Form.Item label='指标计算单位' rules={[{ required: false }]}>
-                  <Form.Item name='unit' rules={[{ required: true }]}>
+                <Form.Item label='指标计算单位' rules={[{ required: false, }]}>
+                  <Form.Item name='unit' rules={[{ required: true,message:'请输入指标计算单位' }]}>
                     <Select >
                       {Object.keys(unitTypes).map((key) => {
                         return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)
@@ -405,10 +405,11 @@ const [operateScript, setOperateScript] = useState<any>({
                                   <InputNumber placeholder="请输入值" />
                                 </Form.Item>
                               </Col>
-                              <Col span={10}>
+                              <Col span={10} >
                                 <Form.Item
                                   // label={'告警级别'}
                                   name={[item.name, 'severity']}
+                                  className='item_severity_style'
                                   rules={[{ required: true, message: `请选择告警级别` }]}
                                 >
                                   <Radio.Group>
