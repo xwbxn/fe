@@ -1,9 +1,9 @@
 import './style.less';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Space } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, InputRef, message, Modal, Radio, Row, Select, Space, Table,  TableProps  } from 'antd';
 import { useTranslation } from 'react-i18next';
-
+import _, { concat, random, values } from 'lodash';
 import { getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
 import { getMonitorUnit, createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
@@ -12,7 +12,7 @@ import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 const { TextArea } = Input;
 import { factories, unitTypes } from '../../assetmgt/catalog';
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { FilterOutlined, MinusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
@@ -29,8 +29,16 @@ export default function (props: { initialValues: object; initParams: object; mod
   const { id } = queryString.parse(search);
   const { action } = queryString.parse(search);
   const [monitor, setMonitor] = useState<any>({});
+  const [scriptOptions,setScriptOptions] =  useState<any[]>([]);
+  const [selectedRow,setSelectedRow] =  useState<string>();
+  const [filteredInfo, setFilteredInfo] = useState<Record<string, any | null>>({});
+  const [searchVal, setSearchVal] = useState<string>('');
+  const searchInput = useRef<InputRef>(null);
 
-
+const [operateScript, setOperateScript] = useState<any>({
+    visual: false,
+    title: "选择监控指标"
+  });
 
   const panelBaseProps: any = {
     size: 'small',
@@ -39,6 +47,28 @@ export default function (props: { initialValues: object; initParams: object; mod
 
 
   useEffect(() => {
+
+    let map = new Map;
+    let scripList = new Array();
+    Object.keys(cn_name).map(key=>{
+        if(!map.has(key)){
+          scripList.push({
+            name:key,
+            cn_name:cn_name[key]
+          })
+          map.set(key,key);
+        }
+    })
+    Object.keys(en_name).map(key=>{
+      if(!map.has(key)){
+        scripList.push({
+          name:key,
+          cn_name:en_name[key]
+        })
+        map.set(key,key);
+      }
+    })
+   setScriptOptions(scripList);
     if (action == null || 'addeditview'.indexOf(action + '') < 0) {
       history.goBack();
     }
@@ -103,6 +133,10 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   }, []);
 
+  const handleChange: TableProps<any>['onChange'] = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter);
+    setFilteredInfo(filters);
+  };
 
   const genForm = (assets, types) => {
     if (assets == null || assets.length <= 0 || types == null || types.length <= 0) return
@@ -130,6 +164,24 @@ export default function (props: { initialValues: object; initParams: object; mod
       }
     }
   };
+
+  const getColumnSearchProps = (dataIndex,title) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input.Search
+          ref={searchInput}
+          allowClear
+          placeholder={`在${title}中填关键词`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onSearch={(val) => {
+            setSearchVal(val);
+          }}
+        />
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+  });
 
   const renderForm = (v) => {
     console.log("config form item,", v)
@@ -178,6 +230,14 @@ export default function (props: { initialValues: object; initParams: object; mod
         message.success('操作成功');
         history.push(`/xh/monitor?assetId=${values['asset_id']}`)
       });
+    }
+  };
+
+
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows,'selectedRows-Name: ', selectedRows[0].name);
+      setSelectedRow(selectedRows[0].name);
     }
   };
 
@@ -230,7 +290,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
             </Row>
             <Row gutter={10}>
-              <Col span={16}>
+              <Col span={14}>
                 <Form.Item label='监控脚本' rules={[{ required: false }]}>
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
@@ -238,8 +298,17 @@ export default function (props: { initialValues: object; initParams: object; mod
                   {sqlCN != null && sqlCN.length > 0 && (
                     <div className='chinese_remark'><span className='title' style={{ color: '#0A4B9D', fontSize: "14px" }}>指标关键词说明：</span>{sqlCN}</div>
                   )}
+                  
                 </Form.Item>
+                
               </Col>
+              <Col span={2}  className='script_option'>
+                  <Button type='primary' icon={<SearchOutlined /> } onClick={() => {
+                          operateScript.visual = true;
+                          setOperateScript(_.cloneDeep(operateScript));
+                        }}>选择</Button>
+              </Col>
+              
               <Col span={4}>
                 <Form.Item name="label" label="标签">
                     <Input placeholder='{{name}}'></Input>
@@ -390,6 +459,62 @@ export default function (props: { initialValues: object; initParams: object; mod
         )}
 
       </Form>
+      <Modal
+          visible={operateScript.visual}
+          title={"选择监控指标"}
+          confirmLoading={false}
+          width={window.innerWidth * 0.4}
+          okButtonProps={{
+              onClick: () => {
+                operateScript.visual = false;
+               setOperateScript(_.cloneDeep(operateScript));
+                if(selectedRow!=null && selectedRow.length>0) {
+                   let values:any = form.getFieldsValue();
+                   form.setFieldsValue(values);
+                   values["monitoring_sql"] = selectedRow;
+                   form.setFieldsValue(values);
+                   genForm(assetList, assetTypes);
+                }
+                 
+              }           
+          }}
+          onCancel={() => {
+            operateScript.visual = false;
+            setOperateScript(_.cloneDeep(operateScript));
+          }}
+        >
+          <Table
+              rowSelection={{
+                type: "radio",
+                ...rowSelection,
+              }}
+              className='script_table'
+              bordered
+              rowKey={"name"}
+              columns={[
+                {
+                  title: '指标名',
+                  dataIndex: 'name',
+                  key: 'name',
+                },
+                {
+                  title: '指标说明',
+                  dataIndex: 'cn_name',
+                  onFilter: (value: string, record) => record.cn_name.includes(value),
+                  key: 'cn_name',
+                  ...getColumnSearchProps('cn_name','指标说明'),
+                },
+              ]}
+              dataSource={_.filter(scriptOptions, (item) => {
+                if (searchVal) {
+                  return _.includes(item.cn_name, searchVal);
+                }
+                return item;
+              })}
+              onChange={handleChange}
+            />
+
+        </Modal>
       {props.disabled == true && (
         <div className='monitor_management_button_zone'>
           <Button

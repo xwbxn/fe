@@ -1,7 +1,7 @@
 import './style.less';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, message, Modal, Radio, Row, Select, Space } from 'antd';
+import { Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, InputRef, message, Modal, Radio, Row, Select, Space, Table, TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
@@ -12,9 +12,10 @@ import { factories,unitTypes } from '../assetmgt/catalog';
 import queryString from 'query-string';
 import { cn_name, en_name } from '@/components/PromQueryBuilder/components/metrics_translation'
 import PageLayout from '@/components/pageLayout';
-import { GroupOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { GroupOutlined, MinusCircleOutlined, SearchOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 const { Option } = Select;
+import _, { concat, random, values } from 'lodash';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string, disabled?: boolean }) {
   const { t } = useTranslation('assets');
@@ -25,6 +26,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
   const [sqlCN, setSqlCN] = useState<string>("")
+  const [selectedRow,setSelectedRow] =  useState<string>();
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; password?: boolean; items?: [] }[]>([]);
   const [form] = Form.useForm();
@@ -36,8 +38,17 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [monitor, setMonitor] = useState<any>({});
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isSearchEmpty, setIsSearchEmpty] = useState(false);
-  
+  const [scriptOptions,setScriptOptions] =  useState<any[]>([]);
+  const [searchVal, setSearchVal] = useState<string>('');
+  const searchInput = useRef<InputRef>(null);
+  const [filteredInfo, setFilteredInfo] = useState<Record<string, any | null>>({});
   const [options, setOptions] = useState<any[]>([]);
+
+  const [operateScript, setOperateScript] = useState<any>({
+    visual: false,
+    title: "选择监控指标"
+  });
+
 
   const panelBaseProps: any = {
     size: 'small',
@@ -67,7 +78,48 @@ export default function (props: { initialValues: object; initParams: object; mod
       setIdentList(items);
     });
     form.setFieldsValue({ datasource_id: 1 })
+
+    let map = new Map;
+    let scripList = new Array();
+    Object.keys(cn_name).map(key=>{
+        if(!map.has(key)){
+          scripList.push({
+            name:key,
+            cn_name:cn_name[key]
+          })
+          map.set(key,key);
+        }
+    })
+    Object.keys(en_name).map(key=>{
+      if(!map.has(key)){
+        scripList.push({
+          name:key,
+          cn_name:en_name[key]
+        })
+        map.set(key,key);
+      }
+    })
+   setScriptOptions(scripList);
   }, []);
+
+
+  const getColumnSearchProps = (dataIndex,title) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input.Search
+          ref={searchInput}
+          allowClear
+          placeholder={`在${title}中填关键词`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onSearch={(val) => {
+            setSearchVal(val);
+          }}
+        />
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+  });
 
   const genForm = (assets, types) => {
 
@@ -89,6 +141,12 @@ export default function (props: { initialValues: object; initParams: object; mod
     }
   };
 
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows,'selectedRows-Name: ', selectedRows[0].name);
+      setSelectedRow(selectedRows[0].name);
+    }
+  };
   const renderForm = (v) => {
     if (v.items) {
       return (
@@ -173,7 +231,10 @@ export default function (props: { initialValues: object; initParams: object; mod
       ).length === 0,
     );
   };
-
+  const handleChange: TableProps<any>['onChange'] = (pagination, filters, sorter) => {
+    console.log('Various parameters', pagination, filters, sorter);
+    setFilteredInfo(filters);
+  };
   const handleSelectChange = (values: number[]) => {
     setSelectedValues(values);
     searchKeyword && setSearchKeyword('');
@@ -399,7 +460,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Col>
             </Row>
             <Row gutter={10}>
-              <Col span={20}>
+              <Col span={14}>
                 <Form.Item label='监控脚本' rules={[{ required: false }]}>
                   <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
@@ -410,6 +471,17 @@ export default function (props: { initialValues: object; initParams: object; mod
 
                 </Form.Item>
 
+              </Col>
+              <Col span={2}  className='script_option'>
+                  <Button type='primary' icon={<SearchOutlined /> } onClick={() => {
+                          operateScript.visual = true;
+                          setOperateScript(_.cloneDeep(operateScript));
+                        }}>选择</Button>
+              </Col>
+              <Col span={4}>
+                <Form.Item name="label" label="标签">
+                    <Input placeholder='{{name}}'></Input>
+                </Form.Item>
               </Col>
               <Col span={4}>
                 <Form.Item label='指标计算单位' rules={[{ required: false }]}>
@@ -571,6 +643,62 @@ export default function (props: { initialValues: object; initParams: object; mod
           </div>
 
       </Form>
+      <Modal
+          visible={operateScript.visual}
+          title={"选择监控指标"}
+          confirmLoading={false}
+          width={window.innerWidth * 0.4}
+          okButtonProps={{
+              onClick: () => {
+                operateScript.visual = false;
+               setOperateScript(_.cloneDeep(operateScript));
+                if(selectedRow!=null && selectedRow.length>0) {
+                   let values:any = form.getFieldsValue();
+                   form.setFieldsValue(values);
+                   values["monitoring_sql"] = selectedRow;
+                   form.setFieldsValue(values);
+                   genForm(assetList, assetTypes);
+                }
+                 
+              }           
+          }}
+          onCancel={() => {
+            operateScript.visual = false;
+            setOperateScript(_.cloneDeep(operateScript));
+          }}
+        >
+          <Table
+              rowSelection={{
+                type: "radio",
+                ...rowSelection,
+              }}
+              className='script_table'
+              bordered
+              rowKey={"name"}
+              columns={[
+                {
+                  title: '指标名',
+                  dataIndex: 'name',
+                  key: 'name',
+                },
+                {
+                  title: '指标说明',
+                  dataIndex: 'cn_name',
+                  onFilter: (value: string, record) => record.cn_name.includes(value),
+                  key: 'cn_name',
+                  ...getColumnSearchProps('cn_name','指标说明'),
+                },
+              ]}
+              dataSource={_.filter(scriptOptions, (item) => {
+                if (searchVal) {
+                  return _.includes(item.cn_name, searchVal);
+                }
+                return item;
+              })}
+              onChange={handleChange}
+            />
+
+        </Modal>
       </PageLayout >
        
     </>

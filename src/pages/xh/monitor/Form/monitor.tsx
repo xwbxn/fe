@@ -35,6 +35,7 @@ export default function (props: { initialValues: object; initParams: object; mod
     visual: false,
     title: "指标名称"
   });
+  
   const [accessories, setAccessories] = useState<any>({
     visual: false,
     title: "其他信息名称",
@@ -599,6 +600,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             })}
           </div>
         </Modal>
+        
       </div>
     </Form>
 
