@@ -28,7 +28,7 @@ const QueryStatsView: FC<QueryStats> = (props) => {
   return (
     <div className='query-stats'>
       <span>
-        Load time: {loadTime}ms &ensp;{resolution && `Resolution: ${resolution}s `}&ensp;Result series: {resultSeries}
+         加载时间: {loadTime}ms &ensp;{resolution && `Resolution: ${resolution}s `}&ensp;结果序列: {resultSeries}
       </span>
     </div>
   );

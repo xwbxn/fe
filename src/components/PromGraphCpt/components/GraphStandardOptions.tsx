@@ -88,7 +88,6 @@ export default function GraphStandardOptions(props: IProps) {
   const precisionMenu = (
     <Menu
       onClick={(e) => {
-        debugger
         setHighLevelConfig({ ...highLevelConfig, unit: e.key });
       }}
       selectedKeys={[highLevelConfig.unit]}
@@ -106,7 +105,7 @@ export default function GraphStandardOptions(props: IProps) {
           setHighLevelConfig({ ...highLevelConfig, shared: e.target.checked });
         }}
       >
-        Multi Series in Tooltip, order value
+        工具提示中的多序列，顺序值
       </Checkbox>
       <Dropdown overlay={aggrFuncMenu}>
         <a className='ant-dropdown-link' onClick={(e) => e.preventDefault()}>
@@ -120,10 +119,10 @@ export default function GraphStandardOptions(props: IProps) {
           setHighLevelConfig({ ...highLevelConfig, legend: e.target.checked });
         }}
       >
-        Show Legend
+        显示 Legend
       </Checkbox>
       <br />
-      Value format with:{' '}
+      值格式转换，包含:{' '}
       <Dropdown overlay={precisionMenu}>
         <a className='ant-dropdown-link' onClick={(e) => e.preventDefault()}>
           {_.get(_.find(units, { value: highLevelConfig.unit }), 'label')} <DownOutlined />
