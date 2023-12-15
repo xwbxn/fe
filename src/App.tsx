@@ -14,10 +14,10 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState, createContext, useRef } from 'react';
-import { BrowserRouter as Router, Switch, Route, useHistory } from 'react-router-dom';
+import React, { useEffect, useState, createContext, useRef, useLayoutEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
-import { ConfigProvider, Layout, Menu, MenuProps, Modal } from 'antd';
+import { ConfigProvider, Layout, Menu, MenuProps, Modal, message } from 'antd';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
 import 'antd/dist/antd.less';
@@ -27,11 +27,11 @@ import TaskOutput from '@/pages/taskOutput';
 import TaskHostOutput from '@/pages/taskOutput/host';
 import { getAuthorizedDatasourceCates, Cate } from '@/components/AdvancedWrap';
 import { GetProfile } from '@/services/account';
+import { WebSocketURL } from './utils/constant';
 import { getBusiGroups, getDatasourceBriefList } from '@/services/common';
 import { getLicense } from '@/components/AdvancedWrap';
 import { getVersions } from '@/components/pageLayout/Version/services';
 import Content from './routers';
-
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
 
@@ -40,7 +40,6 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import LayoutXH from './components/menu/layoutXH'; //西航版本
-
 interface IProfile {
   admin?: boolean;
   nickname: string;
@@ -108,11 +107,14 @@ function App() {
   const isPlus = useIsPlus();
   const initialized = useRef(false);
   const path = location.pathname;
-  console.log(path, path.startsWith('/login'));
+  const ws = useRef<WebSocket | null>(null);
+  const audioRef = useRef<any>(null);
+  const [dialogShow, setDialogShow] = useState<string>(_.toString(localStorage.getItem('alert_dialog_show') || '0'));
+  const [alertLevel, setAlertLevel] = useState<number>(0);
+  const [alertId, setAlertId] = useState<number>(0);
   const bodyStyle = {
     overflow: 'hidden',
   };
-
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -164,6 +166,25 @@ function App() {
     isPlus,
   });
 
+  useLayoutEffect(() => {
+    console.log('ws.current.useLayoutEffect')
+    ws.current = new WebSocket(WebSocketURL);
+    ws.current.onmessage = e => {
+      message.error("有设备发生告警信息")
+      if(audioRef?.current){
+        audioRef?.current.play();
+      }
+      let data = JSON.parse(e.data);
+      console.log(data);
+      setAlertLevel(data.dat[0].severity)
+      setAlertId(data.dat[0].id);
+      setDialogShow("1");
+    };
+    return () => {
+      ws.current?.close();
+    };
+  }, [ws]);
+  
   useEffect(() => {
     try {
       (async () => {
@@ -255,6 +276,20 @@ function App() {
           </Router>
         </ConfigProvider>
       </CommonStateContext.Provider>
+      <audio ref={audioRef} src="/music/y2168.mp3" />
+      <div className='special_alert_dialog' style={dialogShow=="0"?{ display: 'none' } : {display:'block'}} >
+           <div className='close_button' ><p>告警提醒</p><span onClick={()=>{
+              setDialogShow("0");
+           }}>X</span></div>
+           <div className='alert_content'>
+                <div className='level'>{alertLevel}</div>
+                <div className='detail' onClick={e=>{
+                   location.href='/alert-cur-events/'+alertId;
+                }}>
+                 查看详情
+                </div>
+           </div>
+      </div>
     </div>
   );
 }

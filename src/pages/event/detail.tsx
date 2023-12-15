@@ -58,7 +58,7 @@ const EventDetailPage: React.FC = () => {
   const parsedEventDetail = parseValues(eventDetail);
   const descriptionInfo = [
     {
-      label: t('detail.rule_name'),
+      label: '规则名称',
       key: 'rule_name',
       render(content, { rule_id }) {        
         return content;
@@ -103,7 +103,7 @@ const EventDetailPage: React.FC = () => {
         );
       }
     },
-    { label: t('detail.rule_note'), key: 'rule_note' },
+    // { label: t('detail.rule_note'), key: 'rule_note' },
     {
       label: t('detail.severity'),
       key: 'severity',
@@ -120,10 +120,10 @@ const EventDetailPage: React.FC = () => {
       },
     },
     {
-      label: t('detail.is_recovered'),
+      label: '告警状态',
       key: 'is_recovered',
       render(isRecovered) {
-        return <Tag color={isRecovered ? 'green' : 'red'}>{isRecovered ? 'Recovered' : 'Triggered'}</Tag>;
+        return <Tag color={isRecovered ? 'green' : 'red'}>{isRecovered ? '已修复' : '未修复'}</Tag>;
       },
     },
     // {

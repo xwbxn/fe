@@ -359,7 +359,7 @@ export default function () {
               showModal('update', record);
             }}
           />
-          <DeleteOutlined
+          <DeleteOutlined  title='删除'
             className='table-operator-area-warning'
             onClick={async () => {
               Modal.confirm({
