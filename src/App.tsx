@@ -167,24 +167,24 @@ function App() {
   });
 
   useLayoutEffect(() => {
-    console.log('ws.current.useLayoutEffect')
+    console.log('ws.current.useLayoutEffect');
     ws.current = new WebSocket(WebSocketURL);
-    ws.current.onmessage = e => {
-      message.error("有设备发生告警信息")
-      if(audioRef?.current){
+    ws.current.onmessage = (e) => {
+      message.error('有设备发生告警信息');
+      if (audioRef?.current) {
         audioRef?.current.play();
       }
       let data = JSON.parse(e.data);
       console.log(data);
-      setAlertLevel(data.dat[0].severity)
+      setAlertLevel(data.dat[0].severity);
       setAlertId(data.dat[0].id);
-      setDialogShow("1");
+      setDialogShow('1');
     };
     return () => {
       ws.current?.close();
     };
   }, [ws]);
-  
+
   useEffect(() => {
     try {
       (async () => {
@@ -268,7 +268,7 @@ function App() {
               <>
                 {/* <LayoutXH /> */}
                 <TopMenu></TopMenu>
-                <div style={{ display: '-webkit-flex', height: '100%' }}>
+                <div className='content-box'>
                   <Content />
                 </div>
               </>
@@ -276,19 +276,29 @@ function App() {
           </Router>
         </ConfigProvider>
       </CommonStateContext.Provider>
-      <audio ref={audioRef} src="/music/y2168.mp3" />
-      <div className='special_alert_dialog' style={dialogShow=="0"?{ display: 'none' } : {display:'block'}} >
-           <div className='close_button' ><p>告警提醒</p><span onClick={()=>{
-              setDialogShow("0");
-           }}>X</span></div>
-           <div className='alert_content'>
-                <div className='level'>{alertLevel}</div>
-                <div className='detail' onClick={e=>{
-                   location.href='/alert-cur-events/'+alertId;
-                }}>
-                 查看详情
-                </div>
-           </div>
+      <audio ref={audioRef} src='/music/y2168.mp3' />
+      <div className='special_alert_dialog' style={dialogShow == '0' ? { display: 'none' } : { display: 'block' }}>
+        <div className='close_button'>
+          <p>告警提醒</p>
+          <span
+            onClick={() => {
+              setDialogShow('0');
+            }}
+          >
+            X
+          </span>
+        </div>
+        <div className='alert_content'>
+          <div className='level'>{alertLevel}</div>
+          <div
+            className='detail'
+            onClick={(e) => {
+              location.href = '/alert-cur-events/' + alertId;
+            }}
+          >
+            查看详情
+          </div>
+        </div>
       </div>
     </div>
   );

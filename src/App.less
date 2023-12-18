@@ -70,16 +70,21 @@ html {
 .App {
   display: block;
   color: #333752;
-  overflow: hidden;
+  // overflow: hidden;
   background: #f9f9f9;
   font-family: @font-family;
   // min-width: 1180px;
   .ant-menu-inline-collapsed {
     width: 50px;
   }
-  .content {
-    flex: 1;
-    height: 100%;
+
+  .content-box {
+    height: calc(~'100vh - 45px');
+    .content {
+      flex: 1;
+      height: 100%;
+      overflow: auto;
+    }
   }
   
   .dot-block {
@@ -109,7 +114,7 @@ html {
   .searchInput {
     width: 200px;
   }
-  
+
   .ant-pagination-total-text {
     line-height: 32px;
     margin-right: 16px;
