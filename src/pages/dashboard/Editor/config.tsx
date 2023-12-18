@@ -67,17 +67,13 @@ export const visualizations = [
     name: '柱状图(g2)',
   },
   {
-    type: 'pien',
-    name: '饼图(g2)',
-  },
-  {
     type: 'line',
     name: '折线图(g2)',
   },
   {
-    type: 'barGaugeN',
-    name: '排行榜(g2)',
-  },
+    type: 'topo',
+    name: '拓扑图',
+  }
 ];
 
 export const IRefreshMap = {
@@ -258,7 +254,10 @@ export const defaultCustomValuesMap = {
     textMode: 'valueAndName',
     calc: 'lastNotNull',
   },
-  column: {},
+  column: {
+    calc: 'lastNotNull',
+  },
+  topo: {}
 };
 
 export const defaultOptionsValuesMap = {
@@ -282,10 +281,8 @@ export const defaultOptionsValuesMap = {
     },
   },
   column: defaultOptionsValues,
-  pien: defaultOptionsValues,
   line: defaultOptionsValues,
-  timeseriesN: defaultOptionsValues,
-  barGaugeN: defaultOptionsValues,
+  topo: {},
 };
 
 export const legendPostion = ['hidden', 'top', 'left', 'right', 'bottom'];

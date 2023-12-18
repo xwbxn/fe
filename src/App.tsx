@@ -258,7 +258,7 @@ function App() {
   }
 
   return (
-    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
+    <div className='App'>
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
           <Router>

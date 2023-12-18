@@ -8,9 +8,6 @@ const Left = ({ leftFlag, setLeftFlag, onDnd }) => {
     <>
       <div
         className='topo-designer-left'
-        style={{
-          left: leftFlag ? 0 : -200,
-        }}
       >
         <Collapse bordered={false} defaultActiveKey={widgetType[0].name}>
           {widgetType.map((item) => {

@@ -49,11 +49,10 @@ import { IPanel } from '../../types';
 import replaceFieldWithVariable from '../utils/replaceFieldWithVariable';
 import './style.less';
 import Column from './Column';
-import PieN from './PieN';
 import Line from './Line';
-import BarGaugeN from './BarGaugeN';
 import TimeSeriesN from './TimeSeriesN';
 import GaugeN from './GaugeN';
+import Topo from './Topo';
 
 interface IProps {
   datasourceValue?: number; // 全局数据源，如 values.datasourceValue 未设置则用全局数据源
@@ -121,10 +120,9 @@ function index(props: IProps) {
     gauge: () => <Gauge {...subProps} themeMode={themeMode} />,
     iframe: () => <Iframe {...subProps} time={time} />,
     column: () => <Column {...subProps} themeMode={themeMode} />,
-    pien: () => <PieN {...subProps} themeMode={themeMode} />,
     line: () => <Line {...subProps} themeMode={themeMode}></Line>,
-    barGaugeN: () => <BarGaugeN {...subProps} themeMode={themeMode}></BarGaugeN>,
-    gaugeN: () => <GaugeN {...subProps} themeMode={themeMode}></GaugeN>
+    gaugeN: () => <GaugeN {...subProps} themeMode={themeMode}></GaugeN>,
+    topo: () => <Topo {...subProps} themeMode={themeMode}></Topo>
   };
 
   return (
@@ -283,7 +281,7 @@ function index(props: IProps) {
           </div>
         </div>
         <div className='renderer-body' style={{ height: values.name ? `calc(100% - 34px)` : '100%' }}>
-          {_.isEmpty(series) && values.type !== 'text' && values.type !== 'iframe' ? (
+          {_.isEmpty(series) && values.type !== 'text' && values.type !== 'iframe' && values.type !== 'topo' ? (
             <div className='renderer-body-content-empty'>无数据展示</div>
           ) : (
             <>{RendererCptMap[values.type] ? RendererCptMap[values.type]() : <div className='unknown-type'>{`无效的图表类型 ${values.type}`}</div>}</>

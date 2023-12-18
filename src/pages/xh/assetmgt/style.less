@@ -177,22 +177,17 @@
     display: flex !important;
     background-color: #fff;
     .asset-operate_xh {
-        // width: calc(100% - 250px);
         background-color: #fff;
         overflow: scroll;
-
         z-index: 2;
-        // width: calc(100%-221px);
         margin-right: 1px;
-        // border: 1px solid red;
         width: 100%;
+        padding: 16px;
         .table-content_xh {
             display: flex;
             width: 100%;
             position: relative;
             justify-content: space-between;
-            padding: 15px 15px 0 15px;
-
 
             .tool_right {
                 display: flex;
@@ -220,70 +215,4 @@
             }
         }
     }
-
-
 }
-.react-resizable {
-    position: relative;
-  }
-  
-  .react-resizable-handle {
-    position: absolute;
-    z-index: 999;
-    bottom: 0;
-    right: 0;
-    width: 2px;
-    height: 100%;
-    cursor: col-resize;
-    &.active::before {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      height: 1000px;
-      border-left: 2px solid #d0d0d0;
-      content: '';
-    }
-  }
-  .ant-table-wrapper {
-    position: relative;
-    overflow: hidden;
-  }
-  .ofs-table-row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    overflow: hidden;
-  }
-  .ofs-table-cell-wrapper {
-    width: 100%;
-    overflow: hidden;
-  }
-  .ofs-table-cell {
-    padding: 0 10px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .ant-table-thead > tr > th,
-  .ant-table-tbody > tr > td,
-  .ant-table tfoot > tr > th,
-  .ant-table tfoot > tr > td {
-    padding: 16px 0px;
-  }
-  .ant-table-thead > tr > th:last-child span.react-resizable-handle {
-    display: none;
-  }
-  .ant-table-thead {
-    .ant-table-cell-ellipsis {
-      overflow: visible;
-      & > div {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        word-break: keep-all;
-      }
-    }
-  }
-  
-  

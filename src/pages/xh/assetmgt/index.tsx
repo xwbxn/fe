@@ -44,7 +44,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
-import { useSize, useTimeout } from 'ahooks';
+import { useSize } from 'ahooks';
 import { useInterval } from 'react-use';
 
 
@@ -101,15 +101,12 @@ export default function () {
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
   const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_asset_type') || '0'));
   const [assetTypes, setAassetTypes] = useState<any[]>([]);
-  const [viewIndex, setViewIndex] = useState<number>(-1);
 
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
   const [selectColum, setSelectColum] = useState<any[]>([]);
-  const eleRef = useRef<HTMLDivElement>(null);
-  const size = useSize(eleRef);
   const { resizableColumns,components, tableWidth } = useAntdResizableHeader({
     columns: useMemo(() => selectColum, [selectColum]),
     columnsState: {
@@ -121,15 +118,12 @@ export default function () {
 
   const history = useHistory();
   
-
   const baseColumns: any[] = [
     {
       title: '资产名称',
       dataIndex: 'name',
       fixed: 'left',
       ellipsis: true,
-      width: size?.width! - 200,
-      className: 'renderer-table-td-content-value-container',
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
       },
@@ -141,49 +135,46 @@ export default function () {
       title: '资产类型',
       dataIndex: 'type',
       fixed: 'left',
+      width: 120,
       align: 'center',
       ellipsis: true,
-      className: 'renderer-table-td-content-value-container',
       sorter: (a, b) => {
         return a.type.localeCompare(b.type);
       },
-      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: 'IP地址',
       dataIndex: 'ip',
       align: 'center',
-      className: 'renderer-table-td-content-value-container',
+      width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.ip.localeCompare(b.ip);
       },
-      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '厂商',
       dataIndex: 'manufacturers',
       align: 'center',
+      width: 120,
       ellipsis: true,
-      className: 'renderer-table-td-content-value-container',
-      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '位置',
       dataIndex: 'position',
       align: 'center',
       ellipsis: true,
-      className: 'renderer-table-td-content-value-container',
+      width: 120,
       sorter: (a, b) => {
         return a.position.localeCompare(b.position);
       },
-      render: (text) => <div className='renderer-table-td-content'>{text}</div>,
     },
     {
       title: '所属业务组',
       dataIndex: 'group_id',
       align: 'center',
       ellipsis: true,
+      width: 120,
       render(value, record, index) {
         if (value > 0) {
           let groupName = '';
@@ -200,6 +191,7 @@ export default function () {
       title: '管理状态',
       dataIndex: 'status',
       align: 'center',
+      width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.status - b.status;
@@ -226,6 +218,7 @@ export default function () {
       title: '运行状态',
       dataIndex: 'health',
       align: 'center',
+      width: 120,
       ellipsis: true,
       sorter: (a, b) => {
         return a.status - b.status;
@@ -329,7 +322,7 @@ export default function () {
   const fixColumns: any[] = [
     {
       title: '操作',
-      width: '140px',
+      width: 200,
       align: 'center',
       fixed: 'right',
       render: (text: string, record: assetsType) => (
@@ -504,7 +497,6 @@ export default function () {
               );
             }
           });
-          console.log('Map', map);
           //以上分组加载数据
           let mapValues = {};
           map.forEach(function (value, key) {
@@ -925,7 +917,7 @@ export default function () {
               </Space>
             </div>
           </div>
-          <div className='renderer-table-container' ref={eleRef}>
+          <div className='renderer-table-container'>
             <div className='assets-list-1 renderer-table-container-box'>
               <Table
                 dataSource={list}
@@ -934,15 +926,6 @@ export default function () {
                 components={components}
                 columns={resizableColumns}
                 bordered
-                onRow={(record) => {
-                  return {
-                    onClick: (event) => {
-                      // debugger;
-                      setViewIndex(record.id);
-                      console.log(viewIndex);
-                    },
-                  };
-                }}
                 rowSelection={{
                   onChange: (_, rows) => {
                     setSelectedAssets(rows ? rows.map(({ id }) => id) : []);

@@ -26,6 +26,8 @@ Graph.registerPortLayout(
 
 const graphOptions: Partial<Options.Manual> = {
   autoResize: true,
+  width: 600,
+  height: 400,
 };
 
 function createGraph(graphDom: React.MutableRefObject<null>) {
@@ -37,25 +39,28 @@ function createGraph(graphDom: React.MutableRefObject<null>) {
   return graph;
 }
 
-const Preview = ({ height, width, json }) => {
+interface IProps {
+  topo: any;
+}
+
+const Preview = ({ topo }: IProps) => {
   const graphDom = useRef(null);
   const graph = useRef<Graph>();
 
   useEffect(() => {
     graph.current = createGraph(graphDom);
+    graph.current.on('resize', ({ width, height }) => {
+      graph.current?.zoomToFit({ maxScale: 1 });
+    });
     return () => {
       graph.current?.dispose();
     };
   }, []);
 
   useEffect(() => {
-    graph.current?.fromJSON(json);
-  }, [json]);
-
-  useEffect(() => {
-    graph.current?.resize(width, height);
-    graph.current?.center();
-  }, [width, height]);
+    graph.current?.fromJSON(topo);
+    graph.current?.zoomToFit({ maxScale: 1 });
+  }, [topo]);
 
   return (
     <>

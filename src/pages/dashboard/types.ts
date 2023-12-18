@@ -41,7 +41,7 @@ export interface ITarget {
   instant?: boolean;
 }
 
-export type IType = 'row' | 'timeseries' | 'stat' | 'table' | 'pie' | 'hexbin' | 'barGauge' | 'text' | 'gauge' | 'iframe';
+export type IType = 'row' | 'timeseries' | 'stat' | 'table' | 'pie' | 'hexbin' | 'barGauge' | 'text' | 'gauge' | 'iframe' | 'topo' | 'column';
 
 export interface IValueMapping {
   match: {

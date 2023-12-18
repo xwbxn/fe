@@ -262,3 +262,10 @@ export const changeAssetOrganization = function (data) {
     data,
   });
 };
+
+// 获取指标列表
+export const getMonitoringOptions = function () {
+  return request(`/api/n9e/monitoring/options`, {
+    method: RequestMethod.Get,
+  });
+};

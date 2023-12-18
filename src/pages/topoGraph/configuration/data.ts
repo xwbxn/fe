@@ -1,17 +1,4 @@
 const data = {
-  // 数据项默认值
-  configureValue: {
-    useInterface: false,
-    dataType: 'mock',
-    mock: {
-      value: '文本框',
-    },
-    url: '',
-    method: 'get',
-    field: 'value',
-    autoRefresh: false,
-    interval: 0,
-  },
   // 数据项配置
   configure: [
     {
@@ -20,6 +7,13 @@ const data = {
       name: 'label',
       required: false,
       placeholder: '请输入名称',
+    },
+    {
+      componentName: 'AssetSelect',
+      label: '关联资产',
+      name: 'asset_id',
+      required: false,
+      placeholder: '请选择资产',
     },
   ],
 };

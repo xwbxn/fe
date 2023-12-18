@@ -64,8 +64,6 @@ import Targets from '@/pages/targets';
 import DictTypes from  '@/pages/dictType/index';
 import AssetMgt, { Add as AddInfoAsset } from '@/pages/assetmgt/index';
 import Assets, { Add as AddAsset, Edit as EditAsset } from '@/pages/assets';
-import DeviceMgt from '@/pages/deviceMgt/index';
-import AddInfoAssets from '@/pages/deviceMgt/Add';
 import Demo from '@/pages/demo';
 import TaskTpl from '@/pages/taskTpl';
 import TaskTplAdd from '@/pages/taskTpl/add';
@@ -100,13 +98,10 @@ import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
 import plusLoader from 'plus:/utils/loader';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
-import Designer from '@/pages/bigScreen/Designer';
-import Preview from '@/pages/bigScreen/Preview';
 import Topo from '@/pages/topoGraph/Designer';
 import Apiservice, {Add as ApiServiceAdd, Edit as ApiServiceEdit, Detail as ApiServiceDetail} from '@/pages/apiService';
-import Bigscreen from '@/pages/bigScreen';
-import View from '@/pages/bigScreen/View';
 import Board from '@/pages/dashboard/Detail/Board'
+import DataRoom from '@/pages/dataRoom';
 
 
 const Packages = dynamicPackages();
@@ -204,8 +199,6 @@ export default function Content() {
 
         <Route exact path='/assetmgt' component={AssetMgt} />
         <Route exact path='/assetmgt/add/:orgid' component={AddInfoAsset} />
-        <Route exact path='/devicemgt' component={DeviceMgt} />
-        <Route exact path='/devicemgt/add/:type' component={AddInfoAssets} /> 
 
         <Route exact path='/assets' component={Assets} />
         <Route exact path='/assets/add/:bgid' component={AddAsset} />
@@ -252,13 +245,8 @@ export default function Content() {
         <Route exact path='/organizations' component={Organization} />
         <Route exact path='/target/version' component={TargetVersion} />
 
-        <Route exact path='/bigscreen/designer' component={Designer} />
-        <Route exact path='/bigscreen/designer/:id' component={Designer} />
-        <Route exact path='/bigscreen/preview' component={Preview} />
         <Route exact path='/bigscreen/topo' component={Topo} />
-        <Route exact path='/bigscreen/view/:id' component={View} />
-
-        <Route exact path='/bigscreen' component={Bigscreen} />
+        <Route exact path='/bigscreen' component={DataRoom} />
 
         <Route exact path='/bigScreen/api-service' component={Apiservice}/>
         <Route exact path='/bigScreen/api-service/add' component={ApiServiceAdd}/>

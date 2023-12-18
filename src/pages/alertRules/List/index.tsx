@@ -243,7 +243,7 @@ export default function List(props: ListProps) {
     columns: useMemo(() => selectColumns, []),
     columnsState: {
       persistenceType: 'localStorage',
-      persistenceKey: `dashboard-table-resizable-xh-asset-management`,
+      persistenceKey: `dashboard-table-resizable-xh-rule-management`,
     },
   });
 

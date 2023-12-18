@@ -25,7 +25,7 @@ export const defaultPorts = {
   ],
 };
 
-const defaultConfigureValue = {
+const shapeDefaultConfigureValue = {
   shape: 'Rect',
   width: 40,
   height: 40,
@@ -37,6 +37,22 @@ const defaultConfigureValue = {
       fill: 'rgba(0,186,136,0)',
       stroke: 'rgba(0,186,136,1)',
       'stroke-width': 2,
+    },
+  },
+};
+
+const iconDefaultConfigureValue = {
+  shape: 'Rect',
+  width: 40,
+  height: 40,
+  ports: {
+    ...defaultGroup,
+  },
+  attrs: {
+    body: {
+      fill: '#6796f5',
+      stroke: '#6796f5',
+      'stroke-width': 0,
     },
   },
 };
@@ -97,18 +113,27 @@ export const widgetType = [
       },
     ],
   },
+  {
+    name: '文字',
+    list: [
+      {
+        name: '普通文字',
+        url: '',
+        code: 'Text',
+      },
+    ],
+  },
 ];
 
 export const widgetConfigure = {
   Switch: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'Switch',
       data: {
         label: '交换机',
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -116,13 +141,13 @@ export const widgetConfigure = {
   },
   Firewall: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'Firewall',
       data: {
         label: '防火墙',
+        metric: [{ label: 'cpu使用率' }],
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -130,13 +155,12 @@ export const widgetConfigure = {
   },
   Middleware: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'Middleware',
       data: {
         label: '中间件',
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -144,13 +168,12 @@ export const widgetConfigure = {
   },
   Database: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'Database',
       data: {
         label: '数据库',
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -158,13 +181,12 @@ export const widgetConfigure = {
   },
   LoadBalance: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'LoadBalance',
       data: {
         label: '负载均衡',
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -172,13 +194,12 @@ export const widgetConfigure = {
   },
   Server: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...iconDefaultConfigureValue,
       shape: 'Server',
       data: {
         label: '服务器',
       },
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -186,12 +207,11 @@ export const widgetConfigure = {
   },
   rect: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...shapeDefaultConfigureValue,
       shape: 'rect',
       width: 100,
       height: 100,
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -199,12 +219,11 @@ export const widgetConfigure = {
   },
   circle: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...shapeDefaultConfigureValue,
       shape: 'circle',
       width: 100,
       height: 100,
     },
-    dataConfigureValue: data.configureValue,
     configuration: {
       data: data.configure,
       attr: attr.configure,
@@ -212,12 +231,27 @@ export const widgetConfigure = {
   },
   ellipse: {
     configureValue: {
-      ...defaultConfigureValue,
+      ...shapeDefaultConfigureValue,
       shape: 'ellipse',
       width: 100,
       height: 60,
     },
-    dataConfigureValue: data.configureValue,
+    configuration: {
+      data: data.configure,
+      attr: attr.configure,
+    },
+  },
+  Text: {
+    configureValue: {
+      ...iconDefaultConfigureValue,
+      shape: 'Text',
+      data: {
+        label: '文字',
+      },
+      attrs: {
+        text: { 'font-size': 16 },
+      },
+    },
     configuration: {
       data: data.configure,
       attr: attr.configure,

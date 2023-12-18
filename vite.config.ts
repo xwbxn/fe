@@ -18,6 +18,7 @@ import { defineConfig } from 'vite';
 import reactRefresh from '@vitejs/plugin-react-refresh';
 import { md } from './plugins/md';
 import plusResolve from './plugins/plusResolve';
+import { visualizer } from 'rollup-plugin-visualizer';
 const reactSvgPlugin = require('./plugins/svg');
 
 const chunk2 = [
@@ -35,6 +36,15 @@ const chunk2 = [
 const chunk3 = ['react-ace'];
 const chunk1 = ['react', 'react-router-dom', 'react-dom', 'moment', '@ant-design/icons', 'umi-request', 'lodash', 'react-grid-layout', 'd3', 'ahooks', 'color'];
 const antdChunk = ['antd'];
+const x6Chunk = [
+  '@antv/x6',
+  '@antv/x6-plugin-dnd',
+  '@antv/x6-plugin-history',
+  '@antv/x6-plugin-selection',
+  '@antv/x6-plugin-snapline',
+  '@antv/x6-plugin-clipboard',
+  '@antv/x6-plugin-transform',
+];
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -77,15 +87,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: [
-      '@antv/x6',
-      '@antv/x6-plugin-dnd',
-      '@antv/x6-plugin-history',
-      '@antv/x6-plugin-selection',
-      '@antv/x6-plugin-snapline',
-      '@antv/x6-plugin-clipboard',
-      '@antv/x6-plugin-transform',
-    ],
+    exclude: x6Chunk,
   },
   build: {
     target: 'chrome58',
@@ -93,12 +95,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 650,
     sourcemap: true,
     rollupOptions: {
+      plugins: [visualizer()],
       output: {
         manualChunks: {
           vendor: chunk1,
           vendor1: chunk2,
           vendor2: chunk3,
           antdChunk: antdChunk,
+          x6Chunk: x6Chunk,
         },
       },
     },

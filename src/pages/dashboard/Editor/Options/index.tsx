@@ -26,11 +26,10 @@ import Text from './Text';
 import Gauge from './Gauge';
 import Iframe from './Iframe';
 import Column from './Column';
-import PieN from './PieN';
 import Line from './Line';
-import BarGaugeN from './BarGaugeN';
 import TimeseriesN from './TimeseriesN';
 import GaugeN from './GaugeN';
+import Topo from './Topo';
 
 export default function index({ type, targets, chartForm, variableConfigWithOptions }) {
   const OptionsCptMap = {
@@ -44,11 +43,10 @@ export default function index({ type, targets, chartForm, variableConfigWithOpti
     iframe: <Iframe variableConfigWithOptions={variableConfigWithOptions} />,
     gauge: <Gauge />,
     column: <Column />,
-    pien: <PieN />,
     line: <Line></Line>,
-    barGaugeN: <BarGaugeN></BarGaugeN>,
     timeseriesN: <TimeseriesN></TimeseriesN>,
-    gaugeN: <GaugeN></GaugeN>
+    gaugeN: <GaugeN></GaugeN>,
+    topo: <Topo></Topo>
   };
   return OptionsCptMap[type] || `无效的图表类型 ${type}`;
 }

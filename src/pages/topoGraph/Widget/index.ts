@@ -1,9 +1,11 @@
 import './style.less';
 import { createImageNode } from './ImageNode';
+import { createTextNode } from './TextNode';
 
-createImageNode('/image/topo/switch.svg', '交换机', 'Switch');
-createImageNode('/image/topo/firewall.svg', '防火墙', 'Firewall');
-createImageNode('/image/topo/middleware.svg', '中间件', 'Middleware');
-createImageNode('/image/topo/database.svg', '数据库', 'Database');
-createImageNode('/image/topo/lb.svg', '负载均衡', 'LoadBalance');
-createImageNode('/image/topo/server.svg', '服务器', 'Server');
+createImageNode('#icon-hexinjiaohuanji', '交换机', 'Switch');
+createImageNode('#icon-fanghuoqiang', '防火墙', 'Firewall');
+createImageNode('#icon-api', '中间件', 'Middleware');
+createImageNode('#icon-shujuku', '数据库', 'Database');
+createImageNode('#icon-fuzaijunheng', '负载均衡', 'LoadBalance');
+createImageNode('#icon-fuwuqi1', '服务器', 'Server');
+createTextNode('文字', 'Text');

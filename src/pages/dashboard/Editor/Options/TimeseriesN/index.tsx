@@ -16,7 +16,7 @@
  */
 import React from 'react';
 import Tooltip from '../../Fields/Tooltip';
-import Legend from '../../Fields/Legend';
+import Legend from './Legend';
 import GraphStyles from './GraphStyles';
 import StandardOptions from '../../Fields/StandardOptions';
 import Thresholds from '../../Fields/Thresholds';
@@ -25,7 +25,7 @@ export default function TimeseriesN() {
   return (
     <>
       <Tooltip />
-      <Legend noTable />
+      <Legend />
       <GraphStyles />
       <StandardOptions />
       <Thresholds />

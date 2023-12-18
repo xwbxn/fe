@@ -40,6 +40,7 @@ const Header = ({ selection, onCopy, onDelete, onUndo, onRedo, onSave }) => {
         </div>
         <div
           className='topo-designer-header-button disabled'
+          style={{ display: 'none' }}
           onClick={() => {
             onSave && onSave();
           }}

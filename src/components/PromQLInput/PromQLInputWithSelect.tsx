@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import PromQueryBuilderModal from '@/components/PromQueryBuilder/PromQueryBuilderModal';
 import PromQLInput, { CMExpressionInputProps } from './index';
 import './locale';
-import { getMonitoringOptions } from '@/services/bigscreen';
+import { getMonitoringOptions } from '@/services/assets';
 
 export function PromQLInputWithSelect(props: CMExpressionInputProps & { datasourceValue: number }) {
   const { t } = useTranslation('promQLInput');

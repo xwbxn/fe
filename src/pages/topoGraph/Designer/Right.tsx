@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './index.less';
 import { Tabs, Form, Input, InputNumber, FormInstance, Row, Col, Select, Collapse, Switch, Slider, Button } from 'antd';
-import { ChromePicker } from 'react-color';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import ReactCodeMirror from '@uiw/react-codemirror';
@@ -9,6 +8,8 @@ import { json } from '@codemirror/lang-json';
 import { Compartment } from '@codemirror/state';
 import { Cell } from '@antv/x6';
 import { widgetConfigure } from '../configuration';
+import ColorPicker from './ColorPicker';
+import AssetSelect from './AssetSelect';
 
 let language = new Compartment();
 // 微件配置文件
@@ -42,8 +43,8 @@ const Right = ({ selection, setRightFlag, rightFlag, onUpdateData }: IRightProps
     const allConfigure: any[] = [];
     selection?.forEach((v) => {
       Object.assign(combinedData, v.data);
-      Object.assign(combinedAttr, v.attrs?.body);
-      allConfigure.push(widgetConfigure[v.shape].configuration || []);
+      Object.assign(combinedAttr, v.attrs);
+      allConfigure.push(widgetConfigure[v.shape]?.configuration || []);
     });
     dataForm.setFieldsValue(combinedData);
     attrForm.setFieldsValue(combinedAttr);
@@ -78,17 +79,15 @@ const Right = ({ selection, setRightFlag, rightFlag, onUpdateData }: IRightProps
   };
 
   const modifyData = (val: any) => {
-    console.log('🚀 ~ file: Right.tsx:82 ~ modifyData ~ val:', val);
     if (onUpdateData) {
       onUpdateData(val);
     }
   };
 
   const modifyAttr = (val: any) => {
-    console.log('🚀 ~ file: Right.tsx:88 ~ modifyAttr ~ val:', val);
     selection?.forEach((v) => {
-      v.setAttrs({
-        body: val,
+      Object.keys(val).forEach((k) => {
+        v.attr(k.replace(',', '/'), val[k]);
       });
     });
   };
@@ -149,6 +148,11 @@ const Right = ({ selection, setRightFlag, rightFlag, onUpdateData }: IRightProps
             />
           </Form.Item>
         )}
+        {item.componentName === 'AssetSelect' && (
+          <Form.Item label={item.label} name={item.name} tooltip={item.tooltip} rules={[{ required: item.require }]}>
+            <AssetSelect onAfterChange={(value) => isUpdate && onChangeHandler(callback, item.name, value, field)} />
+          </Form.Item>
+        )}
         {item.componentName === 'Select' && (
           <Form.Item label={item.label} name={item.name} tooltip={item.tooltip} rules={[{ required: item.require }]}>
             <Select allowClear disabled={item.disabled} onChange={(value: string) => isUpdate && onChangeHandler(callback, item.name, value, field)} placeholder={item.placeholder}>
@@ -174,29 +178,12 @@ const Right = ({ selection, setRightFlag, rightFlag, onUpdateData }: IRightProps
                 </Form.Item>
               </Col>
               <Col span={11} offset={1}>
-                <Form.Item shouldUpdate noStyle>
-                  {() => (
-                    <div
-                      className='color-wrapper'
-                      style={{
-                        background: form.getFieldValue(item.name),
-                        width: '100%',
-                      }}
-                    >
-                      获取颜色
-                      <div className='color'>
-                        <ChromePicker
-                          color={form.getFieldValue(item.name)}
-                          onChangeComplete={(e) => {
-                            form.setFieldsValue({
-                              [item.name]: `rgba(${e.rgb.r},${e.rgb.g},${e.rgb.b},${e.rgb.a})`,
-                            });
-                            onChangeHandler(callback, item.name, `rgba(${e.rgb.r},${e.rgb.g},${e.rgb.b},${e.rgb.a})`, field);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                <Form.Item shouldUpdate noStyle name={item.name}>
+                  <ColorPicker
+                    onChangeHandler={(val) => {
+                      onChangeHandler(callback, item.name, val, field);
+                    }}
+                  ></ColorPicker>
                 </Form.Item>
               </Col>
             </Row>
@@ -292,12 +279,7 @@ const Right = ({ selection, setRightFlag, rightFlag, onUpdateData }: IRightProps
   };
 
   return (
-    <div
-      className='topo-designer-right'
-      style={{
-        right: rightFlag ? 0 : -400,
-      }}
-    >
+    <div className='topo-designer-right'>
       <div onClick={() => setRightFlag(!rightFlag)} className='operation'>
         {rightFlag ? <LeftOutlined /> : <RightOutlined />}
       </div>

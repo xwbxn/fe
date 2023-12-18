@@ -32,7 +32,6 @@ export default function index() {
         <Col span={9}>
           <Form.Item label={t('panel.options.legend.displayMode.label')} name={[...namePrefix, 'displayMode']}>
             <Radio.Group buttonStyle='solid'>
-              <Radio.Button value='table'>{t('panel.options.legend.displayMode.table')}</Radio.Button>
               <Radio.Button value='list'>{t('panel.options.legend.displayMode.list')}</Radio.Button>
               <Radio.Button value='hidden'>{t('panel.options.legend.displayMode.hidden')}</Radio.Button>
             </Radio.Group>

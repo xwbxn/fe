@@ -1,10 +1,10 @@
 import React from 'react';
 
-const BigScreen = () => {
+const TopoGraph = () => {
   return (
     <>
     </>
   );
 };
 
-export default BigScreen;
+export default TopoGraph;

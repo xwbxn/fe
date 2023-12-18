@@ -20,7 +20,6 @@ import { getXhMonitor, getXhMonitorByAssetId } from '@/services/manage';
 import { getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
 import { getAssetsIdents, getAssetsStypes } from '@/services/assets';
-import { time } from 'echarts';
 import { useToggle } from 'ahooks';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {

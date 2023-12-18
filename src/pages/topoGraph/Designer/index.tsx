@@ -17,8 +17,9 @@ import Right from './Right';
 import Header from './Header';
 import '../Widget';
 import { defaultPorts, widgetConfigure } from '../configuration';
-import { IWidget } from '@/pages/bigScreen/type';
+import { IWidget } from '../type';
 import { useHistory } from 'react-router-dom';
+import { Button, Menu } from 'antd';
 
 // 注册连接点位置
 Graph.registerPortLayout(
@@ -67,10 +68,27 @@ function createGraph(graphDom: React.MutableRefObject<null>) {
   return graph;
 }
 
-const Design = () => {
-  const graphDom = useRef(null);
+interface IProps {
+  value?: any;
+  onChange?: (value: any) => void;
+}
 
-  const history = useHistory();
+const Design = ({ value = {}, onChange }: IProps) => {
+  const graphDom = useRef(null);
+  const [data, setData] = useState(value);
+
+  const [contextMenu, setContextMenu] = useState<{ left?: number; top?: number; show: boolean }>({
+    left: 0,
+    top: 0,
+    show: false,
+  });
+
+  const [metricBox, setMetricBox] = useState<{ left?: number; top?: number; show: boolean; metric?: any[] }>({
+    left: 0,
+    top: 0,
+    show: false,
+    metric: [],
+  });
 
   // 是否显示左边
   const [leftFlag, setLeftFlag] = useState(true);
@@ -78,11 +96,6 @@ const Design = () => {
 
   const graph = useRef<Graph>();
   const dnd = useRef<Dnd>();
-
-  // 大屏配置数据
-  const [screen, setScreen] = useLocalStorageState('CURRENT_SCREEN');
-  // 当前选择的组件
-  const [currentWidget, setCurrentWidget] = useLocalStorageState<IWidget>('CURRENT_WIDGET');
 
   // 选中的节点
   const [selection, setSelection] = useState<Cell[]>([]);
@@ -137,6 +150,14 @@ const Design = () => {
         if (cell.isNode()) {
           cell.addTools(['button-remove']);
           cell.addPorts(defaultPorts.items);
+          if (!metricBox.show) {
+            setMetricBox({
+              left: cell.getBBox().left + 200,
+              top: cell.getBBox().top + 45 - 80,
+              show: true,
+              metric: cell.data.metric,
+            });
+          }
         }
       })
       .on('cell:mouseleave', ({ cell }) => {
@@ -144,6 +165,9 @@ const Design = () => {
         cell.removeTools();
         if (cell.isNode()) {
           cell.removePorts();
+          setMetricBox({
+            show: false,
+          });
         }
       })
       .on('edge:connected', ({ edge }) => {
@@ -171,6 +195,20 @@ const Design = () => {
           }
         });
         setSelection(selected);
+      })
+      .on('cell:changed', () => {
+        handleSave();
+      })
+      .on('cell:contextmenu', ({ x, y, cell }) => {
+        setContextMenu({
+          left: x + 200,
+          top: y + 45,
+          show: true,
+        });
+        setSelection([cell]);
+      })
+      .on('blank:mousedown', () => {
+        setContextMenu({ show: false });
       });
 
     return () => {
@@ -181,9 +219,9 @@ const Design = () => {
 
   useEffect(() => {
     if (graph.current) {
-      graph.current.fromJSON(currentWidget?.configureValue.graph);
+      graph.current.fromJSON(data);
     }
-  }, [currentWidget]);
+  }, [data]);
 
   // 添加节点
   const handleAdd = useCallback((item: any, e: any) => {
@@ -203,34 +241,47 @@ const Design = () => {
   };
 
   const handleCopy = useCallback(() => {}, []);
-  const handleDelete = useCallback(() => {}, []);
+  const handleDelete = useCallback(() => {
+    graph.current?.removeCells(selection);
+    setContextMenu({ show: false });
+  }, [selection]);
   const handleUndo = useCallback(() => {}, []);
   const handleRedo = useCallback(() => {}, []);
   const handleSave = useCallback(() => {
-    if (currentWidget) {
-      const index = screen.widgets.findIndex((v) => v.id === currentWidget?.id);
-      currentWidget.configureValue.graph = graph.current?.toJSON();
-      screen.widgets[index] = currentWidget;
-      setCurrentWidget(currentWidget);
-      setScreen(screen);
-    }
-    history.goBack();
+    onChange && onChange(graph.current?.toJSON());
   }, []);
 
   return (
     <>
-      <div
-        className='topo-designer'
-        style={{
-          paddingLeft: leftFlag ? 200 : 0,
-        }}
-      >
-        <Left leftFlag={leftFlag} setLeftFlag={setLeftFlag} onDnd={handleAdd}></Left>
-        <Header selection={selection} onCopy={handleCopy} onDelete={handleDelete} onRedo={handleRedo} onUndo={handleUndo} onSave={handleSave}></Header>
-        <div className='topo-designer-paint'>
-          <div ref={graphDom}></div>
+      <div className='topo-designer'>
+        <div className='topo-left'>
+          <Left leftFlag={leftFlag} setLeftFlag={setLeftFlag} onDnd={handleAdd}></Left>
         </div>
-        <Right selection={selection} rightFlag={rightFlag} setRightFlag={setRightFlag} onUpdateData={handleUpdate}></Right>
+        <div className='topo-center'>
+          <Header selection={selection} onCopy={handleCopy} onDelete={handleDelete} onRedo={handleRedo} onUndo={handleUndo} onSave={handleSave}></Header>
+          <div className='topo-designer-paint'>
+            <div ref={graphDom}></div>
+          </div>
+        </div>
+        <div className='topo-right'>
+          <Right selection={selection} rightFlag={rightFlag} setRightFlag={setRightFlag} onUpdateData={handleUpdate}></Right>
+        </div>
+      </div>
+      <div className='topo-designer-context-menu' style={{ left: contextMenu.left, top: contextMenu.top, display: contextMenu.show ? '' : 'none' }}>
+        <Button size='small' onClick={() => handleDelete()}>
+          删除
+        </Button>
+      </div>
+      <div className='topo-designer-metric' style={{ left: metricBox.left, top: metricBox.top, display: metricBox.show ? '' : 'none' }}>
+        <ul>
+          {metricBox.metric?.map((m) => {
+            return (
+              <li>
+                {m.label}: {m.value}
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </>
   );

@@ -70,6 +70,7 @@ html {
 .App {
   display: block;
   color: #333752;
+  overflow: hidden;
   background: #f9f9f9;
   font-family: @font-family;
   // min-width: 1180px;
@@ -79,7 +80,6 @@ html {
   .content {
     flex: 1;
     height: 100%;
-    overflow: auto;
   }
   
   .dot-block {
@@ -480,4 +480,9 @@ input::placeholder {
             cursor: pointer;
        }
    }
+}
+
+.icon {
+  fill: currentColor;
+  overflow: hidden;
 }
