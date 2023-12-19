@@ -117,6 +117,8 @@ export default function index() {
                       onClick={() => {
                         confirm({
                           title: t('common:confirm.delete'),
+                          okText: '确认',
+                          cancelText: '取消',
                           onOk() {
                             if (activeRole?.id) {
                               deleteRoles(activeRole?.id).then(() => {

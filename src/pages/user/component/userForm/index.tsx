@@ -41,6 +41,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
     form: form,
   }));
   useEffect(() => {
+    console.log("AAAAAAAAAAA",userId);
     if (userId) {
       getUserInfoDetail(userId);
     } else {
@@ -81,7 +82,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
           contacts.push(val);
         });
       }
-
+      console.log("初始化数据擦好看",data)
       setInitialValues(
         Object.assign({}, data, {
           contacts,
@@ -91,7 +92,17 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
     });
   };
   const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span:10 } };
-
+  const validatePassword = (_, value) => {
+    if (value && value.length >= 8) {
+      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&*]/].reduce((acc, regex) => {
+        return acc + (regex.test(value) ? 1 : 0);
+      }, 0);
+      if (count >= 3) {
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject('密码必须大于8位，并且包含大写字母、小写字母、数字和符号中的至少3种');
+  };
   return !loading ? (
     <Form {...formItemLayout} layout={'horizontal'} form={form} initialValues={initialValues} preserve={false}>
       <Row>
@@ -126,6 +137,9 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
             rules={[
               {
                 required: true,
+              },
+              {
+                validator: validatePassword,
               },
             ]}
             hasFeedback
@@ -196,7 +210,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       </Form.Item>
       </Col>
       <Col span={12} key={"item-" + 8}>
-        <Form.Item label={'所属用户组'} name='user_group_id'>
+        <Form.Item label={'所属用户组'} name='group_name'>
          <Select mode='multiple' options={treeData}>
 
           </Select>
