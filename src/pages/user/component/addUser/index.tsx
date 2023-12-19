@@ -26,9 +26,9 @@ import './index.less';
 
 const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
   const { t } = useTranslation('user');
-  const { teamId, onSelect } = props;
+  const { teamId, onSelect ,userIds} = props;
   const [teamInfo, setTeamInfo] = useState<Team>();
-  const [selectedUser, setSelectedUser] = useState<React.Key[]>([]);
+  const [selectedUser, setSelectedUser] = useState<React.Key[]>(userIds?userIds:[]);
   const [selectedUserRows, setSelectedUserRows] = useState<User[]>([]);
   const [query, setQuery] = useState('');
   const userColumn: ColumnsType<User> = [
@@ -148,7 +148,7 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
           ...tableProps.pagination,
           size: 'small',
           pageSizeOptions: ['5', '10', '20', '50', '100'],
-          showTotal: (total) => `Total ${total} items`,
+          showTotal: (total) => `总共 ${total} 条`,
           showSizeChanger: true,
         }}
       />

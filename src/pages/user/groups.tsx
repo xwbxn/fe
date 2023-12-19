@@ -37,12 +37,15 @@ const Resource: React.FC = () => {
   const [teamId, setTeamId] = useState<string>('');
   const [memberId, setMemberId] = useState<string>('');
   const [memberList, setMemberList] = useState<User[]>([]);
+  const [existUsers, setExistUsers] = useState<any[]>([]);
+  
   const [allMemberList, setAllMemberList] = useState<User[]>([]);
   const [teamInfo, setTeamInfo] = useState<Team>();
   const [teamList, setTeamList] = useState<Team[]>([]);
   const [memberLoading, setMemberLoading] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchMemberValue, setSearchMemberValue] = useState<string>('');
+  const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const userColumn: ColumnsType<User> = [
     {
       title: t('account:profile.username'),
@@ -73,32 +76,33 @@ const Resource: React.FC = () => {
       title: t('common:table.operations'),
       width: '100px',
       render: (text: string, record) => (
-        <DeleteOutlined 
-                    style={{
-                      color: '#4095E5',
-                      marginLeft: '8px',
-                      fontSize: '16px',
-                    }}
-                    onClick={() => {
-                      let params = {
-                        ids: [record.id],
-                      };
-                      confirm({
-                        title: t('common:confirm.delete'),
-                        onOk: () => {
-                          deleteMember(teamId, params).then((_) => {
-                            message.success(t('common:success.delete'));
-                            handleClose('updateMember');
-                          });
-                        },
-                        onCancel: () => {},
-                      });
-                    }}
-                  >
-                    </DeleteOutlined> 
+        <DeleteOutlined
+          style={{
+            color: '#4095E5',
+            marginLeft: '8px',
+            fontSize: '16px',
+          }}
+          onClick={() => {
+            let params = {
+              ids: [record.id],
+            };
+            confirm({
+              title: t('common:confirm.delete'),
+              onOk: () => {
+                deleteMember(teamId, params).then((_) => {
+                  message.success(t('common:success.delete'));
+                  handleClose('updateMember');
+                });
+              },
+              onCancel: () => { },
+            });
+          }}
+        >
+        </DeleteOutlined>
       ),
     },
   ];
+
 
   useEffect(() => {
     getList(true);
@@ -158,6 +162,7 @@ const Resource: React.FC = () => {
   };
 
   const handleClick = (type: ActionType, id?: string, memberId?: string) => {
+    console.log(type,id )
     if (id) {
       setTeamId(id);
     } else {
@@ -190,6 +195,13 @@ const Resource: React.FC = () => {
     }
   };
 
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedKeys: React.Key[], selectedRows: User[]) => {
+      setSelectedRowKeys(selectedKeys as string[]);
+    },
+  };
+
   return (
     <PageLayout title={t('team.title')} icon={<UserOutlined />}>
       <div className='user-manage-content'>
@@ -197,17 +209,17 @@ const Resource: React.FC = () => {
           <div className='left-tree-area'>
             <div className='sub-title'>
               {t('team.list')}
-              <PlusSquareOutlined  style={{
-                  height: '30px',
-                  lineHeight:'35px',
-                  color: '#4095E5',
-                }}
+              <PlusSquareOutlined style={{
+                height: '30px',
+                lineHeight: '35px',
+                color: '#4095E5',
+              }}
                 type='link'
                 onClick={() => {
                   handleClick(ActionType.CreateTeam);
                 }}
-                >
-                </PlusSquareOutlined>
+              >
+              </PlusSquareOutlined>
             </div>
             <div style={{ display: 'flex', margin: '5px 0px 12px' }}>
               <Input
@@ -276,7 +288,7 @@ const Resource: React.FC = () => {
                             handleClose(true);
                           });
                         },
-                        onCancel: () => {},
+                        onCancel: () => { },
                       });
                     }}
                   />
@@ -314,19 +326,33 @@ const Resource: React.FC = () => {
                 <Button
                   type='primary'
                   onClick={() => {
+                    let userIds = Array.from(new Set(memberList.map((obj) => obj.id)));
+                    setExistUsers(userIds);
                     handleClick(ActionType.AddUser, teamId);
                   }}
                 >
-                  {t('team.add_member')}
+                  {'添加成员'}
                 </Button>
               </Row>
 
-              <Table size='small' rowKey='id' columns={teamMemberColumns} dataSource={memberList} loading={memberLoading} />
+              <Table size='small'
+                rowKey='id'
+                columns={teamMemberColumns}
+                dataSource={memberList} 
+                pagination={{
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total) => `总共 ${total} 条`,
+                  pageSizeOptions: [5,10, 20, 50, 100],
+                }}
+                loading={memberLoading} 
+                rowSelection={rowSelection}
+                />
             </div>
           ) : (
             <div className='blank-busi-holder'>
               <p style={{ textAlign: 'left', fontWeight: 'bold' }}>
-                <InfoCircleOutlined style={{ color: '#1473ff' }} /> Tips
+                <InfoCircleOutlined style={{ color: '#1473ff' }} /> 提示
               </p>
               <p>
                 {t('team.empty')}&nbsp;
@@ -345,6 +371,7 @@ const Resource: React.FC = () => {
             setSearchValue(val);
             handleSearch('team', val);
           }}
+          existUserIds ={existUsers}
           userId={undefined}
           teamId={teamId}
           memberId={memberId}

@@ -15,38 +15,39 @@ export const SetConfigForms = {
       items: [
         {
           type: "input",
-          name: "name",
-          label: "机构名称",
-          required:true,
+          name: "设备",
+          label: "设备",
+          // required:true,
         },{
           type: "input",
-          name: "city",
-          label: "城市",
-          required:true,
+          name: "设备序列号",
+          label: "设备序列号",
+          // required:true,
           
         }, {
-          type: "input",
-          name: "address",
-          label: "地址",
-          required:false,
-        },{
-          type: "input",
-          name: "manger",
-          label: "机构负责人",
-        },{
-          type: "input",
-          name: "phone",
-          label: "联系电话",
-        },{
           type: "treeselect",
-          name: "parent_id",
-          label: "上级组织机构",
-          source:'initial',          
+          name: "设备类型",
+          label: "设备类型",
+          // required:false,
+         
         },{
-          type: "textarea",
-          name: "description",
-          label: "描述",
-          col:2
+          type: "input", 
+          name: "采集器信息",
+          label: "采集器信息",
+        },{
+          type: "input",
+          name: "首次创建监测",
+          label: "首次创建监测",
+        },{
+          type: "input",
+          name: "所在机房",
+          label: "所在机房",
+          // source:'initial',          
+        },{
+          type: "input",
+          name: "位置",
+          label: "位置",
+          // col:2
         }
       ]
     },

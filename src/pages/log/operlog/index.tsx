@@ -369,7 +369,7 @@ export default function () {
               ...tableProps.pagination,
               size: 'small',
               pageSizeOptions: ['5', '10', '20', '50', '100'],
-              showTotal: (total) => `Total ${total} items`,
+              showTotal: (total) => `总共 ${total} 条`,
               showSizeChanger: true,
             }}
             onHeaderRow={(columns, index) => {

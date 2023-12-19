@@ -15,38 +15,42 @@ export const SetConfigForms = {
       items: [
         {
           type: "input",
-          name: "name",
-          label: "机构名称",
-          required:true,
+          name: "序列号",
+          label: "序列号",
+          // required:true,
         },{
           type: "input",
-          name: "city",
-          label: "城市",
-          required:true,
+          name: "采集器信息",
+          label: "采集器信息",
+          // required:true,
           
         }, {
           type: "input",
-          name: "address",
-          label: "地址",
-          required:false,
+          name: "主版本号",
+          label: "主版本号",
+          // required:false,
         },{
           type: "input",
-          name: "manger",
-          label: "机构负责人",
+          name: "采集器版本号",
+          label: "采集器版本号",
         },{
           type: "input",
-          name: "phone",
-          label: "联系电话",
+          name: "有效模块",
+          label: "有效模块",
         },{
-          type: "treeselect",
-          name: "parent_id",
-          label: "上级组织机构",
-          source:'initial',          
+          type: "input",
+          name: "有效期",
+          label: "有效期",
+          // source:'initial',          
         },{
-          type: "textarea",
-          name: "description",
-          label: "描述",
-          col:2
+          type: "input",
+          name: "许可节点数",
+          label: "许可节点数",
+          // col:2
+        },{
+          type: "input",
+          name: "已用许可节点",
+          label: "已用许可节点",
         }
       ]
     },

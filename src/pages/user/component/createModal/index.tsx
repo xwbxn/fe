@@ -37,7 +37,7 @@ import { useTranslation } from 'react-i18next';
 
 const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
   const { t } = useTranslation('user');
-  const { visible, userType, onClose, action, userId, teamId, onSearch, width } = props;
+  const { visible,existUserIds, userType, onClose, action, userId, teamId, onSearch, width } = props;
   const [selectedUser, setSelectedUser] = useState<string[]>();
   const userRef = useRef(null as any);
   const teamRef = useRef(null as any);
@@ -214,7 +214,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
         </Button>,
         action === ActionType.CreateTeam && (
           <Button type='primary' onClick={() => onOk('search')}>
-            {t('ok_and_search')}
+            {/* {t('ok_and_search')} */}
           </Button>
         ),
       ]}
@@ -223,7 +223,7 @@ const CreateModal: React.FC<ModalProps> = (props: ModalProps) => {
       {isTeamForm && <TeamForm ref={teamRef} teamId={teamId} />}
       {isBusinessForm && <BusinessForm ref={teamRef} businessId={teamId} action={action} />}
       {isPasswordForm && <PasswordForm ref={passwordRef} userId={userId} />}
-      {isAddUser && <AddUser teamId={teamId} onSelect={(val) => setSelectedUser(val)}></AddUser>}
+      {isAddUser && <AddUser teamId={teamId} userIds={existUserIds}  onSelect={(val) => setSelectedUser(val)}></AddUser>}
     </Modal>
   );
 };

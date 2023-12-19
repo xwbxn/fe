@@ -1,4 +1,6 @@
 const zh_CN = {
+
+
     title: '资产管理',
     default_filter: '预置筛选',
     ungrouped_assets: '未归组资产',
@@ -14,7 +16,9 @@ const zh_CN = {
 
     basic: '基础信息',
     info: '配置信息',
-    search_placeholder: "按名称/地址/标签查找",
+    // search_placeholder: "按名称/地址/标签查找",
+    search_placeholder: '资产名称、资产类型、IP地址',
+
     tags: "标签",
     status: "监控配置",
 

@@ -36,7 +36,7 @@ export default function FieldWithEditor(props: IProps) {
       success: boolean;
       message: string;
     }>();
-  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(true);
 
   return (
     <div className='template-field'>

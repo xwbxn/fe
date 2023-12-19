@@ -355,13 +355,13 @@ const Resource: React.FC = () => {
                   >
                     {t('business.add_team')}
                   </Button>
-                  <Select defaultValue={"批量操作"}
+                  {/* <Select defaultValue={"批量操作"}
                   style={{ width: '125px',marginLeft:'3px'}}
                   onChange={handleChange}
                   options={[
                     { value: '0', label: '删除' },
                   ]}
-                  ></Select>
+                  ></Select> */}
                 </Col>
                                
               </Row>
