@@ -61,7 +61,7 @@ const getMenuList = (t) => {
       label: t('告警管理'),
       children: [
         {
-          key: '/alert-rules',
+          key: '/alert-rules?id=-1',
           icon: <IconFont type='icon-Menu_Infrastructure' />,
           label: t('告警规则'),
         },
@@ -315,6 +315,8 @@ export default function () {//{ selectMenu?:any }
         setMenus(menuList);
       }
     }
+    i18n.changeLanguage("zh_CN");
+    localStorage.setItem('language', "zh_CN");
   }, [profile?.roles, i18n.language]);
 
   const hideSideMenu = () => {
@@ -361,8 +363,8 @@ export default function () {//{ selectMenu?:any }
         onClick={() => {
           Logout().then(() => {
             sessionStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('curBusiId');
+            sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('curBusiId');
             history.push('/login');
           });
         }}
@@ -387,6 +389,16 @@ export default function () {//{ selectMenu?:any }
         >
           {i18n.language == 'zh_CN' ? 'EN' : '中'}
         </span> */}
+       <span
+          className='language'
+          onClick={() => {
+            let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
+            i18n.changeLanguage(language);
+            localStorage.setItem('language', language);
+          }}
+        >
+          <Icon type="bell" />
+        </span>
         <Dropdown overlay={topRightMenu} trigger={['click']} className='my_portrait' >
           <span className='avator'>
             <img src={profile.portrait?profile.portrait:'/image/avatar1.png'} alt='' />

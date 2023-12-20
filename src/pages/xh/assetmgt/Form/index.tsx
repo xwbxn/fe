@@ -172,6 +172,8 @@ export default function () {
   const submitForm = async (values) => {
     console.log('提交数据');
     values.params = { ...values };
+
+    debugger;
     if (tabIndex == 'base_set') {
       if (editType === 'edit' && id != null) {
         values.id = parseInt('' + id);

@@ -68,7 +68,10 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
   }
 
   useEffect(() => {
-    selectAsset(null)
+    let assetId = window.localStorage.getItem('select_monitor_asset_id');
+    if (assetId != null && assetId.length > 0) {
+       selectAsset(null)
+    }
   }, []);
 
 

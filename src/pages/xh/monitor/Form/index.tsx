@@ -20,6 +20,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
   const [assetList, setAssetList] = useState<any[]>([]);
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  const [assetIpOptions, setAssetIpOptions] = useState<any[]>([]);
   const [sqlCN, setSqlCN] = useState<string>("")
   const [identList, setIdentList] = useState([]);
   const [params, setParams] = useState<{ label: string; name: string; editable?: boolean; required?: boolean; password?: boolean; items?: [] }[]>([]);
@@ -89,15 +90,24 @@ const [operateScript, setOperateScript] = useState<any>({
       setAssetTypes(types);
       getAssetsByCondition(param).then((assets) => {
         let options = new Array();
-        const items = assets.dat.list.map((v) => {
+        assets.dat.list.map((v) => {
           options.push({
             value: v.id,
             label: v.name + '[' + v.type + ']',
           });
         });
         setAssetOptions(options);
+        let ipOptions = new Array();
+        assets.dat.list.map((v) => {
+          ipOptions.push({
+            value: v.id,
+            label: v.ip,
+          });
+        });
+        setAssetIpOptions(ipOptions);
+        
         setAssetList(assets.dat.list);
-        if (id != null && id.length > 0 && id != 'null') {
+        if (id != null && id.length > 0 && id != 'null' && action!="add") {
           getXhMonitor(id).then(({ dat }) => {
             if (dat != null) {
               setMonitor(dat);
@@ -114,6 +124,9 @@ const [operateScript, setOperateScript] = useState<any>({
               }, 1500);
             }
           });
+        }
+        if(id != null && id.length > 0 && id != 'null' && action=="add" ){
+            form.setFieldsValue({asset_id:parseInt(""+id)});
         }
       });
 
@@ -203,6 +216,10 @@ const [operateScript, setOperateScript] = useState<any>({
 
   const submitForm = async (values) => {
     console.log('submitForm', values);
+    if(values.monitoring_sql==null || values.monitoring_sql.length<1){
+      message.error("监控脚本不能为空，请编辑此项");
+      return 
+    } 
     if(values.alert_rules!=null && values.alert_rules.length>0){
       values.alert_rules.forEach(rule => {
         let relation = rule.relation==">"?"大于":(rule.relation=="=="?"等于":"小于")
@@ -217,7 +234,7 @@ const [operateScript, setOperateScript] = useState<any>({
         delete values[group.name];
       }
     }
-    if (id != null && id.length > 0 && id != 'null') {
+    if (id != null && id.length > 0 && id != 'null' &&  action!="add") {
       values.id = parseInt('' + id);
       values['config'] = JSON.stringify(config);
       updateXhMonitor(values).then((res) => {
@@ -264,29 +281,24 @@ const [operateScript, setOperateScript] = useState<any>({
           <Card {...panelBaseProps} title={t('basic')}>
             <Row gutter={10}>
               <Col span={8}>
-                <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
-                  <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetOptions} placeholder='请选择资产' disabled={action === 'edit'} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
                 <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
                   <Input placeholder='请输入资产名称' />
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
-                  <Select
-                    onChange={(v) => {
-                      setDatasource(v);
-                    }}
-                    options={[
-                      {
-                        value: 1,
-                        label: '普罗米修斯',
-                      },
-                    ]}
-                  ></Select>
+                <Form.Item label='资产名称' name='asset_id' rules={[{ required: true }]}>
+                  <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetOptions} placeholder='请选择资产' disabled={action === 'edit'} />
                 </Form.Item>
+              </Col>
+             
+              <Col span={8}>
+              <Form.Item name='datasource_id'  hidden>
+              <Input defaultValue={1}></Input>
+              </Form.Item>
+
+              <Form.Item label='IP地址' name='asset_id' rules={[{ required: true }]}>
+                  <Select style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"} options={assetIpOptions} placeholder='请选择资产' disabled={action === 'edit'} />
+                </Form.Item>              
               </Col>
             </Row>
             <Row gutter={10}>
@@ -327,12 +339,12 @@ const [operateScript, setOperateScript] = useState<any>({
 
               </Col>
             </Row>
-            <Form.Item hidden label='状态' name='status'>
+            {/* <Form.Item hidden label='状态' name='status'>
               <InputNumber/>
             </Form.Item>
             <Form.Item hidden label='采集器' name='target_id'>
              <InputNumber/>
-            </Form.Item>
+            </Form.Item> */}
             <Row gutter={10}>
               <Col span={24}>
                 <Form.Item label='描述' name='remark'>

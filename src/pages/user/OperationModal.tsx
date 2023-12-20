@@ -100,12 +100,16 @@ const props = {
     // console.log(file)
     let { name } = file;
     var fileExtension = name.substring(name.lastIndexOf('.') + 1);//截取文件后缀名
-    setFileName(name);
-    let newList = new Array();
-    newList.push(file)
-    fileList.concat(...newList);
-    setFileList(newList)
-    return false;
+      if(fileExtension=="xls" || fileExtension=="xlsx"){
+      setFileName(name);
+      let newList = new Array();
+      newList.push(file)
+      fileList.concat(...newList);
+      setFileList(newList)
+      return false;
+    }else{
+      message.error("文件格式错误，系统支持excel格式xls、xlsx");
+    }
   },
   fileList,
 };

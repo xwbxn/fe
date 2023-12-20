@@ -118,16 +118,21 @@ function Card(props: Props, ref) {
       title: '资产名称',
       dataIndex: 'asset_name',
       width: 100,
-      render: (value) => {
-        return value;
+      ellipsis: true,
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
     },
     {
       title: '资产IP',
       dataIndex: 'asset_ip',
       width: 100,
-      render: (value) => {
-        return value;
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
     },
     {

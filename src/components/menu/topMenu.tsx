@@ -465,8 +465,8 @@ export default function () {
         onClick={() => {
           Logout().then(() => {
             sessionStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('curBusiId');
+            sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('curBusiId');
             history.push('/login');
           });
         }}

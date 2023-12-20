@@ -45,7 +45,7 @@ import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useSize } from 'ahooks';
-import { useInterval } from 'react-use';
+import { useInterval, useLocalStorage } from 'react-use';
 
 
 export enum OperateType {
@@ -84,11 +84,11 @@ export default function () {
   const [treeData, setTreeData] = React.useState<DataNode[]>();
   const [optionColumns, setOptionColumns] = useState<any[]>([]);
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
-  const [filterType, setFilterType] = useState<string>('');
-  const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [searchVal, setSearchVal] = useState('');
-  const [filterParam, setFilterParam] = useState<string>('');
+  const [filterType, setFilterType] = useLocalStorage<any>('asset_filter_type',null);
+  const [current, setCurrent] = useLocalStorage("asset_current",1);
+  const [pageSize, setPageSize] = useLocalStorage("asset_current_page",10);
+  const [searchVal, setSearchVal] = useLocalStorage<any>('asset_filter_value',null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('asset_filter_param',null);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [defaultValues, setDefaultValues] = useState<string[]>();
@@ -135,7 +135,7 @@ export default function () {
       title: '资产类型',
       dataIndex: 'type',
       fixed: 'left',
-      width: 120,
+       
       align: 'center',
       ellipsis: true,
       sorter: (a, b) => {
@@ -151,6 +151,12 @@ export default function () {
       sorter: (a, b) => {
         return a.ip.localeCompare(b.ip);
       },
+      render(value, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.id + "&action=asset");
+        }}>{value}</div>;
+      },
+
     },
     {
       title: '厂商',
@@ -253,6 +259,7 @@ export default function () {
    * 选择左边，加载列属性
    */
   const getAssetTypeItems = (type: any, types?: any) => {
+    
     let dealTypes = types != null ? types : assetTypes;
     if (type == '0') {
       return loadAssetTypeAllColumns(dealTypes);
@@ -313,19 +320,22 @@ export default function () {
       });
 
       let columns = baseColumns.concat(cloumns);
-      setOptionColumns(_.cloneDeep(columns));
+      setOptionColumns(columns);
       setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
     }
+    let modelIds = Array.from(new Set(baseColumns.map((obj) => obj.title)));
+    setDefaultValues(modelIds);
   };
 
 
   const fixColumns: any[] = [
     {
       title: '操作',
-      width: 200,
+      // width: "180px",
       align: 'center',
       fixed: 'right',
       render: (text: string, record: assetsType) => (
+        <div style={{width:'180px'}}>
         <Space>
           <VideoCameraOutlined
             title='设置监控'
@@ -361,6 +371,7 @@ export default function () {
                   await deleteXhAssets({ ids: [record.id.toString()] });
                   message.success(t('common:success.delete'));
                   setRefreshKey(_.uniqueId('refreshKey_'));
+                  setSelectedAssets([]);
                 },
 
                 onCancel() {},
@@ -368,6 +379,7 @@ export default function () {
             }}
           ></DeleteOutlined>
         </Space>
+        </div>
       ),
     },
   ];
@@ -388,7 +400,6 @@ export default function () {
       }
     });
     setSelectColum(showColumns.concat(fixColumns));
-    tableRef.current
     
   }
  
@@ -480,10 +491,15 @@ export default function () {
     if (typeId != null && typeId != '0' && modifyType) {
       param['type'] = typeId;
     }
-    if (filterParam != null && filterParam.length > 0 && searchVal != null && searchVal.length > 0) {
+    if (filterParam != null  && searchVal != null && searchVal.length > 0) {
       param['filter'] = filterParam;
     }
     setQueryCondition(param);
+
+    // console.log("asset_display_condition",useLocalStorage("asset_display_condition"));
+    
+    // useLocalStorage("asset_display_condition",param);
+
     getAssetsByCondition(param).then(({ dat }) => {
       dat.list.forEach((entity, index) => {
         let expands = entity.exps;
@@ -528,13 +544,13 @@ export default function () {
     });
   };
 
-  const pupupContent = (
+  const pupupContent=(typeId:any) => (
     <div style={{ maxHeight: '550px', overflow: 'scroll' }}>
-      <Checkbox.Group defaultValue={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
+      <Checkbox.Group defaultValue={defaultValues}  style={{ width: '100%' }} onChange={handelShowColumn}>
         {optionColumns.map((item, index) => (
           <Row key={'option' + index} style={{ marginBottom: '5px' }}>
             <Col span={24}>
-              <Checkbox value={item.title}>{item.title}</Checkbox>
+              <Checkbox checked value={item.title}>{item.title}</Checkbox>
             </Col>
           </Row>
         ))}
@@ -660,6 +676,8 @@ export default function () {
     let columns = baseColumns.concat(cloumns);
     setOptionColumns(_.cloneDeep(columns));
     setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
+    let modelIds = Array.from(new Set(baseColumns.map((obj) => obj.title)));
+    setDefaultValues(modelIds);
   };
 
   const showModal = (action: string, formData: any) => {
@@ -794,11 +812,12 @@ export default function () {
                     onChange={(value) => {
                       queryFilter.forEach((item) => {
                         if (item.name == value) {
-                          setFilterType(item.type);
+                          setFilterType(item.type);                          
                         }
                       });
-                      setFilterParam(value);
-                      setSearchVal('');
+                      setFilterParam(null);                      
+                      setSearchVal(null);
+                      
                     }}
                   >
                     {queryFilter.map((item, index) => (
@@ -812,7 +831,10 @@ export default function () {
                       className={'searchInput'}
                       value={searchVal}
                       allowClear
-                      onChange={(e) => setSearchVal(e.target.value)}
+                      onChange={(e) => {
+                        setCurrent(1);
+                        setSearchVal(e.target.value)
+                      }}
                       suffix={<SearchOutlined />}
                       placeholder={'输入模糊检索关键字'}
                     />
@@ -824,7 +846,11 @@ export default function () {
                       value={searchVal}
                       allowClear
                       options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                      onChange={(val) => setSearchVal(val)}
+                      onChange={(e) => {
+                        setCurrent(1);
+                        setSearchVal(e.target.value)
+                        useLocalStorage
+                      }}
                     />
                   )}
                 </Space>
@@ -843,7 +869,7 @@ export default function () {
                   </Button>
                 </div>
                 <div>
-                  <Popover placement='bottom' content={pupupContent} trigger='click' className='filter_columns'>
+                  <Popover placement='bottom' content={pupupContent(typeId)} trigger='click' className='filter_columns'>
                     <Button icon={<UnorderedListOutlined />}>显示列</Button>
                   </Popover>
                 </div>
@@ -858,17 +884,17 @@ export default function () {
                             let names = new Array();
                             names.push(queryCondition);
                             setSelectedAssetsName(queryCondition);
-                            if (selectedAssets.length <= 0) {
-                              Modal.confirm({
-                                title: '确认导出所有设备资产吗',
-                                onOk: async () => {
-                                  setOperateType(key as OperateType);
-                                },
-                                onCancel() {},
-                              });
-                            } else {
+                            // if (selectedAssets.length <= 0) {
+                            //   Modal.confirm({
+                            //     title: '确认导出所有设备资产吗',
+                            //     onOk: async () => {
+                            //       setOperateType(key as OperateType);
+                            //     },
+                            //     onCancel() {},
+                            //   });
+                            // } else {
                               setOperateType(key as OperateType);
-                            }
+                            // }
                           } else if (key == OperateType.Delete) {
                             if (selectedAssets.length <= 0) {
                               message.warning('请选择要批量操作的设备');
@@ -880,6 +906,7 @@ export default function () {
                                   let rows = selectedAssets?.map((item) => '' + item);
                                   deleteXhAssets({ ids: rows }).then((res) => {
                                     message.success('删除成功！');
+                                    setSelectedAssets([]);
                                     setRefreshKey(_.uniqueId('refreshKey_'));
                                   });
                                 },
@@ -888,7 +915,7 @@ export default function () {
                             }
                           } else if (key == OperateType.UpdateBusi) {
                             if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量操作记录');
+                              message.warning('请选择需要批量转移的资产');
                               return;
                             }
                             setOperateType(key as OperateType);

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Popover, Checkbox, Row, Col, Select } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ const { confirm } = Modal;
 import CommonModal from '@/components/CustomForm/CommonModal';
 import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
 import '@minko-fe/use-antd-resizable-header/dist/style.css';
+
 
 import './locale';
 import './style.less';
@@ -48,6 +49,7 @@ let queryFilter = [
 export default function () {
   const { t } = useTranslation('assets');
   const [list, setList] = useState<any[]>([]);
+  const audioRef = useRef(null);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
@@ -80,6 +82,7 @@ export default function () {
   const history = useHistory();
   const [unitOptions, setUnitOptions] = useState<any>(unitTypes);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_flag'));
+
   const onSelectNone = () => {
     setSelectedAssets([]);
     setSelectedAssetsName([]);
@@ -124,7 +127,9 @@ export default function () {
       ellipsis: true,
       render(value, record, index) {
         let name = assetInfo[value]?.ip;
-        return name;
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
+        }}>{name}</div>;
       },
       sorter: (a, b) => {
         const aip = assetInfo[a.asset_id]?.ip
@@ -179,11 +184,11 @@ export default function () {
   const fixColumns: any[] = [
     {
       title: '操作',
-      width: 200,
+      width: 300,
       align: 'center',
       fixed: 'right',
       render: (val, record: any) => (
-        <Space size={"middle"}>
+        <Space>
           <PoweroffOutlined
             title={record.status == 1 ? '正常' : '失效'}
             style={{ color: record.status === 1 ? ('green') : ('gray') }}
@@ -204,7 +209,7 @@ export default function () {
 
               } else {
                 Modal.confirm({
-                  title: "确认要禁止当前用户使用？",
+                  title: "确认要关闭当前选择监控？",
                   onOk: async () => {
                     updateMonitorStatus(0, key, 1).then((res) => {
                       message.success('修改成功');
@@ -245,6 +250,7 @@ export default function () {
           }} />
 
         </Space>
+        
       ),
     },
   ];
@@ -527,6 +533,7 @@ export default function () {
             <div className="left_tree" style={{ display: 'inline-block' }}>
               <div className='asset_organize_cls'>组织树列表
                 <div style={{ margin: '0 10prx ' }}>
+                  
                   {/* <Switch
                   className='switch'
                   checkedChildren='切至目录'
@@ -614,7 +621,7 @@ export default function () {
               <div>
                 <Button className='tool_rightbtn'
                   onClick={() => {
-                    showModal("asset", 0, "add")
+                    showModal("asset", currentAssetId, "add")
                   }}
 
                   type='primary'
@@ -669,7 +676,7 @@ export default function () {
                             });
                           } else if (key == "disableMonitoring") {
                             Modal.confirm({
-                              title: "确认要禁止当前用户使用？",
+                              title: "确认要禁止当前选择监控？",
                               onOk: async () => {
                                 updateMonitorStatus(0, selectedAssets, 1).then((res) => {
                                   message.success('修改成功');

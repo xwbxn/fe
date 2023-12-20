@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import CodeMirror from '@uiw/react-codemirror';
 import _ from 'lodash';
@@ -36,8 +36,26 @@ export default function FieldWithEditor(props: IProps) {
       success: boolean;
       message: string;
     }>();
-  const [previewLoading, setPreviewLoading] = useState<boolean>(true);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+   
 
+  useEffect(() => {
+    setPreviewLoading(true);
+    previewTemplate(record)
+      .then((res) => {
+        setPreviewResult({
+          content: res,
+          success: true,
+          message: '',
+        });
+      })
+      .finally(() => {
+        setPreviewLoading(false);
+      });
+
+  },[]);
+
+ 
   return (
     <div className='template-field'>
       <div className='template-field-editor'>

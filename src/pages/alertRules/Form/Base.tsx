@@ -20,7 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { Form, Input, Select, Card, Row, Col, Tag, Tooltip } from 'antd';
 import { panelBaseProps } from '../constants';
 import { getAssetsByCondition } from '@/services/assets';
-
+import queryString from 'query-string';
+import { useLocation } from 'react-router-dom';
 // 校验单个标签格式是否正确
 function isTagValid(tag) {
   const contentRegExp = /^[a-zA-Z_][\w]*={1}[^=]+$/;
@@ -30,13 +31,15 @@ function isTagValid(tag) {
   };
 }
 
-export default function Base({ type }) {
+export default function Base({ type,form,assetId }) {
   const { t } = useTranslation('alertRules'); 
   // type = 1;
+  const { search } = useLocation();
   const [assetList, setAssetList] = useState<any>({});
   const [assetOptions, setAssetOptions] = useState<any[]>([]);
+  const [assetIpOptions, setAssetIpOptions] = useState<any[]>([]);
   const [assetIp, setAssetIp] = useState<string>("");
-
+  const { action,assetid } = queryString.parse(search);
 
   useEffect(() => {
     let param = {};
@@ -54,11 +57,23 @@ export default function Base({ type }) {
         });
         setAssetOptions(options);
         setAssetList({...assetList});
+        let ipOptions = new Array();
+        res.dat.list.map((v) => {
+          ipOptions.push({
+            value: v.id,
+            label: v.ip,
+          });
+        });
+        setAssetIpOptions(ipOptions);
        
       })
     }
     let ip = window.localStorage.getItem('select_monitor_asset_ip');
     setAssetIp(ip?ip:"");
+    if(assetId>0){
+      form.setFieldsValue({asset_id:assetId})
+    }
+    
   }, []);
 
   // 渲染标签
@@ -115,7 +130,18 @@ export default function Base({ type }) {
           </Form.Item>
         </Col>
         <Col span={8}>
-            <div className='ip_show'><div className='title'>资产IP:</div><span className='ip_content' id="asset_ip">{assetIp}</span></div>
+        <Form.Item label={t('IP地址')} name='asset_id' rules={[{ required: true }]}>
+          <Select 
+            onChange={(value)=>{               
+              let ip = assetList[value].ip
+              window.localStorage.setItem('select_monitor_asset_id',value);
+              setAssetIp(ip)
+           }}
+            options={assetIpOptions}
+          />
+          </Form.Item>
+
+            {/* <div className='ip_show'><div className='title'>资产IP:</div><span className='ip_content' id="asset_ip">{assetIp}</span></div> */}
         </Col>
 
       </Row>

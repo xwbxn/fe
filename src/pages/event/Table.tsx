@@ -25,12 +25,13 @@ import { useAntdTable } from 'ahooks';
 import { CommonStateContext } from '@/App';
 import { getEvents } from './services';
 import { deleteAlertEventsModal } from './index';
-import { SeverityColor } from './index';
+import { SeverityColor,SeverityFont } from './index';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import '../event/index.less';
 // @ts-ignore
 import AckBtn from 'plus:/parcels/Event/Acknowledge/AckBtn';
 import { FileSearchOutlined, DownloadOutlined, DeleteOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { center } from '@antv/x6/lib/registry/node-anchor/bbox';
 
 interface IProps {
   filterObj: any;
@@ -47,10 +48,26 @@ export default function TableCpt(props: IProps) {
   const { filterObj, filter, setFilter, header, selectedRowKeys, setSelectedRowKeys,deleteAlert } = props;
   const history = useHistory();
   const { t } = useTranslation('AlertCurEvents');
-  const { groupedDatasourceList } = useContext(CommonStateContext);
-  const [rowKeys, setRowKeys] = useState<any[]>([]);
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const columns:any = [
+    {
+      title: '显示级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 60,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
+    },
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -70,9 +87,12 @@ export default function TableCpt(props: IProps) {
       title: '资产名称',
       dataIndex: 'asset_name',
       width: 100,
-      align: "center",
-      render: (value) => {
-        return value;
+      align: "center",  
+      ellipsis: true,    
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
       sorter: (a, b) =>{
         return (a.asset_name).localeCompare(b.asset_name)
@@ -83,8 +103,10 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'asset_ip',
       width: 100,
       align: "center",
-      render: (value) => {
-        return value;
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
       sorter: (a, b) =>{
         return (a.asset_ip).localeCompare(b.asset_ip)
@@ -112,6 +134,18 @@ export default function TableCpt(props: IProps) {
       },
       render(value) {
         return moment(value * 1000).format('YYYY-MM-DD HH:mm:ss');
+      },
+    },
+    {
+      title: '业务组',
+      dataIndex: 'group_name',
+      align: "center",
+      width: 120,
+      sorter: (a, b) =>{
+        return (a.rule_config_cn).localeCompare(b.rule_config_cn)
+      },
+      render(value) {
+        return value;
       },
     },
     {
@@ -234,9 +268,9 @@ export default function TableCpt(props: IProps) {
           columns={columns}
           className='current_events_list'
           {...tableProps}
-          rowClassName={(record: { severity: number; is_recovered: number }) => {
-            return SeverityColor[record.is_recovered ? 3 : record.severity - 1] + '-left-border';
-          }}
+          // rowClassName={(record: { severity: number; is_recovered: number }) => {
+          //   return SeverityColor[record.is_recovered ? 3 : record.severity - 1] + '-left-border';
+          // }}
           rowSelection={{
             selectedRowKeys: selectedRowKeys,
             onChange(selectedRowKeys: number[]) {

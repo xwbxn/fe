@@ -17,12 +17,13 @@
 import React, { useContext, useEffect, createContext } from 'react';
 import { Form, Space, Button, notification, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useParams, Link } from 'react-router-dom';
+import { useHistory, useParams, Link, useLocation } from 'react-router-dom';
 import _ from 'lodash';
 import { CommonStateContext } from '@/App';
 import { addStrategy, EditStrategy, getStrategiesByRuleIds } from '@/services/warning';
 import Base from './Base';
 import Rule from './Rule';
+import queryString from 'query-string';
 import './style.less'
 import { getXhMonitorByAssetId } from '@/services/manage';
 
@@ -30,6 +31,7 @@ import Effective from './Effective';
 import Notify from './Notify';
 import { getFirstDatasourceId, processFormValues, processInitialValues } from './utils';
 import { defaultValues } from './constants';
+import { useSearchParam } from 'react-use';
 
 interface IProps {
   type?: number; // 空: 新增 1:编辑 2:克隆 3:查看
@@ -43,9 +45,13 @@ export const FormStateContext = createContext({
 export default function index(props: IProps) {
   const { type, initialValues } = props;
   const history = useHistory();
+  const { search } = useLocation();
+  const location = useLocation();
+  const assetid = useSearchParam("assetid");
   const { bgid } = useParams<{ bgid: string }>();
   const { t } = useTranslation('alertRules');
   const [form] = Form.useForm();
+
   const { groupedDatasourceList, licenseRulesRemaining } = useContext(CommonStateContext);
   const disabled = type === 3;
   const handleCheck = async (values) => {
@@ -66,7 +72,7 @@ export default function index(props: IProps) {
         message.error(res.error);
       } else {
         message.success(t('common:success.modify'));
-        history.push('/alert-rules?'+Math.random());
+        history.goBack()
       }
     } else {
       const { dat } = res;
@@ -79,27 +85,28 @@ export default function index(props: IProps) {
   
         if (!errorNum) {
           message.success(`${type === 2 ? t('common:success.clone') : t('common:success.add')}`);
-          history.push('/alert-rules?'+Math.random().toString);
+          history.goBack()
         } else {
           message.error(t(msg));
         }
       }else{
-        history.push('/alert-rules?'+Math.random());
+        history.goBack()
       }
      
     }
   };
   const genForm=(changeValue,values)=>{
-      form
-
+   
   }
-
   useEffect(() => {
     if (type === 1 || type === 2 || type === 3) {
       form.setFieldsValue(processInitialValues(initialValues));
+      
     } else {
       form.setFieldsValue(defaultValues);
+      
     }
+    
   }, [initialValues]);
 
   return (
@@ -115,7 +122,7 @@ export default function index(props: IProps) {
           <Form.Item name='disabled' hidden>
             <div />
           </Form.Item>
-          <Base type={1}/>
+          <Base type={1} form={form} assetId={assetid?parseInt(""+assetid):0}/>
           <Rule form={form} type={1} />
           <Effective />
           <Notify disabled={disabled} />
@@ -124,10 +131,10 @@ export default function index(props: IProps) {
               <Button
                 type='primary'
                 onClick={() => {
+                  
                   form
                     .validateFields()
                     .then(async (values) => {
-                      console.log("values",values)
                       if(values["asset_id"]){                           
                         getXhMonitorByAssetId(values["asset_id"]).then(({ dat }) => { 
                           let map = {};                         
@@ -164,7 +171,10 @@ export default function index(props: IProps) {
                           const res = await EditStrategy(data, initialValues.group_id, initialValues.id);
                           handleMessage(res);
                         } else {
-                          const curBusiId = initialValues?.group_id || Number(bgid);
+                          let curBusiId = initialValues?.group_id || Number(bgid) || 1;
+                          if(curBusiId<=0){
+                            curBusiId = 1;
+                          }
                           const res = await addStrategy([data], curBusiId);
                           handleMessage(res);
                         }

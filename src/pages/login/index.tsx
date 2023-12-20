@@ -137,7 +137,7 @@ export default function Login() {
         const { dat, err } = res;
         const { access_token, refresh_token } = dat;
         sessionStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
+        sessionStorage.setItem('refresh_token', refresh_token);
         if (!err) {
           window.location.href = redirect || '/home';
         }
