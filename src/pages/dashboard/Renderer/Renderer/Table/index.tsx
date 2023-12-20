@@ -145,10 +145,10 @@ export default function Stat(props: IProps) {
         />
         <Space>
           <Button type='primary' onClick={() => handleSearch(confirm)} icon={<SearchOutlined />} size='small' style={{ width: 90 }}>
-            Search
+            搜索
           </Button>
           <Button onClick={() => clearFilters && handleReset(clearFilters, confirm)} size='small' style={{ width: 90 }}>
-            Reset
+            重置
           </Button>
         </Space>
       </div>

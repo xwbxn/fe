@@ -5,7 +5,7 @@ import { Button, Card, Checkbox, Col, Empty, Form, Input, InputNumber, InputRef,
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
-import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset, getAssetsByCondition } from '@/services/assets';
+import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetstypes, updateAsset, getAssetsByCondition } from '@/services/assets';
 import { createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from '../monitor/Form/PromBox';
 import { factories,unitTypes } from '../assetmgt/catalog';
@@ -57,7 +57,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   useEffect(() => {  
     
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
           value: v.name,

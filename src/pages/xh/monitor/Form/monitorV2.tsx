@@ -9,7 +9,7 @@ import { factories } from '../../assetmgt/catalog';
 import { Link, useLocation } from 'react-router-dom';
 import { getAssetBoard, getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
-import { getAssetsIdents, getAssetsStypes } from '@/services/assets';
+import { getAssetsIdents, getAssetstypes } from '@/services/assets';
 import Board from '@/pages/dashboard/Detail/Board';
 
 export default function () {
@@ -79,7 +79,7 @@ export default function () {
   useEffect(() => {
     if (action == 'asset' && id != null && id.length > 0 && id != 'null') {
       //资产信息
-      getAssetsStypes().then((res) => {
+      getAssetstypes().then((res) => {
         const types = res.dat.map((v) => {
           return {
             value: v.name,

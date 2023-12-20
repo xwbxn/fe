@@ -121,7 +121,7 @@ export const getAssetsMonitor = function (start_at: number, end_at: number, moni
 };
 
 //获取资产类型
-export const getAssetsStypes = function () {
+export const getAssetstypes = function () {
   return request('/api/n9e/assets/types', {
     method: RequestMethod.Get,
   });

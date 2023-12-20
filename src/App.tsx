@@ -51,6 +51,7 @@ interface IProfile {
   id: number;
   portrait: string;
   contacts: { string?: string };
+  board_id: number;
 }
 
 interface Datasource {

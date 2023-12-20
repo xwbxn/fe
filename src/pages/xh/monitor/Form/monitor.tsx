@@ -19,7 +19,7 @@ import { Link, Redirect, useHistory, useLocation } from 'react-router-dom';
 import { getXhMonitor, getXhMonitorByAssetId } from '@/services/manage';
 import { getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
-import { getAssetsIdents, getAssetsStypes } from '@/services/assets';
+import { getAssetsIdents, getAssetstypes } from '@/services/assets';
 import { useToggle } from 'ahooks';
 
 export default function (props: { initialValues: object; initParams: object; mode?: string }) {
@@ -129,7 +129,7 @@ export default function (props: { initialValues: object; initParams: object; mod
   useEffect(() => {
     if (action == "asset" && id != null && id.length > 0 && id != "null") {
       //资产信息      
-      getAssetsStypes().then((res) => {
+      getAssetstypes().then((res) => {
         const types = res.dat.map((v) => {
           return {
             value: v.name,
@@ -170,7 +170,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             dat = { ...configJson, ...dat };
           }
           //资产信息
-          getAssetsStypes().then((res) => {
+          getAssetstypes().then((res) => {
             const types = res.dat.map((v) => {
               return {
                 value: v.name,

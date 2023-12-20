@@ -5,7 +5,7 @@ import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, S
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';
 import { CommonStateContext } from '@/App';
-import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetsStypes, updateXHAsset, addXHAssetExpansion } from '@/services/assets';
+import { insertXHAsset, getXhAsset, getAssetsIdents, getAssetstypes, updateXHAsset, addXHAssetExpansion } from '@/services/assets';
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -29,15 +29,17 @@ export default function () {
 
   const [params, setParams] = useState<{ label: string; name: string; required?: boolean; type: string; options?: [] }[]>([]);
   const [form] = Form.useForm();
-  const refForm = React.createRef<FormInstance>();
+  const [assetData, setAssetData] = useState<any>({}); // 集中保存提交的数据
+  const [currentType, setCurrentType] = useState();
 
   const panelBaseProps: any = {
     size: 'small',
     bodyStyle: { padding: '24px 24px 8px 24px' },
   };
 
-  const genForm = (assetTypes) => {
-    const assetType: any = assetTypes.find((v) => v.name === form.getFieldValue('type'));
+  // 根据选择资产类型生成表单
+  useEffect(() => {
+    const assetType: any = assetTypes.find((v) => v.name === currentType);
     if (assetType) {
       setParams(assetType.form || []); // 显示form表单
 
@@ -85,13 +87,12 @@ export default function () {
       setProperties(properties);
       setFormItems(items);
     }
-  };
+  }, [currentType]);
 
-  const loadAssetInfo = (id, isTabLoading, assetTypes) => {
+  const loadAssetInfo = (id) => {
     if (!!id) {
       setEditType('edit');
-      getXhAsset('' + id).then(({ dat }) => {
-        console.log(dat);
+      getXhAsset(_.toString(id)).then(({ dat }) => {
         let expands = dat.exps;
         if (expands != null && expands.length > 0) {
           const map = new Map();
@@ -129,20 +130,16 @@ export default function () {
           });
           delete dat.exps;
         }
+        setAssetData(dat);
+        form.resetFields();
         form.setFieldsValue(dat);
-        form.setFieldsValue(dat.params);
-
-        if (isTabLoading) {
-          setTimeout(() => {
-            genForm(assetTypes);
-          }, 1500);
-        }
+        setCurrentType(dat.type);
       });
     }
   };
 
   useEffect(() => {
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
           value: v.name,
@@ -155,10 +152,10 @@ export default function () {
   }, []);
 
   useEffect(() => {
-    if (assetTypes.length > 0) {
-      loadAssetInfo(id, true, assetTypes);
+    if (id) {
+      loadAssetInfo(id);
     }
-  }, [assetTypes]);
+  }, [id]);
 
   const TabOperteClick = (tabIndex: string) => {
     setTabIndex(tabIndex);
@@ -169,49 +166,37 @@ export default function () {
     }
   };
 
-  const submitForm = async (values) => {
-    console.log('提交数据');
-    values.params = { ...values };
-    if (tabIndex == 'base_set') {
-      if (editType === 'edit' && id != null) {
-        values.id = parseInt('' + id);
-        await updateXHAsset(values).then(() => {
-          message.success('修改成功');
-        });
-      } else {
-        await insertXHAsset(values).then((res) => {
-          message.success('添加成功');
-          history.goBack();
-        });
-      }
+  const submitForm = async () => {
+    if (editType !== 'edit') {
+      await insertXHAsset(assetData);
+      message.success('添加成功');
+      history.goBack();
     } else {
-      if (id != null) {
-        let listValues = values[tabIndex];
-        console.log(listValues);
-        let subItem = new Array();
-        for (let values of listValues) {
-          let groupId = uuidv4();
-          for (let key in values) {
-            let row = {
-              // property_category: tabIndex,
-              name: key,
-              value: values[key],
-              name_cn: properties[tabIndex + '.' + key],
-              group_id: groupId,
-              assets_id: parseInt('' + id),
-              config_category: tabIndex,
-            };
-            subItem.push(row);
-          }
-        }
-        console.log('提交的数据', subItem);
-        addXHAssetExpansion(subItem, id, tabIndex).then((res) => {
-          message.success('操作成功');
-          loadAssetInfo(id, false, null);
-        });
-      } else {
-        message.error('当前资产信息未找到，不能添加该信息！');
-      }
+      delete assetData['tags']; // 更新信息不包括tag，格式不符
+      assetData.id = _.toNumber(id);
+      await updateXHAsset(assetData);
+      await formItems.map(async (v) => {
+        const subItem: any[] = [];
+        const expData = assetData[v.name]; //[{item}]
+        expData &&
+          await expData.map((item) => {
+            const groupId = uuidv4();
+            for (let key in item) {
+              let row = {
+                name: key,
+                value: item[key],
+                name_cn: properties[v.name + '.' + key],
+                group_id: groupId,
+                assets_id: _.toNumber(id),
+                config_category: v.name,
+              };
+              subItem.push(row);
+            }
+          });
+        await addXHAssetExpansion(subItem, id, v.name);
+      });
+      message.success('操作成功');
+      loadAssetInfo(id);
     }
   };
 
@@ -226,6 +211,10 @@ export default function () {
       return <Checkbox></Checkbox>;
     }
     return <Input key={'v' + v.name} placeholder={`请填写${v.label}`} name={v.name} />;
+  };
+
+  const updateData = (changedValues, values) => {
+    setAssetData({ ...assetData, ...values });
   };
 
   const formItemLayout = { labelCol: { span: 8 }, wrapperCol: { span: 10 } };
@@ -254,11 +243,8 @@ export default function () {
         disabled={mode == 'view' ? true : false}
         {...formItemLayout}
         onFinish={submitForm}
-        ref={refForm}
         className='asset_xh_form'
-        onValuesChange={() => {
-          genForm(assetTypes);
-        }}
+        onValuesChange={updateData}
       >
         <Form.Item hidden name='id'>
           <Input></Input>
@@ -269,7 +255,15 @@ export default function () {
               <Row gutter={10}>
                 <Col span={12}>
                   <Form.Item label='类型' name='type' rules={[{ required: true }]}>
-                    <Select style={{ width: '100%' }} options={assetTypes} placeholder='请选择资产类型' disabled={id != null} />
+                    <Select
+                      style={{ width: '100%' }}
+                      options={assetTypes}
+                      placeholder='请选择资产类型'
+                      disabled={id != null}
+                      onChange={(val) => {
+                        setCurrentType(val);
+                      }}
+                    />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -324,7 +318,13 @@ export default function () {
                   {params.map((v) => {
                     return (
                       <Col span={12} key={`col-${v.name}`}>
-                        <Form.Item label={v.label} name={v.name} key={`formitem=${v.name}`} valuePropName={v.type === 'checkbox' ? 'checked' : 'value'} required={v.required}>
+                        <Form.Item
+                          label={v.label}
+                          name={['params', v.name]}
+                          key={`formitem=${v.name}`}
+                          valuePropName={v.type === 'checkbox' ? 'checked' : 'value'}
+                          required={v.required}
+                        >
                           {renderFormItem(v)}
                         </Form.Item>
                       </Col>

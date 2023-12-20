@@ -5,7 +5,7 @@ import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Space } fr
 import { useTranslation } from 'react-i18next';
 
 import { CommonStateContext } from '@/App';
-import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetsStypes, updateAsset } from '@/services/assets';
+import { addAsset, getAssetDefaultConfig, getAssetsIdents, getAssetstypes, updateAsset } from '@/services/assets';
 import { FileAddOutlined } from '@ant-design/icons';
 import { toml } from '@codemirror/legacy-modes/mode/toml';
 import { StreamLanguage } from '@codemirror/stream-parser';
@@ -65,7 +65,7 @@ export default function (props: { initialValues: object; initParams: object; mod
       setIdentList(items);
     });
 
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const items = res.dat
         .map((v) => {
           return {

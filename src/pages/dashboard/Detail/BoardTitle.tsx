@@ -15,13 +15,15 @@
  *
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Col, Dropdown, Menu, Modal, Radio, Row, Select, Space, Switch } from 'antd';
+import { Button, Checkbox, Col, Dropdown, Menu, Modal, Radio, RadioChangeEvent, Row, Select, Space, Switch } from 'antd';
 
 import { IRawTimeRange, TimeRangePickerWithRefresh } from '@/components/TimeRangePicker';
 import VariableConfig, { IVariable } from '../VariableConfig';
 import { dashboardTimeCacheKey } from './Detail';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-use';
+import moment from 'moment';
+import _ from 'lodash';
 
 interface IProps {
   dashboard: any;
@@ -39,16 +41,24 @@ export default function BoardTitle(props: IProps) {
   const history = useHistory();
   const location = useLocation();
 
+  const shotCutChange = (val: RadioChangeEvent) => {
+    setRange({
+      start: moment().subtract(val.target.value, 'minutes'),
+      end: moment(),
+      refreshFlag: _.uniqueId('refreshFlag_ '),
+    });
+  };
+
   return (
     <div className='dashboard-detail-header'>
       <div className='dashboard-detail-header-left'>
-        <Radio.Group>
-          <Radio.Button value='now-1h'>近1小时</Radio.Button>
-          <Radio.Button value='now-3h'>近3小时</Radio.Button>
-          <Radio.Button value='now-12h'>近12小时</Radio.Button>
-          <Radio.Button value='now-24h'>近24小时</Radio.Button>
-          <Radio.Button value='now-7d'>近7天</Radio.Button>
-          <Radio.Button value='now-30d'>近30天</Radio.Button>
+        <Radio.Group onChange={(val) => shotCutChange(val)}>
+          <Radio.Button value={60}>近1小时</Radio.Button>
+          <Radio.Button value={60 * 3}>近3小时</Radio.Button>
+          <Radio.Button value={60 * 12}>近12小时</Radio.Button>
+          <Radio.Button value={60 * 24}>近24小时</Radio.Button>
+          <Radio.Button value={60 * 24 * 7}>近7天</Radio.Button>
+          <Radio.Button value={60 * 24 * 30}>近30天</Radio.Button>
         </Radio.Group>
       </div>
 
@@ -56,7 +66,6 @@ export default function BoardTitle(props: IProps) {
         <Space>
           <Button
             onClick={() => {
-              location;
               history.push(`/dashboards/${dashboard.id}?${location.search}`);
             }}
           >

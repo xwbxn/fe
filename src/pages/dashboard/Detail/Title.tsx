@@ -14,12 +14,12 @@
  * limitations under the License.
  *
  */
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import querystring from 'query-string';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Button, Space, Dropdown, Menu, Switch, Modal, Form, Select, message, Checkbox } from 'antd';
+import { Button, Space, Dropdown, Menu, Switch, Modal, Form, Select, message, Checkbox, Row, Col } from 'antd';
 import { RollbackOutlined } from '@ant-design/icons';
 import { TimeRangePickerWithRefresh, IRawTimeRange } from '@/components/TimeRangePicker';
 import { AddPanelIcon } from '../config';
@@ -27,9 +27,11 @@ import { visualizations } from '../Editor/config';
 import { dashboardTimeCacheKey } from './Detail';
 import VariableConfig, { IVariable } from '../VariableConfig';
 import { useLocalStorageState } from 'ahooks';
-import { getAssetsStypes } from '@/services/assets';
+import { getAssetstypes } from '@/services/assets';
 import { GetAssetType } from '@/services/metric';
 import { setDashboardAssetType } from '@/services/dashboardV2';
+import { updateSelfBoard } from '@/services/account';
+import { CommonStateContext } from '@/App';
 
 interface IProps {
   dashboard: any;
@@ -45,26 +47,42 @@ interface IProps {
   handleVariableChange: (value, b, valueWithOptions) => void;
   id: string;
   stopAutoRefresh: () => void;
+  handlePanelChange?: (v: any[]) => void;
 }
 
 const cachePageTitle = document.title;
 
 export default function Title(props: IProps) {
   const { t, i18n } = useTranslation('dashboard');
-  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome } = props;
+  const { dashboard, range, setRange, onAddPanel, isPreview, isBuiltin, isAuthorized, variableConfig, handleVariableChange, id, stopAutoRefresh, isHome, handlePanelChange } =
+    props;
   const history = useHistory();
   const location = useLocation();
   const query = querystring.parse(location.search);
   const { viewMode, themeMode } = query;
-  const [home, setHome] = useLocalStorageState('HOME_URL', {
-    defaultValue: '1',
-  });
   const [defaultModal, setdefaultModal] = useState(false);
   const [form] = Form.useForm();
   const [options, setOptions] = useState([]);
+  const { profile, setProfile } = useContext(CommonStateContext);
   const setHomePage = () => {
-    setHome(id);
+    // setHome(id);
+    updateSelfBoard({
+      board_id: _.toNumber(id),
+    }).then((res) => {
+      setProfile({
+        ...profile,
+        board_id: _.toNumber(id),
+      });
+      message.success('设置成功');
+    });
   };
+
+  const [openView, setOpenView] = useState(false);
+  const panelOptions =
+    dashboard?.configs?.panels.map((v) => {
+      return { label: v.name, value: v.id, checked: !v.hidden };
+    }) || [];
+  const defaultOptions = panelOptions.filter((v) => !v.hidden).map((v) => v.value);
 
   const formSubmit = () => {
     form.validateFields().then((values) => {
@@ -83,7 +101,7 @@ export default function Title(props: IProps) {
   }, [dashboard.name]);
 
   useEffect(() => {
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       setOptions(
         res.dat.map((v) => {
           return { label: v.name, value: v.name };
@@ -191,9 +209,28 @@ export default function Title(props: IProps) {
             >
               设置默认
             </Button>
+            <Button
+              onClick={() => {
+                setOpenView(true);
+              }}
+            >
+              可见
+            </Button>
           </Space>
         </div>
       }
+      {isHome && (
+        <div className='dashboard-detail-header-right'>
+          <Button
+            onClick={() => {
+              // setOpenView(true);
+              history.push(`/dashboards/${dashboard.id}?${location.search}`);
+            }}
+          >
+            设置
+          </Button>
+        </div>
+      )}
       <Modal
         title={'默认看板设置'}
         visible={defaultModal}
@@ -210,6 +247,22 @@ export default function Title(props: IProps) {
             <Checkbox></Checkbox>
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal title='指标设置' visible={openView} onOk={() => setOpenView(false)} onCancel={() => setOpenView(false)}>
+        <Checkbox.Group defaultValue={defaultOptions} onChange={handlePanelChange}>
+          <Row gutter={8}>
+            {panelOptions.map((v) => {
+              return (
+                <Col span={8}>
+                  <Checkbox style={{ padding: 8 }} value={v.value}>
+                    {v.label}
+                  </Checkbox>
+                </Col>
+              );
+            })}
+          </Row>
+        </Checkbox.Group>
       </Modal>
     </div>
   );

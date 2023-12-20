@@ -53,8 +53,10 @@ interface IProps {
   variableConfig: any;
   panels: any[];
   isPreview: boolean;
+  isHome?: boolean;
   setPanels: (panels: any[]) => void;
   onShareClick: (panel: any) => void;
+  onFullScreenClick?: (panel: any) => void;
   onUpdated: (res: any) => void;
 }
 
@@ -64,7 +66,7 @@ function index(props: IProps) {
   const { profile } = useContext(CommonStateContext);
   const location = useLocation();
   const { themeMode } = querystring.parse(location.search);
-  const { editable, dashboard, range, variableConfig, panels, isPreview, setPanels, onShareClick, onUpdated } = props;
+  const { editable, dashboard, range, variableConfig, panels, isPreview, setPanels, onShareClick, onUpdated, onFullScreenClick, isHome } = props;
   const roles = _.get(profile, 'roles', []);
   const isAuthorized = !_.some(roles, (item) => item === 'Guest') && !isPreview;
   const layoutInitialized = useRef(false);
@@ -151,6 +153,7 @@ function index(props: IProps) {
                     id={item.id}
                     time={range}
                     values={item}
+                    isHome={isHome}
                     variableConfig={variableConfig}
                     onCloneClick={() => {
                       const newPanels = updatePanelsInsertNewPanel(panels, {
@@ -167,6 +170,9 @@ function index(props: IProps) {
                     }}
                     onShareClick={() => {
                       onShareClick(item);
+                    }}
+                    onFullScreenClick={() => {
+                      onFullScreenClick && onFullScreenClick(item)
                     }}
                     onEditClick={() => {
                       setEditorData({

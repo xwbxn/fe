@@ -15,7 +15,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import moment from 'moment';
 import { Resizable } from 're-resizable';
-import { insertXHAsset, updateXHAsset, getAssetsStypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
+import { insertXHAsset, updateXHAsset, getAssetstypes, updateAssetDirectoryTree, moveAssetDirectoryTree, getAssetsByCondition, insertAssetDirectoryTree, deleteAssetDirectoryTree, getOrganizationTree, getAssetDirectoryTree } from '@/services/assets';
 import { getMonitorInfoList, getMonitorUnit, deleteXhMonitor, deleteXhBatchMonitor, updateMonitorStatus } from '@/services/manage';
 import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
@@ -108,7 +108,7 @@ export default function () {
       render(value, record, index) {
         let name = assetInfo[value]?.name;
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${value}&asset_id=${value}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) => {
@@ -275,7 +275,7 @@ export default function () {
     setOptionColumns(baseColumns.concat(choooseColumns));
     let modelIds = Array.from(new Set(baseColumns.concat(choooseColumns).map(obj => obj.title)))
     setDefaultValues(modelIds);
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
           id: v.name,
@@ -315,7 +315,7 @@ export default function () {
 
     filterOptions["status"] = [{ value: '0', label: '关闭' }, { value: '1', label: '正常' }]
     filterOptions["is_alarm"] = [{ value: '1', label: '已启用' }, { value: '0', label: '未启用' }]
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       filterOptions["asset_type"] = res.dat.map((v) => {
         return {
           value: v.name,

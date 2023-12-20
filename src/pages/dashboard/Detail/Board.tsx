@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useInterval } from 'ahooks';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import queryString from 'query-string';
-import { message } from 'antd';
+import { Button, message, Modal } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { IRawTimeRange, getDefaultValue, isValid } from '@/components/TimeRangePicker';
 import { Dashboard } from '@/store/dashboardInterface';
@@ -21,6 +21,8 @@ import { JSONParse } from '../utils';
 import Editor from '../Editor';
 import { sortPanelsByGridLayout, panelsMergeToConfigs, updatePanelsInsertNewPanelToGlobal } from '../Panels/utils';
 import { useGlobalState } from '../globalState';
+import Renderer from '../Renderer/Renderer';
+import { useSearchParam, useWindowSize } from 'react-use';
 import './style.less';
 import './dark.antd.less';
 import './dark.less';
@@ -99,6 +101,12 @@ export default function Board(props: IProps) {
     initialValues: {} as any,
   });
   let updateAtRef = useRef<number>();
+  const [fullScreen, setFullScreen] = useState<{
+    visible: boolean;
+    panel: any;
+  }>({ visible: false, panel: {} });
+  const windowSize = useWindowSize();
+  const themeMode = useSearchParam('themeMode');
 
   const refresh = async (cbk?: () => void) => {
     fetchDashboard({
@@ -169,7 +177,7 @@ export default function Board(props: IProps) {
   };
 
   useEffect(() => {
-    if (id !== "") {
+    if (id !== '') {
       refresh();
     }
   }, [id]);
@@ -214,6 +222,7 @@ export default function Board(props: IProps) {
               setPanels={setPanels}
               dashboard={dashboard}
               range={range}
+              isHome={isHome}
               variableConfig={variableConfigWithOptions}
               onShareClick={(panel) => {
                 const curDatasourceValue = replaceExpressionVars(panel.datasourceValue, variableConfigWithOptions, variableConfigWithOptions.length, id);
@@ -248,6 +257,12 @@ export default function Board(props: IProps) {
                 updateAtRef.current = res.update_at;
                 refresh();
               }}
+              onFullScreenClick={(panel) => {
+                setFullScreen({
+                  visible: true,
+                  panel: panel,
+                });
+              }}
             />
           )}
         </div>
@@ -274,6 +289,35 @@ export default function Board(props: IProps) {
           });
         }}
       />
+      <Modal
+        visible={fullScreen?.visible}
+        destroyOnClose
+        footer={
+          <Button
+            type='primary'
+            onClick={() => {
+              setFullScreen({
+                visible: false,
+                panel: {},
+              });
+            }}
+          >
+            关闭
+          </Button>
+        }
+        {...windowSize}
+      >
+        <Renderer
+          isPreview={true}
+          themeMode={themeMode as 'dark'}
+          dashboardId={_.toString(dashboard.id)}
+          id={fullScreen.panel.id}
+          time={range}
+          values={fullScreen.panel}
+          variableConfig={variableConfig}
+          isHome={true}
+        />
+      </Modal>
     </PageLayout>
   );
 }

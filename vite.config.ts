@@ -122,7 +122,7 @@ export default defineConfig({
           'radio-button-checked-bg': '#EAE6F3',
           'form-item-margin-bottom': '18px',
           'font-family': 'Monda-Regular,PingFangSC-Regular,microsoft yahei ui,microsoft yahei,simsun,"sans-serif"',
-          'text-color': '#262626',
+          'text-color': '#767676',
           'table-row-hover-bg': '#EAE8F2',
           'table-header-bg': '#f0f0f0',
           'select-selection-item-bg': '#EAE6F3',

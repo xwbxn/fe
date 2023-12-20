@@ -27,6 +27,7 @@ export interface accountStoreState {
     id: number;
     portrait: string;
     contacts: { string?: string };
+    board_id: number
   };
 }
 

@@ -26,7 +26,7 @@ import SearchInput from '@/components/BaseSearchInput';
 import usePagination from '@/components/usePagination';
 import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/services/warning';
 import { CommonStateContext } from '@/App';
-import { getAssetsStypes } from '@/services/assets';
+import { getAssetstypes } from '@/services/assets';
 import Tags from '@/components/Tags';
 import './style.less';
 import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
@@ -283,7 +283,7 @@ export default function List(props: ListProps) {
     }
   };
   useEffect(() => {
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       filterOptions["type"] = res.dat.map((v) => {
         return {
           value: v.name,

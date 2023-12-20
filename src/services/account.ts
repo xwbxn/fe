@@ -59,4 +59,9 @@ export const getUsers = function () {
   });
 };
 
-
+export const updateSelfBoard = function (data) {
+  return request('/api/n9e/self/board', {
+    method: RequestMethod.Put,
+    data,
+  });
+};

@@ -30,7 +30,7 @@ import { assetsType } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import {
   deleteXhAssets,
-  getAssetsStypes,
+  getAssetstypes,
   updateAssetDirectoryTree,
   moveAssetDirectoryTree,
   getAssetsByCondition,
@@ -44,9 +44,7 @@ import { Link, useHistory } from 'react-router-dom';
 import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
-import { useSize } from 'ahooks';
-import { useInterval } from 'react-use';
-
+import { useInterval, useLocalStorage } from 'react-use';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -65,59 +63,60 @@ let queryFilter = [
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'manufacturers', label: '厂商', type: 'select' },
   { name: 'os', label: '操作系统', type: 'input' },
-  { name: 'status', label: '状态', type: 'select' },
+  { name: 'status', label: '管理状态', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
   { name: 'position', label: '资产位置', type: 'input' },
 ];
 
 export default function () {
   const { t } = useTranslation('assets');
-
-  const tableRef = useRef(null);
-  const tableWrapperSize = useSize(tableRef);
-  const [wrapperWidth, setWrapperWidth] = useState<number>();
+  const history = useHistory();
 
   const [list, setList] = useState<any[]>([]);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
-  const [optionColumns, setOptionColumns] = useState<any[]>([]);
-  const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
-  const [filterType, setFilterType] = useState<string>('');
+  const [filterType, setFilterType] = useState<string>('input');
+
+  const [searchVal, setSearchVal] = useState('');
+  const [filterParam, setFilterParam] = useState<string>('ip');
+  const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+
   const [current, setCurrent] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [searchVal, setSearchVal] = useState('');
-  const [filterParam, setFilterParam] = useState<string>('');
-  const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
-  const [filterOptions, setFilterOptions] = useState<any>({});
-  const [defaultValues, setDefaultValues] = useState<string[]>();
   const [total, setTotal] = useState<number>(0);
-  const [groupColumns, setGroupColumns] = useState<any>({});
-  const [initData, setInitData] = useState({});
+
   const { busiGroups } = useContext(CommonStateContext);
 
   const [collapse, setCollapse] = useState(localStorage.getItem('left_asset_list') === '1');
   const [width, setWidth] = useState(_.toNumber(localStorage.getItem('leftassetWidth') || 200));
   const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_asset_type') || '0'));
-  const [assetTypes, setAassetTypes] = useState<any[]>([]);
+  const [assetTypes, setAssetTypes] = useState<any[]>([]);
 
-  const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [expandedKeys, setExpandedKeys] = useState<any[]>();
   const [modifyType, setModifyType] = useState<boolean>(true);
   const [queryCondition, setQueryCondition] = useState<any>({});
-  const [selectColum, setSelectColum] = useState<any[]>([]);
-  const { resizableColumns,components, tableWidth } = useAntdResizableHeader({
-    columns: useMemo(() => selectColum, [selectColum]),
-    columnsState: {
-      persistenceType: 'localStorage',
-      persistenceKey: `dashboard-table-resizable-xh-asset-management`,
-    },
-  });
 
+  const filterOptions = {
+    status: [
+      { value: '1', label: '在线' },
+      { value: '0', label: '离线' },
+    ],
+    group_id: busiGroups.map((group) => {
+      return {
+        value: _.toString(group.id),
+        label: group.name,
+      };
+    }),
+    manufacturers: factories.map((factory) => {
+      return {
+        value: _.toString(factory.value),
+        label: factory.value,
+      };
+    }),
+  };
 
-  const history = useHistory();
-  
   const baseColumns: any[] = [
     {
       title: '资产名称',
@@ -221,7 +220,7 @@ export default function () {
       width: 120,
       ellipsis: true,
       sorter: (a, b) => {
-        return a.status - b.status;
+        return a.health - b.health;
       },
       render(value, record, index) {
         let label;
@@ -248,76 +247,6 @@ export default function () {
       },
     },
   ];
-
-  /**
-   * 选择左边，加载列属性
-   */
-  const getAssetTypeItems = (type: any, types?: any) => {
-    let dealTypes = types != null ? types : assetTypes;
-    if (type == '0') {
-      return loadAssetTypeAllColumns(dealTypes);
-    }
-
-    const extendType: any = dealTypes.find((v) => v.name === type);
-    if (extendType) {
-      //TODO：处理分组属性
-      const extra_items = new Array();
-      extendType.metrics?.forEach((element) => {
-        let newItem = {
-          name: element.metrics,
-          label: element.name,
-        };
-        extra_items.push(newItem);
-      });
-      let extra_props = extendType.extra_props;
-      for (let property in extra_props) {
-        let group = extra_props[property];
-        let columns = new Array();
-        if (group != null) {
-          for (let item of group.props) {
-            item.items.forEach((element) => {
-              columns.push({
-                title: element.label,
-                dataIndex: element.name,
-                width: '120px',
-                ellipsis: true,
-                align: 'center',
-              });
-            });
-            let newItem = {
-              name: property + '.' + item.name,
-              label: item.label,
-            };
-            extra_items.push(newItem);
-          }
-        }
-        groupColumns[property] = columns;
-        setGroupColumns({ ...groupColumns });
-      }
-
-      const cloumns = new Array();
-      extra_items.map((item) => {
-        cloumns.push({
-          title: item.label,
-          dataIndex: item.name,
-          align: 'center',
-          ellipsis: true,
-          render: (val, record, i) => {
-            if (item.name.split('.').length > 1) {
-              return renderItem(item.name, record, i);
-            } else {
-              return renderMetricsItem(item.name, record, i);
-            }
-          },
-        });
-      });
-
-      let columns = baseColumns.concat(cloumns);
-      setOptionColumns(_.cloneDeep(columns));
-      setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
-    }
-  };
-
 
   const fixColumns: any[] = [
     {
@@ -352,7 +281,8 @@ export default function () {
               showModal('update', record);
             }}
           />
-          <DeleteOutlined  title='删除'
+          <DeleteOutlined
+            title='删除'
             className='table-operator-area-warning'
             onClick={async () => {
               Modal.confirm({
@@ -372,13 +302,102 @@ export default function () {
     },
   ];
 
+  // 列处理
+  const [groupColumns, setGroupColumns] = useState<any>({});
+  const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => obj.title))));
+  const [optionColumns, setOptionColumns] = useState<any[]>(baseColumns); // 可选列
+  const [selectColumns, setSelectColumns] = useState<any[]>(baseColumns.concat(fixColumns));
+  const { resizableColumns, components, tableWidth } = useAntdResizableHeader({
+    columns: useMemo(() => selectColumns, [selectColumns]),
+    columnsState: {
+      persistenceType: 'localStorage',
+      persistenceKey: `dashboard-table-resizable-xh-asset-management`,
+    },
+  });
 
 
   useEffect(() => {
-    if (tableWrapperSize) {
-      setWrapperWidth(tableWrapperSize.width);
+    const { groupedColumns, optionalColumns } = getAssetTypeItems(typeId, assetTypes);
+    setGroupColumns(groupedColumns);
+    setOptionColumns(optionalColumns);
+    const newSelectedColumns = optionalColumns.filter(v => defaultValues?.includes(v.title))
+    setSelectColumns(newSelectedColumns.concat(fixColumns));
+  }, [typeId, assetTypes]);
+
+  /**
+   * 选择左边，计算列属性
+   */
+  const getAssetTypeItems = (
+    type: any,
+    types?: any,
+  ): {
+    optionalColumns: any[];
+    groupedColumns: {};
+  } => {
+    let dealTypes = types != null ? types : assetTypes;
+    if (type == '0') {
+      return loadAssetTypeAllColumns(dealTypes);
     }
-  }, [tableRef, tableWrapperSize]);
+
+    let groupedColumns = {};
+    let optionalColumns: any[] = [];
+    const extendType: any = dealTypes.find((v) => v.name === type);
+    if (extendType) {
+      //TODO：处理分组属性
+      const extra_items = new Array();
+      extendType.metrics?.forEach((element) => {
+        let newItem = {
+          name: element.metrics,
+          label: element.name,
+        };
+        extra_items.push(newItem);
+      });
+      let extra_props = extendType.extra_props;
+      for (let property in extra_props) {
+        let group = extra_props[property];
+        let columns = new Array();
+        if (group != null) {
+          for (let item of group.props) {
+            item.items.forEach((element) => {
+              columns.push({
+                title: element.label,
+                dataIndex: element.name,
+                width: '120px',
+                ellipsis: true,
+                align: 'center',
+              });
+            });
+            let newItem = {
+              name: property + '.' + item.name,
+              label: item.label,
+            };
+            extra_items.push(newItem);
+          }
+        }
+        groupedColumns[property] = columns;
+      }
+
+      const cloumns = new Array();
+      extra_items.map((item) => {
+        cloumns.push({
+          title: item.label,
+          dataIndex: item.name,
+          align: 'center',
+          ellipsis: true,
+          render: (val, record, i) => {
+            if (item.name.split('.').length > 1) {
+              return renderItem(item.name, record, i);
+            } else {
+              return renderMetricsItem(item.label, record, i);
+            }
+          },
+        });
+      });
+
+      optionalColumns = baseColumns.concat(cloumns);
+    }
+    return { groupedColumns, optionalColumns };
+  };
 
   function handelShowColumn(checkedValues) {
     let showColumns = new Array();
@@ -387,27 +406,13 @@ export default function () {
         showColumns.push(item);
       }
     });
-    setSelectColum(showColumns.concat(fixColumns));
-    tableRef.current
-    
+    setDefaultValues(showColumns.map((v) => v.title));
+    setSelectColumns(showColumns.concat(fixColumns));
   }
- 
-  useEffect(() => {
-    if (!modifyType) {
-      loadDataCenter();
-      setSecondAddButton(true);
-    } else {
-      setSecondAddButton(false);
-    }
-  }, [modifyType]);
 
   useEffect(() => {
-    let modelIds = Array.from(new Set(baseColumns.map((obj) => obj.title)));
-    setDefaultValues(modelIds);
-    setOptionColumns(baseColumns);
-    setSelectColum(baseColumns.concat(fixColumns));
     //来源数据字典
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       let arr = ['0'];
       const items = res.dat.map((v) => {
         return {
@@ -428,36 +433,9 @@ export default function () {
         arr.push(item.id);
       });
       setExpandedKeys(arr);
-      setAassetTypes(items);
-      filterOptions['type'] = res.dat.map((v) => {
-        return {
-          value: v.name,
-          label: v.name,
-        };
-      });
-      setFilterOptions({ ...filterOptions });
+      setAssetTypes(items);
       setTreeData(_.cloneDeep(treeData));
-      getAssetTypeItems(typeId, items);
     });
-    filterOptions['status'] = [
-      { value: '1', label: '在线' },
-      { value: '0', label: '离线' },
-    ];
-    filterOptions['group_id'] = busiGroups.map((group) => {
-      return {
-        value: '' + group.id,
-        label: group.name,
-      };
-    });
-    filterOptions['manufacturers'] = factories.map((factory) => {
-      return {
-        value: '' + factory.value,
-        label: factory.value,
-      };
-    });
-    setFilterOptions({ ...filterOptions });
-    setFilterType('input');
-    setFilterParam('ip');
   }, []);
 
   useEffect(() => {
@@ -528,9 +506,9 @@ export default function () {
     });
   };
 
-  const pupupContent = (
+  const popupContent = (
     <div style={{ maxHeight: '550px', overflow: 'scroll' }}>
-      <Checkbox.Group defaultValue={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
+      <Checkbox.Group value={defaultValues} style={{ width: '100%' }} onChange={handelShowColumn}>
         {optionColumns.map((item, index) => (
           <Row key={'option' + index} style={{ marginBottom: '5px' }}>
             <Col span={24}>
@@ -541,28 +519,9 @@ export default function () {
       </Checkbox.Group>
     </div>
   );
-  const loadDataCenter = () => {
-    getAssetDirectoryTree().then(({ dat, err }) => {
-      //默认所有的
-      if (err == '') {
-        let treeData: any[] = [
-          {
-            id: 0,
-            name: '全部资产',
-            count: 0,
-            children: dat,
-          },
-        ];
-        initData['directory_id'] = dat;
-        setInitData({ ...initData });
-        setTreeData(_.cloneDeep(treeData));
-      }
-    });
-  };
 
   const detailInfo = (id, data) => {
     let columns = groupColumns[id];
-    console.log(columns, data);
     return (
       <div className='other_infos'>
         <Table style={{ width: '700px' }} dataSource={data} className='other_table' columns={columns} pagination={false}></Table>
@@ -585,21 +544,28 @@ export default function () {
   const renderMetricsItem = (field, record, index) => {
     let vaue: any = null;
     for (let item of record.metrics_list) {
-      if (item.label == field) {
-        vaue = parseFloat(item.val).toFixed(1);
+      if (item.name == field) {
+        vaue = parseFloat(item.value).toFixed(1);
         break;
       }
     }
     return vaue;
   };
 
-  const loadAssetTypeAllColumns = (dealTypes) => {
+  const loadAssetTypeAllColumns = (
+    dealTypes,
+  ): {
+    optionalColumns: any[];
+    groupedColumns: {};
+  } => {
     const extra_items = new Array();
     const map = new Map();
 
+    let groupedColumns = {};
+    let optionalColumns: any[] = [];
+
     dealTypes.map((extendType) => {
       //TODO：处理分组属性
-
       extendType.metrics?.forEach((element) => {
         if (!map.has(element.name)) {
           let newItem = {
@@ -635,8 +601,7 @@ export default function () {
             }
           }
         }
-        groupColumns[property] = columns;
-        setGroupColumns({ ...groupColumns });
+        groupedColumns[property] = columns;
       }
     });
     const cloumns = new Array();
@@ -651,15 +616,14 @@ export default function () {
           if (item.name.split('.').length > 1) {
             return renderItem(item.name, record, i);
           } else {
-            return renderMetricsItem(item.name, record, i);
+            return renderMetricsItem(item.label, record, i);
           }
         },
       });
     });
 
-    let columns = baseColumns.concat(cloumns);
-    setOptionColumns(_.cloneDeep(columns));
-    setSelectColum(_.cloneDeep(baseColumns.concat(fixColumns)));
+    optionalColumns = baseColumns.concat(cloumns);
+    return { groupedColumns, optionalColumns };
   };
 
   const showModal = (action: string, formData: any) => {
@@ -709,67 +673,21 @@ export default function () {
               {!collapse ? <LeftOutlined /> : <RightOutlined />}
             </div>
             <div className='left_tree' style={{ display: 'inline-block' }}>
-              <div className='asset_organize_cls'>
-                组织树列表
-                <div style={{ margin: '0 10prx ' }}>
-                  {/* <Switch
-                  className='switch'
-                  checkedChildren='切至目录'
-                  disabled={!modifySwitch}
-                  
-                  defaultChecked={modifyType}
-                  unCheckedChildren='切至类型'
-                  size="small"
-                  onChange={(checked: boolean) => setModifyType(checked)}
-                /> */}
-                </div>
-              </div>
+              <div className='asset_organize_cls'>组织树列表</div>
               <Accordion
                 isAutoInitialized={true}
-                refreshLeft={refreshLeft}
                 treeData={treeData}
-                addButton={secondAddButton}
+                addButton={false}
                 addMenu={true}
                 expandAll={true}
                 selectedKey={typeId}
                 expandedKeys={expandedKeys}
                 handleClick={async (key: any, node: any, type) => {
-                  if (type == 'query' && !modifyType) {
-                    setTypeId(key);
-                    setRefreshKey(_.uniqueId('refreshKey_'));
-                  }
                   if (type == 'query' && modifyType) {
                     //资产类型操作
-                    getAssetTypeItems(key);
                     setTypeId(key);
                     localStorage.setItem('left_asset_type', key);
                     setRefreshKey(_.uniqueId('refreshKey_'));
-                  }
-                  if (key < 0) {
-                    let params = {
-                      name: '新目录',
-                      parent_id: node,
-                    };
-                    insertAssetDirectoryTree(params).then((res) => {
-                      loadDataCenter();
-                    });
-                  } else {
-                    if (type == 'delete') {
-                      deleteAssetDirectoryTree(key).then((res) => {
-                        message.success('删除成功！');
-                        loadDataCenter();
-                      });
-                    } else if (type == 'update') {
-                      updateAssetDirectoryTree(node).then((res) => {
-                        message.success('修改成功！');
-                        loadDataCenter();
-                      });
-                    } else if (type == 'move') {
-                      moveAssetDirectoryTree(node).then((res) => {
-                        message.success('修改成功！');
-                        loadDataCenter();
-                      });
-                    }
                   }
                 }}
               />
@@ -843,7 +761,7 @@ export default function () {
                   </Button>
                 </div>
                 <div>
-                  <Popover placement='bottom' content={pupupContent} trigger='click' className='filter_columns'>
+                  <Popover placement='bottom' content={popupContent} trigger='click' className='filter_columns'>
                     <Button icon={<UnorderedListOutlined />}>显示列</Button>
                   </Popover>
                 </div>

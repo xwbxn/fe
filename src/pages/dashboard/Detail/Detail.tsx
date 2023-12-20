@@ -114,11 +114,9 @@ export default function DetailV2(props: IProps) {
   const isAuthorized = !_.some(roles, (item) => item === 'Guest') && !isPreview;
   const [dashboardMeta, setDashboardMeta] = useGlobalState('dashboardMeta');
   let { id } = useParams<URLParam>();
-  const [home] = useLocalStorageState('HOME_URL', {
-    defaultValue: '1',
-  });
+
   if (isHome) {
-    id = home;
+    id = _.toString(profile.board_id) || '1'
   }
   const query = queryString.parse(useLocation().search);
   if (isBuiltin) {
@@ -196,6 +194,16 @@ export default function DetailV2(props: IProps) {
   const stopAutoRefresh = () => {
     refreshRef.current?.closeRefresh();
   };
+  const handlePanelChange = (ids: any[]) => {
+    const newPanels = panels.map((p) => {
+      p.hidden = !ids.includes(p.id);
+      return p;
+    });
+    setPanels(newPanels);
+    handleUpdateDashboardConfigs(dashboard.id, {
+      configs: panelsMergeToConfigs(dashboard.configs, newPanels),
+    });
+  };
 
   useEffect(() => {
     refresh();
@@ -266,6 +274,7 @@ export default function DetailV2(props: IProps) {
           handleVariableChange={handleVariableChange}
           stopAutoRefresh={stopAutoRefresh}
           variableConfig={variableConfig}
+          handlePanelChange={handlePanelChange}
         />
       }
     >
@@ -280,6 +289,7 @@ export default function DetailV2(props: IProps) {
             <Panels
               dashboardId={id}
               isPreview={isPreview}
+              isHome={isHome}
               editable={editable}
               panels={panels}
               setPanels={setPanels}

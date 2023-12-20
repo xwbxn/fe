@@ -42,21 +42,20 @@ html {
   margin-right: 5px;
   color: #fff;
 }
-.down_load_button {    
+.down_load_button {
   span {
     color: #2977d7;
-    text-decoration:underline;
+    text-decoration: underline;
   }
 }
 .ant-modal-header {
   background-color: #2977d7;
   padding: 6px 20px;
   .ant-modal-title {
-     color: #fff;
-  }  
+    color: #fff;
+  }
 }
 .ant-upload-select-text {
-
 }
 .ant-modal-footer {
   display: flex;
@@ -69,7 +68,7 @@ html {
 }
 .App {
   display: block;
-  color: #333752;
+  color: #767676;
   // overflow: hidden;
   background: #f9f9f9;
   font-family: @font-family;
@@ -79,14 +78,15 @@ html {
   }
 
   .content-box {
-    height: calc(~'100vh - 45px');
+    height: calc(~'100vh');
+    padding-top: 60px;
     .content {
       flex: 1;
       height: 100%;
       overflow: auto;
     }
   }
-  
+
   .dot-block {
     padding: 16px;
     border: 1px dashed @primary-color;
@@ -404,16 +404,16 @@ input::placeholder {
   }
 }
 .ant-modal-confirm-btns {
-   text-align: center !important;
-   .ant-btn-default {
-      border-radius: 8px;
-      width: 70px;
-   }
-   .ant-btn-primary {
-      background-color: #2977d7 !important;
-      border-radius: 8px;
-      width: 70px;
-   }
+  text-align: center !important;
+  .ant-btn-default {
+    border-radius: 8px;
+    width: 70px;
+  }
+  .ant-btn-primary {
+    background-color: #2977d7 !important;
+    border-radius: 8px;
+    width: 70px;
+  }
 }
 .ant-checkbox-inner {
   top: 1px !important;
@@ -424,70 +424,75 @@ input::placeholder {
 }
 
 .special_alert_dialog {
-   width: 150px !important;
-   height: 125px !important;
-   position: absolute;
-   background-color: #fff;
-   right: 20px;
-   bottom: 5px;
-   z-index: 9999;
-   border: 4px solid #cecece;
-   border-radius: 4px;
-   display: block;
-   .close_button {
-      display: flex;
-      height: 15px;   
-      background-color: dimgrey; 
+  width: 150px !important;
+  height: 125px !important;
+  position: absolute;
+  background-color: #fff;
+  right: 20px;
+  bottom: 5px;
+  z-index: 9999;
+  border: 4px solid #cecece;
+  border-radius: 4px;
+  display: block;
+  .close_button {
+    display: flex;
+    height: 15px;
+    background-color: dimgrey;
+    color: #fff;
+    padding-left: 2%;
+    font-size: 12px;
+    line-height: 15px;
+    span {
+      cursor: pointer;
+      position: absolute;
+      right: 0px;
+      background-color: gray;
+      border-radius: 50%;
+      width: 14px;
+      padding-left: 3px;
+      height: 14px;
       color: #fff;
-      padding-left: 2%;
-      font-size: 12px;
-      line-height: 15px;
-      span {
-        cursor: pointer;
-        position: absolute;
-        right: 0px;  
-        background-color: gray;
-        border-radius: 50%;
-        width: 14px;
-        padding-left: 3px;
-        height: 14px;
-        color: #fff;
-      }
-   }
-   .alert_content {
-       width: 100%;
-       display: block;
+    }
+  }
+  .alert_content {
+    width: 100%;
+    display: block;
 
-       background-color: #2F84ED;       
-       .level {
-        margin-left: 14%;
-        width: 70%;
-        height: 93px;
-        line-height: 110px;
-        font-size: 25px;
-        font-weight: 900;
-        padding-left: 4px;
-        text-align: center;
-        justify-items: center;
-        border-radius: 50%;
-        color: #000;
-        background-image: url(/public/music/flash.gif);
-        background-size: 100% 100%;
-        background-position: 0%;
-       }
-       .detail {
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-            padding-left: 5px;
-            text-align: center;
-            margin-top: -9px;
-            cursor: pointer;
-       }
-   }
+    background-color: #2f84ed;
+    .level {
+      margin-left: 14%;
+      width: 70%;
+      height: 93px;
+      line-height: 110px;
+      font-size: 25px;
+      font-weight: 900;
+      padding-left: 4px;
+      text-align: center;
+      justify-items: center;
+      border-radius: 50%;
+      color: #000;
+      background-image: url(/public/music/flash.gif);
+      background-size: 100% 100%;
+      background-position: 0%;
+    }
+    .detail {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      padding-left: 5px;
+      text-align: center;
+      margin-top: -9px;
+      cursor: pointer;
+    }
+  }
 }
 
 .icon {
   fill: currentColor;
   overflow: hidden;
+}
+
+.ant-table-tbody > tr.ant-table-row:hover > td,
+.ant-table-tbody > tr > td.ant-table-cell-row-hover {
+  background-color: #f4f9ff;
 }

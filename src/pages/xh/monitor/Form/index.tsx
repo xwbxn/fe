@@ -4,7 +4,7 @@ import React, { Fragment, useContext, useEffect, useRef, useState } from 'react'
 import { Button, Card, Col, Form, Input, InputNumber, InputRef, message, Modal, Radio, Row, Select, Space, Table,  TableProps  } from 'antd';
 import { useTranslation } from 'react-i18next';
 import _, { concat, random, values } from 'lodash';
-import { getAssetsIdents, getAssetsStypes, getAssetsByCondition } from '@/services/assets';
+import { getAssetsIdents, getAssetstypes, getAssetsByCondition } from '@/services/assets';
 import { getMonitorUnit, createXhMonitor, getXhMonitor, updateXhMonitor } from '@/services/manage';
 import PromBox from './PromBox';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -77,7 +77,7 @@ const [operateScript, setOperateScript] = useState<any>({
       limit: 10000,
     };
 
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const types = res.dat.map((v) => {
         return {
           value: v.name,
