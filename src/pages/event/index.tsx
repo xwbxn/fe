@@ -67,7 +67,7 @@ const Event: React.FC = () => {
   const { busiGroups, feats } = useContext(CommonStateContext);
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [searchVal, setSearchVal] = useState<any>(null);
-  const [filterParam, setFilterParam] = useState<string|null>(null);
+  const [filterParam, setFilterParam] = useState<string>("");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -165,7 +165,7 @@ const Event: React.FC = () => {
             defaultValue={filterParam}
             onChange={(value) => {
               if(value==undefined){
-                setFilterParam(null);
+                setFilterParam("");
                 setSearchVal(null)
               }else{
                 cardQueryFilter.forEach((item) => {

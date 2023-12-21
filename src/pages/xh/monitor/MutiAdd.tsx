@@ -57,7 +57,7 @@ export default function (props: { initialValues: object; initParams: object; mod
 
   useEffect(() => {
 
-    getAssetsStypes().then((res) => {
+    getAssetstypes().then((res) => {
       const items = res.dat.map((v) => {
         return {
           value: v.name,

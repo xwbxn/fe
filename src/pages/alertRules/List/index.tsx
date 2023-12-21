@@ -61,7 +61,7 @@ interface Filter {
 
 export default function List(props: ListProps) {
   const { bgid, assetid } = props;
-  // const { t } = useTranslation('alertRules');
+  const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
   const [params, setParams] = useState<any>({
