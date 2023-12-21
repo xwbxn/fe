@@ -101,24 +101,7 @@ const Event: React.FC = () => {
     setFilterOptions({...filterOptions})
   }, []);
   const columns: any = [
-    {
-      title: '显示级别',
-      dataIndex: 'severity',
-      align: "center",
-      width: 60,
-      render(val,record) {
-        return (
-          <>
-          <Tag  color={SeverityColor[val-1]}>
-             {SeverityFont[val-1]} 
-            </Tag>
-          </>
-        );
-      },
-      sorter: (a, b) =>{
-        return (a.rule_name).localeCompare(b.rule_name)
-      },
-    },
+    
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -174,6 +157,24 @@ const Event: React.FC = () => {
       },
       sorter: (a, b) =>{
         return (a.rule_config_cn).localeCompare(b.rule_config_cn)
+      },
+    },
+    {
+      title: '告警级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 60,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
       },
     },
     {

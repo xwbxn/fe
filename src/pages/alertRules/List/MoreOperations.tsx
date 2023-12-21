@@ -28,7 +28,7 @@ interface MoreOperationsProps {
   bgid: number;
   selectRowKeys: React.Key[];
   selectedRows: any[];
-  getAlertRules: (object?) => void;
+  refreshRules: (object?) => void;
 }
 
 const exportIgnoreAttrsObj = {
@@ -46,7 +46,7 @@ const exportIgnoreAttrsObj = {
 
 export default function MoreOperations(props: MoreOperationsProps) {
   const { t } = useTranslation('alertRules');
-  const { bgid, selectRowKeys, selectedRows, getAlertRules } = props;
+  const { bgid, selectRowKeys, selectedRows, refreshRules } = props;
   const [isModalVisible, setisModalVisible] = useState<boolean>(false);
   const { groupedDatasourceList, datasourceCateOptions } = useContext(CommonStateContext);
 
@@ -60,7 +60,7 @@ export default function MoreOperations(props: MoreOperationsProps) {
               onClick={() => {
                 Import({
                   busiId: bgid,
-                  refreshList: getAlertRules,
+                  refreshList: refreshRules,
                   groupedDatasourceList,
                   datasourceCateOptions,
                 });
@@ -94,12 +94,12 @@ export default function MoreOperations(props: MoreOperationsProps) {
                     onOk: () => {
                       deleteStrategy(selectRowKeys as number[], bgid).then(() => {
                         message.success('删除成功');
-                        getAlertRules();
+                        refreshRules(2);
                       });
                     },
                   });
                 } else {
-                  message.warning('请选择要删除的记录');
+                  message.warning(' 请选择要删除的告警规则');
                 }
               }}
             >
@@ -109,7 +109,7 @@ export default function MoreOperations(props: MoreOperationsProps) {
               className='ant-dropdown-menu-item'
               onClick={() => {
                 if (selectRowKeys.length == 0) {
-                  message.warning('未选择');
+                  message.warning('请选择要更新的告警规则');
                   return;
                 }
                 setisModalVisible(true);
@@ -146,14 +146,13 @@ export default function MoreOperations(props: MoreOperationsProps) {
             );
             if (!res.err) {
               message.success('修改成功！');
-              getAlertRules();
+              refreshRules(2);
               setisModalVisible(false);
             } else {
               message.error(res.err);
             }
           } else {
             setisModalVisible(false);
-            debugger;
 
           }
         }}

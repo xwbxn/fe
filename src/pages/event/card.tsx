@@ -9,7 +9,7 @@ import queryString from 'query-string';
 import { useTranslation } from 'react-i18next';
 import { getAlertCards, getCardDetail } from '@/services/warning';
 import { CommonStateContext } from '@/App';
-import { SeverityColor, deleteAlertEventsModal } from './index';
+import { SeverityColor,SeverityFont, deleteAlertEventsModal } from './index';
 import CardLeft from './cardLeft';
 import './index.less';
 import { getStrategiesByRuleIds } from '@/services/warning';
@@ -102,18 +102,7 @@ function Card(props: Props, ref) {
   };
 
   const columns:any = [
-    {
-      title: '规则名称',
-      dataIndex: 'rule_name',
-      width: 150,
-      render(title, { id, tags }) {
-        return (
-          <>
-          <Link to={`/alert-cur-events/${id}`} >{title}</Link>
-          </>
-        );
-      },
-    },
+   
     {
       title: '资产名称',
       dataIndex: 'asset_name',
@@ -141,6 +130,24 @@ function Card(props: Props, ref) {
       width: 180,
       render: (value) => {
         return value;
+      },
+    },
+    {
+      title: '告警级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 100,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
       },
     },
     // {

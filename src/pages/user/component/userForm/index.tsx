@@ -210,7 +210,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
       </Form.Item>
       </Col>
       <Col span={12} key={"item-" + 8}>
-        <Form.Item label={'所属用户组'} name='group_name'>
+        <Form.Item label={'所属团队'} name='group_name'>
          <Select mode='multiple' options={treeData}>
 
           </Select>

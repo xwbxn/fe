@@ -63,7 +63,7 @@ const EventDetailPage: React.FC = () => {
       render(content, { rule_id }) {        
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
           history.push("/alert-rules/edit/"+rule_id+"?mode=view",{
-             from:
+             from:'0000'
           });
         }}>{content}</div>;
       },

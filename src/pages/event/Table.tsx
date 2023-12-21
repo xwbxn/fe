@@ -50,24 +50,7 @@ export default function TableCpt(props: IProps) {
   const { t } = useTranslation('AlertCurEvents');
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const columns:any = [
-    {
-      title: '显示级别',
-      dataIndex: 'severity',
-      align: "center",
-      width: 60,
-      render(val,record) {
-        return (
-          <>
-          <Tag  color={SeverityColor[val-1]}>
-             {SeverityFont[val-1]} 
-            </Tag>
-          </>
-        );
-      },
-      sorter: (a, b) =>{
-        return (a.rule_name).localeCompare(b.rule_name)
-      },
-    },
+    
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -123,7 +106,25 @@ export default function TableCpt(props: IProps) {
       sorter: (a, b) =>{
         return (a.rule_config_cn).localeCompare(b.rule_config_cn)
       },
-    },    
+    }, 
+    {
+      title: '告警级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 60,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
+    },
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',

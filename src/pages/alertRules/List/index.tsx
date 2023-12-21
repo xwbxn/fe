@@ -67,6 +67,7 @@ export default function List(props: ListProps) {
   const [params, setParams] = useState<any>({
     limit: 10, page: 1
   });
+  const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
@@ -215,8 +216,7 @@ export default function List(props: ListProps) {
               history.push(`alert-rules/edit/${record.id}?mode=view`);
             }} />
             <EditOutlined title='编辑'
-              onClick={() => {
-               
+              onClick={() => {               
                 history.push(`alert-rules/edit/${record.id}`);
               }}
             />
@@ -231,6 +231,7 @@ export default function List(props: ListProps) {
                       deleteStrategy([record.id], bgid).then(() => {
                         message.success('删除成功');
                         getAlertRules(params);
+                        setSelectRowKeys([]);
                       });
                   },
 
@@ -339,10 +340,11 @@ export default function List(props: ListProps) {
       }
       getAlertRules(params);
     }
-  }, [bgid, searchVal]);
+  }, [bgid, searchVal,refreshLeft]);
 
   if (!bgid) return null;
   const filteredData = filterData();
+
 
   return (
     <div className='alert-rules-list-container' style={{ height: '100%', overflowY: 'auto' }}>
@@ -412,7 +414,10 @@ export default function List(props: ListProps) {
             >
              添加
             </Button>
-            <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} getAlertRules={(getAlertRules)} />
+            <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} refreshRules={(e)=>{
+              debugger;
+              setRefreshLeft(_.uniqueId('refresh_left'));
+            }} />
           </Space>
         </Col>
       </Row>

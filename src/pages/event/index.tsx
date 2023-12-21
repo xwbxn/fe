@@ -39,7 +39,7 @@ import moment from 'moment';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
-export const SeverityFont = ['致命', '一般', '轻微', '已修复'];
+export const SeverityFont = ['S1', 'S2', 'S3', '已修复'];
 export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) {
   confirm({
     title: t('delete_confirm.title'),
