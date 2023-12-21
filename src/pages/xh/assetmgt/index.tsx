@@ -77,14 +77,15 @@ export default function () {
   const [selectedAssets, setSelectedAssets] = useState<number[]>([]);
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
-  const [filterType, setFilterType] = useState<string>('input');
-
-  const [searchVal, setSearchVal] = useState('');
-  const [filterParam, setFilterParam] = useState<string>('ip');
+  const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
+  const [filterType, setFilterType] = useLocalStorage<any>('asset_filter_type',null);
+  const [current, setCurrent] = useLocalStorage("asset_current",1);
+  const [pageSize, setPageSize] = useLocalStorage("asset_current_page",10);
+  const [searchVal, setSearchVal] = useLocalStorage<any>('asset_filter_value',null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('asset_filter_param','ip');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
 
-  const [current, setCurrent] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+
   const [total, setTotal] = useState<number>(0);
 
   const { busiGroups } = useContext(CommonStateContext);
@@ -147,6 +148,11 @@ export default function () {
       align: 'center',
       width: 120,
       ellipsis: true,
+      render(value, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push(`/xh/assetmgt/add?mode=view&id=${record.id}`);
+        }}>{value}</div>;
+      },
       sorter: (a, b) => {
         return a.ip.localeCompare(b.ip);
       },
@@ -686,6 +692,7 @@ export default function () {
                   if (type == 'query' && modifyType) {
                     //资产类型操作
                     setTypeId(key);
+                    setCurrent(1);
                     localStorage.setItem('left_asset_type', key);
                     setRefreshKey(_.uniqueId('refreshKey_'));
                   }

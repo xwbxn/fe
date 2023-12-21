@@ -20,7 +20,7 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
   const [assetsList, setAssetsList] = useState<string[]>(assets);
   const [tagsList, setTagsList] = useState<string[]>([]);
   const [fileName, setFileName] = useState<string>();
-  const [fileList, setFileList] = useState<any>([]);
+  const [fileList, setFileList] = useState<any[]>([]);
   const detailProp = operateType === OperateType.UnbindTag ? tagsList : busiGroups;
   const [treeData, setTreeData] = useState([]);
   const [ids,setIds] =useState<string>();
@@ -413,14 +413,18 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
 
      
     if(operateType === OperateType.AssetBatchImport){
-      
+      if(fileList==null || fileList.length==0){
+        message.error("请选择要导入的文件")
+        return 
+      }
       let formData = new FormData();
       formData.append("file", fileList[0]);
       let url = "/api/n9e/xh/asset/import-xls";
       console.log("批量导入",url);
       importXhAssetSetData(url, formData).then((res) => {
         message.success('批量导入成功');
-        setFileName("")
+        setFileName("");
+        setFileList([]);
         reloadList(null,operateType);
       })   
     
@@ -529,6 +533,9 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       onOk={submitForm}
       onCancel={() => {
         setOperateType(OperateType.None);
+        setFileName("")
+        // form.setFieldsValue();
+        setFileList([])
         form.resetFields();
       }}
     >

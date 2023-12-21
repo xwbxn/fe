@@ -42,7 +42,7 @@ let queryFilter = [
   { name: 'monitoring_name', label: '监控名称', type: 'input' },
   { name: 'asset_name', label: '资产名称', type: 'input' },
   { name: 'status', label: '监控状态', type: 'select' },
-  { name: 'is_alarm', label: '是否启用告警', type: 'select' },
+  // { name: 'is_alarm', label: '是否启用告警', type: 'select' },
   { name: 'asset_ip', label: 'IP地址', type: 'input' },
   // { name: 'asset_type', label: '资产类型', type: 'select' },
 ]
@@ -128,7 +128,7 @@ export default function () {
       render(value, record, index) {
         let name = assetInfo[value]?.ip;
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + value + "&action=asset");
+          history.push("/xh/assetmgt/add?mode=view&id=" + value);
         }}>{name}</div>;
       },
       sorter: (a, b) => {
@@ -632,7 +632,7 @@ export default function () {
               </div>
               <div>
                 <Popover placement="bottom" content={pupupContent} trigger="click" className='filter_columns' >
-                  <Button className='show_columns' >显示列</Button>
+                  <Button className='show_columns'  icon={<UnorderedListOutlined />} >显示列</Button>
                   &nbsp; &nbsp; &nbsp;
                 </Popover>
               </div>

@@ -61,35 +61,29 @@ const EventDetailPage: React.FC = () => {
       label: '规则名称',
       key: 'rule_name',
       render(content, { rule_id }) {        
-        return content;
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/alert-rules/edit/"+rule_id+"?mode=view",{
+             from:
+          });
+        }}>{content}</div>;
       },
     },
     {
       label: '资产名称',
       key: 'asset_name',
       render: (asset_name,{ asset_id }) => {
-        return (<Link
-              to={{
-                pathname: `/xh/assetmgt/add?mode=view&id=${asset_id}`,
-              }}
-              target='_blank'
-            >
-              {asset_name}
-            </Link>)
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + asset_id + "&action=asset");
+        }}>{asset_name}</div>;
       },
     },
     {
       label: '资产IP',
       key: 'asset_ip',
       render: (asset_ip,{ asset_id }) => {
-        return (<Link
-          to={{
-            pathname: `/xh/assetmgt/add?mode=view&id=${asset_id}`,
-          }}
-          target='_blank'
-        >
-          {asset_ip}
-        </Link>)
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/assetmgt/add?mode=view&id="+ asset_id);
+        }}>{asset_ip}</div>;
       },
     },
     {

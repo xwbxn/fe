@@ -47,7 +47,7 @@ export default function Edit() {
   }, [alertRuleId]);
 
   return (
-    <PageLayout title={t('title')} showBack backPath='/alert-rules'>
+    <PageLayout title={t('title')} showBack >
       <Form type={mode==="view"?3:(mode=== 'clone' ? 2 : 1)} initialValues={values} />
     </PageLayout>
   );

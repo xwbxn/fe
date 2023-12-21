@@ -282,7 +282,7 @@ const [operateScript, setOperateScript] = useState<any>({
             <Row gutter={10}>
               <Col span={8}>
                 <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
-                  <Input placeholder='请输入资产名称' />
+                  <Input placeholder='请输入监控名称' />
                 </Form.Item>
               </Col>
               <Col span={8}>

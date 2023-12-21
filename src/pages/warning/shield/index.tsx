@@ -20,6 +20,7 @@ import { ColumnsType } from 'antd/lib/table';
 import { CloseCircleOutlined, ExclamationCircleOutlined, SearchOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import _ from 'lodash';
+import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation, Link } from 'react-router-dom';
 import queryString from 'query-string';
@@ -336,6 +337,25 @@ const Shield: React.FC = () => {
           setCurBusiId={(newId) => {
             history.push(`/alert-mutes?id=${newId}`);
             commonState.setCurBusiId(newId);
+          }}
+          renderHeadExtra={() => {
+            return (
+              <div>
+                <div className='left-area-group-title'>预制筛选</div>
+                <div
+                  className={classNames({
+                    'n9e-biz-group-item': true,
+                    active: bgid === -1,
+                  })}
+                  onClick={() => {
+                    commonState.setCurBusiId(-1);
+                    history.push(`/alert-mutes?id=-1`);
+                  }}
+                >
+                  {'全部对象'}
+                </div>
+              </div>
+            );
           }}
         />
         {bgid ? (

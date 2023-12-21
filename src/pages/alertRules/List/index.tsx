@@ -117,7 +117,7 @@ export default function List(props: ListProps) {
       align: "center",
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
         }}>{name}</div>;
       },
       sorter: (a, b) => {
