@@ -39,6 +39,7 @@ import moment from 'moment';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
+export const SeverityFont = ['致命', '一般', '轻微', '已修复'];
 export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) {
   confirm({
     title: t('delete_confirm.title'),
@@ -66,7 +67,7 @@ const Event: React.FC = () => {
   const { busiGroups, feats } = useContext(CommonStateContext);
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [searchVal, setSearchVal] = useState<any>(null);
-  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterParam, setFilterParam] = useState<string|null>(null);
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -89,7 +90,8 @@ const Event: React.FC = () => {
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
-  const [filterType, setFilterType] = useState<string|null>(localStorage.getItem('current_query_type') ?_.toString(localStorage.getItem('current_alert_display')):null);
+  // const [filterType, setFilterType] = useState<string|null>(localStorage.getItem('current_query_type') ?_.toString(localStorage.getItem('current_alert_display')):null);
+  const [filterType, setFilterType] = useState<string|null>(null);
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
@@ -162,15 +164,20 @@ const Event: React.FC = () => {
             allowClear
             defaultValue={filterParam}
             onChange={(value) => {
-              cardQueryFilter.forEach((item) => {
-                if (item.name == value) {
-                  setFilterType(item.type);
-                }
-              })
-
-              setFilterParam(value);
-              localStorage.setItem('current_query_type', "value")
-              setSearchVal(null)
+              if(value==undefined){
+                setFilterParam(null);
+                setSearchVal(null)
+              }else{
+                cardQueryFilter.forEach((item) => {
+                  if (item.name == value) {
+                    setFilterType(item.type);
+                  }
+                })  
+                setFilterParam(value);
+                localStorage.setItem('current_query_type',value)
+                setSearchVal(null)
+              }
+              
             }}>
             {cardQueryFilter.map((item, index) => (
               <Select.Option value={item.name} key={index}>{item.label}</Select.Option>

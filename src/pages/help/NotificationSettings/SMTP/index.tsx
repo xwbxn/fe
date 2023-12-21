@@ -44,7 +44,7 @@ export default function index() {
           />
         </Form.Item>
         <div>
-          <Button
+          <Button 
             type='primary'
             onClick={() => {
               form.validateFields().then((values) => {

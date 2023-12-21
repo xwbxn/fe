@@ -25,13 +25,14 @@ import Form from './Form';
 export default function Edit() {
   const { t } = useTranslation('alertRules');
   const { id } = useParams<{ id: string }>();
-  const alertRuleId = Number(id);
+  const alertRuleId = Number(id.split("?")[0]);
   const [values, setValues] = useState<any>({});
   const { search } = useLocation();
   const { mode } = queryString.parse(search);
 
   useEffect(() => {
     window.localStorage.removeItem('select_monitor_asset_id');
+    console.log('alertRuleId',alertRuleId);
     if (alertRuleId) {      
       getWarningStrategy(alertRuleId).then((res) => {
         res.dat.rule_config =JSON.parse(res.dat["rule_config_fe"]);

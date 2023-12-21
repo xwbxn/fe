@@ -315,13 +315,14 @@ export default function (props: { initialValues: object; initParams: object; mod
                       {assetInfo.name}
                     </Link>
                   </div>
-                  <div className='theme1'><div className='title'>资产类型：</div>{assetInfo.type}</div>
-                  <div className='theme1'><div className='title'>IP地址：</div>{assetInfo.ip}</div>
-                  <div className='theme1'><div className='title'>厂商：</div>{assetInfo.manufacturers}</div>
+                  
+                  <div className='theme1'><div className='title'>资产类型：</div><span className='content'>{assetInfo.type}</span></div>
+                  <div className='theme1'><div className='title'>IP地址：</div><span className='content'>{assetInfo.ip}</span></div>
+                  <div className='theme1'><div className='title'>厂商：</div><span className='content'>{assetInfo.manufacturers}</span></div>
                 </div>
                 <div className='row'>
-                  <div className='theme1'><div className='title'>资产位置：</div>{assetInfo.position}</div>
-                  <div className='theme1'><div className='title'>状态：</div>
+                  <div className='theme1'><div className='title'>资产位置：</div><span className='content' title={assetInfo.position}>{assetInfo.position}</span></div>
+                  <div className='theme1'><div className='title'>资产状态：</div>
                     {assetInfo.health == 1 
                     ? <Tag icon={<CheckCircleOutlined />} color='success'>在线</Tag> 
                     : <Tag icon={<CloseCircleOutlined />} color='error'>离线</Tag>}
@@ -330,6 +331,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                   <div className='theme1'></div>
                 </div>
               </div>
+
             </div>            
             {assetItems!=null && assetItems.length > 0 && (            
             <div className='party_info'>

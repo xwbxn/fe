@@ -1,6 +1,6 @@
 const zh_CN = {
-  title: '通知模板管理',
-  list: '通知模板',
+  title: '通知模板',
+  list: '列表',
   channel: '标识',
   contact_key_name: '联系方式名称',
   contact_key: '联系方式标识',

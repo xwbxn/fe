@@ -54,7 +54,8 @@ const Resource: React.FC = () => {
   const [teamId, setTeamId] = useState(0);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([0]);
   const [action, setAction] = useState<ActionType>();
-  const [userId, setUserId] = useState<string>('');
+  // const [userId, setUserId] = useState<string>('');
+  const [userId, setUserId] = useState<any>();
   const [query, setQuery] = useState<string>('');
   const [status, setStatus] = useState<number>();
   const [role, setRole] = useState<string>();
@@ -233,10 +234,10 @@ const Resource: React.FC = () => {
             onClick={e => {
 
             }} />
-          <EditOutlined className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
+          <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
 
           </EditOutlined>
-          <UndoOutlined className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
+          <UndoOutlined title='重置密码' className='oper-name' onClick={() => handleClick(ActionType.Reset, record.id, "member")}>
             {t('account:password.reset')}
           </UndoOutlined>
           <a className='oper-name'
@@ -254,7 +255,7 @@ const Resource: React.FC = () => {
               });
             }}
           >
-            <DeleteOutlined />
+            <DeleteOutlined  className='table-operator-area-warning' title='删除'/>
           </a>
         </>
       ),
@@ -268,7 +269,7 @@ const Resource: React.FC = () => {
   const handleClick = (type: ActionType, id: any, operate: string) => {
     setAction(type);
     setActionType(operate);
-    setTeamId(id > 0 ? id : undefined)
+    setUserId(id > 0 ? id : undefined)
     setVisible(true);
   };
 
@@ -394,7 +395,7 @@ const Resource: React.FC = () => {
       console.log("status",status)
     }
     
-    return getUserList(params).then((res) => {
+    return getUserInfoList(params).then((res) => {
       // let orgIds  =Array.from(new Set(res.dat.list.map(obj => obj.organization_id)))
       // getOrganizationsByIds(orgIds).then(({dat}) => {
       //    dat.forEach(item => {
@@ -442,7 +443,7 @@ const Resource: React.FC = () => {
       <div style={{ display: 'flex', width: '100%' }} className='user_management'>
         <div style={{ width: '300px', display: 'list-item' }}>
           <div className='sub-title'>
-            用户组列表
+            团队列表
             <Button
               size='small'
               type='link'
@@ -635,7 +636,7 @@ const Resource: React.FC = () => {
                 loadingTree();
               }
             }}
-            userId={"" + userId}
+            userId={userId > 0 ? "" + userId : undefined}
             teamId={teamId > 0 ? "" + teamId : undefined}
           />
           <OperationModal

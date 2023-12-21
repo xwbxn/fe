@@ -9,6 +9,7 @@ import { OperateType } from './index';
 import { exportTemplet } from '@/services/assets/asset';
 import Icon from '@ant-design/icons';
 import moment from 'moment';
+import './style.less'
 import { getOrganizationTree,importXhAssetSetData } from '@/services/assets';
 
 export const OperationModal = ({ operateType, setOperateType, assets, names, reloadList }) => {
@@ -38,15 +39,20 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       setFileList([])
     },
     beforeUpload: file => {
-      // console.log(file)
+      console.log(file)
       let { name } = file;
       var fileExtension = name.substring(name.lastIndexOf('.') + 1);//截取文件后缀名
-      setFileName(name);
-      let newList = new Array();
-      newList.push(file)
-      fileList.concat(...newList);
-      setFileList(newList)
-      return false;
+      if(fileExtension=="xls" || fileExtension=="xlsx"){
+        setFileName(name);
+        let newList = new Array();
+        newList.push(file)
+        fileList.concat(...newList);
+        setFileList(newList)
+        return false;
+      }else{
+        message.error("文件格式错误，系统支持excel格式xls、xlsx");
+      }
+      
     },
     fileList,
   };
@@ -187,7 +193,13 @@ export const OperationModal = ({ operateType, setOperateType, assets, names, rel
       render() {
         return (
         <>
-      
+         <>
+           {assets.length > 0 ? (
+              <div className='tip_title'>确认要导出所选中的资产记录吗?</div>
+           ):(
+               <div className='tip_title' >确认要导出所有的资产记录吗？</div>
+           )}         
+         </>
          <Radio.Group  style={{width:'100%',display:"flex",justifyContent:'center'}} defaultValue={ftype}>
                <Radio value={1} onChange={e=>{                  
                   setFtype(parseInt(""+e.target.value))

@@ -102,6 +102,7 @@ export interface ModalProps {
   userType?: string;
   onClose?: any;
   action: ActionType;
+  existUserIds?:any;
   userId?: string;
   teamId?: string;
   memberId?: string;
@@ -121,6 +122,7 @@ export interface TeamProps {
   teamId?: string;
   businessId?: string;
   onSelect?: any;
+  userIds?:any;
   action?: ActionType;
 }
 export interface UserAndPasswordFormProps {

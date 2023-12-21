@@ -66,7 +66,7 @@ export default function MoreOperations(props: MoreOperationsProps) {
                 });
               }}
             >
-              <span>{t('batch.import.title')}</span>
+              <span>{'导入告警规则'}</span>
             </li>
             <li
               className='ant-dropdown-menu-item'
@@ -79,43 +79,43 @@ export default function MoreOperations(props: MoreOperationsProps) {
                     data: JSON.stringify(exportData, null, 2),
                   });
                 } else {
-                  message.warning(t('batch.not_select'));
+                  message.warning('请至少选择一条记录');
                 }
               }}
             >
-              <span>{t('batch.export.title')}</span>
+              <span>{'导出告警规则'}</span>
             </li>
             <li
               className='ant-dropdown-menu-item'
               onClick={() => {
                 if (selectRowKeys.length) {
                   Modal.confirm({
-                    title: t('batch.delete_confirm'),
+                    title: "确定要批量删除？",
                     onOk: () => {
                       deleteStrategy(selectRowKeys as number[], bgid).then(() => {
-                        message.success(t('batch.delete.success'));
+                        message.success('删除成功');
                         getAlertRules();
                       });
                     },
                   });
                 } else {
-                  message.warning(t('batch.not_select'));
+                  message.warning('请选择要删除的记录');
                 }
               }}
             >
-              <span>{t('batch.delete')}</span>
+              <span>批量删除</span>
             </li>
             <li
               className='ant-dropdown-menu-item'
               onClick={() => {
                 if (selectRowKeys.length == 0) {
-                  message.warning(t('batch.not_select'));
+                  message.warning('未选择');
                   return;
                 }
                 setisModalVisible(true);
               }}
             >
-              <span>{t('batch.update.title')}</span>
+              <span>{'更新告警规则'}</span>
             </li>
           </ul>
         }
@@ -153,6 +153,8 @@ export default function MoreOperations(props: MoreOperationsProps) {
             }
           } else {
             setisModalVisible(false);
+            debugger;
+
           }
         }}
       />

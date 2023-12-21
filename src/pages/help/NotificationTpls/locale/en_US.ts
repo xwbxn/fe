@@ -1,7 +1,7 @@
 const en_US = {
-  title: 'Notification Template Management',
-  list: 'List',
-  channel: 'Channel',
+  title: '通知模板管理',
+  列表: '列表',
+  通知媒介: '通知媒介',
   contact_key_name: 'Contact Name',
   contact_key: 'Contact Key',
   hide_channel: 'Hide Channel',

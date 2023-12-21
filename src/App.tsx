@@ -17,7 +17,7 @@
 import React, { useEffect, useState, createContext, useRef, useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 // Modal 会被注入的代码所使用，请不要删除
-import { ConfigProvider, Layout, Menu, MenuProps, Modal, message } from 'antd';
+import { ConfigProvider, notification, Modal, message } from 'antd';
 import zhCN from 'antd/lib/locale/zh_CN';
 import enUS from 'antd/lib/locale/en_US';
 import 'antd/dist/antd.less';
@@ -108,7 +108,8 @@ function App() {
   const isPlus = useIsPlus();
   const initialized = useRef(false);
   const path = location.pathname;
-  const ws = useRef<WebSocket | null>(null);
+  const alertWebsocket = useRef<WebSocket | null>(null);
+  const licenseWebsocket = useRef<WebSocket | null>(null);
   const audioRef = useRef<any>(null);
   const [dialogShow, setDialogShow] = useState<string>(_.toString(localStorage.getItem('alert_dialog_show') || '0'));
   const [alertLevel, setAlertLevel] = useState<number>(0);
@@ -168,11 +169,10 @@ function App() {
   });
 
   useLayoutEffect(() => {
-    console.log('ws.current.useLayoutEffect');
-    ws.current = new WebSocket(WebSocketURL);
-    ws.current.onmessage = (e) => {
-      message.error('有设备发生告警信息');
-      if (audioRef?.current) {
+    alertWebsocket.current = new WebSocket(WebSocketURL+232443);//获取推送过来的告警消息
+    alertWebsocket.current.onmessage = e => {
+      message.error("有设备发生告警信息")
+      if(audioRef?.current){
         audioRef?.current.play();
       }
       let data = JSON.parse(e.data);
@@ -182,10 +182,25 @@ function App() {
       setDialogShow('1');
     };
     return () => {
-      ws.current?.close();
+      alertWebsocket.current?.close();
     };
-  }, [ws]);
+  }, [alertWebsocket]);
 
+  useLayoutEffect(() => {
+    licenseWebsocket.current = new WebSocket(WebSocketURL+758493);//获取推送过来的许可到期的消息
+    licenseWebsocket.current.onmessage = e => {
+      let data = JSON.parse(e.data);
+      
+      Modal.warning({
+        title: '许可信息提醒',
+        content: data.dat,
+      });
+    };
+    return () => {
+      licenseWebsocket.current?.close();
+    };
+  }, [licenseWebsocket]);
+  
   useEffect(() => {
     try {
       (async () => {
@@ -259,7 +274,7 @@ function App() {
   }
 
   return (
-    <div className='App'>
+    <div className='App' style={path.startsWith('/login') ? { overflow: 'hidden' } : { overflow: 'auto' }}>
       <CommonStateContext.Provider value={commonState}>
         <ConfigProvider locale={i18n.language == 'en_US' ? enUS : zhCN}>
           <Router>

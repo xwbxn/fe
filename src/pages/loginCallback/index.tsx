@@ -34,7 +34,7 @@ export default function index() {
         if (res.err === '') {
           if (res.dat && res.dat.access_token && res.dat.refresh_token) {
             sessionStorage.setItem('access_token', res.dat.access_token);
-            localStorage.setItem('refresh_token', res.dat.refresh_token);
+            sessionStorage.setItem('refresh_token', res.dat.refresh_token);
             window.location.href = res.dat.redirect;
           } else {
             console.log(res.dat);

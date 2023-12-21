@@ -128,7 +128,7 @@ request.interceptors.response.use(
       if (response.url.indexOf('/api/n9e/auth/refresh') > 0) {
         location.href = `/login${location.pathname != '/' ? '?redirect=' + location.pathname + location.search : ''}`;
       } else {
-        localStorage.getItem('refresh_token')
+        sessionStorage.getItem('refresh_token')
           ? UpdateAccessToken().then((res) => {
               console.log('401 err', res);
               if (res.err) {
@@ -136,7 +136,7 @@ request.interceptors.response.use(
               } else {
                 const { access_token, refresh_token } = res.dat;
                 sessionStorage.setItem('access_token', access_token);
-                localStorage.setItem('refresh_token', refresh_token);
+                sessionStorage.setItem('refresh_token', refresh_token);
                 location.href = `${location.pathname}${location.search}`;
               }
             })

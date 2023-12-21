@@ -31,7 +31,7 @@ import DatasourceSelect from '@/components/DatasourceSelect/DatasourceSelect';
 import exportEvents, { downloadFile } from './exportEvents';
 import { getStrategiesByRuleIds } from '@/services/warning';
 import { getEvents, deleteHistoryEvents, exportTemplet } from './services';
-import { SeverityColor } from '../event';
+import { SeverityColor,SeverityFont } from '../event';
 import '../event/index.less';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
@@ -102,9 +102,28 @@ const Event: React.FC = () => {
   }, []);
   const columns: any = [
     {
+      title: '显示级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 60,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
+    },
+    {
       title: '规则名称',
       dataIndex: 'rule_name',
       width: 150,
+      ellipsis: true,
       render(title, { id, tags }) {
         return (
           <>
@@ -121,8 +140,11 @@ const Event: React.FC = () => {
       dataIndex: 'asset_name',
       width: 100,
       align: 'center',
-      render: (value) => {
-        return value;
+      ellipsis: true,
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
       sorter: (a, b) =>{
         return (a.asset_name).localeCompare(b.asset_name)
@@ -133,8 +155,10 @@ const Event: React.FC = () => {
       dataIndex: 'asset_ip',
       width: 100,
       align: 'center',
-      render: (value) => {
-        return value;
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
       },
       sorter: (a, b) =>{
         return (a.asset_ip).localeCompare(b.asset_ip)
@@ -226,6 +250,22 @@ const Event: React.FC = () => {
     { alert_type: 2 },
   );
 
+  const onChange = (
+    value: DatePickerProps['value'] | RangePickerProps['value'],
+    dateString: [string, string] | string,
+  ) => {
+    console.log('Selected Time: ', value);
+    console.log('Formatted Selected Time: ', dateString);
+    if (value == null) {
+      localStorage.removeItem('current_query_time')
+      delete filter["start"];
+      delete filter["end"];    
+      setStart(0)  
+      setEnd(0)
+      setRefreshFlag(_.uniqueId('refresh_'));
+    }
+  };
+
   function renderLeftHeader() {
     return (
       <div className='table-operate-box'>
@@ -259,6 +299,7 @@ const Event: React.FC = () => {
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
             locale={locale}
+            onChange={onChange}
             onOk={onOk}
           />
 

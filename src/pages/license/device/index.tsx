@@ -16,6 +16,9 @@ import RefreshIcon from '@/components/RefreshIcon';
 import { Link, useHistory } from 'react-router-dom';
 
 
+
+
+
 interface DataType {
   key: React.ReactNode;
   name: string;
@@ -35,6 +38,22 @@ export default function () {
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
+  const [filterType, setFilterType] = useState<string>("");
+  const [searchVal, setSearchVal] = useState<any>(null);
+  const { Option } = Select;
+  const [refreshing, setRefreshing] = useState(false);
+
+  
+  const handleRefresh = () => {
+    setRefreshing(true);
+    // 添加数据刷新逻辑
+  
+    setTimeout(() => {
+      // 添加数据刷新逻辑...
+      setRefreshing(false);
+    }, 500); // 模拟延迟
+  };
+   
 
   const loadingTree = () => {
     getOrganizationTree({}).then(({ dat }) => {
@@ -129,16 +148,32 @@ export default function () {
       <div className='assets-list' style={{ height: '30px', lineHeight: '39px' }}>
         <Row className='event-table-search'>
           <div className='event-table-search-left' style={{ marginLeft: '10px' }}>
-            客户名称：西安政务网
+            {/* 客户名称：西安政务网 */}
+            许可节点数：800     已用节点数：600
+            <br></br>
+            <Input
+              placeholder="资产名称、资产类型、IP地址"
+              style={{ width: "360px", marginRight: "20px" }}
+              suffix={
+                <Space>
+                  <SearchOutlined style={{ color: '#1890ff' }} />
+                </Space>
+              }
+            />
+            <Select placeholder="设备类型" style={{ width: "120px" }}>
+              <Option value1>设备类型</Option>
+              <Option value="服务器">X86服务器</Option>
+            </Select>
           </div>
-          <div className='event-table-search-right'>
-            <div className='user-manage-operate'>
-              <Button type='primary' onClick={() => handleClick('create')} >
-                一键导出
-              </Button>
-            </div>
+
+
+          <div className='user-manage-operate' style={{ textAlign: 'right' }}>
+            <Button type='primary' onClick={handleRefresh} icon={<SyncOutlined spin={refreshing} />} style={{ marginLeft: 'auto' }}>
+            同步License
+            </Button>
           </div>
         </Row>
+
         <Table
           dataSource={treeData}
           rowSelection={{
@@ -148,41 +183,41 @@ export default function () {
           columns={[
             {
               title: '设备',
-              dataIndex: 'name',
+              dataIndex: '设备',
               render(value, record, index) {
                 return value;
               },
             },
             {
               title: '设备序列号',
-              dataIndex: 'city',
+              dataIndex: '设备序列号',
             },
             {
               title: '设备类型',
-              dataIndex: 'address',
+              dataIndex: '设备类型',
             },
             {
               title: '采集器信息',
-              dataIndex: 'manger',
+              dataIndex: '采集器信息',
             },
             {
               title: '首次创建监测',
-              dataIndex: 'phone',
+              dataIndex: '首次创建监测',
             },
             {
               title: '所在机房',
-              dataIndex: 'description',
+              dataIndex: '所在机房',
             },
             {
               title: '位置',
-              dataIndex: 'description',
+              dataIndex: '位置',
             },
           ]}
           rowKey='id'
           size='small'
         ></Table>
 
-        
+
 
 
         <CommonModal

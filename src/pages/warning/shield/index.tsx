@@ -47,7 +47,7 @@ const Shield: React.FC = () => {
   const { search } = useLocation();
   const { id } = queryString.parse(search);
   const commonState = useContext(CommonStateContext);
-  const bgid = id ? Number(id) : commonState.curBusiId;
+  const bgid = id ? Number(id) : commonState.curBusiId>0?commonState.curBusiId:1;
   const { datasourceList, groupedDatasourceList } = commonState;
   const [query, setQuery] = useState<string>('');
   const [currentShieldDataAll, setCurrentShieldDataAll] = useState<Array<shieldItem>>([]);

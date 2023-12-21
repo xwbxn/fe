@@ -42,7 +42,7 @@ export default function index() {
   const assetid = asset_id ? Number(asset_id) : 0;
 
   return (
-    <PageLayout title={t('title')} icon={<SettingOutlined />}>
+    <PageLayout title={t('title')} icon={<SettingOutlined />} showBack>
       <div className='alert-rules-container'>
         <BusinessGroup
         

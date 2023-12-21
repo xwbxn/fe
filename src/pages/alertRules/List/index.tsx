@@ -36,6 +36,7 @@ import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, Poweroff
 import parameters from '@/pages/system/parameters';
 import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
 import '@minko-fe/use-antd-resizable-header/dist/style.css';
+import { link } from 'fs';
 
 interface ListProps {
   bgid?: number;
@@ -60,7 +61,7 @@ interface Filter {
 
 export default function List(props: ListProps) {
   const { bgid, assetid } = props;
-  const { t } = useTranslation('alertRules');
+  // const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
   const [params, setParams] = useState<any>({
@@ -101,6 +102,11 @@ export default function List(props: ListProps) {
       dataIndex: 'asset_name',
       align: "center",
       width: 120,
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
+      },
       sorter: (a, b) => {
         return (a.asset_name).localeCompare(b.asset_name)
       },
@@ -109,6 +115,11 @@ export default function List(props: ListProps) {
       title: 'IP地址',
       dataIndex: 'asset_ip',
       align: "center",
+      render(name, record, index) {
+        return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+        }}>{name}</div>;
+      },
       sorter: (a, b) => {
         return (a.asset_ip).localeCompare(b.asset_ip)
       },
@@ -196,7 +207,7 @@ export default function List(props: ListProps) {
               to={{
                 pathname: `/alert-rules/edit/${record.id}?mode=clone`,
               }}
-              target="_blank"
+              target="_self"
             >
               <CopyTwoTone />
             </Link>
@@ -205,6 +216,7 @@ export default function List(props: ListProps) {
             }} />
             <EditOutlined title='编辑'
               onClick={() => {
+               
                 history.push(`alert-rules/edit/${record.id}`);
               }}
             />
@@ -213,7 +225,7 @@ export default function List(props: ListProps) {
               className='table-operator-area-warning'
               onClick={() => {
                 Modal.confirm({
-                  title: t('common:confirm.delete'),
+                  title: '确认要删除',
                   onOk: () => {
                     bgid &&
                       deleteStrategy([record.id], bgid).then(() => {
@@ -274,7 +286,7 @@ export default function List(props: ListProps) {
     if (!bgid) {
       return;
     }
-    setLoading(true);
+    // setLoading(true);
     params["id"] = bgid;
     const { success, dat } = await getStrategyGroupSubList(params);
     if (success) {
@@ -314,6 +326,7 @@ export default function List(props: ListProps) {
 
   useEffect(() => {
     if (bgid) {
+      params["id"] = bgid;
       if (assetid != null && assetid > 0) {
         params["filter"] = "asset_id";
         params["query"] = "" + assetid;
@@ -385,15 +398,21 @@ export default function List(props: ListProps) {
           <Space>
             <Button
               type='primary'
-              onClick={() => {
-                window.localStorage.removeItem('select_monitor_asset_ip');
-                history.push(`/alert-rules/add/${bgid}`);
+              onClick={() => {                  
+                  window.localStorage.removeItem('select_monitor_asset_ip');
+                  let path_params = assetid != null && assetid > 0?"?action=add&assetid="+assetid:""; 
+                  history.push({
+                     pathname:`/alert-rules/add/${bgid>0?bgid:1}${path_params}`,
+                     state:{
+                      "asset_id":assetid
+                    }
+                  });
               }}
               className='strategy-table-search-right-create'
             >
-              {t('common:btn.add')}
+             添加
             </Button>
-            <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} getAlertRules={getAlertRules} />
+            <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} getAlertRules={(getAlertRules)} />
           </Space>
         </Col>
       </Row>
