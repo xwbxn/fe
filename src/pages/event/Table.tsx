@@ -74,7 +74,7 @@ export default function TableCpt(props: IProps) {
       ellipsis: true,    
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{
@@ -82,13 +82,13 @@ export default function TableCpt(props: IProps) {
       },
     },
     {
-      title: '资产IP',
+      title: 'IP地址',
       dataIndex: 'asset_ip',
       width: 100,
       align: "center",
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{

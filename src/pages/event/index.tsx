@@ -36,6 +36,7 @@ import { exportTemplet } from '../historyEvents/services';
 // @ts-ignore
 import BatchAckBtn from 'plus:/parcels/Event/Acknowledge/BatchAckBtn';
 import moment from 'moment';
+import { useLocalStorage } from 'react-use';
 
 const { confirm } = Modal;
 export const SeverityColor = ['red', 'orange', 'yellow', 'green'];
@@ -66,13 +67,13 @@ const Event: React.FC = () => {
   const [view, setView] = useState<'card' | 'list'>('card');
   const { busiGroups, feats } = useContext(CommonStateContext);
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
-  const [searchVal, setSearchVal] = useState<any>(null);
-  const [filterParam, setFilterParam] = useState<string>("");
+  const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type',null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param',null);
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [startTime, setStartTime] = useState<any>();
-  const [endTime, setEndTime] = useState<any>();
+  const [startTime, setStartTime] = useLocalStorage<any>('current_filter_start',null);
+  const [endTime, setEndTime] = useLocalStorage<any>('current_filter_end',null);
   const DateFormat = 'YYYY-MM-DD HH:mm:ss';
   const [display, setDisplay] = useState<any>(localStorage.getItem('current_alert_display') ? _.toString(localStorage.getItem('current_alert_display')) : "card");
 
@@ -90,8 +91,7 @@ const Event: React.FC = () => {
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
-  // const [filterType, setFilterType] = useState<string|null>(localStorage.getItem('current_query_type') ?_.toString(localStorage.getItem('current_alert_display')):null);
-  const [filterType, setFilterType] = useState<string|null>(null);
+  const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types',null);
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
@@ -100,7 +100,6 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
     if (value == null) {
-      localStorage.removeItem('current_query_time')
       delete filter["start"];
       delete filter["end"];    
       setStartTime(null)  
@@ -124,7 +123,6 @@ const Event: React.FC = () => {
         setFilter({ ...filter });
       }
     });
-    localStorage.setItem('current_query_time',filter["start"]+","+filter["end"])
     setRefreshFlag(_.uniqueId('refresh_'));
   };
   useEffect(() => {
@@ -135,16 +133,17 @@ const Event: React.FC = () => {
       { label: 'S3', value: '3' },
     ];
      setFilterOptions({...filterOptions})
-     if(localStorage.getItem('current_query_time')){
-       let query =localStorage.getItem("current_query_time")?.split(",");
-       if(query!=null && query.length>0){
-          console.log(query);
-          setStartTime(moment(parseInt(query[0])*1000).format(DateFormat));
-          setEndTime(moment(parseInt(query[1])*1000).format(DateFormat));
-       }
-       
+     if(startTime!=null && endTime!=null){
+          filter["start"] = moment(startTime).unix()  
+          filter["end"] = moment(endTime).unix()  
+          setFilter({ ...filter });    
      }
-  }, [filterType])
+  }, [])
+
+  useEffect(() => {
+    
+    
+ }, [filterType])
 
   function renderLeftHeader() {
     return (
@@ -165,17 +164,18 @@ const Event: React.FC = () => {
             defaultValue={filterParam}
             onChange={(value) => {
               if(value==undefined){
-                setFilterParam("");
-                setSearchVal(null)
+                setFilterParam(null);
+                setSearchVal(null);
+                setFilterType(null);
               }else{
                 cardQueryFilter.forEach((item) => {
                   if (item.name == value) {
                     setFilterType(item.type);
+                    setFilterParam(value);
+                    setSearchVal(null)
                   }
                 })  
-                setFilterParam(value);
-                localStorage.setItem('current_query_type',value)
-                setSearchVal(null)
+                
               }
               
             }}>
@@ -200,7 +200,13 @@ const Event: React.FC = () => {
               value={searchVal}
               allowClear
               options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
-               onChange={(val) => setSearchVal(val)}
+              onChange={(val) => {
+                 if(val && val.length>0){
+                  setSearchVal(val);
+                 }else{
+                  setSearchVal(null)
+                 }
+              }}
               placeholder={'选择要筛选的条件'}
             />
           )}

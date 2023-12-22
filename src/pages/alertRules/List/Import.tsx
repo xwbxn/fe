@@ -59,19 +59,25 @@ function Import(props: IProps & ModalWrapProps) {
                 disabled: vals.enabled ? 0 : 1,
               };
             });
-            const { dat } = await importStrategy(importData, busiId);
-            const dataSource = _.map(dat, (val, key) => {
-              return {
-                name: key,
-                msg: val,
-              };
-            });
-            setImportResult(dataSource);
-            if (_.every(dataSource, (item) => !item.msg)) {
-              message.success(t('common:success.import'));
-              refreshList();
-              destroy();
-            }
+            importStrategy(importData, busiId).then(({dat})=>{
+              const dataSource = _.map(dat, (val, key) => {
+                return {
+                  name: key,
+                  msg: val,
+                };
+              });
+              setImportResult(dataSource);
+              if (_.every(dataSource, (item) => !item.msg)) {
+                message.success(t('common:success.import'));
+                refreshList();
+                destroy();
+              }
+            })
+            
+
+
+
+            
           } catch (error) {
             message.error(t('common:error.import') + error);
           }

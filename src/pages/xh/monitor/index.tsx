@@ -23,6 +23,7 @@ import { OperationModal } from './OperationModal';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import RefreshIcon from '@/components/RefreshIcon';
 import { unitTypes } from '../assetmgt/catalog';
+import { useLocalStorage } from 'react-use';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -70,13 +71,13 @@ export default function () {
   const [initData, setInitData] = useState({});
   const [formData, setFormData] = useState<any>({});
   const [businessForm, setBusinessForm] = useState<any>({});
-  const [typeId, setTypeId] = useState(_.toString(localStorage.getItem('left_monitor_type') || '0'))
+  const [typeId, setTypeId] = useLocalStorage<any>('monitor_filter_type',0);
   const { search } = useLocation();
   const { assetId } = queryString.parse(search);
   const [currentAssetId, setCurrentAssetId] = useState<number>(assetId != null ? parseInt(assetId.toString()) : 0);
   const [secondAddButton, setSecondAddButton] = useState<boolean>(true);
   const [collapse, setCollapse] = useState(localStorage.getItem('left_monitor_list') === '1');
-  const [width, setWidth] = useState(_.toNumber(localStorage.getItem('left_monitor_Width') || 200));
+  const [width, setWidth] = useLocalStorage<any>('left_monitor_width',200);  
   const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
   const [filterParam, setFilterParam] = useState<string>("");
   const history = useHistory();
@@ -128,7 +129,7 @@ export default function () {
       render(value, record, index) {
         let name = assetInfo[value]?.ip;
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id=" + value);
+          history.push(`/xh/monitor/add?type=monitor&id=${value}&asset_id=${value}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) => {
@@ -291,7 +292,7 @@ export default function () {
       })
       let treeData: any[] = [{
         id: 0,
-        name: '全部',
+        name: '全部资产',
         count: 0,
         children: items
       }];
@@ -494,13 +495,12 @@ export default function () {
   }
 
   const onSelect = (selectedKeys, info) => {
-    setTypeId(selectedKeys);
-    localStorage.setItem('left_monitor_type', selectedKeys);
+    setTypeId(selectedKeys[0]);
     setCurrentAssetId(0);
     setRefreshKey(_.uniqueId('refreshKey_'));
   };
   return (
-    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack backPath='/xh/assetmgt'
+    <PageLayout icon={<GroupOutlined />} title={'监控管理'} showBack
     >
       <div style={{ display: 'flex' }} className='monitor_list_view'>
         <Resizable
@@ -513,11 +513,10 @@ export default function () {
           }}
           onResizeStop={(e, direction, ref, d) => {
             let curWidth = width + d.width;
-            if (curWidth < 250) {
-              curWidth = 250;
+            if (curWidth < 200) {
+              curWidth = 200;
             }
             setWidth(curWidth);
-            localStorage.setItem('left_monitor_Width', curWidth.toString());
           }}
         >
           <div className={collapse ? 'left-area collapse' : 'left-area'}>
@@ -547,7 +546,7 @@ export default function () {
                 </div>
 
               </div>
-              <div style={{ display: 'table', height: '100%' }}>
+              <div style={{ display: 'table', height: '100%',width:'100%' }}>
                 {expandedKeys && treeData && (
                   <Tree
                     showLine={true}

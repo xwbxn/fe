@@ -36,6 +36,7 @@ import '../event/index.less';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import './locale';
 import DatePicker, { RangePickerProps } from 'antd/es/date-picker';
+import { useLocalStorage } from 'react-use';
 const { RangePicker } = DatePicker;
 export const getDefaultHours = () => {
   const locale = window.localStorage.getItem('alert_events_hours');
@@ -60,13 +61,15 @@ export const setDefaultHours = (hours: number) => {
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
   const { busiGroups } = useContext(CommonStateContext);
-  const [filterType, setFilterType] = useState<string>("");
-  const [searchVal, setSearchVal] = useState<any>(null);
-  const [filterParam, setFilterParam] = useState<string>("");
+  const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types',null);
+  const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value',null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param',null);
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
+  const [startTime, setStartTime] = useLocalStorage<any>('history_filter_start',null);
+  const [endTime, setEndTime] = useLocalStorage<any>('history_filter_end',null);
   const [start, setStart] = useState<number>(0);
   const [end, setEnd] = useState<number>(0);
   const history = useHistory();
@@ -126,7 +129,7 @@ const Event: React.FC = () => {
       ellipsis: true,
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{
@@ -140,7 +143,7 @@ const Event: React.FC = () => {
       align: 'center',
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{
@@ -246,6 +249,8 @@ const Event: React.FC = () => {
 
   const filterObj = Object.assign(
     (filterParam!=null && searchVal!=null && searchVal.length>0)?{ filter: filterParam } : {},
+    (startTime!=null)?{ start:moment(startTime).unix() } : {},
+    (endTime!=null)?{ end:moment(endTime).unix() } : {},
     (searchVal!=null && searchVal.length>0) ? { query: searchVal } : {},
     { group: filter.bgid },
     { alert_type: 2 },
@@ -258,12 +263,14 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
     if (value == null) {
-      localStorage.removeItem('current_query_time')
       delete filter["start"];
       delete filter["end"];    
-      setStart(0)  
-      setEnd(0)
+      setStartTime(null)  
+      setEndTime(null)
       setRefreshFlag(_.uniqueId('refresh_'));
+    }else{
+      setStartTime(dateString[0])  
+      setEndTime(dateString[1])
     }
   };
 
@@ -281,6 +288,7 @@ const Event: React.FC = () => {
             // defaultValue="lucy"
             placeholder="选择过滤器"
             style={{ width: 120 }}
+            defaultValue={filterParam}
             allowClear
             onChange={(value) => {
               queryFilter.forEach((item) => {
@@ -296,16 +304,6 @@ const Event: React.FC = () => {
             ))
             }
           </Select>
-          <RangePicker
-            showTime={{ format: 'HH:mm:ss' }}
-            format="YYYY-MM-DD HH:mm"
-            locale={locale}
-            onChange={onChange}
-            onOk={onOk}
-          />
-
-
-
           {filterType == "input" && (
             <Input
               className={'searchInput'}
@@ -322,11 +320,24 @@ const Event: React.FC = () => {
               value={searchVal}
               allowClear
               options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
-               onChange={(val) => setSearchVal(val)}
+              onChange={(val) => {
+                if(val && val.length>0){
+                 setSearchVal(val);
+                }else{
+                 setSearchVal(null)
+                }
+              }}
               placeholder={'选择要查询的条件'}
             />
           )}
-
+          <RangePicker
+            showTime={{ format: 'HH:mm:ss' }}
+            format="YYYY-MM-DD HH:mm"
+            locale={locale}
+            onChange={onChange}
+            defaultValue={[startTime?moment(startTime):null, endTime?moment(endTime):null]}
+            onOk={onOk}
+          />
           
         </Space>
         <div>
@@ -360,6 +371,7 @@ const Event: React.FC = () => {
                             deleteHistoryEvents(selectRowKeys).then((res) => {
                               message.success("删除成功");
                               setRefreshFlag(_.uniqueId('refresh_'));
+                              setSelectRowKeys([]);
                             })
                           },
                           onCancel() { },
@@ -385,13 +397,14 @@ const Event: React.FC = () => {
   }
 
   const fetchData = ({ current, pageSize }) => {
-    // debugger;
     if (start > 0) {
       filterObj["start"] = start
     }
     if (end > 0) {
       filterObj["end"] = end
     }
+
+
     return getEvents({
       page: current,
       limit: pageSize,

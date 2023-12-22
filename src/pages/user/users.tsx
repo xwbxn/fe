@@ -470,18 +470,15 @@ const Resource: React.FC = () => {
     <PageLayout title={t('user.title')} icon={<UserOutlined />}>
 
       <div style={{ display: 'flex', width: '100%' }} className='user_management'>
-        <div style={{ width: '300px', display: 'list-item' }}>
+        <div style={{ width: '200px', display: 'list-item' }}>
           <div className='sub-title'>
             团队列表
-            <Button
-              size='small'
-              type='link'
+              <PlusSquareOutlined 
+              className='user_add_group_button'
               onClick={() => {
                 handleClick(ActionType.CreateTeam, 0, "team");
               }}
-            >
-              <PlusSquareOutlined />
-            </Button>
+              />
           </div>
           <Tree
             onSelect={(keys, e) => {

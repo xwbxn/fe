@@ -115,12 +115,13 @@ function Card(props: Props, ref) {
       },
     },
     {
-      title: '资产IP',
+      title: 'IP地址',
       dataIndex: 'asset_ip',
       width: 100,
+      align: 'center',
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
+          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
         }}>{name}</div>;
       },
     },
@@ -219,9 +220,10 @@ function Card(props: Props, ref) {
       },
     },
     {
-      title: t('common:table.operations'),
       dataIndex: 'operate',
+      title: '操作',
       width: 180,
+      align: 'center',
       render(value, record) {
         return (
           <>
@@ -376,7 +378,7 @@ function Card(props: Props, ref) {
           tableLayout='fixed'
           size='small'
           rowKey={'id'}
-          className='card-event-drawer'
+          // className='card-event-drawer'
           rowClassName={(record: { severity: number }) => {
             return SeverityColor[record.severity - 1] + '-left-border';
           }}

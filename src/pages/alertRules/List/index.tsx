@@ -105,7 +105,7 @@ export default function List(props: ListProps) {
       width: 120,
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) => {
@@ -118,7 +118,7 @@ export default function List(props: ListProps) {
       align: "center",
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) => {
@@ -347,7 +347,7 @@ export default function List(props: ListProps) {
 
 
   return (
-    <div className='alert-rules-list-container' style={{ height: '100%', overflowY: 'auto' }}>
+    <div className='alert-rules-list-container'>
       <Row justify='space-between'>
         <Col span={20}>
           <Space>
@@ -415,7 +415,6 @@ export default function List(props: ListProps) {
              添加
             </Button>
             <MoreOperations bgid={bgid} selectRowKeys={selectRowKeys} selectedRows={selectedRows} refreshRules={(e)=>{
-              debugger;
               setRefreshLeft(_.uniqueId('refresh_left'));
             }} />
           </Space>

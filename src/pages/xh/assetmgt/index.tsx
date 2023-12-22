@@ -150,7 +150,7 @@ export default function () {
       ellipsis: true,
       render(value, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push(`/xh/assetmgt/add?mode=view&id=${record.id}`);
+          history.push(`/xh/monitor/add?type=monitor&id=${record.id}&asset_id=${record.id}&action=asset&prom=1`);
         }}>{value}</div>;
       },
       sorter: (a, b) => {
@@ -297,6 +297,7 @@ export default function () {
                   await deleteXhAssets({ ids: [record.id.toString()] });
                   message.success(t('common:success.delete'));
                   setRefreshKey(_.uniqueId('refreshKey_'));
+                  setSelectedAssets([]);
                 },
 
                 onCancel() {},
@@ -779,21 +780,8 @@ export default function () {
                       <Menu
                         style={{ width: '100px' }}
                         onClick={({ key }) => {
-                          if (key == OperateType.AssetBatchExport) {
-                            let names = new Array();
-                            names.push(queryCondition);
-                            setSelectedAssetsName(queryCondition);
-                            if (selectedAssets.length <= 0) {
-                              Modal.confirm({
-                                title: '确认导出所有设备资产吗',
-                                onOk: async () => {
-                                  setOperateType(key as OperateType);
-                                },
-                                onCancel() {},
-                              });
-                            } else {
-                              setOperateType(key as OperateType);
-                            }
+                          if (key == OperateType.AssetBatchExport) {                            
+                            setOperateType(key as OperateType);
                           } else if (key == OperateType.Delete) {
                             if (selectedAssets.length <= 0) {
                               message.warning('请选择要批量操作的设备');
@@ -806,6 +794,7 @@ export default function () {
                                   deleteXhAssets({ ids: rows }).then((res) => {
                                     message.success('删除成功！');
                                     setRefreshKey(_.uniqueId('refreshKey_'));
+                                    setSelectedAssets([]);
                                   });
                                 },
                                 onCancel() {},
@@ -813,7 +802,7 @@ export default function () {
                             }
                           } else if (key == OperateType.UpdateBusi) {
                             if (selectedAssets.length <= 0) {
-                              message.warning('请选择要批量操作记录');
+                              message.warning('请选择要批量转移的资产');
                               return;
                             }
                             setOperateType(key as OperateType);
