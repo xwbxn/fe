@@ -303,8 +303,8 @@ const [operateScript, setOperateScript] = useState<any>({
             </Row>
             <Row gutter={10}>
               <Col span={14}>
-                <Form.Item label='监控脚本' rules={[{ required: false }]}>
-                  <Form.Item name='monitoring_sql' rules={[{ required: false }]}>
+                <Form.Item rules={[{ required: true }]}>
+                  <Form.Item label='监控脚本'  name='monitoring_sql' rules={[{ required: true }]}>
                     <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
                   </Form.Item>
                   {sqlCN != null && sqlCN.length > 0 && (
@@ -327,24 +327,16 @@ const [operateScript, setOperateScript] = useState<any>({
                 </Form.Item>
               </Col>
               <Col span={4}>
-                <Form.Item label='指标计算单位' rules={[{ required: false, }]}>
-                  <Form.Item name='unit' rules={[{ required: true,message:'请输入指标计算单位' }]}>
+                  <Form.Item label='指标计算单位' name='unit' rules={[{ required: true,message:'请输入指标计算单位' }]}>
                     <Select >
                       {Object.keys(unitTypes).map((key) => {
                         return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)
                       })}
                     </Select>
                   </Form.Item>
-                </Form.Item>
 
               </Col>
             </Row>
-            {/* <Form.Item hidden label='状态' name='status'>
-              <InputNumber/>
-            </Form.Item>
-            <Form.Item hidden label='采集器' name='target_id'>
-             <InputNumber/>
-            </Form.Item> */}
             <Row gutter={10}>
               <Col span={24}>
                 <Form.Item label='描述' name='remark'>

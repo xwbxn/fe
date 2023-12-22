@@ -316,14 +316,13 @@ export default function (props: { initialValues: object; initParams: object; mod
                   <Form.Item label='资产名称' name='asset_ids' rules={[{ required: true }]}>
                    <Select mode="multiple" style={{ width: '100%' }} showSearch filterOption optionFilterProp={"label"}
                       placeholder='请选择资产'
-                      disabled={props.mode === 'edit'}
-                      
+                      disabled={props.mode === 'edit'}                      
                       maxTagCount={3}
                       getPopupContainer={(triggerNode) => triggerNode.parentNode}
                       maxTagPlaceholder={(omittedValues) => `+ ${omittedValues.length} 项`}
                       dropdownRender={(menu) => (
                         <div className="my-select-wrapper">
-                          {!searchKeyword && (
+                          {!searchKeyword && assetOptions.length>0 && (
                             <div onClick={(e) => e.stopPropagation()} className="my-menu-all">
                               <Checkbox
                                 checked={isAllOptionSelected()}
@@ -370,18 +369,28 @@ export default function (props: { initialValues: object; initParams: object; mod
                           )}
                         </div>
                       )}
+                      onFocus={()=>{
+                        if(form.getFieldValue("type")==null){
+                          message.warn("请先选择要编辑的设备类型")
+                        }else{
+                           if(assetOptions==null || assetOptions.length==0){
+                             message.info("该类型下无资产信息")
+                           }
+                        }
+
+                      }}
 
                     > 
                     {assetOptions.map((item, index) => (
                        <Select.Option value={item.value} key={index}>{item.label}</Select.Option>
-                   ))}
+                    ))}
                     </Select>
 
 
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label='资产IP' name='asset_ids' rules={[{ required: true }]}>
+                  <Form.Item label='IP地址' name='asset_ids' rules={[{ required: true }]}>
                     <Select mode="multiple" style={{ width: '100%' }} showSearch
                       filterOption optionFilterProp={"label"}
                       placeholder='请选择资产' disabled={props.mode === 'edit'}
@@ -391,7 +400,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                       maxTagPlaceholder={(omittedValues) => `+ ${omittedValues.length} 项`}
                       dropdownRender={(menu) => (
                         <div className="my-select-wrapper">
-                          {!searchKeyword && (
+                          {!searchKeyword && options.length>0 && (
                             <div onClick={(e) => e.stopPropagation()} className="my-menu-all">
                               <Checkbox
                                 checked={isAllOptionSelected()}
@@ -404,7 +413,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                           )}
                           {isSearchEmpty ? (
                             <div className="my-empty">
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />-------
                             </div>
                           ) : (
                             options
@@ -440,7 +449,15 @@ export default function (props: { initialValues: object; initParams: object; mod
                           )}
                         </div>
                       )}
-
+                      onFocus={()=>{
+                          if(form.getFieldValue("type")==null){
+                            message.warn("请先选择要编辑的设备类型")
+                          }else{
+                            if(options==null || options.length==0){
+                              message.info("该类型下无资产信息")
+                            }
+                         }
+                      }}
 
                     >
                      {options.map((item, index) => (
@@ -451,31 +468,18 @@ export default function (props: { initialValues: object; initParams: object; mod
                 </Col>
                 <Col span={12}>
                   <Form.Item label='监控名称' name='monitoring_name' rules={[{ required: true }]}>
-                    <Input placeholder='请输入资产名称' />
+                    <Input placeholder='请输入监控名称' />
                   </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='数据源类型' name='datasource_id' rules={[{ required: true }]}>
-                    <Select
-                      onChange={(v) => {
-                        setDatasource(v);
-                      }}
-                      defaultValue={1}
-                      options={[
-                        {
-                          value: 1,
-                          label: '普罗米修斯',
-                        },
-                      ]}
-                    ></Select>
-                  </Form.Item>
+                  <Form.Item name='datasource_id'  hidden>
+                    <Input defaultValue={1}></Input>
+                 </Form.Item>
                 </Col>
               </Row>
               <Row gutter={10}>
                 <Col span={14}>
-                  <Form.Item label='监控脚本' rules={[{ required: true }]}>
+                  <Form.Item rules={[{ required: true }]}>
 
-                    <Form.Item name='monitoring_sql' rules={[{ required: true }]}>
+                    <Form.Item  label='监控脚本' name='monitoring_sql' rules={[{ required: true }]}>
                       <PromBox datasource={datasource} value={monitor.monitoring_sql}></PromBox>
                     </Form.Item>
                     {sqlCN != null && sqlCN.length > 0 && (
@@ -497,37 +501,17 @@ export default function (props: { initialValues: object; initParams: object; mod
                   </Form.Item>
                 </Col>
                 <Col span={4}>
-                  <Form.Item label='指标计算单位' rules={[{ required: false }]}>
-                    <Form.Item name='unit' rules={[{ required: true, message: '请输入指标计算单位' }]}>
+                    <Form.Item name='unit' label='指标计算单位'  rules={[{ required: true, message: '请输入指标计算单位' }]}>
                       <Select >
                         {Object.keys(unitTypes).map((key) => {
                           return (<Select.Option value={key}>{unitTypes[key]}</Select.Option>)
                         })}
                       </Select>
-                    </Form.Item>
                   </Form.Item>
 
                 </Col>
               </Row>
-              <Row gutter={10}>
-                <Col span={12}>
-                  <Form.Item label='状态' name='status'>
-                    <Select
-                      style={{ width: '100%' }}
-                      defaultValue={0}
-                      options={[
-                        { value: 0, label: '正常' },
-                        { value: 1, label: '失效' },
-                      ]}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item label='采集器' name='target_id'>
-                    <Select style={{ width: '100%' }} options={identList} />
-                  </Form.Item>
-                </Col>
-              </Row>
+              
               <Row gutter={10}>
                 <Col span={24}>
                   <Form.Item label='描述' name='remark'>
@@ -538,7 +522,7 @@ export default function (props: { initialValues: object; initParams: object; mod
             </Card>
           </div>
           <div className='card-wrapper'>
-            <Card title={'告警消息'} className='alert_rule_card'>
+            <Card title={'告警设置'} className='alert_rule_card'>
               <Row gutter={10}>
                 <Form.List name={'alert_rules'} initialValue={[{}]}>
                   {(field, { add, remove }) => {
@@ -562,14 +546,23 @@ export default function (props: { initialValues: object; initParams: object; mod
                           }
                         >
                           <Row gutter={10} className='rule-row'>
-                            <Col span={6}>关系</Col>
-                            <Col span={6}>阈值</Col>
-                            <Col span={12}>告警级别</Col>
+                                <Col span={5}>指标</Col>
+                                <Col span={2}>关系</Col>
+                                <Col span={5}>阈值</Col>
+                                <Col span={12}>告警级别</Col>
                           </Row>
                           {field.map((item, _suoyi) => (
                             <Fragment>
                               <Row gutter={10} className='rule-row'>
-                                <Col span={6}>
+                              <Col span={5}>
+                               <Form.Item name={[item.name, 'id']} hidden>
+                                  <Input></Input>
+                                </Form.Item>
+                                <Form.Item>
+                                  <Input readOnly value={form.getFieldValue("monitoring_name")}></Input>
+                                </Form.Item>
+                               </Col>
+                                <Col span={2}>
                                   <Form.Item
                                     // label={'关系'}
                                     name={[item.name, 'relation']}
@@ -580,7 +573,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                                     ]}></Select>
                                   </Form.Item>
                                 </Col>
-                                <Col span={6}>
+                                <Col span={5}>
                                   <Form.Item
                                     // label={'阈值'}
                                     name={[item.name, 'value']}

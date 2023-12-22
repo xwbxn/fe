@@ -45,8 +45,6 @@ export const FormStateContext = createContext({
 export default function index(props: IProps) {
   const { type, initialValues } = props;
   const history = useHistory();
-  const { search } = useLocation();
-  const location = useLocation();
   const assetid = useSearchParam("assetid");
   const { bgid } = useParams<{ bgid: string }>();
   const { t } = useTranslation('alertRules');
@@ -75,7 +73,7 @@ export default function index(props: IProps) {
         history.goBack()
       }
     } else {
-      const { dat } = res;
+      const { dat,err } = res;
       let errorNum = 0;
       if(dat!=undefined){
         const msg = Object.keys(dat).map((key) => {
@@ -89,10 +87,7 @@ export default function index(props: IProps) {
         } else {
           message.error(t(msg));
         }
-      }else{
-        history.goBack()
       }
-     
     }
   };
   const genForm=(changeValue,values)=>{
@@ -142,7 +137,6 @@ export default function index(props: IProps) {
                             map[element.id] = element;                            
                           });
                           handleCheck(values);
-                          
                           if(values.rule_config.queries.length>0){
                             let config_cn = new Array;
                             values.rule_config.queries.forEach(element=>{
@@ -160,17 +154,24 @@ export default function index(props: IProps) {
                             handleMessage(res);
                           } else {
                             const curBusiId = initialValues?.group_id || Number(bgid);
-                            const res = addStrategy([data], curBusiId);
-                            handleMessage(res);
+                            addStrategy([data], curBusiId).then(res=>{
+                                handleMessage(res);
+                            })
+                            
+                            
                           }
                         })
                       }else{
                         handleCheck(values);
                         const data = processFormValues(values) as any;
+                        if(type==2){
+                          delete data["id"];
+                        }
                         if (type === 1) {
                           const res = await EditStrategy(data, initialValues.group_id, initialValues.id);
                           handleMessage(res);
                         } else {
+                          
                           let curBusiId = initialValues?.group_id || Number(bgid) || 1;
                           if(curBusiId<=0){
                             curBusiId = 1;

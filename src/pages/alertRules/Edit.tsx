@@ -21,14 +21,14 @@ import queryString from 'query-string';
 import PageLayout from '@/components/pageLayout';
 import { getWarningStrategy } from '@/services/warning';
 import Form from './Form';
+import { useSearchParam } from 'react-use';
 
 export default function Edit() {
   const { t } = useTranslation('alertRules');
   const { id } = useParams<{ id: string }>();
   const alertRuleId = Number(id.split("?")[0]);
   const [values, setValues] = useState<any>({});
-  const { search } = useLocation();
-  const { mode } = queryString.parse(search);
+  const mode = useSearchParam("mode");
 
   useEffect(() => {
     window.localStorage.removeItem('select_monitor_asset_id');

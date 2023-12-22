@@ -69,18 +69,20 @@ const EventDetailPage: React.FC = () => {
     {
       label: '资产名称',
       key: 'asset_name',
+      align: 'center',
       render: (asset_name,{ asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + asset_id + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_name}</div>;
       },
     },
     {
-      label: '资产IP',
+      label: 'IP地址',
       key: 'asset_ip',
+      align: 'center',
       render: (asset_ip,{ asset_id }) => {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ asset_id);
+          history.push(`/xh/monitor/add?type=monitor&id=${asset_id}&asset_id=${asset_id}&action=asset&prom=1`)
         }}>{asset_ip}</div>;
       },
     },
@@ -95,7 +97,6 @@ const EventDetailPage: React.FC = () => {
         );
       }
     },
-    // { label: t('detail.rule_note'), key: 'rule_note' },
     {
       label: t('detail.severity'),
       key: 'severity',

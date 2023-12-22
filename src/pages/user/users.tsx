@@ -61,7 +61,7 @@ const Resource: React.FC = () => {
   const [role, setRole] = useState<string>();
   const { profile } = useContext(CommonStateContext);
   const pagination = usePagination({ PAGESIZE_KEY: 'users' });
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<any[]>([]);
   const [operateType, setOperateType] = useState<OperateType>(OperateType.None);
   const [selectedRows, setSelectedRows] = useState<any>();
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
@@ -145,7 +145,6 @@ const Resource: React.FC = () => {
 
 
  useEffect(() => {    
-    console.log("初始化页面和参数");    
     filterOptions["statu"]=[{value:'0',label:'禁用'},{value:'1',label:'启用'}]  
     setFilterOptions({...filterOptions}) 
     getRoles().then((res) => {      
@@ -186,7 +185,7 @@ const Resource: React.FC = () => {
       render: (text: string, record) => record.phone || '-',
     },
     {
-      title: '所属用户组',
+      title: '所属团队',
       dataIndex: 'group_name',
       render: (val, record) => {
         return val ? val.join(",") : ''//renderDataMap["organ_"+val];
@@ -229,10 +228,24 @@ const Resource: React.FC = () => {
       render: (text: string, record) => (
         <>
           <PoweroffOutlined className='oper-name'
-            title={record.status === 0 ? ('已启动') : ('未启动')}
-            style={{ color: record.status === 0 ? ('green') : ('gray') }}
+            title={record.status === 1 ? ('已启用') : ('已禁用')}
+            style={{ color: record.status === 1 ? ('green') : ('gray') }}
             onClick={e => {
-
+              if(""+record.id=="1"){
+                 message.error("默认超管账号，禁止在此操作！");
+              }else{
+                Modal.confirm({
+                  title: "确认要"+(record.status === 1?'禁用':'启用')+"所选用户使用？",
+                  onOk: async () => {
+                    updateProperty("status", (record.status === 1?0:1),[record.id]).then((res) => {
+                      message.success('修改成功');
+                      setRefreshFlag(_.uniqueId('refreshFlag_'));
+                    });
+                  },
+                  onCancel() { },
+                });
+              }
+              
             }} />
           <EditOutlined title='编辑' className='oper-name' onClick={() => handleClick(ActionType.EditUser, record.id, "member")}>
 
@@ -242,6 +255,10 @@ const Resource: React.FC = () => {
           </UndoOutlined>
           <a className='oper-name'
             onClick={() => {
+              if(""+record.id=="1"){
+                message.error("默认超管账号，禁止在此操作！");
+                return
+              }
               confirm({
                 title: t('common:confirm.delete'),
                 onOk: () => {
@@ -284,9 +301,14 @@ const Resource: React.FC = () => {
         message.warning("请选择要批量人员信息")
         return
       } else {
+
         if (key == "changeOrganize") {
           setOperateType(key as OperateType);
         } else if (key == "delete") {
+          if (selectedRowKeys.includes(1)) {
+            message.error("所选用户中包括超管账号，不可继续操作");
+            return 
+          }
           Modal.confirm({
             title: "确认要批量删除用户？",
             onOk: async () => {
@@ -300,8 +322,12 @@ const Resource: React.FC = () => {
           });
 
         } else if (key == "start") {
+          if (selectedRowKeys.includes(1)) {
+            message.error("所选用户中包括超管账号，不可继续操作");
+            return 
+          }
           Modal.confirm({
-            title: "确认要启用当前用户使用？",
+            title: "确认要启用所选用户使用？",
             onOk: async () => {
               updateProperty("status", 1, selectedRowKeys).then((res) => {
                 message.success('修改成功');
@@ -314,8 +340,12 @@ const Resource: React.FC = () => {
           });
 
         } else if (key == "stop") {
+          if (selectedRowKeys.includes(1)) {
+            message.error("所选用户中包括超管账号，不可继续操作");
+            return 
+          }
           Modal.confirm({
-            title: "确认要禁止当前用户使用？",
+            title: "确认要禁止所选用户使用？",
             onOk: async () => {
               updateProperty("status", 0, selectedRowKeys).then((res) => {
                 message.success('修改成功');
@@ -375,7 +405,6 @@ const Resource: React.FC = () => {
       page: current,
       limit: pageSize,
     };
-    console.log("----------")
     if(filterName!=null && searchVal != null && searchVal.length > 0){
       params["type"]=filterName;
       console.log("FFFFFFFFFF",filterName)
@@ -441,18 +470,15 @@ const Resource: React.FC = () => {
     <PageLayout title={t('user.title')} icon={<UserOutlined />}>
 
       <div style={{ display: 'flex', width: '100%' }} className='user_management'>
-        <div style={{ width: '300px', display: 'list-item' }}>
+        <div style={{ width: '200px', display: 'list-item' }}>
           <div className='sub-title'>
             团队列表
-            <Button
-              size='small'
-              type='link'
+              <PlusSquareOutlined 
+              className='user_add_group_button'
               onClick={() => {
                 handleClick(ActionType.CreateTeam, 0, "team");
               }}
-            >
-              <PlusSquareOutlined />
-            </Button>
+              />
           </div>
           <Tree
             onSelect={(keys, e) => {
@@ -592,7 +618,7 @@ const Resource: React.FC = () => {
               <Button className='btn' type="primary" onClick={() => { handleOperateClick("add") }}>新增
                 </Button>
                 {profile.roles?.includes('Admin') && (
-                  <div className='user-manage-operate'>
+                  <div className='user-manage-operate-list'>
                     <Dropdown
                       trigger={['click']}
                       overlay={

@@ -50,24 +50,7 @@ export default function TableCpt(props: IProps) {
   const { t } = useTranslation('AlertCurEvents');
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const columns:any = [
-    {
-      title: '显示级别',
-      dataIndex: 'severity',
-      align: "center",
-      width: 60,
-      render(val,record) {
-        return (
-          <>
-          <Tag  color={SeverityColor[val-1]}>
-             {SeverityFont[val-1]} 
-            </Tag>
-          </>
-        );
-      },
-      sorter: (a, b) =>{
-        return (a.rule_name).localeCompare(b.rule_name)
-      },
-    },
+    
     {
       title: '规则名称',
       dataIndex: 'rule_name',
@@ -91,7 +74,7 @@ export default function TableCpt(props: IProps) {
       ellipsis: true,    
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/monitor/add?type=monitor&id=" + record.asset_id + "&action=asset");
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{
@@ -99,13 +82,13 @@ export default function TableCpt(props: IProps) {
       },
     },
     {
-      title: '资产IP',
+      title: 'IP地址',
       dataIndex: 'asset_ip',
       width: 100,
       align: "center",
       render(name, record, index) {
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
-          history.push("/xh/assetmgt/add?mode=view&id="+ record.asset_id);
+          history.push(`/xh/monitor/add?type=monitor&id=${record.asset_id}&asset_id=${record.asset_id}&action=asset&prom=1`)
         }}>{name}</div>;
       },
       sorter: (a, b) =>{
@@ -123,7 +106,25 @@ export default function TableCpt(props: IProps) {
       sorter: (a, b) =>{
         return (a.rule_config_cn).localeCompare(b.rule_config_cn)
       },
-    },    
+    }, 
+    {
+      title: '告警级别',
+      dataIndex: 'severity',
+      align: "center",
+      width: 60,
+      render(val,record) {
+        return (
+          <>
+          <Tag  color={SeverityColor[val-1]}>
+             {SeverityFont[val-1]} 
+            </Tag>
+          </>
+        );
+      },
+      sorter: (a, b) =>{
+        return (a.rule_name).localeCompare(b.rule_name)
+      },
+    },
     {
       title: t('trigger_time'),
       dataIndex: 'trigger_time',

@@ -138,7 +138,7 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
       <Col span={24}>
       <Space align='baseline'>
       触发告警级别：
-      <Form.Item name={'severity'} rules={[{ required: true, message: '选择级别' }]} noStyle>
+      <Form.Item name={'severity'} className='severity_cls'    rules={[{ required: true, message: '选择级别' }]}>
         <Radio.Group disabled={disabled}>
           <Radio value={1}>{t('common:severity.1')}</Radio>
           <Radio value={2}>{t('common:severity.2')}</Radio>

@@ -22,7 +22,7 @@ import Form from './Form';
 export default function Add() {
   const { t } = useTranslation('alertRules');
   return (
-    <PageLayout title={t('title')} showBack backPath='/alert-rules'>
+    <PageLayout title={t('title')} showBack>
       <Form />
     </PageLayout>
   );
