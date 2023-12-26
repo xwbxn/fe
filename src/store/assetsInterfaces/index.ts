@@ -12,3 +12,7 @@ export interface assetsType {
     configs: string;
     dashboard?: string;
 }
+export const  metricsUnitEnum={
+    "percent-100": '%',
+    "bit":'Bit'
+};

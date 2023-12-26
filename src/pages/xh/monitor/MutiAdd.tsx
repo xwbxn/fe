@@ -413,7 +413,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                           )}
                           {isSearchEmpty ? (
                             <div className="my-empty">
-                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />-------
+                              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                             </div>
                           ) : (
                             options
@@ -614,7 +614,7 @@ export default function (props: { initialValues: object; initParams: object; mod
               </Row>
             </Card>
           </div>
-          <div className='card-wrapper'>
+          {/* <div className='card-wrapper'>
             <Card {...panelBaseProps} title={'配置信息'}>
               <Row gutter={10}>
                 {params.map((v) => {
@@ -628,7 +628,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                 })}
               </Row>
             </Card>
-          </div>
+          </div> */}
           <div className='card-wrapper'>
             <Form.Item>
               <div className='bottom_button'>

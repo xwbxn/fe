@@ -59,7 +59,19 @@ export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) 
   });
 }
 let cardQueryFilter = [
-  { name: 'severity', label: '告警级别', type: 'select' }
+  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'severity', label: '告警级别', type: 'select' },
+  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
+  { name: 'alert_rule', label: '告警规则', type: 'input' },
+]
+let listQueryFilter = [
+  { name: 'ip', label: 'IP地址', type: 'input' },
+  { name: 'severity', label: '告警级别', type: 'select' },
+  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'name', label: '资产名称', type: 'input' },
+  { name: 'alert_rule', label: '告警规则', type: 'input' },
+  { name: 'group_id', label: '业务组', type: 'select' },
 ]
 
 const Event: React.FC = () => {
@@ -67,13 +79,13 @@ const Event: React.FC = () => {
   const [view, setView] = useState<'card' | 'list'>('card');
   const { busiGroups, feats } = useContext(CommonStateContext);
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
-  const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type',null);
-  const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param',null);
+  const [searchVal, setSearchVal] = useLocalStorage<any>('current_filter_type', null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('current_filter_param', "ip");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [ftype, setFtype] = useState<number>(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [startTime, setStartTime] = useLocalStorage<any>('current_filter_start',null);
-  const [endTime, setEndTime] = useLocalStorage<any>('current_filter_end',null);
+  const [startTime, setStartTime] = useLocalStorage<any>('current_filter_start', null);
+  const [endTime, setEndTime] = useLocalStorage<any>('current_filter_end', null);
   const DateFormat = 'YYYY-MM-DD HH:mm:ss';
   const [display, setDisplay] = useState<any>(localStorage.getItem('current_alert_display') ? _.toString(localStorage.getItem('current_alert_display')) : "card");
 
@@ -91,22 +103,21 @@ const Event: React.FC = () => {
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const [rowKeys, setRowKeys] = useState<any[]>([]);
-  const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types',null);
+  const [filterType, setFilterType] = useLocalStorage<any>('current_filter_types', "input");
 
   const onChange = (
     value: DatePickerProps['value'] | RangePickerProps['value'],
     dateString: [string, string] | string,
   ) => {
-    console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
-    if (value == null) {
+    if (value == null ) {
       delete filter["start"];
-      delete filter["end"];    
-      setStartTime(null)  
+      delete filter["end"];
+      setStartTime(null)
       setEndTime(null)
       setRefreshFlag(_.uniqueId('refresh_'));
-    }else{
-      setStartTime(dateString[0])  
+    } else {
+      setStartTime(dateString[0])
       setEndTime(dateString[1])
     }
   };
@@ -126,70 +137,98 @@ const Event: React.FC = () => {
     setRefreshFlag(_.uniqueId('refresh_'));
   };
   useEffect(() => {
-     setView(display);
-     filterOptions["severity"]=[
+    setView(display);
+    filterOptions["severity"] = [
       { label: 'S1', value: '1' },
       { label: 'S2', value: '2' },
       { label: 'S3', value: '3' },
     ];
-     setFilterOptions({...filterOptions})
-     if(startTime!=null && endTime!=null){
-          filter["start"] = moment(startTime).unix()  
-          filter["end"] = moment(endTime).unix()  
-          setFilter({ ...filter });    
-     }
+    filterOptions["group_id"] = busiGroups.map(group => {
+      return {
+        value: "" + group.id,
+        label: group.name,
+      }
+    })
+    setFilterOptions({ ...filterOptions })
+    console.log(filterOptions)
+    if (startTime != null && endTime != null) {
+      filter["start"] = moment(startTime).unix()
+      filter["end"] = moment(endTime).unix()
+      setFilter({ ...filter });
+    }
   }, [])
 
   useEffect(() => {
-    
-    
- }, [filterType])
 
-  function renderLeftHeader() {
+
+  }, [filterType])
+
+  function renderLeftHeader(type:string) {
+    
     return (
       <Row justify='space-between' style={{ width: '100%' }}>
         <Space>
           <Button icon={<AppstoreOutlined />} onClick={() => {
-            setView('card');
+            setView('card');     
+            if (filterParam == "group_id") {
+              setFilterParam(null);
+              setSearchVal(null);
+              setFilterType(null);
+            }       
             localStorage.setItem('current_alert_display', "card");
+
           }} />
           <Button icon={<UnorderedListOutlined />} onClick={() => {
             setView('list')
             localStorage.setItem('current_alert_display', "list")
           }} />
-          <Select
-            placeholder="选择过滤器"
-            style={{ width: 120 }}
-            allowClear
-            defaultValue={filterParam}
-            onChange={(value) => {
-              if(value==undefined){
-                setFilterParam(null);
-                setSearchVal(null);
-                setFilterType(null);
-              }else{
-                cardQueryFilter.forEach((item) => {
-                  if (item.name == value) {
-                    setFilterType(item.type);
-                    setFilterParam(value);
-                    setSearchVal(null)
-                  }
-                })  
-                
-              }
-              
-            }}>
-            {cardQueryFilter.map((item, index) => (
-              <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
-            ))
-            }
-          </Select>
+
+         
+            <Select
+              placeholder="选择过滤器"
+              style={{ width: 120 }}
+              // allowClear
+              defaultValue={filterParam}
+              onChange={(value) => {
+                if (value == undefined) {
+                  setFilterParam(null);
+                  setSearchVal(null);
+                  setFilterType(null);
+                } else {
+                  let list = type=="card"?cardQueryFilter:listQueryFilter
+                  list.forEach((item) => {
+                    if (item.name == value) {
+                      setFilterType(item.type);
+                      setFilterParam(value);
+                      setSearchVal(null)
+                      console.log("selected",item.name,item.type);
+                      console.log("values",filterOptions[value]);
+                    }
+                  })
+
+                }
+
+              }}>
+               {type=="card" && cardQueryFilter.map((item, index) => (
+                <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
+              ))}
+               {type=="list" && listQueryFilter.map((item, index) => (
+                <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
+               ))}
+            </Select>
+
           {filterType == "input" && (
             <Input
               className={'searchInput'}
               value={searchVal}
               allowClear
-              onChange={(e) => setSearchVal(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value && e.target.value.length > 0) {
+                  setSearchVal(e.target.value);
+                } else {
+                  setSearchVal(null)
+                }
+              }}
               suffix={<SearchOutlined />}
               placeholder={'输入检索关键字'}
             />
@@ -199,13 +238,13 @@ const Event: React.FC = () => {
               className={'searchInput'}
               value={searchVal}
               allowClear
-              options={filterOptions[filterParam]?filterOptions[filterParam]:[]}
+              options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
               onChange={(val) => {
-                 if(val && val.length>0){
+                if (val && val.length > 0) {
                   setSearchVal(val);
-                 }else{
+                } else {
                   setSearchVal(null)
-                 }
+                }
               }}
               placeholder={'选择要筛选的条件'}
             />
@@ -214,8 +253,8 @@ const Event: React.FC = () => {
             showTime={{ format: 'HH:mm:ss' }}
             format="YYYY-MM-DD HH:mm"
             onChange={onChange}
-            defaultValue={[startTime?moment(startTime):null, endTime?moment(endTime):null]}
-            value={[startTime?moment(startTime, DateFormat):null, endTime?moment(endTime, DateFormat):null]}
+            defaultValue={[startTime ? moment(startTime) : null, endTime ? moment(endTime) : null]}
+            value={[startTime ? moment(startTime, DateFormat) : null, endTime ? moment(endTime, DateFormat) : null]}
             locale={locale}
             onOk={onOk}
           />
@@ -291,7 +330,7 @@ const Event: React.FC = () => {
   }
 
   const filterObj = Object.assign(
-    (searchVal!=null && searchVal.length>0) ? {filter:'severity',query: searchVal } : {},
+    (searchVal != null && searchVal.length > 0) ? { filter: filterParam, query: searchVal } : {},
     filter.start > 0 ? { start: filter.start } : {},
     filter.end > 0 ? { end: filter.end } : {},
   );
@@ -342,12 +381,12 @@ const Event: React.FC = () => {
   return (
     <PageLayout icon={<AlertOutlined />} title={t('title')}>
       {view === 'card' ? (
-        <Card header={renderLeftHeader()} filter={filterObj} refreshFlag={refreshFlag} />
+        <Card header={renderLeftHeader(view)} filter={filterObj} refreshFlag={refreshFlag} />
       ) : (
         <>
 
           <Table
-            header={renderLeftHeader()}
+            header={renderLeftHeader(view)}
             filter={filter}
             filterObj={filterObj}
             setFilter={setFilter}

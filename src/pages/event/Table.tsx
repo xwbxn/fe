@@ -157,8 +157,8 @@ export default function TableCpt(props: IProps) {
       fixed:'right',
       render(value, record) {
         return (
-          <>
-            <Space>
+          <div>
+            <Space size={'small'} className='table-operate-column'>
               <FileSearchOutlined title='详情' onClick={()=>{
                   history.push({
                     pathname: `/alert-cur-events/${record.id}`
@@ -196,18 +196,7 @@ export default function TableCpt(props: IProps) {
             }} />
 
           </Space>
-
-
-
-
-            <AckBtn
-              data={record}
-              onOk={() => {
-                setRefreshFlag(_.uniqueId('refresh_'));
-              }}
-            />
-            
-          </>
+          </div>
         );
       },
     },

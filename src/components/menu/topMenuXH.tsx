@@ -1,8 +1,8 @@
-import { CommonStateContext } from '@/App';
+import { CommonStateContext,initTheme } from '@/App';
 import { getMenuPerm } from '@/services/common';
 import Icon, { DownOutlined, ProfileOutlined, ProjectOutlined } from '@ant-design/icons';
 import querystring from 'query-string';
-import { Dropdown, Menu, Space } from 'antd';
+import { Dropdown, Menu, Space,Image } from 'antd';
 import _ from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import './topMenu.less';
 import './locale';
 import { Logout } from '@/services/login';
 import { useLocalStorageState } from 'ahooks';
+import { useLocalStorage } from 'react-use';
 
 const getMenuList = (t) => {
   const menuList = [
@@ -256,22 +257,10 @@ export default function () {//{ selectMenu?:any }
   const { profile } = useContext(CommonStateContext);
   const [home] = useLocalStorageState('HOME_URL');
 
+  const [theme, setTheme] = useLocalStorage<any>("platform_theme",initTheme);
+
   useEffect(() => {
     setDefaultSelectedKeys([]);
-
-    // for (const item of menuList) {
-    //   if (item && item.key.startsWith('/') && pathname.includes(item.key)) {
-    //     setDefaultSelectedKeys([item?.key]);
-    //     break;
-    //   } else if (item?.children && item.children.length > 0) {
-    //     for (const i of item.children) {
-    //       if (i && (pathname === i.key || pathname.startsWith(i.key + '/'))) {
-    //         setDefaultSelectedKeys([item?.key, i.key!]);
-    //         break;
-    //       }
-    //     }
-    //   }
-    // }
   }, [pathname]);
 
   useEffect(() => {
@@ -376,19 +365,11 @@ export default function () {//{ selectMenu?:any }
 
   return hideSideMenu() ? null : (
     <div className='top-menu1'>
-      <div className='logoImg'></div>
+      <div className='logoImg'>
+        <Image src={theme.logo} className='xh_logo_image_size' preview={false}></Image>        
+        {theme?.title}</div>
       <Menu mode='horizontal' className='layer_1_menu' selectedKeys={mainMenuKey} onClick={handleClick} items={menus} />
       <div className='top_right'>
-        {/* <span
-          className='language'
-          onClick={() => {
-            let language = i18n.language == 'en_US' ? 'zh_CN' : 'en_US';
-            i18n.changeLanguage(language);
-            localStorage.setItem('language', language);
-          }}
-        >
-          {i18n.language == 'zh_CN' ? 'EN' : '中'}
-        </span> */}
        <span
           className='language'
           onClick={() => {

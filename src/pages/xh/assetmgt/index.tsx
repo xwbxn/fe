@@ -26,17 +26,12 @@ import './style.less';
 import _ from 'lodash';
 import { Resizable } from 're-resizable';
 import Accordion from './Accordion';
-import { assetsType } from '@/store/assetsInterfaces';
+import { assetsType,metricsUnitEnum } from '@/store/assetsInterfaces';
 import { CommonStateContext } from '@/App';
 import {
   deleteXhAssets,
   getAssetstypes,
-  updateAssetDirectoryTree,
-  moveAssetDirectoryTree,
   getAssetsByCondition,
-  insertAssetDirectoryTree,
-  deleteAssetDirectoryTree,
-  getAssetDirectoryTree,
 } from '@/services/assets';
 
 import RefreshIcon from '@/components/RefreshIcon';
@@ -78,12 +73,15 @@ export default function () {
   const [selectedAssetsName, setSelectedAssetsName] = useState<string[]>([]);
   const [treeData, setTreeData] = React.useState<DataNode[]>();
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
-  const [filterType, setFilterType] = useLocalStorage<any>('asset_filter_type',null);
+  const [filterType, setFilterType] = useLocalStorage<any>('asset_filter_type',"input");
   const [current, setCurrent] = useLocalStorage("asset_current",1);
   const [pageSize, setPageSize] = useLocalStorage("asset_current_page",10);
   const [searchVal, setSearchVal] = useLocalStorage<any>('asset_filter_value',null);
   const [filterParam, setFilterParam] = useLocalStorage<any>('asset_filter_param','ip');
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
+
+
+  const [metricUnits, setMetricUnits] = useState<any>({});
 
 
   const [total, setTotal] = useState<number>(0);
@@ -122,7 +120,7 @@ export default function () {
     {
       title: '资产名称',
       dataIndex: 'name',
-      fixed: 'left',
+      Ced: 'left',
       ellipsis: true,
       sorter: (a, b) => {
         return a.name.localeCompare(b.name);
@@ -353,12 +351,17 @@ export default function () {
       //TODO：处理分组属性
       const extra_items = new Array();
       extendType.metrics?.forEach((element) => {
+        if(metricsUnitEnum[element.unit]){
+          metricUnits[element.metrics] ="("+metricsUnitEnum[element.unit]+")";
+        }        
         let newItem = {
           name: element.metrics,
-          label: element.name,
+          label: element.name ,
         };
         extra_items.push(newItem);
       });
+      setMetricUnits({...metricUnits});
+
       let extra_props = extendType.extra_props;
       for (let property in extra_props) {
         let group = extra_props[property];
@@ -387,7 +390,7 @@ export default function () {
       const cloumns = new Array();
       extra_items.map((item) => {
         cloumns.push({
-          title: item.label,
+          title: item.label+(metricUnits[item.name]?metricUnits[item.name]:''),
           dataIndex: item.name,
           align: 'center',
           ellipsis: true,
@@ -575,6 +578,7 @@ export default function () {
       //TODO：处理分组属性
       extendType.metrics?.forEach((element) => {
         if (!map.has(element.name)) {
+          metricUnits[element.metrics] ="("+metricsUnitEnum[element.unit]+")";
           let newItem = {
             name: element.metrics,
             label: element.name,
@@ -583,6 +587,7 @@ export default function () {
           map.set(element.name, element.name);
         }
       });
+      setMetricUnits({...metricUnits});
       let extra_props = extendType.extra_props;
       for (let property in extra_props) {
         let group = extra_props[property];
@@ -614,9 +619,9 @@ export default function () {
     const cloumns = new Array();
     extra_items.map((item) => {
       cloumns.push({
-        title: item.label,
+        title: item.label+(metricUnits[item.name]?metricUnits[item.name]:''),
         dataIndex: item.name,
-        width: '80px',
+        width: '100px',
         align: 'center',
         ellipsis: true,
         render: (val, record, i) => {
@@ -716,7 +721,7 @@ export default function () {
                     defaultValue='ip'
                     placeholder='选择过滤器'
                     style={{ width: 120 }}
-                    allowClear
+                    // allowClear
                     onChange={(value) => {
                       queryFilter.forEach((item) => {
                         if (item.name == value) {
@@ -749,6 +754,7 @@ export default function () {
                       placeholder={'选择要查询的条件'}
                       value={searchVal}
                       allowClear
+                      showSearch filterOption optionFilterProp={"label"}
                       options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
                       onChange={(val) => setSearchVal(val)}
                     />

@@ -71,7 +71,7 @@ export default function index() {
             );
           }}
         />
-        {bgid ? <List bgid={bgid}  assetid={assetid}/> : <BlankBusinessPlaceholder text='告警规则' />}
+        {bgid ? <List bgid={bgid} from={1}  assetid={assetid}/> : <BlankBusinessPlaceholder text='告警规则' />}
       </div>
     </PageLayout>
   );

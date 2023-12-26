@@ -32,6 +32,18 @@ export default function ChangePassword() {
     }
   };
 
+  const validatePassword = (_, value) => {
+    if (value && value.length >= 8) {
+      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&*]/].reduce((acc, regex) => {
+        return acc + (regex.test(value) ? 1 : 0);
+      }, 0);
+      if (count >= 3) {
+        return Promise.resolve();
+      }
+    }
+    return Promise.reject('密码必须大于8位，并且包含大写字母、小写字母、数字和符号中的至少3种');
+  };
+
   const modifyPassword = () => {
     const { oldpass, newpass } = form.getFieldsValue();
     UpdatePwd(oldpass, newpass).then(() => {
@@ -63,6 +75,9 @@ export default function ChangePassword() {
           {
             required: true,
             message: t('password.newMsg'),
+          },
+          {
+            validator: validatePassword,
           },
         ]}
       >

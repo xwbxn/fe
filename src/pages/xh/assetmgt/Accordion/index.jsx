@@ -214,8 +214,11 @@ class Accordions extends Component {
     }
   };
   onSelect = (selectedKeys, info) => {
-    this.state.showMenu = false;
-    this.props.handleClick(selectedKeys[0], info, "query");
+    // this.state.showMenu = false;
+    if(selectedKeys.length>0){
+        this.props.handleClick(selectedKeys[0], info, "query");
+    }
+    
   };
 
   renderMenu = () => {
@@ -246,10 +249,10 @@ class Accordions extends Component {
   };
 
   hiddenMenu = (e) => {
-    e.stopPropagation();
-    console.log("hiddenMenu", e);
-    this.state.showMenu = false;
-    this.setState(this.state)
+    // e.stopPropagation();
+    // console.log("hiddenMenu", e);
+    // this.state.showMenu = false;
+    // this.setState(this.state)
   }
 
   onExpand = (expandedKeysValue) => { 
@@ -267,7 +270,7 @@ class Accordions extends Component {
         {treeData!=null && ( 
           <>
           <div className='bread-crumb-container_category' onClick={e => {
-            this.hiddenMenu(e);
+            // this.hiddenMenu(e);
           }}>
             <div
               className="collapse-content"
@@ -282,10 +285,10 @@ class Accordions extends Component {
                 onRightClick={this.handleRightClick}
                 treeData={treeData}
                 defaultExpandAll
-                checkStrictly
+                // checkStrictly
                 onExpand={this.onExpand}
                 defaultSelectedKeys={[selectedKey]}
-                // multiple={true}
+                multiple={false}
                 defaultExpandedKeys={expandedKeys}
                 fieldNames={{ key: 'id', title: 'name' }}
                 onSelect={this.onSelect}

@@ -56,8 +56,8 @@ const request = extend({
 request.interceptors.request.use((url, options) => {
   let headers = {
     ...options.headers,
-  };
-  headers['Authorization'] = `Bearer ${sessionStorage.getItem('access_token') || ''}`;
+  };  
+  headers['Authorization'] = `Bearer ${sessionStorage.getItem('access_token') || ''}`;  
   headers['X-Language'] = localStorage.getItem('language') === 'en_US' ? 'en' : 'zh';
   return {
     url,
@@ -65,7 +65,6 @@ request.interceptors.request.use((url, options) => {
   };
 });
 
-request
 /**
  * 响应拦截
  */

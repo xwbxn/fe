@@ -32,6 +32,7 @@ import { getBusiGroups, getDatasourceBriefList } from '@/services/common';
 import { getLicense } from '@/components/AdvancedWrap';
 import { getVersions } from '@/components/pageLayout/Version/services';
 import Content from './routers';
+import {getSystemTheme} from '@/services/login';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
 
@@ -40,6 +41,7 @@ import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
 import LayoutXH from './components/menu/layoutXH'; //西航版本
+import { useLocalStorage } from 'react-use';
 interface IProfile {
   admin?: boolean;
   nickname: string;
@@ -96,12 +98,19 @@ export interface ICommonState {
   isPlus: boolean;
 }
 
+export const initTheme ={
+  title: '工控网运维系统',
+  logo: '/image/topmenu/favicon.png',
+  icon: '/image/plticon.png',
+}
 // 可以匿名访问的路由 TODO: job-task output 应该也可以匿名访问
 const anonymousRoutes = ['/login', '/callback', '/chart', '/dashboards/share/'];
 // 判断是否是匿名访问的路由
 const anonymous = _.some(anonymousRoutes, (route) => location.pathname.startsWith(route));
 // 初始化数据 context
 export const CommonStateContext = createContext({} as ICommonState);
+
+var link :any= document.querySelector('link[rel*="icon"]');
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -114,9 +123,12 @@ function App() {
   const [dialogShow, setDialogShow] = useState<string>(_.toString(localStorage.getItem('alert_dialog_show') || '0'));
   const [alertLevel, setAlertLevel] = useState<number>(0);
   const [alertId, setAlertId] = useState<number>(0);
-  const bodyStyle = {
-    overflow: 'hidden',
+
+  const setPageTitle = (newTitle) => {
+    document.title = newTitle;
   };
+
+  const [theme, setTheme] = useLocalStorage("platform_theme",initTheme);  
   const [commonState, setCommonState] = useState<ICommonState>({
     datasourceCateOptions: [],
     groupedDatasourceList: {},
@@ -202,6 +214,17 @@ function App() {
   }, [licenseWebsocket]);
   
   useEffect(() => {
+    getSystemTheme().then((res) => {
+      if (res.dat) {
+        setTheme({
+          title: res.dat.login_title,
+          icon: res.dat.logo_title,
+          logo: res.dat.logo_top,
+        });       
+      }
+    });
+    link.href = theme?.icon; 
+    setPageTitle(theme?.title);
     try {
       (async () => {
         // 非匿名访问，需要初始化一些公共数据

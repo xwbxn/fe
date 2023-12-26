@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Checkbox } from 'antd';
 import { useHistory, useLocation } from 'react-router-dom';
 import { PictureOutlined, UserOutlined, LockOutlined, SafetyCertificateTwoTone, LockTwoTone, IdcardTwoTone } from '@ant-design/icons';
-import { ifShowCaptcha, getCaptcha, getSsoConfig, getRedirectURL, getRedirectURLCAS, getRedirectURLOAuth, authLogin, getRSAConfig } from '@/services/login';
+import { ifShowCaptcha, getCaptcha, getSsoConfig, getSystemTheme, authLogin, getRSAConfig } from '@/services/login';
 import './login.less';
 // import cookie from "react-cookies";
 // @ts-ignore
@@ -27,6 +27,7 @@ import useSsoWay from 'plus:/parcels/SSOConfigs/useSsoWay';
 import { useTranslation } from 'react-i18next';
 import { RsaEncry } from '@/utils/rsa';
 import _ from 'lodash';
+import { useLocalStorage } from 'react-use';
 
 export interface DisplayName {
   oidc: string;
@@ -38,14 +39,22 @@ export interface DisplayName {
 export default function Login() {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const history = useHistory();
   const location = useLocation();
+  
   const redirect = location.search && new URLSearchParams(location.search).get('redirect');
   const [displayName, setDis] = useState<DisplayName>({
     oidc: 'OIDC',
     cas: 'CAS',
     oauth: 'OAuth',
   });
+
+  const [theme, setTheme] = useLocalStorage("platform_theme",{
+    title: '工控网运维系统',
+    logo: '/image/topmenu/logo.png',
+    icon: '/image/plticon.png',
+  });
+
+
   const [showcaptcha, setShowcaptcha] = useState(false);
   const verifyimgRef = useRef<HTMLImageElement>(null);
   const captchaidRef = useRef<string>();
@@ -61,15 +70,15 @@ export default function Login() {
     });
   };
   useSsoWay();
-  useEffect(()=>{
-
-}, [remember]);
+  
   useEffect(() => {
     // 从 localStorage 中读取用户的登录信息
     const username = localStorage.getItem('username');
     const password = localStorage.getItem('password');
     const remember = localStorage.getItem('remember') === 'true';
-    //console.log("1111",remember)
+
+    
+    
     if(username){
       form.setFieldsValue({
         username,
@@ -94,6 +103,9 @@ export default function Login() {
         });
       }
     });
+
+    
+
 
     ifShowCaptcha().then((res) => {
       setShowcaptcha(res?.dat?.show);
@@ -153,7 +165,7 @@ export default function Login() {
     <div className='login-warp'>
       <div className='login-panel'>
         <div className='login-main'>
-          <div className='title'> </div>
+          <div className='title'> {theme?.title}</div>
           <div className='main'> </div>
         </div>
         <div className='integration'>

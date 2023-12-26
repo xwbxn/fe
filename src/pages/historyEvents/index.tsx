@@ -61,9 +61,9 @@ export const setDefaultHours = (hours: number) => {
 const Event: React.FC = () => {
   const { t } = useTranslation('AlertHisEvents');
   const { busiGroups } = useContext(CommonStateContext);
-  const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types',null);
+  const [filterType, setFilterType] = useLocalStorage<any>('history_filter_types',"input");
   const [searchVal, setSearchVal] = useLocalStorage<any>('history_filter_value',null);
-  const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param',null);
+  const [filterParam, setFilterParam] = useLocalStorage<any>('history_filter_param',"ip");
   const [filterOptions, setFilterOptions] = useState<any>({});
   const [refreshFlag, setRefreshFlag] = useState<string>(_.uniqueId('refresh_'));
   const [selectRowKeys, setSelectRowKeys] = useState<any[]>([]);
@@ -137,7 +137,7 @@ const Event: React.FC = () => {
       },
     },
     {
-      title: '资产IP',
+      title: 'IP地址',
       dataIndex: 'asset_ip',
       width: 100,
       align: 'center',
@@ -195,12 +195,12 @@ const Event: React.FC = () => {
     },
     {
       title: '操作',
-      width: 100,
+      width: 60,
       align: 'center',
       fixed: 'right',
       render: (record: any) => {
         return (
-          <Space>
+          <Space  size={'small'} className='table-operate-column'>
             <FileSearchOutlined title='详情'
                onClick={()=>{
                  history.push(`/alert-his-events/${record.id}?from=history`);
@@ -263,10 +263,12 @@ const Event: React.FC = () => {
     console.log('Selected Time: ', value);
     console.log('Formatted Selected Time: ', dateString);
     if (value == null) {
-      delete filter["start"];
-      delete filter["end"];    
+      delete filterObj["start"];
+      delete filterObj["end"];    
       setStartTime(null)  
+      setStart(0)
       setEndTime(null)
+      setEnd(0)
       setRefreshFlag(_.uniqueId('refresh_'));
     }else{
       setStartTime(dateString[0])  
@@ -289,7 +291,7 @@ const Event: React.FC = () => {
             placeholder="选择过滤器"
             style={{ width: 120 }}
             defaultValue={filterParam}
-            allowClear
+            // allowClear
             onChange={(value) => {
               queryFilter.forEach((item) => {
                 if (item.name == value) {
@@ -362,7 +364,7 @@ const Event: React.FC = () => {
                       }
                     } else if (key == "delete") {
                       if (selectRowKeys.length <= 0) {
-                        message.warning("请选择要批量记录")
+                        message.warning("请选择要批量删除的记录")
                         return
                       } else {
                         Modal.confirm({

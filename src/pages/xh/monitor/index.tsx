@@ -116,7 +116,9 @@ export default function () {
         }}>{name}</div>;
       },
       sorter: (a, b) => {
-        return (a.asset_id).localeCompare(b.asset_id)
+        const aip = assetInfo[a.asset_id]?.name
+        const bip = assetInfo[b.asset_id]?.name
+        return (aip).localeCompare(bip)
       },
     },
     {
@@ -581,7 +583,7 @@ export default function () {
                   defaultValue="asset_ip"
                   placeholder="选择过滤器"
                   style={{ width: 120 }}
-                  allowClear
+                  // allowClear
                   onChange={(value) => {
                     selectFilterType(value);
                   }}>

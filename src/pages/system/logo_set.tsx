@@ -2,15 +2,16 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dropdown, Input, Menu, message, Modal, Space, Table, Tag, Tree, Switch, Row, Card, Form, Radio, Select, Upload } from 'antd';
 import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
-import { GroupOutlined} from '@ant-design/icons';
+import { GroupOutlined } from '@ant-design/icons';
 const { confirm } = Modal;
-import { CommonStateContext } from '@/App';
+import { CommonStateContext,initTheme } from '@/App';
 import './style.less';
 import _, { now, random, uniqueId } from 'lodash';
 import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadProps } from 'antd/es/upload';
 import type { UploadFile } from 'antd/es/upload/interface';
-import {saveLog,getLogInfo } from '@/services/log_set';
+import { saveLog, getLogInfo } from '@/services/log_set';
+import { useLocalStorage } from 'react-use';
 
 const getBase64 = (img: RcFile, callback: (url: string) => void) => {
   const reader = new FileReader();
@@ -23,25 +24,25 @@ const getBase64 = (img: RcFile, callback: (url: string) => void) => {
 
 export default function () {
   const { t } = useTranslation('assets');
-  let imageURL ="http://192.168.20.19:17000/api/n9e/"
+  let imageURL = "/api/n9e/"
   const commonState = useContext(CommonStateContext);
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);  
+  const [theme, setTheme] = useLocalStorage("platform_theme", initTheme);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
   const handleCancel = () => setPreviewOpen(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
-      
-    getLogInfo().then(({dat})=>{
-      console.log("查询结果",dat)
+
+    getLogInfo().then(({ dat }) => {
       form.setFieldsValue(dat)
-      if(dat.logo_top!=null && dat.logo_top.length>0){
-        setTopLogoImageUrl(imageURL+dat.logo_top);
+      if (dat.logo_top != null && dat.logo_top.length > 0) {
+        setTopLogoImageUrl(dat.logo_top);
       }
-      if(dat.logo_title!=null && dat.logo_title.length>0){
-        setTitleLogoImageUrl(imageURL+dat.logo_title);
+      if (dat.logo_title != null && dat.logo_title.length > 0) {
+        setTitleLogoImageUrl(dat.logo_title);
       }
     })
   }, []);
@@ -55,24 +56,76 @@ export default function () {
   const [titleLogoImageUrl, setTitleLogoImageUrl] = useState<string | undefined>();
 
 
+  const resetLogoSet=() =>{
+      let values ={
+        "login_title":initTheme.title,
+        "logo_top":initTheme.logo,
+        "logo_title":initTheme.icon,        
+      }
+      saveLog(values).then(res => {
+        // message.success('表单成功提交');
+        getLogInfo().then(({ dat }) => {
+          setTheme({
+            title: dat.login_title,
+            icon: dat.logo_title,
+            logo: dat.logo_top,
+          });
+          form.setFieldsValue(dat)
+          if (dat.logo_top != null && dat.logo_top.length > 0) {
+            setTitleLogoImageUrl(dat.logo_title);
+          }
+          if (dat.logo_title != null && dat.logo_title.length > 0) {
+            setTopLogoImageUrl(dat.logo_top);
+          }
+          confirm({
+            title: '系统提醒',
+            content: '设置信息已提交，确定立即生效？',
+            onOk() {
+              window.location.reload();
+            },
+            onCancel() {
+              console.log('Cancel')
+            },
+          })
+        })
+
+  })
+}
 
   const onFinish = async (values: any) => {
     try {
-      saveLog(values).then(res=>{
-        message.success('表单成功提交');
-      })      
-  
+      saveLog(values).then(res => {
+        // message.success('表单成功提交');
+        getLogInfo().then(({ dat }) => {
+          setTheme({
+            title: dat.login_title,
+            logo: dat.logo_top,
+            icon: dat.logo_title
+          });
+          confirm({
+            title: '系统提醒',
+            content: '设置信息已提交，确定立即生效？',
+            onOk() {
+              window.location.reload();
+            },
+            onCancel() {
+              console.log('Cancel')
+            },
+          })
+        })
+
+      })
     } catch (error) {
       // 处理任何意外错误
       console.error('提交表单时发生错误:', error);
       message.error('提交表单时发生错误');
     }
   };
-  
-  
 
 
-  const beforeUpload = (file: RcFile,name:any) => {
+
+
+  const beforeUpload = (file: RcFile, name: any) => {
 
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isJpgOrPng) {
@@ -88,37 +141,32 @@ export default function () {
     return isJpgOrPng && isLt2M;
   };
   const handleChange = (info: UploadChangeParam<UploadFile>) => {
-    console.log("handleChangehandleChangehandleChangehandleChange");
-    
     if (info.file.status === 'uploading') {
       setLoading(true);
       return;
     }
 
     if (info.file.status === 'done') {
-      let file :any= info.file.originFileObj;
-      let suffix = file["name"].split(".")[file["name"].split(".").length-1];
-      
+      let file: any = info.file.originFileObj;
       getBase64(file as RcFile, (url) => {
         setLoading(false);
-        
         if (logoName === "logo_top") {
-          setTopLogoImageUrl("http://192.168.20.19:17000/api/n9e/"+info.file.response.dat+"?"+Math.random());
+          setTopLogoImageUrl(imageURL+ info.file.response.dat + "?" + Math.random());
           form.setFieldsValue({
-            logo_top: info.file.response.dat,
+            logo_top: imageURL+info.file.response.dat,
           });
         }
         if (logoName === "logo_title") {
-          setTitleLogoImageUrl("http://192.168.20.19:17000/api/n9e/"+info.file.response.dat+"?"+Math.random());
+          setTitleLogoImageUrl(imageURL+ info.file.response.dat + "?" + Math.random());
           form.setFieldsValue({
-            logo_title: info.file.response.dat,
+            logo_title: imageURL+info.file.response.dat,
           });
         }
       });
     }
-      // 发送文件到后端
-      const formData = new FormData();
-      formData.append('file', info.file.originFileObj as RcFile);
+    // 发送文件到后端
+    const formData = new FormData();
+    formData.append('file', info.file.originFileObj as RcFile);
 
 
   }
@@ -131,7 +179,7 @@ export default function () {
     headers: {
       authorization: `Bearer ${sessionStorage.getItem('access_token') || ''}`,
     },
-    
+
   };
   const uploadButton = (
     <div>
@@ -163,10 +211,10 @@ export default function () {
           <Form.Item hidden name="logo_top"><Input /></Form.Item>
           <Form.Item hidden name="logo_title"><Input /></Form.Item>
           <Form.Item
-            label="登录页标题（中文）"
+            label="登录页标题"
             name="login_title"
 
-            rules={[{ required: true, message: '请输入登录页标题（中文_)' }]}
+            rules={[{ required: true, message: '请输入登录页标题' }]}
           >
             <Input placeholder='请输入登录页标题（中文' />
           </Form.Item>
@@ -183,7 +231,7 @@ export default function () {
               // className="avatar-uploader"
               className='picture-card'
               showUploadList={false}
-              beforeUpload= {(info)=>{beforeUpload(info,"logo_top")}}
+              beforeUpload={(info) => { beforeUpload(info, "logo_top") }}
               onChange={(info) => {
                 handleChange(info)
               }}
@@ -206,7 +254,7 @@ export default function () {
               // className="avatar-uploader"
               className='picture-card'
               showUploadList={false}
-              beforeUpload= {(info)=>{beforeUpload(info,"logo_title")}}
+              beforeUpload={(info) => { beforeUpload(info, "logo_title") }}
               onChange={(info) => {
                 handleChange(info)
               }}
@@ -224,7 +272,7 @@ export default function () {
               <Button type="primary" htmlType="submit">
                 保存
               </Button>
-              <Button >
+              <Button onClick={resetLogoSet} >
                 还原
               </Button>
             </Space>

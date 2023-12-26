@@ -80,7 +80,7 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
 
   const getTableData = ({ current, pageSize }): Promise<any> => {
     const params = {
-      p: current,
+      page: current,
       limit: pageSize,
     };
 

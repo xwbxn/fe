@@ -41,6 +41,7 @@ import { link } from 'fs';
 interface ListProps {
   bgid?: number;
   assetid?: number;
+  from: number;
 }
 
 let queryFilter = [
@@ -60,7 +61,7 @@ interface Filter {
 }
 
 export default function List(props: ListProps) {
-  const { bgid, assetid } = props;
+  const { bgid, assetid,from } = props;
   const { t } = useTranslation('alertRules');
   const history = useHistory();
   const pagination = usePagination({ PAGESIZE_KEY: 'alert-rules-pagesize' });
@@ -68,24 +69,18 @@ export default function List(props: ListProps) {
     limit: 10, page: 1
   });
   const [refreshLeft, setRefreshLeft] = useState<string>(_.uniqueId('refresh_left'));
+  const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
   const [data, setData] = useState<AlertRuleType<any>[]>([]);
-  const [type, setType] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("input");
   const [searchVal, setSearchVal] = useState<any>(null);
   const [filterParam, setFilterParam] = useState<string>("ip");
   const [filterOptions, setFilterOptions] = useState<any>({});
-  const { busiGroups } = useContext(CommonStateContext);
+  const [current, setCurrent] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [total, setTotal] = useState<number>(0);
   const [typeOptions, setTypeOptions] = useState<any[]>([
-    //  {
-    //   label: '告警级别',
-    //   options: [
-    //     { label: 'S1', value: 1 },
-    //     { label: 'S2', value: 2 },
-    //     { label: 'S3', value: 3 },
-    //   ]
-    //  }
   ]);
 
   const [loading, setLoading] = useState(false);
@@ -261,37 +256,19 @@ export default function List(props: ListProps) {
   });
 
   const filterData = () => {
-    // return data.filter((item) => {
-    //   const { cate, datasourceIds, search, prod, severities } = filter;
-    //   const lowerCaseQuery = search?.toLowerCase() || '';
-    //   return (
-    //     (item.name.toLowerCase().indexOf(lowerCaseQuery) > -1 || item.append_tags.join(' ').toLowerCase().indexOf(lowerCaseQuery) > -1) &&
-    //     ((prod && prod === item.prod) || !prod) &&
-    //     ((item.severities &&
-    //       _.some(item.severities, (severity) => {
-    //         if (_.isEmpty(severities)) return true;
-    //         return _.includes(severities, severity);
-    //       })) ||
-    //       !item.severities) &&
-    //     (_.some(item.datasource_ids, (id) => {
-    //       if (includesProm(datasourceIds) && id === 0) return true;
-    //       return _.includes(datasourceIds, id);
-    //     }) ||
-    //       datasourceIds?.length === 0 ||
-    //       !datasourceIds)
-    //   );
-    // });
     return data["list"];
   };
   const getAlertRules = async (params) => {
     if (!bgid) {
       return;
     }
-    // setLoading(true);
+
     params["id"] = bgid;
+    console.log("params",params);
     const { success, dat } = await getStrategyGroupSubList(params);
     if (success) {
       setData(dat || []);
+      setTotal(dat.total)
       setLoading(false);
     }
   };
@@ -324,8 +301,13 @@ export default function List(props: ListProps) {
     ];
     setFilterOptions({ ...filterOptions })
   }, []);
-
   useEffect(() => {
+    loadingData(1,pageSize);
+  }, [bgid, searchVal,refreshLeft]);
+
+  const loadingData =(current,pageSize) => {
+    params["page"] = current;
+    params["limit"] =  pageSize;
     if (bgid) {
       params["id"] = bgid;
       if (assetid != null && assetid > 0) {
@@ -340,11 +322,20 @@ export default function List(props: ListProps) {
       }
       getAlertRules(params);
     }
-  }, [bgid, searchVal,refreshLeft]);
+  }
+
+
+ 
 
   if (!bgid) return null;
   const filteredData = filterData();
 
+
+  const onPageChange = (page: number, pageSize: number) => {
+    setCurrent(page);
+    setPageSize(pageSize);
+    loadingData(page,pageSize);
+  }
 
   return (
     <div className='alert-rules-list-container'>
@@ -368,6 +359,7 @@ export default function List(props: ListProps) {
                 })
                 setFilterParam(value);
                 setSearchVal(null)
+                setCurrent(0);
               }}>
               {queryFilter.map((item, index) => (
                 <Select.Option value={item.name} key={index}>{item.label}</Select.Option>
@@ -379,7 +371,10 @@ export default function List(props: ListProps) {
                 className={'searchInput'}
                 value={searchVal}
                 allowClear
-                onChange={(e) => setSearchVal(e.target.value)}
+                onChange={(e) => {
+                  setCurrent(0);
+                  setSearchVal(e.target.value)
+                }}
                 suffix={<SearchOutlined />}
                 placeholder={'输入模糊检索关键字'}
               />
@@ -390,7 +385,10 @@ export default function List(props: ListProps) {
                 value={searchVal}
                 allowClear
                 options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                onChange={(val) => setSearchVal(val)}
+                onChange={(val) =>{
+                  setCurrent(0);
+                  setSearchVal(val)
+                } }
                 placeholder={'选择要查询的条件'}
               />
             )}
@@ -423,10 +421,18 @@ export default function List(props: ListProps) {
       <div className='renderer-table-container' >
         <div className='renderer-table-container-box' >
         <Table
-          // tableLayout='fixed'
           size='small'
           rowKey='id'
-          pagination={pagination}
+          pagination={{
+            showSizeChanger: true,
+            showQuickJumper: true,
+            current: current,
+            pageSize: pageSize,
+            total: total,
+            onChange: onPageChange,
+            showTotal: (total) => `总共 ${total} 条`,
+            pageSizeOptions: [10, 20, 50, 100],
+          }}
           loading={loading}
           bordered
           dataSource={filteredData}

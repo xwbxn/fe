@@ -30,6 +30,12 @@ export const getCaptcha = function () {
     method: RequestMethod.Post,
   });
 };
+export const getSystemTheme = function () {
+  return request('/api/n9e/auth/login/title', {
+    method: RequestMethod.Get,
+    silence: true,
+  });
+};
 
 export const ifShowCaptcha = function () {
   return request('/api/n9e/auth/ifshowcaptcha', {
