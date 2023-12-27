@@ -13,6 +13,12 @@ export interface assetsType {
     dashboard?: string;
 }
 export const  metricsUnitEnum={
-    "percent-100": '%',
-    "bit":'Bit'
+    "percent": 'percent%',
+    "percentUnit":'percent0~1',
+    "seconds":'秒',
+    "milliseconds":'毫秒',
+    "bitsSI":'比特值1',
+    "bytesSI":'比特值2',
+    "bitsIEC":'比特值3',    
+    "bytesIEC":'比特值4',
 };

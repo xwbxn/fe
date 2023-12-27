@@ -23,6 +23,7 @@ import { useAntdTable } from 'ahooks';
 import { getTeamInfo, getUserInfoList } from '@/services/manage';
 import { TeamProps, User, Team } from '@/store/manageInterface';
 import './index.less';
+import { forEach } from 'lodash';
 
 const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
   const { t } = useTranslation('user');
@@ -31,6 +32,7 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
   const [selectedUser, setSelectedUser] = useState<React.Key[]>(userIds?userIds:[]);
   const [selectedUserRows, setSelectedUserRows] = useState<User[]>([]);
   const [query, setQuery] = useState('');
+  const [queryUsers, setQueryUsers] = useState<any[]>([]);
   const userColumn: ColumnsType<User> = [
     {
       title: t('account:profile.username'),
@@ -75,7 +77,15 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
   const onSelectChange = (newKeys: [], newRows: []) => {
     onSelect(newKeys);
     setSelectedUser(newKeys);
-    setSelectedUserRows(newRows);
+    let selectedUsers = new Array;
+    for(let i = 0; i < newKeys.length;i++){
+      queryUsers.forEach(user=>{
+         if(user.id==newKeys[i]){
+          selectedUsers.push(user);
+         }
+      })
+    }
+    setSelectedUserRows(selectedUsers);
   };
 
   const getTableData = ({ current, pageSize }): Promise<any> => {
@@ -92,6 +102,8 @@ const AddUser: React.FC<TeamProps> = (props: TeamProps) => {
         total: res.dat.total,
         list: res.dat.list,
       };
+      setQueryUsers(res.dat.list);
+
     });
   };
   const { tableProps } = useAntdTable(getTableData, {

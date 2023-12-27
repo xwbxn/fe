@@ -99,7 +99,7 @@ export interface ICommonState {
 }
 
 export const initTheme ={
-  title: '工控网运维系统',
+  title: '一体化综合运维管理平台',
   logo: '/image/topmenu/favicon.png',
   icon: '/image/plticon.png',
 }

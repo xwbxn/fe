@@ -61,14 +61,14 @@ export function deleteAlertEventsModal(ids: number[], onSuccess = () => { }, t) 
 let cardQueryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
-  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'alert_rule', label: '告警规则', type: 'input' },
 ]
 let listQueryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
-  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'alert_rule', label: '告警规则', type: 'input' },
   { name: 'group_id', label: '业务组', type: 'select' },

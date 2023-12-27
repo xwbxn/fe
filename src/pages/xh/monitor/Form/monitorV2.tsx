@@ -230,7 +230,7 @@ export default function () {
                     {assetInfo.position}
                   </div>
                   <div className='theme1'>
-                    <div className='title'>状态：</div>
+                    <div className='title'>运行状态：</div>
                     {assetInfo.health == 1 ? (
                       <Tag icon={<CheckCircleOutlined />} color='success'>
                         在线
@@ -323,7 +323,7 @@ export default function () {
             setAccessories(_.cloneDeep(accessories));
           }}
         >
-          <div className='accessories_body'>
+          <Space className='accessories_body'>
             {accessories.items.map((item, pos) => {
               return (
                 <div className='accessories_every_group show_image'>
@@ -364,7 +364,7 @@ export default function () {
                 </div>
               );
             })}
-          </div>
+          </Space>
         </Modal>
       </div>
     </Form>

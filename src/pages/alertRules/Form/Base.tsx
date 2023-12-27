@@ -46,6 +46,7 @@ export default function Base({ type,form,assetId }) {
     window.localStorage.removeItem('select_monitor_asset_id');
    
     if(type==1){
+      param["limit"] =-1;
       getAssetsByCondition(param).then((res) => {
         let options = new Array();
         res.dat.list.map((v) => {
