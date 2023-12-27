@@ -307,6 +307,18 @@ export default function Board(props: IProps) {
         }
         {...windowSize}
       >
+        <BoardTitle
+          dashboard={dashboard}
+          range={range}
+          setRange={(v) => {
+            setRange(v);
+          }}
+          id={id}
+          handleVariableChange={handleVariableChange}
+          stopAutoRefresh={stopAutoRefresh}
+          variableConfig={variableConfig}
+          handlePanelChange={handlePanelChange}
+        />
         <Renderer
           isPreview={true}
           themeMode={themeMode as 'dark'}

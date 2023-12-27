@@ -27,7 +27,7 @@ export default function () {
   const { id, action } = queryString.parse(search);
   const [assetInfo, setAssetInfo] = useState<any>({});
   const [assetItems, setAssetItems] = useState<any[]>([]);
-  const [boardId, setBoardId] = useState("");
+  const [boardId, setBoardId] = useState('');
   const [form] = Form.useForm();
 
   const panelBaseProps: any = {
@@ -246,65 +246,51 @@ export default function () {
                 </div>
               </div>
             </div>
-            {assetItems!=null && assetItems.length > 0 && (   
-            <div className='party_info'>
-              <div
-                className='asset_item_ctr_button'
-                onClick={(e) => {
-                  if (itemButton == '收起') {
-                    localStorage.setItem('asset_item_ctr_button', '查看部件');
-                    setItemButton('查看部件');
-                  } else {
-                    localStorage.setItem('asset_item_ctr_button', '收起');
-                    setItemButton('收起');
-                  }
-                }}
-              >
-                {itemButton}
-              </div>
-              {itemButton == '收起' && (
-                <div className='party_show'>
-                  {assetItems.length > 0 &&
-                    assetItems.map((element, index) => {
-                      return (
-                        <div
-                          className='assembly show_image'
-                          onClick={(e) => {
-                            let formItems: any = genForm(assetInfo.type, element.type);
-                            setAccessories({
-                              visual: true,
-                              label: formItems.label,
-                              title: element.label,
-                              name: formItems.name,
-                              items: element.items,
-                              properties: formItems.list,
-                            });
-                          }}
-                        >
-                          <div className='title'>
-                            {element.label}({element.items.length})
-                          </div>
-                          <div className={'image ' + element.type}></div>
-                          <div className='status'>
-                            状态：
-                            {true ? (
-                              <div>
-                                正常
-                                <CheckCircleFilled className='normal' />
-                              </div>
-                            ) : (
-                              <div>
-                                故障
-                                <CheckCircleFilled className='no_normal' />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+            {assetItems != null && assetItems.length > 0 && (
+              <div className='party_info'>
+                <div
+                  className='asset_item_ctr_button'
+                  onClick={(e) => {
+                    if (itemButton == '收起') {
+                      localStorage.setItem('asset_item_ctr_button', '查看部件');
+                      setItemButton('查看部件');
+                    } else {
+                      localStorage.setItem('asset_item_ctr_button', '收起');
+                      setItemButton('收起');
+                    }
+                  }}
+                >
+                  {itemButton}
                 </div>
-              )}
-            </div>
+                {itemButton == '收起' && (
+                  <div className='party_show'>
+                    {assetItems.length > 0 &&
+                      assetItems.map((element, index) => {
+                        return (
+                          <div
+                            className='assembly show_image'
+                            onClick={(e) => {
+                              let formItems: any = genForm(assetInfo.type, element.type);
+                              setAccessories({
+                                visual: true,
+                                label: formItems.label,
+                                title: element.label,
+                                name: formItems.name,
+                                items: element.items,
+                                properties: formItems.list,
+                              });
+                            }}
+                          >
+                            <div className='title'>
+                              {element.label}({element.items.length})
+                            </div>
+                            <div className={'image ' + element.type}></div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
             )}
           </Card>
         </div>
@@ -331,20 +317,6 @@ export default function () {
                     {accessories.label.toUpperCase()}({pos + 1})
                   </div>
                   <div className={'image ' + accessories.name} style={{ marginLeft: '30%' }}></div>
-                  <div className='status' style={{ display: 'flex', margin: '0 auto' }}>
-                    状态：
-                    {true ? (
-                      <div>
-                        正常
-                        <CheckCircleFilled className='normal' />
-                      </div>
-                    ) : (
-                      <div>
-                        故障
-                        <CheckCircleFilled className='no_normal' />
-                      </div>
-                    )}
-                  </div>
                   <div className='properties'>
                     {accessories.properties.map((property, index) => {
                       return (
@@ -354,7 +326,7 @@ export default function () {
                               {property.label}:
                             </div>
                             <div className='content' title={item[property.name]}>
-                              {item[property.name]}
+                              {item[property.name] && item[property.name].slice(0, 40)}
                             </div>
                           </div>
                         </>

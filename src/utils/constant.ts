@@ -67,4 +67,4 @@ enum BaseDatasourceCateEnum {
 export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDatasourceCateEnum };
 export type DatasourceCateEnum = BaseDatasourceCateEnum | AdvancedDatasourceCateEnum;
 
-export const WebSocketURL ="ws://10.16.58.7:17000/alert/ws/2";
+export const WebSocketURL =`ws://${location.host}/alert/ws/2`;
