@@ -395,7 +395,7 @@ const [operateScript, setOperateScript] = useState<any>({
                                   rules={[{ required: true, message: `请选择符号` }]}
                                 >
                                   <Select style={{width: "100%"}} options={[
-                                    { value: ">", label: '大于' }, { value: "=", label: '等于' }, { value: "<", label: '小于' },
+                                    { value: ">", label: '大于' }, { value: "==", label: '等于' }, { value: "<", label: '小于' },
                                   ]}></Select>
                                 </Form.Item>
                               </Col>

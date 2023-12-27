@@ -112,7 +112,7 @@ export default function index(props: { datasourceCate: string; datasourceValue: 
                       <Col span={6}>
                         <Form.Item rules={[{ required:true, message: `请选择关系` }]} {...field} name={[field.name, 'relation']} >
                           <Select options={[
-                            { value: ">", label: '大于' }, { value: "=", label: '等于' }, { value: "<", label: '小于' },
+                            { value: ">", label: '大于' }, { value: "==", label: '等于' }, { value: "<", label: '小于' },
 
                           ]}></Select>
                         </Form.Item>
