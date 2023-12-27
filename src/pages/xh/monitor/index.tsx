@@ -115,10 +115,13 @@ export default function () {
           history.push(`/xh/monitor/add?type=monitor&id=${value}&asset_id=${value}&action=asset&prom=1`)
         }}>{name}</div>;
       },
-      sorter: (a, b) => {
-        const aip = assetInfo[a.asset_id]?.name
-        const bip = assetInfo[b.asset_id]?.name
-        return (aip).localeCompare(bip)
+      sorter: (a, b) => {        
+        const aip = assetInfo[a.asset_id]?.name;
+        const bip = assetInfo[b.asset_id]?.name;
+        if(aip!=null && bip!=null){
+          return (aip).localeCompare(bip)
+        }
+        
       },
     },
     {
@@ -137,7 +140,9 @@ export default function () {
       sorter: (a, b) => {
         const aip = assetInfo[a.asset_id]?.ip
         const bip = assetInfo[b.asset_id]?.ip
-        return (aip).localeCompare(bip)
+        if(aip!=null && bip!=null){
+          return (aip).localeCompare(bip)
+        }
       },
     },
   ];
@@ -314,7 +319,7 @@ export default function () {
       setTreeData(_.cloneDeep(treeData));
     });
     setSelectColum(baseColumns.concat(choooseColumns).concat(fixColumns));
-    getAssetsByCondition({}).then(({ dat }) => {
+    getAssetsByCondition({limit:-1}).then(({ dat }) => {
       dat.list.forEach(v => {
         assetInfo[v.id] = (v);
       })

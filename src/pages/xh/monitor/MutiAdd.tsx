@@ -290,7 +290,7 @@ export default function (props: { initialValues: object; initParams: object; mod
                         form.setFieldsValue({ "asset_ids": [] })
                         const param = {
                           page: 1,
-                          limit: 10000,
+                          limit: 100000,
                           type: value
                         };
                         getAssetsByCondition(param).then((res) => {

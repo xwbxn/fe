@@ -280,6 +280,9 @@ export default function () {
                   <Form.Item label='厂商' name='manufacturers' rules={[{ required: false }]}>
                     <Select
                       style={{ width: '100%' }}
+                      allowClear
+                      showSearch filterOption optionFilterProp={"label"}
+                      
                       options={factories.map(({ key, value }) => ({
                         label: value,
                         value: value,

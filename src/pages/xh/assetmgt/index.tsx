@@ -4,6 +4,7 @@ import PageLayout from '@/components/pageLayout';
 import { useTranslation } from 'react-i18next';
 import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
 import '@minko-fe/use-antd-resizable-header/dist/style.css';
+import valueFormatter from '@/pages/dashboard/Renderer/utils/valueFormatter';
 
 import {
   CheckCircleOutlined,
@@ -99,7 +100,7 @@ export default function () {
 
   const filterOptions = {
     status: [
-      { value: '1', label: '在线' },
+      { value: '1', label: '正常' },
       { value: '0', label: '离线' },
     ],
     group_id: busiGroups.map((group) => {
@@ -351,8 +352,11 @@ export default function () {
       //TODO：处理分组属性
       const extra_items = new Array();
       extendType.metrics?.forEach((element) => {
-        if(metricsUnitEnum[element.unit]){
-          metricUnits[element.metrics] ="("+metricsUnitEnum[element.unit]+")";
+        if(element.unit!=null && metricsUnitEnum[element.unit]){
+          metricUnits[element.metrics] ={
+              label:"("+metricsUnitEnum[element.unit]+")",
+              unit:element.unit
+          };
         }        
         let newItem = {
           name: element.metrics,
@@ -390,7 +394,7 @@ export default function () {
       const cloumns = new Array();
       extra_items.map((item) => {
         cloumns.push({
-          title: item.label+(metricUnits[item.name]?metricUnits[item.name]:''),
+          title: item.label,
           dataIndex: item.name,
           align: 'center',
           ellipsis: true,
@@ -398,7 +402,7 @@ export default function () {
             if (item.name.split('.').length > 1) {
               return renderItem(item.name, record, i);
             } else {
-              return renderMetricsItem(item.label, record, i);
+              return renderMetricsItem(item.label, record, i,metricUnits[item.name]?metricUnits[item.name].unit:'');
             }
           },
         });
@@ -551,15 +555,31 @@ export default function () {
     );
   };
 
-  const renderMetricsItem = (field, record, index) => {
+  const renderMetricsItem = (field, record, index,unit) => {
     let vaue: any = null;
+    console.log("field",field,"单位",unit)
     for (let item of record.metrics_list) {
-      if (item.name == field) {
-        vaue = parseFloat(item.value).toFixed(1);
+      if (item.name == field ) {
+        if(unit!=null && unit.length>0){
+           vaue = item.value
+        }else{
+          vaue = parseFloat(item.value).toFixed(1);
+        }        
         break;
       }
     }
-    return vaue;
+    if(unit!=null && unit.length>0){
+      return valueFormatter(
+        {
+          unit: unit
+        },
+        vaue,
+      ).text;
+    }else{
+      return vaue;
+    }
+    
+    
   };
 
   const loadAssetTypeAllColumns = (
@@ -578,7 +598,12 @@ export default function () {
       //TODO：处理分组属性
       extendType.metrics?.forEach((element) => {
         if (!map.has(element.name)) {
-          metricUnits[element.metrics] ="("+metricsUnitEnum[element.unit]+")";
+          if(element.unit!=null && metricsUnitEnum[element.unit]){
+            metricUnits[element.metrics] ={
+              label:"("+metricsUnitEnum[element.unit]+")",
+              unit:element.unit
+            };
+          } 
           let newItem = {
             name: element.metrics,
             label: element.name,
@@ -619,7 +644,7 @@ export default function () {
     const cloumns = new Array();
     extra_items.map((item) => {
       cloumns.push({
-        title: item.label+(metricUnits[item.name]?metricUnits[item.name]:''),
+        title: item.label,
         dataIndex: item.name,
         width: '100px',
         align: 'center',
@@ -628,7 +653,7 @@ export default function () {
           if (item.name.split('.').length > 1) {
             return renderItem(item.name, record, i);
           } else {
-            return renderMetricsItem(item.label, record, i);
+            return renderMetricsItem(item.label, record, i,metricUnits[item.name]?metricUnits[item.name].unit:'');
           }
         },
       });

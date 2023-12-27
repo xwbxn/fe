@@ -346,7 +346,7 @@ const Resource: React.FC = () => {
                   pageSizeOptions: [5,10, 20, 50, 100],
                 }}
                 loading={memberLoading} 
-                rowSelection={rowSelection}
+                // rowSelection={rowSelection}
                 />
             </div>
           ) : (

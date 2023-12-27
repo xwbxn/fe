@@ -52,7 +52,7 @@ export default function TableCpt(props: IProps) {
   const columns:any = [
     
     {
-      title: '规则名称',
+      title: '告警规则名称',
       dataIndex: 'rule_name',
       width: 150,
       render(title, { id, tags }) {

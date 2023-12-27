@@ -49,7 +49,7 @@ let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'group_id', label: '业务组', type: 'select' },
-  { name: 'rule_name', label: '告警名称', type: 'input' },
+  { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'name', label: '资产名称', type: 'input' },
   { name: 'alert_rule', label: '告警规则', type: 'input' },
 ]
@@ -106,7 +106,7 @@ const Event: React.FC = () => {
   const columns: any = [
     
     {
-      title: '规则名称',
+      title: '告警规则名称',
       dataIndex: 'rule_name',
       width: 150,
       ellipsis: true,
@@ -177,7 +177,7 @@ const Event: React.FC = () => {
         );
       },
       sorter: (a, b) =>{
-        return (a.rule_name).localeCompare(b.rule_name)
+        return a.severity - b.severity;
       },
     },
     {

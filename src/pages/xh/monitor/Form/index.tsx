@@ -88,6 +88,7 @@ const [operateScript, setOperateScript] = useState<any>({
       });
       // .filter((v) => v.name !== '主机'); //探针自注册的不在前台添加
       setAssetTypes(types);
+      param["limit"] =-1;
       getAssetsByCondition(param).then((assets) => {
         let options = new Array();
         assets.dat.list.map((v) => {
