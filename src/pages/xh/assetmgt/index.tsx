@@ -787,7 +787,7 @@ export default function () {
                         }
                       });
                       setFilterParam(value);
-                      setSearchVal('');
+                      setSearchVal(null);
                     }}
                   >
                     {queryFilter.map((item, index) => (
@@ -801,7 +801,15 @@ export default function () {
                       className={'searchInput'}
                       value={searchVal}
                       allowClear
-                      onChange={(e) => setSearchVal(e.target.value)}
+                      onChange={(e) => {
+                        console.log(e)
+                        if(e!=undefined){
+                          setSearchVal(e.target.value)
+                        }else{
+                          setSearchVal(null)
+                        }
+                        
+                      }}
                       suffix={<SearchOutlined />}
                       placeholder={'输入模糊检索关键字'}
                     />
@@ -814,7 +822,14 @@ export default function () {
                       allowClear
                       showSearch filterOption optionFilterProp={"label"}
                       options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                      onChange={(val) => setSearchVal(val)}
+                      onChange={(val) => {
+                        if(val!=undefined){
+                          setSearchVal(val)
+                        }else{
+                          setSearchVal(null)
+                        }
+                      
+                      }}
                     />
                   )}
                 </Space>
