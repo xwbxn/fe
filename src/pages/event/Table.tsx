@@ -256,6 +256,7 @@ export default function TableCpt(props: IProps) {
           tableLayout='fixed'
           rowKey={(record) => record.id}
           columns={columns}
+          bordered
           className='current_events_list'
           {...tableProps}
           // rowClassName={(record: { severity: number; is_recovered: number }) => {

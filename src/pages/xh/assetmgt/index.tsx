@@ -41,6 +41,7 @@ import { OperationModal } from './OperationModal';
 import { factories } from './catalog';
 import type { DataNode, TreeProps } from 'antd/es/tree';
 import { useInterval, useLocalStorage } from 'react-use';
+import { settings } from 'cluster';
 
 export enum OperateType {
   BindTag = 'bindTag',
@@ -133,7 +134,7 @@ export default function () {
     {
       title: '资产类型',
       dataIndex: 'type',
-      fixed: 'left',
+      Ced: 'left',
       width: 120,
       align: 'center',
       ellipsis: true,
@@ -323,8 +324,7 @@ export default function () {
 
 
   useEffect(() => {
-    const { groupedColumns, optionalColumns } = getAssetTypeItems(typeId, assetTypes);
-    setGroupColumns(groupedColumns);
+    const { optionalColumns } = getAssetTypeItems(typeId, assetTypes);
     setOptionColumns(optionalColumns);
     const newSelectedColumns = optionalColumns.filter(v => defaultValues?.includes(v.title))
     setSelectColumns(newSelectedColumns.concat(fixColumns));
@@ -338,14 +338,12 @@ export default function () {
     types?: any,
   ): {
     optionalColumns: any[];
-    groupedColumns: {};
   } => {
     let dealTypes = types != null ? types : assetTypes;
     if (type == '0') {
       return loadAssetTypeAllColumns(dealTypes);
     }
 
-    let groupedColumns = {};
     let optionalColumns: any[] = [];
     const extendType: any = dealTypes.find((v) => v.name === type);
     if (extendType) {
@@ -367,7 +365,7 @@ export default function () {
       setMetricUnits({...metricUnits});
 
       let extra_props = extendType.extra_props;
-      for (let property in extra_props) {
+      for (let property in extra_props) { 
         let group = extra_props[property];
         let columns = new Array();
         if (group != null) {
@@ -388,7 +386,6 @@ export default function () {
             extra_items.push(newItem);
           }
         }
-        groupedColumns[property] = columns;
       }
 
       const cloumns = new Array();
@@ -410,7 +407,7 @@ export default function () {
 
       optionalColumns = baseColumns.concat(cloumns);
     }
-    return { groupedColumns, optionalColumns };
+    return { optionalColumns };
   };
 
   function handelShowColumn(checkedValues) {
@@ -448,6 +445,7 @@ export default function () {
       });
       setExpandedKeys(arr);
       setAssetTypes(items);
+      loadingGroupColumns(items)
       setTreeData(_.cloneDeep(treeData));
     });
   }, []);
@@ -581,16 +579,52 @@ export default function () {
     
   };
 
+  const loadingGroupColumns =(dealTypes)=>{
+    const extra_items = new Array();
+    const map = new Map();
+    let groupedColumns = {};
+
+    dealTypes.map((extendType) => {
+      //TODO：处理分组属性      
+      let extra_props = extendType.extra_props;
+      for (let property in extra_props) {
+        let group = extra_props[property];
+        let columns = new Array();
+        if (group != null) {
+          for (let item of group.props) {
+            item.items.forEach((element) => {
+              columns.push({
+                title: element.label,
+                dataIndex: element.name,
+                width: '120px',
+                ellipsis: true,
+                align: 'center',
+              });
+            });
+            if (!map.has(item.label)) {
+              let newItem = {
+                name: property + '.' + item.name,
+                label: item.label,
+              };
+              extra_items.push(newItem);
+              map.set(item.label, item.label);
+            }
+          }
+        }
+        groupedColumns[property] = columns;
+        setGroupColumns({...groupedColumns});
+      }
+    });
+  }
+
   const loadAssetTypeAllColumns = (
     dealTypes,
   ): {
     optionalColumns: any[];
-    groupedColumns: {};
   } => {
     const extra_items = new Array();
     const map = new Map();
 
-    let groupedColumns = {};
     let optionalColumns: any[] = [];
 
     dealTypes.map((extendType) => {
@@ -637,7 +671,6 @@ export default function () {
             }
           }
         }
-        groupedColumns[property] = columns;
       }
     });
     const cloumns = new Array();
@@ -659,7 +692,7 @@ export default function () {
     });
 
     optionalColumns = baseColumns.concat(cloumns);
-    return { groupedColumns, optionalColumns };
+    return { optionalColumns };
   };
 
   const showModal = (action: string, formData: any) => {
@@ -879,8 +912,8 @@ export default function () {
                 pagination={{
                   showSizeChanger: true,
                   showQuickJumper: true,
-                  current: current,
-                  pageSize: pageSize,
+                  // current: current,
+                  // pageSize: pageSize,
                   total: total,
                   onChange: onPageChange,
                   showTotal: (total) => `总共 ${total} 条`,

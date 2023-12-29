@@ -94,7 +94,7 @@ const UserForm = React.forwardRef<ReactNode, UserAndPasswordFormProps>((props, r
   const formItemLayout = { labelCol: { span: 6 }, wrapperCol: { span:10 } };
   const validatePassword = (_, value) => {
     if (value && value.length >= 8) {
-      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&*]/].reduce((acc, regex) => {
+      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&-*.]/].reduce((acc, regex) => {
         return acc + (regex.test(value) ? 1 : 0);
       }, 0);
       if (count >= 3) {

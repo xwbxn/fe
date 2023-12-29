@@ -34,7 +34,7 @@ export default function ChangePassword() {
 
   const validatePassword = (_, value) => {
     if (value && value.length >= 8) {
-      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&*]/].reduce((acc, regex) => {
+      const count = [/[a-z]/, /[A-Z]/, /\d/, /[!@#$%^&-*.]/].reduce((acc, regex) => {
         return acc + (regex.test(value) ? 1 : 0);
       }, 0);
       if (count >= 3) {

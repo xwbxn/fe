@@ -58,7 +58,7 @@ const EventDetailPage: React.FC = () => {
   const parsedEventDetail = parseValues(eventDetail);
   const descriptionInfo = [
     {
-      label: '规则名称',
+      label: '告警规则名称',
       key: 'rule_name',
       render(content, { rule_id }) {        
         return <div style={{ color: '#2B7EE5', cursor: 'pointer' }} onClick={(e) => {
