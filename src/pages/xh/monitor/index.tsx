@@ -602,7 +602,15 @@ export default function () {
                     className={'searchInput'}
                     value={searchVal}
                     allowClear
-                    onChange={(e) => setSearchVal(e.target.value)}
+                    onChange={(e) => {
+                      console.log(e)
+                      if(e!=undefined){
+                        setSearchVal(e.target.value)
+                      }else{
+                        setSearchVal(null)
+                      }
+                      
+                    }}
                     suffix={<SearchOutlined />}
                     placeholder={'输入模糊检索关键字'}
                   />
@@ -613,7 +621,14 @@ export default function () {
                     value={searchVal}
                     allowClear
                     options={filterOptions[filterParam] ? filterOptions[filterParam] : []}
-                    onChange={(val) => setSearchVal(val)}
+                    onChange={(val) => {
+                      if(val!=undefined){
+                        setSearchVal(val)
+                      }else{
+                        setSearchVal(null)
+                      }
+                    
+                    }}
                     placeholder={'选择要查询的条件'}
                   />
                 )}
