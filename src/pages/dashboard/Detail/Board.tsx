@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useRef, useEffect, useContext, memo } from 'react';
 import _ from 'lodash';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
@@ -80,7 +80,7 @@ const getDefaultTimeRange = (query, t) => {
   });
 };
 
-export default function Board(props: IProps) {
+const Board = (props: IProps) => {
   const { id, isPreview = true, isBuiltin = false, gobackPath, builtinParams, isHome = false } = props;
   const { t, i18n } = useTranslation('dashboard');
   const { datasourceList, profile } = useContext(CommonStateContext);
@@ -333,3 +333,5 @@ export default function Board(props: IProps) {
     </PageLayout>
   );
 }
+
+export default memo(Board)

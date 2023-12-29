@@ -139,7 +139,7 @@ const DemoPie = (props: Props) => {
           position: positon,
         },
   };
-  return <Pie {...config} />;
+  return <Pie {...config} renderer="canvas" />;
 };
 
 export default DemoPie;

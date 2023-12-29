@@ -90,7 +90,7 @@ export default function (props: IProps) {
 
   return (
     <div className='renderer-column-container'>
-      <Column {...customOptions} data={seriesData}></Column>
+      <Column {...customOptions} data={seriesData} renderer="canvas"></Column>
     </div>
   );
 }

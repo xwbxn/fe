@@ -40,7 +40,6 @@ import './App.less';
 import './global.variable.less';
 // import TopMenu from './components/menu/topMenu';
 import TopMenu from './components/menu/topMenuXH'; //西航版本
-import LayoutXH from './components/menu/layoutXH'; //西航版本
 import { useLocalStorage } from 'react-use';
 interface IProfile {
   admin?: boolean;

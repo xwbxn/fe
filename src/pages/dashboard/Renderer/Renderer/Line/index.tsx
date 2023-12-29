@@ -56,7 +56,7 @@ export default function (props: IProps) {
 
   return (
     <div className='renderer-line-container'>
-      <Line {...customOptions} data={seriesData}></Line>
+      <Line {...customOptions} data={seriesData} renderer="canvas"></Line>
     </div>
   );
 }

@@ -557,7 +557,6 @@ export default function () {
 
   const renderMetricsItem = (field, record, index,unit) => {
     let vaue: any = null;
-    console.log("field",field,"单位",unit)
     for (let item of record.metrics_list) {
       if (item.name == field ) {
         if(unit!=null && unit.length>0){

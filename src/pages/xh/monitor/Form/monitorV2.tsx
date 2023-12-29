@@ -1,21 +1,32 @@
 import './style.less';
 import React, { useEffect, useState } from 'react';
 
-import { Button, Card, Col, Form, Input, message, Modal, Row, Select, Image, Space, Radio, RadioChangeEvent, Dropdown, Menu, Tag } from 'antd';
-import { CheckCircleFilled, CheckCircleOutlined, CloseCircleOutlined, FullscreenOutlined, PlusOutlined } from '@ant-design/icons';
+import { Card, Form, Modal, Space, Tag } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 
 import { factories } from '../../assetmgt/catalog';
 import { Link, useLocation } from 'react-router-dom';
 import { getAssetBoard, getXhAsset } from '@/services/assets';
 import queryString from 'query-string';
-import { getAssetsIdents, getAssetstypes } from '@/services/assets';
+import { getAssetstypes } from '@/services/assets';
 import Board from '@/pages/dashboard/Detail/Board';
+
+const loadImages = (cn_name) => {
+  let imageName = '/image/factory/other.png';
+  for (let factor in factories) {
+    let image = factories[factor];
+    if (image.value == cn_name) {
+      imageName = '/image/factory/' + image.key + '.png';
+    }
+  }
+  return imageName;
+};
 
 export default function () {
   const [itemButton, setItemButton] = useState<string>(localStorage.getItem('asset_item_ctr_button') ? '' + localStorage.getItem('asset_item_ctr_button') : '收起');
+  const [accessoriesVisable, setAccessoriesVisable] = useState(false);
   const [accessories, setAccessories] = useState<any>({
-    visual: false,
     title: '其他信息名称',
     label: '',
     name: '',
@@ -178,18 +189,6 @@ export default function () {
     });
   };
 
-  const loadImages = (cn_name) => {
-    console.log('Loading images...', cn_name);
-    let imageName = '/image/factory/other.png';
-    for (let factor in factories) {
-      let image = factories[factor];
-      if (image.value == cn_name) {
-        imageName = '/image/factory/' + image.key + '.png';
-      }
-    }
-    return imageName;
-  };
-
   return (
     <Form name='asset' form={form} layout='vertical'>
       <div className='view-form'>
@@ -216,7 +215,7 @@ export default function () {
                     {assetInfo.type}
                   </div>
                   <div className='theme1'>
-                    <div className='title'>IP地址：</div>
+                    <div className='title'>IP地址: </div>
                     {assetInfo.ip}
                   </div>
                   <div className='theme1'>
@@ -269,10 +268,11 @@ export default function () {
                         return (
                           <div
                             className='assembly show_image'
+                            key={`assetitem-${index}`}
                             onClick={(e) => {
                               let formItems: any = genForm(assetInfo.type, element.type);
+                              setAccessoriesVisable(true);
                               setAccessories({
-                                visual: true,
                                 label: formItems.label,
                                 title: element.label,
                                 name: formItems.name,
@@ -298,21 +298,21 @@ export default function () {
           <Board id={boardId}></Board>
         </div>
         <Modal
-          visible={accessories.visual}
+          visible={accessoriesVisable}
           title={accessories.title}
+          destroyOnClose
           confirmLoading={false}
           className='accessories_modal'
           mask={true}
           width={360 * (accessories.items.length >= 4 ? 4 : accessories.items.length) + 'px'}
           onCancel={() => {
-            accessories.visual = false;
-            setAccessories(_.cloneDeep(accessories));
+            setAccessoriesVisable(false);
           }}
         >
           <Space className='accessories_body'>
             {accessories.items.map((item, pos) => {
               return (
-                <div className='accessories_every_group show_image'>
+                <div className='accessories_every_group show_image' key={pos}>
                   <div className='title' style={{ fontWeight: '600' }}>
                     {accessories.label.toUpperCase()}({pos + 1})
                   </div>
@@ -320,16 +320,14 @@ export default function () {
                   <div className='properties'>
                     {accessories.properties.map((property, index) => {
                       return (
-                        <>
-                          <div className='accessories' key={'_div' + index}>
-                            <div className='title' title={property.label}>
-                              {property.label}:
-                            </div>
-                            <div className='content' title={item[property.name]}>
-                              {item[property.name] && item[property.name].slice(0, 40)}
-                            </div>
+                        <div className='accessories' key={index}>
+                          <div className='title' title={property.label}>
+                            {property.label}:
                           </div>
-                        </>
+                          <div className='content' title={item[property.name]}>
+                            {item[property.name] && item[property.name].slice(0, 40)}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>

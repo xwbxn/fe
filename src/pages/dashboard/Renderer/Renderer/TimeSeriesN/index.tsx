@@ -119,9 +119,9 @@ const TimeSeriesN = function (props: IProps) {
 
   return (
     <div className='renderer-timeseries-n-container'>
-      <Area {...customOptions} data={seriesData}></Area>
+      <Area {...customOptions} data={seriesData} renderer="canvas"></Area>
     </div>
   );
 };
 
-export default memo(TimeSeriesN);
+export default TimeSeriesN;
