@@ -486,6 +486,7 @@ const Event: React.FC = () => {
             size='small'
             className='history_events_list'
             rowKey='id'
+            bordered
             rowSelection={{
               onChange: (_, rows) => {
                 setSelectRowKeys(rows ? rows.map(({ id }) => id) : []);

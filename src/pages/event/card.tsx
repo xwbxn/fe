@@ -378,6 +378,7 @@ function Card(props: Props, ref) {
           tableLayout='fixed'
           size='small'
           rowKey={'id'}
+          bordered
           // className='card-event-drawer'
           rowClassName={(record: { severity: number }) => {
             return SeverityColor[record.severity - 1] + '-left-border';
