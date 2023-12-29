@@ -776,7 +776,7 @@ export default function () {
               <div className='table-handle-search'>
                 <Space>
                   <Select
-                    defaultValue='ip'
+                    defaultValue={filterParam}
                     placeholder='选择过滤器'
                     style={{ width: 120 }}
                     // allowClear

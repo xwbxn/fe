@@ -100,8 +100,8 @@ export default function TableCpt(props: IProps) {
       dataIndex: 'rule_config_cn',
       align: "center",
       width: 180,
-      render: (value) => {
-        return value;
+      render: (value,record) => {
+        return  value;
       },
       sorter: (a, b) =>{
         return (a.rule_config_cn).localeCompare(b.rule_config_cn)
@@ -122,7 +122,7 @@ export default function TableCpt(props: IProps) {
         );
       },
       sorter: (a, b) =>{
-        return (a.rule_name).localeCompare(b.rule_name)
+        return (a.severity)-(b.severity)
       },
     },
     {
@@ -143,7 +143,7 @@ export default function TableCpt(props: IProps) {
       align: "center",
       width: 120,
       sorter: (a, b) =>{
-        return (a.rule_config_cn).localeCompare(b.rule_config_cn)
+        return (a.group_name).localeCompare(b.group_name)
       },
       render(value) {
         return value;
@@ -230,8 +230,11 @@ export default function TableCpt(props: IProps) {
            list.forEach(item => {
                 if(rules[item.rule_id]){
                   item["rule_config_cn"] = rules[item.rule_id].rule_config_cn;
-                   return item
+                  
+                }else{
+                  item["rule_config_cn"] = "";
                 }
+                return item
            });
         })
       }
