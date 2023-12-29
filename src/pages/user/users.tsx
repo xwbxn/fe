@@ -643,6 +643,7 @@ const Resource: React.FC = () => {
               rowKey='id'
               className='user_table_list'
               columns={userColumns}
+              bordered
               rowSelection={rowSelection}
               {...tableProps}
               pagination={{
