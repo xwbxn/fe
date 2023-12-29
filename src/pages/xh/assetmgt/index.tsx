@@ -614,7 +614,6 @@ export default function () {
         }
         groupedColumns[property] = columns;
         setGroupedColumns({...groupedColumns});
-        getTableData();
       }
     });
   }
