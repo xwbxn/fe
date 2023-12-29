@@ -310,7 +310,7 @@ export default function () {
   ];
 
   // 列处理
-  const [groupColumns, setGroupColumns] = useState<any>({});
+  const [groupedColumns, setGroupedColumns] = useState<any>({});
   const [defaultValues, setDefaultValues] = useLocalStorage<string[]>('ASSET_SELECTED_COLUMNS', Array.from(new Set(baseColumns.map((obj) => obj.title))));
   const [optionColumns, setOptionColumns] = useState<any[]>(baseColumns); // 可选列
   const [selectColumns, setSelectColumns] = useState<any[]>(baseColumns.concat(fixColumns));
@@ -328,7 +328,7 @@ export default function () {
     setOptionColumns(optionalColumns);
     const newSelectedColumns = optionalColumns.filter(v => defaultValues?.includes(v.title))
     setSelectColumns(newSelectedColumns.concat(fixColumns));
-  }, [typeId, assetTypes]);
+  }, [groupedColumns,typeId, assetTypes]);
 
   /**
    * 选择左边，计算列属性
@@ -533,7 +533,7 @@ export default function () {
   );
 
   const detailInfo = (id, data) => {
-    let columns = groupColumns[id];
+    let columns = groupedColumns[id];
     return (
       <div className='other_infos'>
         <Table style={{ width: '700px' }} dataSource={data} className='other_table' columns={columns} pagination={false}></Table>
@@ -544,6 +544,7 @@ export default function () {
   const renderItem = (field, record, index) => {
     let key = field.split('.')[1];
     let values = record.expands ? record.expands[key] : [];
+
     return (
       <>
         <Popover content={detailInfo(key, values)} title='详细记录'>
@@ -612,7 +613,8 @@ export default function () {
           }
         }
         groupedColumns[property] = columns;
-        setGroupColumns({...groupedColumns});
+        setGroupedColumns({...groupedColumns});
+        getTableData();
       }
     });
   }
