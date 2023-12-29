@@ -20,23 +20,18 @@ import { useHistory, Link } from 'react-router-dom';
 import _, { concat } from 'lodash';
 import moment from 'moment';
 import { Table, Tag, Switch, Modal, Space, Button, Row, Col, message, Select, Tooltip, Input } from 'antd';
-import { ColumnType } from 'antd/lib/table';
 import RefreshIcon from '@/components/RefreshIcon';
-import SearchInput from '@/components/BaseSearchInput';
 import usePagination from '@/components/usePagination';
 import { getStrategyGroupSubList, updateAlertRules, deleteStrategy } from '@/services/warning';
 import { CommonStateContext } from '@/App';
 import { getAssetstypes } from '@/services/assets';
 import Tags from '@/components/Tags';
 import './style.less';
-import { DatasourceSelect, ProdSelect } from '@/components/DatasourceSelect';
 import { AlertRuleType, AlertRuleStatus } from '../types';
 import MoreOperations from './MoreOperations';
 import { CopyTwoTone, DeleteOutlined, EditOutlined, FileSearchOutlined, PoweroffOutlined, SearchOutlined } from '@ant-design/icons';
-import parameters from '@/pages/system/parameters';
 import { useAntdResizableHeader } from '@minko-fe/use-antd-resizable-header';
 import '@minko-fe/use-antd-resizable-header/dist/style.css';
-import { link } from 'fs';
 
 interface ListProps {
   bgid?: number;
@@ -46,7 +41,7 @@ interface ListProps {
 
 let queryFilter = [
   { name: 'ip', label: 'IP地址', type: 'input' },
-  { name: 'rule_name', label: '规则名称', type: 'input' },
+  { name: 'rule_name', label: '告警规则名称', type: 'input' },
   { name: 'severity', label: '告警级别', type: 'select' },
   { name: 'type', label: '资产类型', type: 'select' },
   { name: 'name', label: '资产名称', type: 'input' },
@@ -72,7 +67,7 @@ export default function List(props: ListProps) {
   const [refreshKey, setRefreshKey] = useState(_.uniqueId('refreshKey_'));
   const [selectRowKeys, setSelectRowKeys] = useState<React.Key[]>([]);
   const [selectedRows, setSelectedRows] = useState<AlertRuleType<any>[]>([]);
-  const [data, setData] = useState<AlertRuleType<any>[]>([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const [filterType, setFilterType] = useState<string>("input");
   const [searchVal, setSearchVal] = useState<any>(null);
   const [filterParam, setFilterParam] = useState<string>("ip");
@@ -255,22 +250,20 @@ export default function List(props: ListProps) {
     },
   });
 
-  const filterData = () => {
-    return data["list"];
-  };
-  const getAlertRules = async (params) => {
+ 
+  const getAlertRules = (params) => {
     if (!bgid) {
       return;
     }
 
     params["id"] = bgid;
     console.log("params",params);
-    const { success, dat } = await getStrategyGroupSubList(params);
-    if (success) {
-      setData(dat || []);
-      setTotal(dat.total)
+    getStrategyGroupSubList(params).then(({dat})=>{
       setLoading(false);
-    }
+      setTableData(dat.list);      
+      console.log("是否有数据",dat.list);
+      setTotal(dat.total)
+    })
   };
   useEffect(() => {
     getAssetstypes().then((res) => {
@@ -328,7 +321,7 @@ export default function List(props: ListProps) {
  
 
   if (!bgid) return null;
-  const filteredData = filterData();
+
 
 
   const onPageChange = (page: number, pageSize: number) => {
@@ -426,8 +419,6 @@ export default function List(props: ListProps) {
           pagination={{
             showSizeChanger: true,
             showQuickJumper: true,
-            current: current,
-            pageSize: pageSize,
             total: total,
             onChange: onPageChange,
             showTotal: (total) => `总共 ${total} 条`,
@@ -435,11 +426,11 @@ export default function List(props: ListProps) {
           }}
           loading={loading}
           bordered
-          dataSource={filteredData}
+          dataSource={tableData}
           className='ruler-table_columns'
           rowSelection={{
             selectedRowKeys: selectedRows.map((item) => item.id),
-            onChange: (selectedRowKeys: React.Key[], selectedRows: AlertRuleType<any>[]) => {
+            onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
               setSelectRowKeys(selectedRowKeys);
               setSelectedRows(selectedRows);
             },

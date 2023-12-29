@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import { factories } from '../catalog';
+const { Option } = Select;
 export default function () {
   const { t } = useTranslation('assets');
   const [assetTypes, setAssetTypes] = useState<any[]>([]);
@@ -281,14 +282,22 @@ export default function () {
                     <Select
                       style={{ width: '100%' }}
                       allowClear
-                      showSearch filterOption optionFilterProp={"label"}
-                      
+                      showSearch filterOption optionFilterProp={"label"}                      
                       options={factories.map(({ key, value }) => ({
                         label: value,
                         value: value,
                       }))}
                       placeholder='请选择厂商'
-                    />
+                    >
+                    {/* {factories.map(({key, value}) => (
+                      <Option value={value} key={key}>
+                        <div style={{display:"flex"}}>
+                          <div className='factory_icon_title'>{value}</div>
+                          <div style={{ color: '#8c8c8c' }}><img src={'/image/factory/' + key + '.png'} className='factory_icon_image'></img></div>
+                        </div>
+                      </Option>
+                    ))}   */}
+                    </Select>
                   </Form.Item>
                 </Col>
                 <Col span={12}>

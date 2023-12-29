@@ -21,7 +21,7 @@ const zh_CN = {
   prod: '监控类型',
 
   aggregate_rule: '聚合规则',
-  aggregate_rule_name: '规则名称',
+  aggregate_rule_name: '告警规则名称',
   public: '公开',
   isPublic: '是否公开',
   status: '是否认领',

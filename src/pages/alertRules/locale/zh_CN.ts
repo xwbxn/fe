@@ -5,7 +5,7 @@ const zh_CN = {
   severity: '级别',
   notify_groups: '告警接收组',
   basic_configs: '基础配置',
-  name: '规则名称',
+  name: '告警规则名称',
   name_severities_appendtags: '名称 & 级别 & 附加标签',
   append_tags: '附加标签',
   append_tags_msg: '标签格式不正确，请检查！',
