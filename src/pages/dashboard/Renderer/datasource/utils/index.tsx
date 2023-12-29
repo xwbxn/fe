@@ -9,9 +9,14 @@ export function completeBreakpoints(step: number | undefined, data: any[]) {
   const result: any[] = [];
   _.forEach(data, (item, idx) => {
     if (idx > 0) {
-      const prev = result[result.length - 1];
-      if (prev[0] + step < item[0]) {
-        result.push([prev[0] + step, null]);
+      let flag = true;
+      while (flag) {
+        const prev = result[result.length - 1];
+        if (prev[0] + step < item[0]) {
+          result.push([prev[0] + step, null]);
+        } else {
+          flag = false;
+        }
       }
     }
     result.push(item);

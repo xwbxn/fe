@@ -48,6 +48,12 @@ export default function GraphStyles() {
               return null;
             }}
           </Form.Item>
+          <Form.Item label={t('panel.custom.timeseries.spanNulls')} name={[...namePrefix, 'spanNulls']} initialValue={false}>
+            <Radio.Group buttonStyle='solid'>
+              <Radio.Button value={true}>{t('panel.custom.timeseries.spanNulls_1')}</Radio.Button>
+              <Radio.Button value={false}>{t('panel.custom.timeseries.spanNulls_0')}</Radio.Button>
+            </Radio.Group>
+          </Form.Item>
         </Space>
         <Form.Item label={t('panel.custom.timeseries.fillOpacity')} name={[...namePrefix, 'fillOpacity']}>
           <Slider min={0} max={1} step={0.01} />

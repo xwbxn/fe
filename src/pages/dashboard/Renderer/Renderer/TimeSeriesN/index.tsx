@@ -62,7 +62,7 @@ const TimeSeriesN = function (props: IProps) {
           }
         : false,
     xAxis: {
-      tickCount: 10,
+      tickCount: 7,
       label: {
         formatter: (val: string) => {
           return moment(val, 'YYYY-MM-DD HH:mm:ss').format('HH:mm:ss');
